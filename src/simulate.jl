@@ -1,8 +1,9 @@
 mutable struct UnfoldSim
+
     coef # event x coefficients
     noise # either vector of event, or function
     overlap # event x onset
-    signal # event
+    signal # event x function
 
 
 end
