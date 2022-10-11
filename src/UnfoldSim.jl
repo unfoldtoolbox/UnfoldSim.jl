@@ -1,11 +1,34 @@
 module UnfoldSim
-using Random
-using MixedModels
-using MixedModelsSim
-using DSP
+   using DSP
+   using Random
+   using DataFrames
+   using Parameters
+   using StatsModels
+   using MixedModels
+   using ImageFiltering
+   using MixedModelsSim
+   using SignalAnalysis
 
-export get_df
-export signal_coef
-# Write your package code here.
+   include("design.jl")
+   include("component.jl")
+   include("noise.jl")
+   include("simulation.jl")
 
+
+   export 
+    @formula,
+    EffectsCoding, 
+    ExperimentDesign,
+    generate,
+    dims,
+    Component,
+    PinkNoise,
+    RedNoise,
+    WhiteNoise,
+    gen_noise,
+    Simulation,
+    simulate,
+    simulate_erps,
+    padarray,
+    convert
 end
