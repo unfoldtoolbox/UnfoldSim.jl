@@ -36,7 +36,7 @@ contrasts = Dict(:stimType => DummyCoding())
 σ_res = 0.0001
 
 # instantiate the component(s)
-p100 = Component(basisfunction, formula, contrast, β, σ_ranef, σ_res)
+p100 = Component(basisfunction, formula, contrasts, β, σ_ranef, σ_res)
 ```
 
 3) Set a seed
