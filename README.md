@@ -32,7 +32,7 @@ basisfunction = padarray(hanning(25), (-50, 50), 0)
 formula = @formula(dv ~ 1 + stimType + (1 + stimType | subj) + (1 | item))
 contrasts = Dict(:stimType => DummyCoding())
 β = [2.0, 0.5]
-σ_ranef = [[0.0, 0.0], [0.0]]
+σ_ranef = Dict(:subj => create_re(0.2, 0.0), :item=>create_re(0.0))
 σ_res = 0.0001
 
 # instantiate the component(s)

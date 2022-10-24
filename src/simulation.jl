@@ -100,7 +100,12 @@ function simulate_erps(rng, design, components)
 			
 			# update random effects parametes of model
 			if σ_ranef !== nothing
-				MixedModelsSim.update!(m, [MixedModelsSim.create_re((b .* (r)./ σ_lmm)...) for r in σ_ranef]...)
+				k = (collect(keys(σ_ranef))...,)
+				v = b .* (collect(values(σ_ranef))...,) ./ σ_lmm
+
+				namedre = NamedTuple{k}(v)
+				
+				MixedModelsSim.update!(m; namedre...)
 			end
 
 			# simulate with new parameters
