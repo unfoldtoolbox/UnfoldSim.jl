@@ -83,7 +83,8 @@ function simulate_erps(rng, design, components)
 			MixedModels.MixedModel, 
 			formula, 
 			generate(design), 
-			contrasts=contrasts
+			contrasts=contrasts,
+			progress=false
 		)
 
 		# empty epoch data
