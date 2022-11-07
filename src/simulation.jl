@@ -76,16 +76,16 @@ function simulate_erps(rng, design, components)
 	epoch_data = []
 
 	# for each components
-	for (;basis, formula, contrasts, β, σ_ranef, σ_res) in components
+	for (; basis, formula, contrasts, β, σ_ranef, σ_res) in components
+
+		# create model
+		m = MixedModels.MixedModel(formula, generate(design), contrasts=contrasts)
+
+		# limit runtime (in seconds)
+		m.optsum.maxtime = 1
 	
 		# fit mixed model to experiment design and dummy data
-		m = MixedModels.fit(
-			MixedModels.MixedModel, 
-			formula, 
-			generate(design), 
-			contrasts=contrasts,
-			progress=false
-		)
+		refit!(m, progress=false)
 
 		# empty epoch data
 		epoch_data_component = zeros(Int(length(basis)), n_subj*n_item)
@@ -142,7 +142,8 @@ function convert(eeg, onsets, design)
 	evts = DataFrame()
 	a = collect(0:n_subj-1) * size(eeg, 1)
 	evts.latency = (onsets' .+ a)'[:,]
-	evts.type .= "sim"
+	#evts.type .= "sim"
+	insertcols!(evts, :type=>"sim")
 	evts.trialnum = 1:size(evts, 1)
 	for i in Set(ed.stimType)
 		evts[!, Symbol("cond"*i)] = [(i == d ? 1 : 0) for d in ed.stimType]
