@@ -1,13 +1,8 @@
-"""
-Simulation
-"""
 struct Simulation
-	design
-	components
-	epochlen
-	fixationlen
-	noisetype
-	noiselevel
+	design#::ExperimentDesign
+	components#::Vector{Component}
+	onset#<:Onset
+	noisetype#<:Noise
 end
 
 
@@ -17,53 +12,41 @@ Simulate eeg data given a simulation design, effect sizes and variances
 function simulate(rng, simulation)
 	
 	# unpacking fields
-	(; design, components, epochlen, fixationlen, noisetype, noiselevel) = simulation 
+	(; design, components, onset, noisetype) = simulation 
 	(;n_item, n_subj) = design
 
 	# create epoch data / erps
 	erps = simulate_erps(deepcopy(rng), design, components)
 
-	# deviation from average fixation samples
-	std_fixationlen = 25 
+	onsets = gen_onsets(rng,simulation, onset)
 	
-	# min + max fixationlen
-	min_fixationlen = fixationlen - std_fixationlen
-	max_fixationlen = fixationlen + std_fixationlen
-
-	# max length eeg 
-	upperbound = (epochlen + max_fixationlen) * n_item + (epochlen + max_fixationlen)
-
-	# sample different fixationlens & combine them with epoch lens
-	fixationlens = rand(deepcopy(rng), min_fixationlen:max_fixationlen, (n_item, n_subj))
-	epochlens = [0, repeat([epochlen], n_item-1)...]
-	onsets = accumulate(+, (fixationlens .+ epochlens), dims=1)
-
-	# one hot encoding of onsets
-	onsets_1hot = hcat([[Int.(i in col) for i in 1:upperbound] for col in eachcol(onsets)]...)
-
 	# combine erps with onsets
-	e = []
+	max_length = maximum(onsets) .+ maxlength(components)
+	#eeg_continuous = Array{Float64,2}(0,max_length,n_subj)
+	eeg_continuous = zeros(max_length,n_subj)
 	for s in 1:n_subj
-		e_s = zeros(upperbound)
 		for i in 1:n_item
-			onset = onsets[CartesianIndex(i, s)]
-			e_s[onset:onset+epochlen-1] = erps[:, (s-1)*n_item+i]
+			one_onset = onsets[CartesianIndex(i, s)]
+			eeg_continuous[one_onset:one_onset+maxlength(components)-1,s] .+= @view erps[:, (s-1)*n_item+i]
 		end
-		push!(e, e_s)
-	end
-	eeg = hcat(e...)
+	end	
+
+	add_noise!(rng,eeg_continuous,noisetype)
 	
+	return eeg_continuous, onsets
+end
+
+
+function add_noise!(rng,eeg,noisetype)
+
 	# generate noise
 	noise = gen_noise(deepcopy(rng), noisetype, length(eeg))
-	noise = imfilter(noise, Kernel.gaussian((5,)))
+	
 	noise = reshape(noise, size(eeg))
 	
 	# add noise to data
-	eeg = eeg + noiselevel .* noise
-
-	return eeg, onsets
+	eeg += noisetype.noiselevel .* noise
 end
-
 
 """
 Simulates erp data given the specified parameters 

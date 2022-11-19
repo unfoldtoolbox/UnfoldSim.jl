@@ -10,11 +10,13 @@ module UnfoldSim
    using MixedModelsSim
    using SignalAnalysis
 
+   import Base.length
+
    include("design.jl")
    include("component.jl")
    include("noise.jl")
    include("simulation.jl")
-
+    include("onset.jl")
 
    export 
     @formula,
@@ -26,10 +28,15 @@ module UnfoldSim
     PinkNoise,
     RedNoise,
     WhiteNoise,
+    NoNoise,
     gen_noise,
     Simulation,
     simulate,
     simulate_erps,
     padarray,
-    convert
+    convert,
+    UniformOnset
+
+
+    export create_re
 end
