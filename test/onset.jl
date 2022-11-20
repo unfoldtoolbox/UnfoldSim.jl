@@ -31,10 +31,10 @@
     end
     @testset "gen_onsets" begin
         # test accumulate always increasing
-        unifOnset = UniformOnset(;offset=100,width=50)
+        unifOnset = UniformOnset(;offset=0,width=50)
 
-        accumOnset = gen_onsets(StableRNG(1),gen_debug_simulation(onset=unifOnset))
-        @test  all(diff(accumOnset) .<= 0)
+        accumOnset = UnfoldSim.gen_onsets(StableRNG(1),gen_debug_simulation(onset=unifOnset))
+        @test  all(diff(accumOnset,dims=1) .>= 0)
     end
 
 end
