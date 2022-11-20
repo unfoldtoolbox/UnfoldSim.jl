@@ -1,6 +1,14 @@
 using UnfoldSim
 using Documenter
 
+GENERATED = joinpath(@__DIR__, "src", "literate")
+for subfolder ∈ ["explanations","HowTo","tutorials","reference"]
+    local SOURCE_FILES = Glob.glob(subfolder*"/*.jl", GENERATED)
+    foreach(fn -> Literate.markdown(fn, GENERATED*"/"*subfolder), SOURCE_FILES)
+
+end
+
+
 DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive=true)
 
 makedocs(;
@@ -16,6 +24,7 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
     ),
     pages=[
         "Home" => "index.md",
+        "NoiseTypes" => "literate/reference/noisetypes.md"
     ],
 )
 
