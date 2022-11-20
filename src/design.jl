@@ -1,15 +1,3 @@
-"""
-Experiment Design
-"""
-mutable struct ExperimentDesign
-    n_subj::Int
-    n_item::Int
-    subj_btwn::Any
-    item_btwn::Any
-    both_win::Any
-end
-
-
 """ Returns dimension of experiment design"""
 dims(expdesign::ExperimentDesign) = expdesign.n_subj * expdesign.n_item
 

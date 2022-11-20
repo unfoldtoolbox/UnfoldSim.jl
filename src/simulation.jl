@@ -1,10 +1,6 @@
-struct Simulation
-	design#::ExperimentDesign
-	components#::Vector{Component}
-	onset#<:Onset
-	noisetype#<:Noise
-end
 
+# helper to move input ::Component to ::Vector{Component}
+Simulation(design::ExperimentDesign,component::Component,onset::AbstractOnset,noisetype::AbstractNoise) = Simulation(design,[component],onset,noisetype)
 
 """
 Simulate eeg data given a simulation design, effect sizes and variances
@@ -18,7 +14,7 @@ function simulate(rng, simulation)
 	# create epoch data / erps
 	erps = simulate_erps(deepcopy(rng), design, components)
 
-	onsets = gen_onsets(rng,simulation, onset)
+	onsets = gen_onsets(rng,simulation)
 	
 	# combine erps with onsets
 	max_length = maximum(onsets) .+ maxlength(components)

@@ -1,32 +1,31 @@
-abstract type Noise end
+#----------------
+# Types
+#-------------
 
-
-@with_kw struct PinkNoise <: Noise
+@with_kw struct PinkNoise <: AbstractNoise
+    noiselevel = 1
     func = SignalAnalysis.PinkGaussian
-    noiselevel = 1
 end
 
 
-@with_kw struct RedNoise <: Noise
+@with_kw struct RedNoise <: AbstractNoise
+    noiselevel = 1
     func = SignalAnalysis.RedGaussian
-    noiselevel = 1
 end
 
 
-@with_kw struct WhiteNoise <: Noise
-    func = randn
+@with_kw struct WhiteNoise <: AbstractNoise
     noiselevel = 1
-    imfilter = 5
+    imfilter = 0
 end
 
 
-@with_kw struct RealisticNoise <: Noise 
-    func = error
+@with_kw struct RealisticNoise <: AbstractNoise 
     noiselevel = 1
 end
 
+struct NoNoise <: AbstractNoise end
 
-struct NoNoise <: Noise end
 
 
 """
@@ -48,7 +47,7 @@ end
 Generate noise of a given type t and length n
 """
 function gen_noise(rng, t::WhiteNoise, n::Int)
-    noisevector = t.noiseLevel .* randn(rng, n)
+    noisevector = t.noiselevel .* randn(rng, n)
     if !isnothing(t.imfilter)
         noisevector = imfilter(noisevector, Kernel.gaussian((t.imfilter,)))
     end
@@ -62,5 +61,6 @@ end
 Generate noise of a given type t and length n
 """
 function gen_noise(rng, t::RealisticNoise, n::Int)
+    error("not implemented")
     return 0
 end
