@@ -1,6 +1,6 @@
 @testset "noise" begin
 
-    for n = [PinkNoise RedNoise WhiteNoise]
+    for n = [PinkNoise RedNoise WhiteNoise ExponentialNoise]
         
         noisevec_1 = gen_noise(StableRNG(1),n(;noiselevel=1),123)
         @test size(noisevec_1) == (123,)

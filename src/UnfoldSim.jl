@@ -10,6 +10,7 @@ module UnfoldSim
    using ImageFiltering # for Noise-filter (can be replaced maybe?)
    using MixedModelsSim
    using SignalAnalysis 
+   using LinearAlgebra
 
    import Base.length
    include("types.jl")
@@ -28,7 +29,7 @@ module UnfoldSim
    export ExperimentDesign,Simulation, Component
    # noise functions
 
-   export PinkNoise,RedNoise,WhiteNoise,NoNoise #,RealNoise (not implemented yet)
+   export PinkNoise,RedNoise,WhiteNoise,NoNoise,ExponentialNoise #,RealNoise (not implemented yet)
    # UnfoldSim functions 
    export simulate, simulate_erps,gen_noise,padarray,convert
 

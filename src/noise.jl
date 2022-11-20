@@ -26,6 +26,21 @@ end
 
 struct NoNoise <: AbstractNoise end
 
+struct AutoRegressiveNoise <: AbstractNoise end
+
+
+
+""" 
+    Noise with exponential decay in AR spectrum
+    !!! warning
+        Current implementation: cholesky of NxN matrix needs to be calculated, might need lot's of RAM
+
+"""
+
+@with_kw struct ExponentialNoise <: AbstractNoise
+    noiselevel = 1
+    ν = 1.5 # exponential factor of AR decay "nu"
+end
 
 
 """
@@ -63,4 +78,36 @@ Generate noise of a given type t and length n
 function gen_noise(rng, t::RealisticNoise, n::Int)
     error("not implemented")
     return 0
+end
+
+
+function gen_noise(rng,t::ExponentialNoise, n::Int)
+    # helper functions from Jaromil Frossard
+    function circulant(x)
+        # Author: Jaromil Frossard
+        # returns a symmetric matrix where X was circ-shifted.
+        lx = length(x)
+        ids = [1:1:(lx-1);]
+        a = Array{Float64,2}(undef, lx, lx)
+        for i = 1:length(x)
+            if i == 1
+                a[i, :] = x
+            else
+                a[i, :] = vcat(x[i], a[i-1, ids])
+            end
+        end
+        return Symmetric(a)
+    end
+    
+    
+    function exponentialCorrelation(x; nu = 1, length_ratio = 1)
+        # Author: Jaromil Frossard
+        # generate exponential function
+        R = length(x) * length_ratio
+        return exp.(-3 * (x / R) .^ nu)
+    end
+    
+    Σ = circulant(exponentialCorrelation([0:1:(n-1);], nu = t.ν))
+    Ut = LinearAlgebra.cholesky(Σ).U'
+    return t.noiselevel .* 10 .* (randn(rng, n)'*Ut')[1, :]    
 end
