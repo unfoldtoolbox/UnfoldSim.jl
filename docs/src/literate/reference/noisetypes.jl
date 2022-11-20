@@ -29,5 +29,5 @@ for n = [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
     lines!(ax_auto,lags,autocor_vec)
     
 end
-f[1:2,3] = Legend(f,ax1,"NoiseType")
+f[1:2,3] = Legend(f,ax_sig,"NoiseType")
 f
