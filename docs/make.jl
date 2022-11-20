@@ -1,5 +1,7 @@
 using UnfoldSim
 using Documenter
+using Glob
+using Literate
 
 GENERATED = joinpath(@__DIR__, "src", "literate")
 for subfolder ∈ ["explanations","HowTo","tutorials","reference"]
