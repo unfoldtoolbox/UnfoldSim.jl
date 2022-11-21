@@ -24,7 +24,7 @@ for n = [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
     ## plot spectrum
     lines!(ax_spec,freq(perio),log10.(power(perio)))
     
-    lags = 1:10:500
+    lags = 0:10:500
     autocor_vec = autocor(noisevec,lags)
     lines!(ax_auto,lags,autocor_vec)
     

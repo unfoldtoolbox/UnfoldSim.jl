@@ -1,14 +1,15 @@
 # UnfoldSim
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://behinger.github.io/UnfoldSim.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://behinger.github.io/UnfoldSim.jl/dev/)
-[![Build Status](https://github.com/behinger/UnfoldSim.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/behinger/UnfoldSim.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/behinger/UnfoldSim.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/behinger/UnfoldSim.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://s-ccs.github.io/UnfoldSim.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://s-ccs.github.io/UnfoldSim.jl/dev/)
+[![Build Status](https://github.com/s-ccs/UnfoldSim.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/s-ccs/UnfoldSim.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/s-ccs/UnfoldSim.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/s-ccs/UnfoldSim.jl)
 
 
-A package to simulate model-based ERPs.
+A package to simulate single timeseries model-based ERPs, fMRI activity, pupil dilation etc.
+If you have one channel, it is a timeseries of (overlapping) event-related activity and some noise - you might have fun here!
 
-**TODO:** Main description
+**Note: Not released yet**
 
 # Usage
 
@@ -47,12 +48,11 @@ rng = MersenneTwister(2)
 4) Put all together into a simulation
 ```julia
 # some more parameters
-epochlen = 125
-fixationlen = 305
-noisetype = WhiteNoise()
-noiselevel = 2
 
-simulation = Simulation(design, [p100],  epochlen, fixationlen, noisetype, noiselevel)
+noisetype = PinkNoise(;noiselevel=2)
+onset = UniformOnset(;offset=200,width=50) # 200-250 samples distance between events
+
+simulation = Simulation(design, [p100],  onset,noisetype)
 ```
 
 5) Simulate EEG data
