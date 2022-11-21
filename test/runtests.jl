@@ -1,6 +1,10 @@
 using UnfoldSim
-using Test
+include("setup.jl")
 
 @testset "UnfoldSim.jl" begin
-    # Write your tests here.
+    include("component.jl")
+    include("design.jl")
+    include("noise.jl")
+    include("onset.jl")
+    include("simulation.jl")
 end

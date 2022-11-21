@@ -1,0 +1,20 @@
+""" Returns dimension of experiment design"""
+dims(expdesign::ExperimentDesign) = expdesign.n_subj * expdesign.n_item
+
+
+"""
+    generate(expdesign::ExperimentDesign)
+
+Generates experiment design data frame
+"""
+function generate(expdesign::ExperimentDesign)
+	return sort!(DataFrame(
+		MixedModelsSim.simdat_crossed(
+			expdesign.n_subj, 
+			expdesign.n_item, 
+			subj_btwn=expdesign.subj_btwn, 
+			item_btwn=expdesign.item_btwn, 
+			both_win=expdesign.both_win
+		)
+	))
+end
