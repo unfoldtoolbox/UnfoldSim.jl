@@ -1,16 +1,21 @@
 abstract type AbstractOnset end
 abstract type AbstractNoise end
 
+abstract type AbstractDesign end
+
+abstract type AbstractComponent end
+
 # find other types in onset.jl and noise.jl
 """
 Experiment Design
 """
-struct ExperimentDesign
+@with_kw struct MultiSubjectDesign <: AbstractDesign
     n_subj::Int
     n_item::Int
-    subj_btwn
-    item_btwn
-    both_win
+    subj_btwn = nothing
+    item_btwn = nothing
+    both_win = nothing
+    tableModifyFun = x->x; # can be used to sort, or x->permute(rng,x)
 end
 
 
@@ -19,7 +24,7 @@ end
 """
 ERP Component
 """
-struct Component
+struct Component <: AbstractComponent
 	basis
 	formula
 	contrasts
@@ -29,8 +34,8 @@ struct Component
 end
 
 struct Simulation
-	design::ExperimentDesign
-	components::Vector{Component}
+	design::AbstractDesign
+	components::Vector{AbstractComponent}
 	onset::AbstractOnset
 	noisetype::AbstractNoise
 end

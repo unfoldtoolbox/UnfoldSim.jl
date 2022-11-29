@@ -1,6 +1,6 @@
 
 # helper to move input ::Component to ::Vector{Component}
-Simulation(design::ExperimentDesign,component::Component,onset::AbstractOnset,noisetype::AbstractNoise) = Simulation(design,[component],onset,noisetype)
+Simulation(design::AbstractDesign,component::AbstractComponent,onset::AbstractOnset,noisetype::AbstractNoise) = Simulation(design,[component],onset,noisetype)
 
 """
 Simulate eeg data given a simulation design, effect sizes and variances
@@ -41,7 +41,8 @@ function add_noise!(rng,eeg,noisetype)
 	noise = reshape(noise, size(eeg))
 	
 	# add noise to data
-	eeg += noisetype.noiselevel .* noise
+	eeg .+= noisetype.noiselevel .* noise
+	
 end
 
 """

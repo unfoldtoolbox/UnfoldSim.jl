@@ -25,10 +25,14 @@ module UnfoldSim
    export @formula,DummyCoding,EffectsCoding
    # mixedModels re-export
    export create_re
+   
    # main types
-   export ExperimentDesign,Simulation, Component
-   # noise functions
+   export Simulation, Component
 
+   # export designs
+   export MultiSubjectDesign
+   # noise functions
+   
    export PinkNoise,RedNoise,WhiteNoise,NoNoise,ExponentialNoise #,RealNoise (not implemented yet)
    # UnfoldSim functions 
    export simulate, simulate_erps,gen_noise,padarray,convert
