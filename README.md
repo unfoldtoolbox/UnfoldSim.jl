@@ -1,9 +1,9 @@
 # UnfoldSim
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://s-ccs.github.io/UnfoldSim.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://s-ccs.github.io/UnfoldSim.jl/dev/)
-[![Build Status](https://github.com/s-ccs/UnfoldSim.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/s-ccs/UnfoldSim.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/s-ccs/UnfoldSim.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/s-ccs/UnfoldSim.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)
+[![Build Status](https://github.com/unfoldtoolbox/UnfoldSim.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/unfoldtoolbox/UnfoldSim.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/v/UnfoldSim.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/unfoldtoolbox/UnfoldSim.jl)
 
 
 A package to simulate single timeseries model-based ERPs, fMRI activity, pupil dilation etc.
