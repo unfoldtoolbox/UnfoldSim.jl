@@ -89,10 +89,10 @@ function simulate_erps(rng, design, components)
 			end
 
 			# simulate with new parameters
-			simulate!(deepcopy(rng), m, β = b .* [β...], σ = σ_lmm)
+			simulate!(deepcopy(rng), m, β = [β...], σ = σ_lmm)
 
 			# save data to array
-			epoch_data_component[t, :] = m.y
+			epoch_data_component[t, :] = b .* m.y
 		end
 
 		push!(epoch_data, epoch_data_component)
