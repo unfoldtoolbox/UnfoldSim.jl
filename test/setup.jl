@@ -13,7 +13,7 @@ function gen_debug_design()
 	both_win = nothing
 	
 	# instantiate the design
-	return ExperimentDesign(n_subj, n_item, btwn_subj, btwn_item, both_win)
+	return MultiSubjectDesign(n_subj, n_item, btwn_subj, btwn_item, both_win)
 end
 
 function gen_debug_component()
