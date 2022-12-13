@@ -109,31 +109,17 @@ end
 Function to convert output similar to unfold (data, evts)
 """
 function convert(eeg, onsets, design)
-	# data 
 	data = eeg[:,]
+	evt = UnfoldSim.generate(design)
+	
+	evt.latency = (onsets' .+ range(0,size(eeg,2)-1).*size(eeg,1) )'[:,]
+	
+	rename!(evt,:subj => :subject)
 
-	# unpack
-	(;n_subj) = design
+    select!(evt, Not([:dv]))
 
-	# generate design data frame
-	ed = generate(design)
-
-	# create & fill event data frame
-	evts = DataFrame()
-	a = collect(0:n_subj-1) * size(eeg, 1)
-	evts.latency = (onsets' .+ a)'[:,]
-	#evts.type .= "sim"
-	insertcols!(evts, :type=>"sim")
-	evts.trialnum = 1:size(evts, 1)
-	for i in Set(ed.stimType)
-		evts[!, Symbol("cond"*i)] = [(i == d ? 1 : 0) for d in ed.stimType]
-	end
-	evts.cond =ed.stimType
-	evts.stimulus = ed.item
-	evts.subject = ed.subj
-	evts.urlatency = onsets[:,]
-
-	return data, evts
+	return data,evt
+	
 end
 
 
