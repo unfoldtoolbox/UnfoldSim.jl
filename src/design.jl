@@ -1,3 +1,17 @@
+"""
+Experiment Design
+"""
+@with_kw struct MultiSubjectDesign <: AbstractDesign
+    n_subj::Int
+    n_item::Int
+    subj_btwn = nothing
+    item_btwn = nothing
+    both_win = nothing
+    tableModifyFun = x->x; # can be used to sort, or x->permute(rng,x)
+end
+
+
+
 """ Returns dimension of experiment design"""
 dims(expdesign::MultiSubjectDesign) = expdesign.n_subj * expdesign.n_item
 

@@ -27,6 +27,7 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
     pages=[
         "Home" => "index.md",
         "NoiseTypes" => "literate/reference/noisetypes.md"
+        "New Experimental Design" => "literate/HowTo/newDesign.md"
     ],
 )
 

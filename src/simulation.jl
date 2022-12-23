@@ -5,16 +5,16 @@ Simulation(design::AbstractDesign,component::AbstractComponent,onset::AbstractOn
 """
 Simulate eeg data given a simulation design, effect sizes and variances
 """
-function simulate(rng, simulation)
+function simulate(rng, simulation::Simulation)
 	
 	# unpacking fields
 	(; design, components, onset, noisetype) = simulation 
 	(;n_item, n_subj) = design
 
 	# create epoch data / erps
-	erps = simulate_erps(deepcopy(rng), design, components)
+	erps = simulate(deepcopy(rng), design, components)
 
-	onsets = gen_onsets(rng,simulation)
+	onsets = gen_onsets(deepcopy(rng),simulation)
 	
 	# combine erps with onsets
 	max_length = maximum(onsets) .+ maxlength(components)
@@ -48,59 +48,15 @@ end
 """
 Simulates erp data given the specified parameters 
 """
-function simulate_erps(rng, design, components)
+function simulate(rng, design::AbstractDesign, components::Vector{<:AbstractComponent})
 
-	# unpacking fields
-	(; n_subj, n_item) = design
+	epoch_data = Array{Float64}(Int(length(components)), dims(design))
 
-	epoch_data = []
-
-	# for each components
-	for (; basis, formula, contrasts, β, σ_ranef, σ_res) in components
-
-		# create model
-		m = MixedModels.MixedModel(formula, generate(design), contrasts=contrasts)
-
-		# limit runtime (in seconds)
-		m.optsum.maxtime = 1
-	
-		# fit mixed model to experiment design and dummy data
-		refit!(m, progress=false)
-
-		# empty epoch data
-		epoch_data_component = zeros(Int(length(basis)), n_subj*n_item)
-
-		# residual variance for lmm
-		σ_lmm = σ_res # 0.0001
-			
-		# iterate over each timepoint
-		for t in eachindex(basis)
-
-			# select weight from basis
-			b = basis[t]
-			
-			# update random effects parametes of model
-			if σ_ranef !== nothing
-				k = (collect(keys(σ_ranef))...,)
-				v = b .* (collect(values(σ_ranef))...,) ./ σ_lmm
-
-				namedre = NamedTuple{k}(v)
-				
-				MixedModelsSim.update!(m; namedre...)
-			end
-
-			# simulate with new parameters
-			simulate!(deepcopy(rng), m, β = b .* [β...], σ = σ_lmm)
-
-			# save data to array
-			epoch_data_component[t, :] = m.y
-		end
-
-		push!(epoch_data, epoch_data_component)
+	# Simulate each component
+	for c in components
+		# add them up
+		epoch_data += simulate(rng,c,design)
 	end
-
-	epoch_data = +(epoch_data...)
-
 	return epoch_data
 end
 
