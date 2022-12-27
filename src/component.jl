@@ -6,7 +6,7 @@ works best with MultiSubjectDesign
     basis
     formula # e.g. dv~1+cond - left side must be "dv"
     β::Vector
-    σs::Dict # Dict(:subj=>[0.5,0.4]) or to specify correlationmatrix Dict(:subj=>[0.5,0.4,I(2,2)],...)
+    σs::Dict # Dict(:subject=>[0.5,0.4]) or to specify correlationmatrix Dict(:subject=>[0.5,0.4,I(2,2)],...)
     contrasts::Dict = Dict()
 end
 
@@ -20,6 +20,12 @@ end
 
 Base.length(c::AbstractComponent) = length(c.basis)
 maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
+
+"""
+# by default call simulate with `::Abstractcomponent,::AbstractDesign``, but allow for custom types
+# making use of other information in simulation
+"""
+simulate(rng,c::AbstractComponent,simulation::Simulation) = simulate(rng,c,simulation.design)
 
 """
 simulate a linearModel
@@ -43,7 +49,7 @@ end
 simulate MixedModelComponent
 
 julia> design = MultiSubjectDesign(;n_subj=2,n_item=50,item_btwn=(;:cond=>["A","B"]))
-julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(dv~1+cond+(1|subj)),[1,2],Dict(:subj=>[2],),Dict())
+julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(dv~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
 julia> simulate(StableRNG(1),c,design)
 
 """
@@ -66,7 +72,7 @@ function simulate(rng,c::MixedModelComponent,design::AbstractDesign)
 	
 
 	# empty epoch data
-	epoch_data_component = zeros(Int(length(c.basis)), dims(design))
+	epoch_data_component = zeros(Int(length(c.basis)), length(design))
 
 	# residual variance for lmm
 	σ_lmm = 	0.0001
