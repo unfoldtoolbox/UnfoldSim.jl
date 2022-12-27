@@ -9,31 +9,52 @@ function simulate(rng, simulation::Simulation)
 	
 	# unpacking fields
 	(; design, components, onset, noisetype) = simulation 
-	(;n_item, n_subj) = design
 
 	# create epoch data / erps
-	erps = simulate(deepcopy(rng), design, components)
+	erps = simulate(deepcopy(rng), components,simulation)
 
-	onsets = gen_onsets(deepcopy(rng),simulation)
+	onsets = generate(deepcopy(rng),onset,simulation)
 	
 	# combine erps with onsets
 	max_length = maximum(onsets) .+ maxlength(components)
 	#eeg_continuous = Array{Float64,2}(0,max_length,n_subj)
+	
+	n_subj = length(size(design))==1 ? 1 : size(design)[2]
+	n_trial = size(design)[1]
 	eeg_continuous = zeros(max_length,n_subj)
+	# not all designs have multiple subjects
 	for s in 1:n_subj
-		for i in 1:n_item
+		for i in 1:n_trial
 			one_onset = onsets[CartesianIndex(i, s)]
-			eeg_continuous[one_onset:one_onset+maxlength(components)-1,s] .+= @view erps[:, (s-1)*n_item+i]
+			eeg_continuous[one_onset:one_onset+maxlength(components)-1,s] .+= @view erps[:, (s-1)*n_trial+i]
 		end
 	end	
 
-	add_noise!(rng,eeg_continuous,noisetype)
+	add_noise!(rng,noisetype,eeg_continuous)
 	
-	return eeg_continuous, onsets
+	return convert(eeg_continuous,onsets,design)
+
 end
 
 
-function add_noise!(rng,eeg,noisetype)
+"""
+Simulates erp data given the specified parameters 
+"""
+function simulate(rng, components::Vector{<:AbstractComponent},simulation::Simulation)
+
+	epoch_data = zeros(maxlength(components), length(simulation.design))
+
+	# Simulate each component
+	for c in components
+		# add them up
+
+		epoch_data += simulate(rng,c,simulation)
+	end
+	return epoch_data
+end
+
+
+function add_noise!(rng,noisetype::AbstractNoise,eeg)
 
 	# generate noise
 	noise = gen_noise(deepcopy(rng), noisetype, length(eeg))
@@ -45,21 +66,6 @@ function add_noise!(rng,eeg,noisetype)
 	
 end
 
-"""
-Simulates erp data given the specified parameters 
-"""
-function simulate(rng, design::AbstractDesign, components::Vector{<:AbstractComponent})
-
-	epoch_data = Array{Float64}(Int(length(components)), dims(design))
-
-	# Simulate each component
-	for c in components
-		# add them up
-		epoch_data += simulate(rng,c,design)
-	end
-	return epoch_data
-end
-
 
 """
 Function to convert output similar to unfold (data, evts)
@@ -69,10 +75,10 @@ function convert(eeg, onsets, design)
 	evt = UnfoldSim.generate(design)
 	
 	evt.latency = (onsets' .+ range(0,size(eeg,2)-1).*size(eeg,1) )'[:,]
-	
-	rename!(evt,:subj => :subject)
 
-    select!(evt, Not([:dv]))
+	if :d ∈	names(evt)
+    	select!(evt, Not([:dv]))
+	end
 
 	return data,evt
 	
