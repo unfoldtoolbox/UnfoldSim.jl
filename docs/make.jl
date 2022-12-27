@@ -3,9 +3,11 @@ using Documenter
 using Glob
 using Literate
 
+
 GENERATED = joinpath(@__DIR__, "src", "literate")
 for subfolder ∈ ["explanations","HowTo","tutorials","reference"]
     local SOURCE_FILES = Glob.glob(subfolder*"/*.jl", GENERATED)
+    #config=Dict(:repo_root_path=>"https://github.com/unfoldtoolbox/UnfoldSim")
     foreach(fn -> Literate.markdown(fn, GENERATED*"/"*subfolder), SOURCE_FILES)
 
 end
@@ -26,8 +28,9 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
     ),
     pages=[
         "Home" => "index.md",
-        "NoiseTypes" => "literate/reference/noisetypes.md",
-        "New Experimental Design" => "literate/HowTo/newDesign.md",
+        "NoiseTypes" => "./literate/reference/noisetypes.md",
+        "New Experimental Design" => "./literate/HowTo/newDesign.md",
+	"Quickstart" => "literate/tutorials/quickstart.md",
     ],
 )
 
