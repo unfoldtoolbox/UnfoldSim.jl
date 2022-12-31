@@ -48,6 +48,7 @@ function simulate(rng, components::Vector{<:AbstractComponent},simulation::Simul
 	for c in components
 		# add them up
 
+
 		epoch_data += simulate(rng,c,simulation)
 	end
 	return epoch_data
