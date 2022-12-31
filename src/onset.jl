@@ -14,25 +14,25 @@ end
 end
 
 #-------------
-function rand_onsets(rng,onset::UniformOnset,n_item,n_subj,simulation)
-    return rand(deepcopy(rng), onset.offset:(onset.offset + onset.width), (n_item, n_subj))
+function rand_onsets(rng,onset::UniformOnset,design::AbstractDesign)
+    return rand(deepcopy(rng), onset.offset:(onset.offset + onset.width), size(design))
 end
 
-function rand_onsets(rng,onset::LogNormalOnset,n_item,n_subj,simulation)
+function rand_onsets(rng,onset::LogNormalOnset,design::AbstractDesign)
+    size = size(design)
     fun = LogNormal(onset.μ,onset.σ)
     if !isnothing(onset.truncate_upper)
         fun = truncated(fun;upper=onset.truncate_upper)
     end
-    return onset.offset .+ rand(deepcopy(rng), fun, (n_item, n_subj))
+    return onset.offset .+ rand(deepcopy(rng), fun, size)
 end
 
 
 # main call from `simulation`
-function gen_onsets(rng,simulation::Simulation)
-    (;n_item, n_subj) = simulation.design
-
+function generate(rng,onset::AbstractOnset,simulation::Simulation)
+    
 	# sample different onsets
-	onsets = rand_onsets(rng,simulation.onset,n_item,n_subj,simulation)
+	onsets = rand_onsets(rng,onset,simulation.design)
 	
     # accumulate them
 	onsets_accum = accumulate(+, onsets, dims=1)

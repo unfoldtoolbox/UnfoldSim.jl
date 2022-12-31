@@ -1,36 +1,19 @@
 abstract type AbstractOnset end
 abstract type AbstractNoise end
 
+abstract type AbstractDesign end
+
+abstract type AbstractComponent end
+
 # find other types in onset.jl and noise.jl
-"""
-Experiment Design
-"""
-struct ExperimentDesign
-    n_subj::Int
-    n_item::Int
-    subj_btwn
-    item_btwn
-    both_win
-end
+# and in design.jl and component.jl
 
 
 
-
-"""
-ERP Component
-"""
-struct Component
-	basis
-	formula
-	contrasts
-	β
-	σ_ranef
-	σ_res
-end
 
 struct Simulation
-	design::ExperimentDesign
-	components::Vector{Component}
+	design::AbstractDesign
+	components::Vector{AbstractComponent}
 	onset::AbstractOnset
 	noisetype::AbstractNoise
 end

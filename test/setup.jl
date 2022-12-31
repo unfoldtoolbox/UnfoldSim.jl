@@ -8,12 +8,11 @@ function gen_debug_design()
 	# define design parameters
 	n_subj = 20
 	n_item = 100
-	btwn_subj = nothing
-	btwn_item = Dict("stimType" => ["A", "B"])
-	both_win = nothing
-	
+
+	item_btwn = Dict("stimType" => ["A", "B"])
+		
 	# instantiate the design
-	return ExperimentDesign(n_subj, n_item, btwn_subj, btwn_item, both_win)
+	return MultiSubjectDesign(;n_subj=n_subj, n_item=n_item, item_btwn = item_btwn)
 end
 
 function gen_debug_component()

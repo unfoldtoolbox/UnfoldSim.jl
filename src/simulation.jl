@@ -1,39 +1,61 @@
 
 # helper to move input ::Component to ::Vector{Component}
-Simulation(design::ExperimentDesign,component::Component,onset::AbstractOnset,noisetype::AbstractNoise) = Simulation(design,[component],onset,noisetype)
+Simulation(design::AbstractDesign,component::AbstractComponent,onset::AbstractOnset,noisetype::AbstractNoise) = Simulation(design,[component],onset,noisetype)
 
 """
 Simulate eeg data given a simulation design, effect sizes and variances
 """
-function simulate(rng, simulation)
+function simulate(rng, simulation::Simulation)
 	
 	# unpacking fields
 	(; design, components, onset, noisetype) = simulation 
-	(;n_item, n_subj) = design
 
 	# create epoch data / erps
-	erps = simulate_erps(deepcopy(rng), design, components)
+	erps = simulate(deepcopy(rng), components,simulation)
 
-	onsets = gen_onsets(rng,simulation)
+	onsets = generate(deepcopy(rng),onset,simulation)
 	
 	# combine erps with onsets
 	max_length = maximum(onsets) .+ maxlength(components)
 	#eeg_continuous = Array{Float64,2}(0,max_length,n_subj)
+	
+	n_subj = length(size(design))==1 ? 1 : size(design)[2]
+	n_trial = size(design)[1]
 	eeg_continuous = zeros(max_length,n_subj)
+	# not all designs have multiple subjects
 	for s in 1:n_subj
-		for i in 1:n_item
+		for i in 1:n_trial
 			one_onset = onsets[CartesianIndex(i, s)]
-			eeg_continuous[one_onset:one_onset+maxlength(components)-1,s] .+= @view erps[:, (s-1)*n_item+i]
+			eeg_continuous[one_onset:one_onset+maxlength(components)-1,s] .+= @view erps[:, (s-1)*n_trial+i]
 		end
 	end	
 
-	add_noise!(rng,eeg_continuous,noisetype)
+	add_noise!(rng,noisetype,eeg_continuous)
 	
-	return eeg_continuous, onsets
+	return convert(eeg_continuous,onsets,design)
+
 end
 
 
-function add_noise!(rng,eeg,noisetype)
+"""
+Simulates erp data given the specified parameters 
+"""
+function simulate(rng, components::Vector{<:AbstractComponent},simulation::Simulation)
+
+	epoch_data = zeros(maxlength(components), length(simulation.design))
+
+	# Simulate each component
+	for c in components
+		# add them up
+
+
+		epoch_data += simulate(rng,c,simulation)
+	end
+	return epoch_data
+end
+
+
+function add_noise!(rng,noisetype::AbstractNoise,eeg)
 
 	# generate noise
 	noise = gen_noise(deepcopy(rng), noisetype, length(eeg))
@@ -41,66 +63,8 @@ function add_noise!(rng,eeg,noisetype)
 	noise = reshape(noise, size(eeg))
 	
 	# add noise to data
-	eeg += noisetype.noiselevel .* noise
-end
-
-"""
-Simulates erp data given the specified parameters 
-"""
-function simulate_erps(rng, design, components)
-
-	# unpacking fields
-	(; n_subj, n_item) = design
-
-	epoch_data = []
-
-	# for each components
-	for (; basis, formula, contrasts, β, σ_ranef, σ_res) in components
-
-		# create model
-		m = MixedModels.MixedModel(formula, generate(design), contrasts=contrasts)
-
-		# limit runtime (in seconds)
-		m.optsum.maxtime = 1
+	eeg .+= noisetype.noiselevel .* noise
 	
-		# fit mixed model to experiment design and dummy data
-		refit!(m, progress=false)
-
-		# empty epoch data
-		epoch_data_component = zeros(Int(length(basis)), n_subj*n_item)
-
-		# residual variance for lmm
-		σ_lmm = σ_res # 0.0001
-			
-		# iterate over each timepoint
-		for t in eachindex(basis)
-
-			# select weight from basis
-			b = basis[t]
-			
-			# update random effects parametes of model
-			if σ_ranef !== nothing
-				k = (collect(keys(σ_ranef))...,)
-				v = b .* (collect(values(σ_ranef))...,) ./ σ_lmm
-
-				namedre = NamedTuple{k}(v)
-				
-				MixedModelsSim.update!(m; namedre...)
-			end
-
-			# simulate with new parameters
-			simulate!(deepcopy(rng), m, β = [β...], σ = σ_lmm)
-
-			# save data to array
-			epoch_data_component[t, :] = b .* m.y
-		end
-
-		push!(epoch_data, epoch_data_component)
-	end
-
-	epoch_data = +(epoch_data...)
-
-	return epoch_data
 end
 
 
@@ -108,31 +72,17 @@ end
 Function to convert output similar to unfold (data, evts)
 """
 function convert(eeg, onsets, design)
-	# data 
 	data = eeg[:,]
+	evt = UnfoldSim.generate(design)
+	
+	evt.latency = (onsets' .+ range(0,size(eeg,2)-1).*size(eeg,1) )'[:,]
 
-	# unpack
-	(;n_subj) = design
-
-	# generate design data frame
-	ed = generate(design)
-
-	# create & fill event data frame
-	evts = DataFrame()
-	a = collect(0:n_subj-1) * size(eeg, 1)
-	evts.latency = (onsets' .+ a)'[:,]
-	#evts.type .= "sim"
-	insertcols!(evts, :type=>"sim")
-	evts.trialnum = 1:size(evts, 1)
-	for i in Set(ed.stimType)
-		evts[!, Symbol("cond"*i)] = [(i == d ? 1 : 0) for d in ed.stimType]
+	if :d ∈	names(evt)
+    	select!(evt, Not([:dv]))
 	end
-	evts.cond =ed.stimType
-	evts.stimulus = ed.item
-	evts.subject = ed.subj
-	evts.urlatency = onsets[:,]
 
-	return data, evts
+	return data,evt
+	
 end
 
 
