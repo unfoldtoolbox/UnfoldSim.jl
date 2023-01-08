@@ -3,12 +3,10 @@ using Test
 using Random
 using StableRNGs
 using Statistics
+using LinearAlgebra
 
-function gen_debug_design()
+function gen_debug_design(;n_subj = 20,n_item = 100)
 	# define design parameters
-	n_subj = 20
-	n_item = 100
-
 	item_btwn = Dict("stimType" => ["A", "B"])
 		
 	# instantiate the design
@@ -20,11 +18,18 @@ function gen_debug_component()
     formula = @formula(dv ~ 1 + stimType + (1 + stimType | subj))
     contrasts = Dict(:stimType => DummyCoding())
     β = [2.0, 0.5]
-    σ_ranef = Dict(:subj => create_re(1, 0.0))
-    σ_res = 0.0001
+    σ_ranef = Dict(:subj => [1, 0.0])
+    
     
     # instantiate the component(s)
-    return Component(basisfunction, formula, contrasts, β, σ_ranef, σ_res)
+    return MixedModelComponent(;
+    basis=basisfunction,
+    formula=formula,
+    β = β,
+    σs= σ_ranef,
+    contrasts=contrasts,
+)
+    #return MixedModelComponent(basisfunction, formula, contrasts, β, σ_ranef)
 end
 
 function gen_debug_simulation(;design = gen_debug_design(),component = gen_debug_component(),noisetype = PinkNoise(),onset = UniformOnset(;width=0,offset=100))

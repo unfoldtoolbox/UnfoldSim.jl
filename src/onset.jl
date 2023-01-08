@@ -19,12 +19,12 @@ function rand_onsets(rng,onset::UniformOnset,design::AbstractDesign)
 end
 
 function rand_onsets(rng,onset::LogNormalOnset,design::AbstractDesign)
-    size = size(design)
+    s = size(design)
     fun = LogNormal(onset.μ,onset.σ)
     if !isnothing(onset.truncate_upper)
         fun = truncated(fun;upper=onset.truncate_upper)
     end
-    return onset.offset .+ rand(deepcopy(rng), fun, size)
+    return onset.offset .+ rand(deepcopy(rng), fun, s)
 end
 
 
