@@ -2,8 +2,9 @@ using UnfoldSim
 using Random
 using CairoMakie
 
-# !!! Tipp
-#        Use `subtypes(AbstractNoise)` (or `subtypes(AbstractComponent)` etc.) to find already implemented building blocks
+
+# !!! tipp
+#       Use `subtypes(AbstractNoise)` (or `subtypes(AbstractComponent)` etc.) to find already implemented building blocks
 
 # #### "Experimental" Design
 # Define a 1 x 2 design with 20 trials. That is, one condition (`condaA`) with two levels.
