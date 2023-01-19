@@ -49,7 +49,7 @@ end
 Generate noise of a given type t and length n
 """
 function gen_noise(rng, t::Union{PinkNoise, RedNoise}, n::Int)
-    return t.noiselevel .* rand(rng, t.func(n, 1.0))
+    return rand(rng, t.func(n, 1.0))
 end
 
 function gen_noise(rng,t::NoNoise,n::Int)
@@ -62,7 +62,7 @@ end
 Generate noise of a given type t and length n
 """
 function gen_noise(rng, t::WhiteNoise, n::Int)
-    noisevector = t.noiselevel .* randn(rng, n)
+    noisevector = randn(rng, n)
     if !isnothing(t.imfilter)
         noisevector = imfilter(noisevector, Kernel.gaussian((t.imfilter,)))
     end
@@ -109,5 +109,5 @@ function gen_noise(rng,t::ExponentialNoise, n::Int)
     
     Σ = circulant(exponentialCorrelation([0:1:(n-1);], nu = t.ν))
     Ut = LinearAlgebra.cholesky(Σ).U'
-    return t.noiselevel .* 10 .* (randn(rng, n)'*Ut')[1, :]    
+    return 10 .* (randn(rng, n)'*Ut')[1, :]    
 end
