@@ -7,13 +7,13 @@ function predef_2x2(rng;
                     n_trials=100,
                     n_subjects=1,
                     conditions = Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"]),
-                    tableModifyFun = x->shuffle(rng,x),
+                    tableModifyFun = x->shuffle(deepcopy(rng),x),
                     
                     # component / signal
                     signalsize = 100,
                     basis = hanning(signalsize), # the component "function"
                     β = [1,-0.5,.5,+1],
-                    σs = Dict(:subject=>[1.,0.5,0.5,0.5],:item=>[1.]), # only in n_subjects>2 case
+                    σs = Dict(:subject=>[0.3,0.1,0.1,0.1],:item=>[0.1]), # only in n_subjects>2 case
                     contrasts = Dict(:A=>EffectsCoding(),:B=>EffectsCoding()),
                     
                     formula = n_subjects==1 ? @formula(0~1+A*B) : @formula(dv~1+A*B+(A*B|subject)+(1|item)),

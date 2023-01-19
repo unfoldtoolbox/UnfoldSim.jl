@@ -7,7 +7,7 @@ using StableRNGs
 # There are several bases types directly implemented. They can be easily used for the `components`.
 #
 # !!! note
-#   You can use any arbitrary shape defined by yourself! We often make use of `hanning(50)` from the DSP.jl package
+#       You can use any arbitrary shape defined by yourself! We often make use of `hanning(50)` from the DSP.jl package
 
 # ## EEG
 # by default, the EEG bases assume a sampling rate of 100, which can easily be changed by e.g. p100(fs=300)

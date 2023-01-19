@@ -30,6 +30,8 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
         "Home" => "index.md",
         "Tutorials"=>[
                 "Quickstart" => "literate/tutorials/quickstart.md",
+                "Simulate ERPs" => "literate/tutorials/simulateERP.md",
+                "Poweranalysis" => "literate/tutorials/poweranalysis.md",
         ],
         "Reference"=>[
                 "NoiseTypes" => "./literate/reference/noisetypes.md",
