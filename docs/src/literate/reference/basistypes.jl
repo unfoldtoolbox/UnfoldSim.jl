@@ -3,9 +3,10 @@ using CairoMakie
 using DSP
 using StableRNGs
 ##
-# ## Basestypes
+# ## Basistypes
 # There are several bases types directly implemented. They can be easily used for the `components`.
-# !!! Note
+#
+# !!! note
 #   You can use any arbitrary shape defined by yourself! We often make use of `hanning(50)` from the DSP.jl package
 
 # ## EEG
