@@ -13,11 +13,14 @@ end
 """
 Function to convert output similar to unfold (data, evts)
 """
-function convert(eeg, onsets, design)
-	data = eeg[:,]
+function convert(eeg, onsets, design;reshape=true)
 	evt = UnfoldSim.generate(design)
-	
-	evt.latency = (onsets' .+ range(0,size(eeg,2)-1).*size(eeg,1) )'[:,]
+	if reshape
+		data = eeg[:,]
+		evt.latency = (onsets' .+ range(0,size(eeg,2)-1).*size(eeg,1) )'[:,]
+	else
+		data = eeg
+	end
 
 	if :d ∈	names(evt)
     	select!(evt, Not([:dv]))

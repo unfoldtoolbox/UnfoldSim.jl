@@ -5,8 +5,8 @@ Simulation(design::AbstractDesign,component::AbstractComponent,onset::AbstractOn
 """
 Simulate eeg data given a simulation design, effect sizes and variances
 """
-simulate(rng,design, signal,  onset, noise) = simulate(rng,Simulation(design, signal,  onset, noise))
-function simulate(rng, simulation::Simulation)
+simulate(rng,design, signal,  onset, noise;kwargs...) = simulate(rng,Simulation(design, signal,  onset, noise);kwargs...)
+function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 	
 	# unpacking fields
 	(; design, components, onset, noisetype) = simulation 
@@ -14,28 +14,34 @@ function simulate(rng, simulation::Simulation)
 	# create epoch data / erps
 	erps = simulate(deepcopy(rng), components,simulation)
 
-	onsets = generate(deepcopy(rng),onset,simulation)
-	
-	# XXX todo: Separate Subjects in Time by adding offset to onsets!!
+	if !return_epoched
+		# we only need to simulate onsets & pull everything together, if we 
+		# want a continuous EEG 	
+		
+		onsets = generate(deepcopy(rng),onset,simulation)
+		
+		# XXX todo: Separate Subjects in Time by adding offset to onsets!!
 
-	# combine erps with onsets
-	max_length = Int(ceil(maximum(onsets))) .+ maxlength(components)
-	#eeg_continuous = Array{Float64,2}(0,max_length,n_subj)
-	
-	n_subj = length(size(design))==1 ? 1 : size(design)[2]
-	n_trial = size(design)[1]
-	eeg_continuous = zeros(max_length,n_subj)
-	# not all designs have multiple subjects
-	for s in 1:n_subj
-		for i in 1:n_trial
-			one_onset = onsets[CartesianIndex(i, s)]
-			eeg_continuous[one_onset:one_onset+maxlength(components)-1,s] .+= @view erps[:, (s-1)*n_trial+i]
-		end
-	end	
+		# combine erps with onsets
+		max_length = Int(ceil(maximum(onsets))) .+ maxlength(components)
+		
+		n_subj = length(size(design))==1 ? 1 : size(design)[2]
+		n_trial = size(design)[1]
+		eeg = zeros(max_length,n_subj)
+		# not all designs have multiple subjects
+		for s in 1:n_subj
+			for i in 1:n_trial
+				one_onset = onsets[CartesianIndex(i, s)]
+				eeg[one_onset:one_onset+maxlength(components)-1,s] .+= @view erps[:, (s-1)*n_trial+i]
+			end
+		end	
+	else
+		eeg = erps
+		onsets = [] # this is still a bit ugly
+	end
+	add_noise!(rng,noisetype,eeg)
 
-	add_noise!(rng,noisetype,eeg_continuous)
-	
-	return convert(eeg_continuous,onsets,design)
+	return convert(eeg,onsets,design;reshape=!return_epoched)
 
 end
 

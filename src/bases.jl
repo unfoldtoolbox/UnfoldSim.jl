@@ -2,27 +2,27 @@
 
 ## EEG
 # P100, N170, P300, N400
-p100(;fs=100) = hanning(0.1,0.1,fs)
-p300(;fs=100) = hanning(0.3,0.3,fs)
-n170(;fs=100) = -hanning(0.15,0.17,fs)
-n400(;fs=100) = -hanning(0.4,0.4,fs)
+p100(;sfreq=100) = hanning(0.1,0.1,sfreq)
+p300(;sfreq=100) = hanning(0.3,0.3,sfreq)
+n170(;sfreq=100) = -hanning(0.15,0.17,sfreq)
+n400(;sfreq=100) = -hanning(0.4,0.4,sfreq)
 
 """
 generate a hanning window
 
 duration: in s
 offset: in s, defines hanning peak
-fs: sampling rate in Hz
+sfreq: sampling rate in Hz
 """
-function DSP.hanning(duration,offset,fs)
-    signal = hanning(Int(round(duration*fs)))
-    return padarray(signal,-Int(round(offset*fs/2)),0)
+function DSP.hanning(duration,offset,sfreq)
+    signal = hanning(Int(round(duration*sfreq)))
+    return padarray(signal,-Int(round(offset*sfreq/2)),0)
 end
 
 ## pupil
 
-function PuRF(;n = 10.1,tmax = 0.93,fs=100)
-    t = (0:1/fs:3*tmax)
+function PuRF(;n = 10.1,tmax = 0.93,sfreq=100)
+    t = (0:1/sfreq:3*tmax)
     @show t
     return PuRF(t,n,tmax)./PuRF(tmax,n,tmax)
 end
@@ -34,7 +34,7 @@ end
 """
 Generate a HRF kernel. 
 
-TR = 1/fs
+TR = 1/sfreq
 default parameters taken from SPM
 
 Code adapted from Unfold.jl
