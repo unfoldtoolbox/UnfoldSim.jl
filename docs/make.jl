@@ -33,6 +33,7 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
         ],
         "Reference"=>[
                 "NoiseTypes" => "./literate/reference/noisetypes.md",
+                "ComponentBasisTypes" => "./literate/reference/basestypes.md",
         ],
         "HowTo" => [
                 "New Experimental Design" => "./literate/HowTo/newDesign.md",

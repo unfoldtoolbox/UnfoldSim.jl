@@ -7,4 +7,5 @@ include("setup.jl")
     include("noise.jl")
     include("onset.jl")
     include("simulation.jl")
+    include("helper.jl")
 end

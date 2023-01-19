@@ -70,32 +70,3 @@ function add_noise!(rng,noisetype::AbstractNoise,eeg)
 	
 end
 
-
-"""
-Function to convert output similar to unfold (data, evts)
-"""
-function convert(eeg, onsets, design)
-	data = eeg[:,]
-	evt = UnfoldSim.generate(design)
-	
-	evt.latency = (onsets' .+ range(0,size(eeg,2)-1).*size(eeg,1) )'[:,]
-
-	if :d ∈	names(evt)
-    	select!(evt, Not([:dv]))
-	end
-
-	return data,evt
-	
-end
-
-
-"""
-Pads array with specified value, length
-"""
-function padarray(arr, len, val)
-	for l in len
-		pad = fill(val, abs(l))
-		arr = l > 0 ? vcat(arr, pad) : vcat(pad, arr)
-	end
-	return arr
-end
