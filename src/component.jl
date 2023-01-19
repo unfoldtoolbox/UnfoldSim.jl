@@ -76,12 +76,19 @@ julia> simulate(StableRNG(1),c,design)
 """
 function simulate(rng,c::LinearModelComponent,design::AbstractDesign)
     evts = generate(design)
-    if isempty(c.contrasts)
-        m = StatsModels.ModelFrame(c.formula, evts)
+    
+    # special case, intercept only 
+    # https://github.com/JuliaStats/StatsModels.jl/issues/269
+    if c.formula.rhs == ConstantTerm(1)
+        X = ones(nrow(evts),1)
     else
-        m = StatsModels.ModelFrame(c.formula, evts;contrasts=c.contrasts)
+        if isempty(c.contrasts)
+            m = StatsModels.ModelFrame(c.formula, evts)
+        else
+            m = StatsModels.ModelFrame(c.formula, evts;contrasts=c.contrasts)
+        end
+        X = StatsModels.modelmatrix(m)    
     end
-    X = StatsModels.modelmatrix(m)    
     y = X * c.β
     return y' .* c.basis
 end

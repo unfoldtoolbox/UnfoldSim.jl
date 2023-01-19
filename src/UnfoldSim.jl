@@ -13,6 +13,7 @@ module UnfoldSim
    using LinearAlgebra
    using StatsModels
 
+   import DSP.hanning
    import Base.length
    import Base.size
    include("types.jl")
@@ -22,6 +23,8 @@ module UnfoldSim
    include("simulation.jl")
    include("onset.jl")
    include("predefinedSimulations.jl")
+   include("helper.jl")
+   include("bases.jl")
 
    export size,length
    export AbstractComponent,AbstractNoise,AbstactOnset,AbstractDesign
@@ -53,4 +56,7 @@ module UnfoldSim
    
    # re-export StatsModels
    export DummyCoding,EffectsCoding
+
+   # export bases
+   export p100,n170,p300,n400,hrf
 end
