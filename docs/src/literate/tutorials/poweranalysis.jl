@@ -9,8 +9,8 @@ using Random
 # For a power analysis, we will repeatedly simulate data, and check whether we can find a significant effect.
 # 
 
-pvals = fill(NaN,100)
-for seed = eachindex(pvals)
+pvals = fill(NaN,50)
+@time for seed = eachindex(pvals)
     ## Simulate data of 30 subjects
     data,evts = UnfoldSim.predef_2x2(MersenneTwister(seed);
                 n_subjects=30, ## 30 subjects
@@ -32,6 +32,7 @@ for seed = eachindex(pvals)
     ## calculate a one-sided t-test
     pvals[seed] = pvalue(OneSampleTTest(y_big,y_small))
 end
-power = mean(pvals .<0.05)*100;
 
-# the calculated power is $power%%
+# let's calculate the power
+power = mean(pvals .<0.05)*100
+
