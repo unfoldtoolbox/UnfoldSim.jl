@@ -1,6 +1,25 @@
 """
-MixedModelComponent
-works best with MultiSubjectDesign
+A component that adds a hierarchical relation between parameters according to a LMM defined via MixedModels.jl
+
+`basis`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model-prediction
+`formula`: Formula-Object in the style of MixedModels.jl e.g. `@formula dv~1+cond + (1|subject)` - left side must be `dv`
+`β` Vector of betas, must fit the formula
+`σs` Dict of random effect variances, e.g. `Dict(:subject=>[0.5,0.4])` or to specify correlationmatrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to MixedModels.jl `create_re` function, which creates the θ matrices.
+`contrasts`: Dict in the style of MixedModels.jl. Default is empty.
+
+All arguments can be named, in that case `contrasts` is optional
+
+Works best with `MultiSubjectDesign`
+```julia
+MixedModelComponent(;
+    basis=hanning(40),
+    formula=@formula(dv~1+cond+(1+cond|subject)),
+    β = [1.,2.],
+    σs= Dict(:subject=>[0.5,0.4]),
+    contrasts=Dict(:cond=>EffectsCoding())
+)
+
+````
 """
 @with_kw struct MixedModelComponent <: AbstractComponent
     basis

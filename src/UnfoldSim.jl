@@ -11,6 +11,7 @@ module UnfoldSim
    using MixedModelsSim
    using SignalAnalysis 
    using LinearAlgebra
+   using StatsModels
 
    import Base.length
    import Base.size
@@ -21,6 +22,7 @@ module UnfoldSim
    include("simulation.jl")
    include("onset.jl")
 
+   export size,length
    export AbstractComponent,AbstractNoise,AbstactOnset,AbstractDesign
    # statsmodels re-export
    export @formula,DummyCoding,EffectsCoding
@@ -47,4 +49,6 @@ module UnfoldSim
    # export Offsets
    export UniformOnset,LogNormalOnset
    
+   # re-export StatsModels
+   export DummyCoding,EffectsCoding
 end
