@@ -1,5 +1,12 @@
-"""
-Experiment Design
+""" 
+n_subj::Int -> number of subjects
+n_item::Int -> number of items (=trials)
+subj_btwn = nothing -> effects between subjects, e.g. young vs old 
+item_btwn = nothing -> effects between items, e.g. natural vs artificial images, but shown to all subjects
+both_win = nothing	-> effects completly crossed
+tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+
+tipp: check the resulting dataframe using `generate(design)`
 """
 @with_kw struct MultiSubjectDesign <: AbstractDesign
     n_subj::Int
@@ -7,9 +14,18 @@ Experiment Design
     subj_btwn = nothing
     item_btwn = nothing
     both_win = nothing
-    tableModifyFun = x->x; # can be used to sort, or x->permute(rng,x)
+    tableModifyFun = x->x; # can be used to sort, or x->shuffle(rng,x)
 end
 
+
+"""
+
+n_trials::Int -> number of trials
+conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
+tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+
+tipp: check the resulting dataframe using `generate(design)`
+"""
 @with_kw struct SingleSubjectDesign <: AbstractDesign
 	n_trials::Int
 	conditions = nothing

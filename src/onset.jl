@@ -15,7 +15,7 @@ end
 
 #-------------
 function rand_onsets(rng,onset::UniformOnset,design::AbstractDesign)
-    return rand(deepcopy(rng), onset.offset:(onset.offset + onset.width), size(design))
+    return Int.(round.(rand(deepcopy(rng), onset.offset:(onset.offset + onset.width), size(design))))
 end
 
 function rand_onsets(rng,onset::LogNormalOnset,design::AbstractDesign)
@@ -24,7 +24,7 @@ function rand_onsets(rng,onset::LogNormalOnset,design::AbstractDesign)
     if !isnothing(onset.truncate_upper)
         fun = truncated(fun;upper=onset.truncate_upper)
     end
-    return onset.offset .+ rand(deepcopy(rng), fun, s)
+    return Int.(round.(onset.offset .+ rand(deepcopy(rng), fun, s)))
 end
 
 
@@ -36,6 +36,7 @@ function generate(rng,onset::AbstractOnset,simulation::Simulation)
 	
     # accumulate them
 	onsets_accum = accumulate(+, onsets, dims=1)
+    
 	return onsets_accum
 end
 

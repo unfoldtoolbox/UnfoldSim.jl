@@ -21,6 +21,7 @@ module UnfoldSim
    include("noise.jl")
    include("simulation.jl")
    include("onset.jl")
+   include("predefinedSimulations.jl")
 
    export size,length
    export AbstractComponent,AbstractNoise,AbstactOnset,AbstractDesign
@@ -40,8 +41,9 @@ module UnfoldSim
 
    # noise functions
    export PinkNoise,RedNoise,WhiteNoise,NoNoise,ExponentialNoise #,RealNoise (not implemented yet)
+   
    # UnfoldSim functions 
-   export simulate, gen_noise
+   export simulate, gen_noise,generate
    
    # utilities
    export padarray,convert
