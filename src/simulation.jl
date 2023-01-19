@@ -25,16 +25,18 @@ function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 		# XXX todo: Separate Subjects in Time by adding offset to onsets!!
 
 		# combine erps with onsets
-		max_length = Int(ceil(maximum(onsets))) .+ maxlength(components)
+		maxlen = maxlength(components)
+		max_length = Int(ceil(maximum(onsets))) .+ maxlen
 		
 		n_subj = length(size(design))==1 ? 1 : size(design)[2]
 		n_trial = size(design)[1]
 		eeg = zeros(max_length,n_subj)
 		# not all designs have multiple subjects
+		
 		for s in 1:n_subj
 			for i in 1:n_trial
 				one_onset = onsets[CartesianIndex(i, s)]
-				eeg[one_onset:one_onset+maxlength(components)-1,s] .+= @view erps[:, (s-1)*n_trial+i]
+				@views eeg[one_onset:one_onset+maxlen-1,s] .+=  erps[:, (s-1)*n_trial+i]
 			end
 		end	
 	else
@@ -60,7 +62,7 @@ function simulate(rng, components::Vector{<:AbstractComponent},simulation::Simul
 		# add them up
 
 
-		epoch_data[1:length(c),:] += simulate(rng,c,simulation)
+		@views epoch_data[1:length(c),:] .+= simulate(rng,c,simulation)
 	end
 	return epoch_data
 end

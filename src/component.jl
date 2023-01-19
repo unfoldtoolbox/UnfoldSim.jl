@@ -110,13 +110,6 @@ function simulate(rng,c::MixedModelComponent,design::AbstractDesign)
 	    m = MixedModels.MixedModel(c.formula, evts; contrasts=c.contrasts)
     end
 
-	# limit runtime (in seconds)
-	m.optsum.maxtime = 1
-	m.optsum.feval = 1 # also do only a single step; 
-
-	# fit mixed model to experiment design and dummy data
-	refit!(m, progress=false) # to initialize it
-	
 
 	# empty epoch data
 	epoch_data_component = zeros(Int(length(c.basis)), length(design))
@@ -135,15 +128,15 @@ function simulate(rng,c::MixedModelComponent,design::AbstractDesign)
 			
             # weight random effects by the basis function
             namedre = weight_σs(c.σs,basis_σs,σ_lmm)
-            MixedModelsSim.update!(m; namedre...)
+            
+            θ = createθ(m; namedre...)
+
         
 			# simulate with new parameters; will update m.y
-			simulate!(
-				deepcopy(rng), # same parameter for each timepont
-				m, 
-				β = basis_β .* c.β, # weight the beta by the basisfunction
-				σ = σ_lmm # no noise
-			)
+            simulate!(deepcopy(rng), m.y, m; 
+                    β=basis_β .* c.β, 
+                    σ= σ_lmm,
+                    θ= θ)
 
 			# save data to array
 			epoch_data_component[t, :] = m.y
