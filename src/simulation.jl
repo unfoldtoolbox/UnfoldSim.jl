@@ -5,6 +5,7 @@ Simulation(design::AbstractDesign,component::AbstractComponent,onset::AbstractOn
 """
 Simulate eeg data given a simulation design, effect sizes and variances
 """
+simulate(rng,design, signal,  onset, noise) = simulate(rng,Simulation(design, signal,  onset, noise))
 function simulate(rng, simulation::Simulation)
 	
 	# unpacking fields
@@ -15,8 +16,10 @@ function simulate(rng, simulation::Simulation)
 
 	onsets = generate(deepcopy(rng),onset,simulation)
 	
+	# XXX todo: Separate Subjects in Time by adding offset to onsets!!
+
 	# combine erps with onsets
-	max_length = maximum(onsets) .+ maxlength(components)
+	max_length = Int(ceil(maximum(onsets))) .+ maxlength(components)
 	#eeg_continuous = Array{Float64,2}(0,max_length,n_subj)
 	
 	n_subj = length(size(design))==1 ? 1 : size(design)[2]
