@@ -116,9 +116,25 @@ function simulate(rng,c::MixedModelComponent,design::AbstractDesign)
 
 	# residual variance for lmm
 	σ_lmm = 	0.0001
-		
-	# iterate over each timepoint
-	for t in eachindex(c.basis)
+	if 1 == 1
+        namedre = weight_σs(c.σs,1.,σ_lmm)
+        θ = createθ(m; namedre...)
+        simulate!(deepcopy(rng), m.y, m; 
+        β= c.β, 
+        σ= σ_lmm,
+        θ= θ)
+
+        # save data to array
+        #@show size(m.y)
+        #@show size(c.basis)
+    
+    
+        epoch_data_component = kron(c.basis,m.y')
+        
+
+    else
+        # iterate over each timepoint
+        for t in eachindex(c.basis)
 
 			# select weight from basis
             # right now, it is the same, but maybe changein thefuture?
@@ -141,8 +157,8 @@ function simulate(rng,c::MixedModelComponent,design::AbstractDesign)
 			# save data to array
 			epoch_data_component[t, :] = m.y
 		end
-
-		return epoch_data_component
+    end
+    return epoch_data_component
 	
 end
 
