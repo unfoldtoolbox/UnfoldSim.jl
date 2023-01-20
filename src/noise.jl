@@ -82,24 +82,7 @@ end
 
 
 function gen_noise(rng,t::ExponentialNoise, n::Int)
-    # helper functions from Jaromil Frossard
-    function circulant(x)
-        # Author: Jaromil Frossard
-        # returns a symmetric matrix where X was circ-shifted.
-        lx = length(x)
-        ids = [1:1:(lx-1);]
-        a = Array{Float64,2}(undef, lx, lx)
-        for i = 1:length(x)
-            if i == 1
-                a[i, :] = x
-            else
-                a[i, :] = vcat(x[i], a[i-1, ids])
-            end
-        end
-        return Symmetric(a)
-    end
-    
-    
+       
     function exponentialCorrelation(x; nu = 1, length_ratio = 1)
         # Author: Jaromil Frossard
         # generate exponential function
@@ -107,7 +90,8 @@ function gen_noise(rng,t::ExponentialNoise, n::Int)
         return exp.(-3 * (x / R) .^ nu)
     end
     
-    Σ = circulant(exponentialCorrelation([0:1:(n-1);], nu = t.ν))
-    Ut = LinearAlgebra.cholesky(Σ).U'
-    return t.noiselevel .* 10 .* (randn(rng, n)'*Ut')[1, :]    
+    Σ = Symmetric(Circulant(exponentialCorrelation([0:1:(n-1);], nu = t.ν)),:L)
+
+    # cholesky(Σ) is n x n diagonal, lots of RAM :S
+    return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]    
 end

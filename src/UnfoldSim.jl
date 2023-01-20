@@ -11,6 +11,7 @@ module UnfoldSim
    using MixedModelsSim
    using SignalAnalysis 
    using LinearAlgebra
+   using ToeplitzMatrices # for AR Expo. Noise "Circulant"
    using StatsModels
 
    import DSP.hanning
