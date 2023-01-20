@@ -10,13 +10,13 @@ using Random
 # For a power analysis, we will repeatedly simulate data, and check whether we can find a significant effect.
 # 
 # We perform the power analysis on epoched data.
-pvals = fill(NaN,1)
-@benchmark for seed = eachindex(pvals)
+pvals = fill(NaN,100)
+@time for seed = eachindex(pvals)
     ## Simulate data of 30 subjects
     data,evts = UnfoldSim.predef_2x2(MersenneTwister(seed);
-                n_subjects=30, ## 30 subjects
+                n_subjects=20, ## 30 subjects
                 overlap=(1,0), ## deactivate overlap
-                noiselevel=4,  ## add more noise to make it more challenging
+                noiselevel=10,  ## add more noise to make it more challenging
                 return_epoched=true, ## saves us the epoching step
                 )
 
