@@ -76,7 +76,7 @@ function add_noise!(rng,noisetype::AbstractNoise,eeg)
 	noise = reshape(noise, size(eeg))
 	
 	# add noise to data
-	eeg .+= noisetype.noiselevel .* noise
+	eeg .+= noise
 	
 end
 
