@@ -71,7 +71,7 @@ simulate(rng,c::AbstractComponent,simulation::Simulation) = simulate(rng,c,simul
 simulate a linearModel
 
 julia> c = UnfoldSim.LinearModelComponent([0,1,1,0],@formula(0~1+cond),[1,2],Dict())
-julia> design = MultiSubjectDesign(;n_subj=2,n_item=50,item_btwn=(;:cond=>["A","B"]))
+julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
 julia> simulate(StableRNG(1),c,design)
 """
 function simulate(rng,c::LinearModelComponent,design::AbstractDesign)
@@ -95,7 +95,7 @@ end
 """
 simulate MixedModelComponent
 
-julia> design = MultiSubjectDesign(;n_subj=2,n_item=50,item_btwn=(;:cond=>["A","B"]))
+julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
 julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(dv~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
 julia> simulate(StableRNG(1),c,design)
 

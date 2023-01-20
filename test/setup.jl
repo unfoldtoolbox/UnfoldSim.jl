@@ -4,13 +4,15 @@ using Random
 using StableRNGs
 using Statistics
 using LinearAlgebra
+using MixedModelsSim
+using DataFrames
 
 function gen_debug_design(;n_subj = 20,n_item = 100)
 	# define design parameters
 	item_btwn = Dict("stimType" => ["A", "B"])
 		
 	# instantiate the design
-	return MultiSubjectDesign(;n_subj=n_subj, n_item=n_item, item_btwn = item_btwn)
+	return MultiSubjectDesign(;n_subjects=n_subj, n_items=n_item, item_between = item_btwn)
 end
 
 function gen_debug_component()
