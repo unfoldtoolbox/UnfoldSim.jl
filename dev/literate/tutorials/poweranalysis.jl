@@ -5,24 +5,24 @@ using HypothesisTests
 using DataFrames
 using Random
 
+
 # ## Simple Poweranalysis Script
 # For a power analysis, we will repeatedly simulate data, and check whether we can find a significant effect.
 # 
-
-pvals = fill(NaN,50)
-@time for seed = eachindex(pvals)
+# We perform the power analysis on epoched data.
+pvals = fill(NaN,1)
+@benchmark for seed = eachindex(pvals)
     ## Simulate data of 30 subjects
     data,evts = UnfoldSim.predef_2x2(MersenneTwister(seed);
                 n_subjects=30, ## 30 subjects
                 overlap=(1,0), ## deactivate overlap
                 noiselevel=4,  ## add more noise to make it more challenging
+                return_epoched=true, ## saves us the epoching step
                 )
 
-    ## cut the continuous simulated signal to epochs
-    data_e,times = Unfold.epoch(;data=data,tbl=evts,τ=(0.4,0.6),sfreq=100)
-
+    
     ## take the mean over a pre-specified timewindow
-    evts.y = dropdims(mean(data_e,dims=2),dims=(1,2))
+    evts.y = dropdims(mean(data[40:60,:],dims=1),dims=(1))
     
     ## extract the two levels of condition A
     evts_reduced = combine(groupby(evts,[:subject,:A]),:y=>mean)
@@ -35,4 +35,3 @@ end
 
 # let's calculate the power
 power = mean(pvals .<0.05)*100
-
