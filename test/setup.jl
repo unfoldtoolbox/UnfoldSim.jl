@@ -12,7 +12,7 @@ function gen_debug_design(;n_subj = 20,n_item = 100)
 	item_btwn = Dict("stimType" => ["A", "B"])
 		
 	# instantiate the design
-	return MultiSubjectDesign(;n_subjects=n_subj, n_items=n_item, item_between = item_btwn)
+	return MultiSubjectDesign(;n_subjects=n_subj, n_items=n_item, items_between = item_btwn)
 end
 
 function gen_debug_component()
