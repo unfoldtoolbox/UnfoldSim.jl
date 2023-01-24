@@ -36,5 +36,27 @@
         @test generate(des).B[1] == "S2"
 
     end
+
+    @testset "RepeatDesign" begin
+            
+        designOnce = MultiSubjectDesign(;
+        n_items=8,
+        n_subjects = 12,
+        subjects_between =Dict(:cond=>["levelA","levelB"]),
+        items_between =Dict(:cond=>["levelA","levelB"]),
+        );
+
+        design = RepeatDesign(designOnce,3); 
+        @test size(generate(design)) == (8*12*3,4)
+        @test size(design) == (8*3,12)
+        #--- single sub
+
+        designOnce = SingleSubjectDesign(;n_trials = 10,conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
+
+        design = RepeatDesign(designOnce,3); 
+        @test size(generate(design)) == (10*5*2*3,2)
+        @test size(design) == (10*3,)
+    end
+    
 end
 

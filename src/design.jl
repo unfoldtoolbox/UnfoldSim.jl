@@ -1,12 +1,22 @@
 """ 
-n_subjects::Int -> number of subjects
-n_items::Int -> number of items (=trials)
-subjects_between = nothing -> effects between subjects, e.g. young vs old 
-items_between = nothing -> effects between items, e.g. natural vs artificial images, but shown to all subjects
-both_within = nothing	-> effects completly crossed
-tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+- n_subjects::Int -> number of subjects
+- n_items::Int -> number of items (=trials)
+- subjects_between = nothing -> effects between subjects, e.g. young vs old 
+- items_between = nothing -> effects between items, e.g. natural vs artificial images, but shown to all subjects
+- both_within = nothing	-> effects completly crossed
+- tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
 tipp: check the resulting dataframe using `generate(design)`
+
+```julia
+# declaring same condition both sub-between and item-between results in a full between subject/item design
+design = MultiSubjectDesignjectDesign(;
+        n_items=10,
+		n_subjects = 30,
+        subjects_between=Dict(:cond=>["levelA","levelB"]),
+		items_between =Dict(:cond=>["levelA","levelB"]),
+        );
+```
 """
 @with_kw struct MultiSubjectDesign <: AbstractDesign
     n_subjects::Int
@@ -20,9 +30,9 @@ end
 
 """
 
-n_trials::Int -> number of trials
-conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
-tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+- n_trials::Int -> number of trials
+- conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
+- tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
 tipp: check the resulting dataframe using `generate(design)`
 """
@@ -94,3 +104,37 @@ end
 
 # length is the same of all dimensions
 length(expdesign::AbstractDesign) = *(size(expdesign)...)
+
+
+
+# ----
+
+"""
+repeat a design DataFrame multiple times to mimick repeatedly recorded trials
+
+```julia
+designOnce = MultiSubjectDesign(;
+        n_items=2,
+		n_subjects = 2,
+        subjects_between =Dict(:cond=>["levelA","levelB"]),
+		items_between =Dict(:cond=>["levelA","levelB"]),
+        );
+
+design = RepeatDesign(designOnce,4);
+```
+"""
+@with_kw struct RepeatDesign{T} <: AbstractDesign
+	design::T
+	repeat::Int = 1
+end
+
+function UnfoldSim.generate(design::RepeatDesign)		
+		df = map(x->generate(design.design),1:design.repeat) |>x->vcat(x...)
+		if isa(design.design,MultiSubjectDesign)
+			sort!(df,[:subject])
+		end
+		return df
+		
+end
+Base.size(design::RepeatDesign{MultiSubjectDesign}) = size(design.design).*(design.repeat,1)
+Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design).*design.repeat
