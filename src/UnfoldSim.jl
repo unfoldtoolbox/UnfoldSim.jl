@@ -13,6 +13,7 @@ module UnfoldSim
    using LinearAlgebra
    using ToeplitzMatrices # for AR Expo. Noise "Circulant"
    using StatsModels
+   
 
    import DSP.hanning
    import Base.length
@@ -41,7 +42,7 @@ module UnfoldSim
    export MixedModelComponent,LinearModelComponent
 
    # export designs
-   export MultiSubjectDesign,SingleSubjectDesign
+   export MultiSubjectDesign,SingleSubjectDesign, RepeatDesign
 
    # noise functions
    export PinkNoise,RedNoise,WhiteNoise,NoNoise,ExponentialNoise #,RealNoise (not implemented yet)
