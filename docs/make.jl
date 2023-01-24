@@ -39,7 +39,7 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
         ],
         "HowTo" => [
                 "New Experimental Design" => "./literate/HowTo/newDesign.md",
-                "Repeating Trials within a Design" => "./literate/HowTo/repeatTrials.jl",
+                "Repeating Trials within a Design" => "./literate/HowTo/repeatTrials.md",
         ],
         "DocStrings" => "api.md",
     ],
