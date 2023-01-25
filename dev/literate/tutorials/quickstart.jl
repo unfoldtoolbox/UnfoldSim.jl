@@ -9,9 +9,8 @@ using CairoMakie
 # #### "Experimental" Design
 # Define a 1 x 2 design with 20 trials. That is, one condition (`condaA`) with two levels.
 design = SingleSubjectDesign(;
-        n_trials=10,
         conditions=Dict(:condA=>["levelA","levelB"])
-        );
+        ) |> x->RepeatDesign(x,10);
 
 # #### Component / Signal
 # Define a simple component and ground truth simulation formula. Akin to ERP components, we call one simulation signal a component.

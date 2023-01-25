@@ -8,9 +8,8 @@ using UnfoldMakie
 
 # let's grab a SingleSubjectDesign and add a continuous predictor
 design = SingleSubjectDesign(;
-        n_trials=100, 
         conditions=Dict(:condition=>["car","face"],:continuous=>range(-5,5,length=10))
-        );
+        ) |> x->RepeatDesign(x,100);
 
 # let's make use of the prespecified basis functions, but use different formulas + parameters for each!
 
