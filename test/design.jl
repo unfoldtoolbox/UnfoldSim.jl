@@ -1,14 +1,14 @@
 @testset "design" begin
 
     @testset "SingleSubjectDesign" begin
-        des = SingleSubjectDesign(;n_trials = 100,conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
+        des = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
         @test generate(des) == generate(des)
-        @test size(generate(des)) == (100*5*2,2)
+        @test size(generate(des)) == (5*2,2)
         @test names(generate(des)) == ["A","B"]
-        @test sum(generate(des).A .== "S2") == 100*2
-        @test sum(generate(des).B .== "S2") == 100*5
+        @test sum(generate(des).A .== "S2") == 2
+        @test sum(generate(des).B .== "S2") == 5
         @test sum((generate(des).B .== "S2").&&(generate(des).A .== "S2")) == 100
-        des = SingleSubjectDesign(;n_trials = 100,conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)),
+        des = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)),
         tableModifyFun = x->sort(x,order(:B,rev=true)))
         @test generate(des).B[1] == "S2"
     end
@@ -51,11 +51,11 @@
         @test size(design) == (8*3,12)
         #--- single sub
 
-        designOnce = SingleSubjectDesign(;n_trials = 10,conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
+        designOnce = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 
         design = RepeatDesign(designOnce,3); 
-        @test size(generate(design)) == (10*5*2*3,2)
-        @test size(design) == (10*3,)
+        @test size(generate(design)) == (5*2*3,2)
+        @test size(design) == (3,)
     end
     
 end

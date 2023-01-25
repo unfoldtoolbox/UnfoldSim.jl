@@ -6,7 +6,7 @@ predef_eeg(;kwargs...) = predef_eeg(MersenneTwister(1);kwargs...) # without rng 
 
 function predef_eeg(rng;
                     # design
-                    n_trials=100,
+                    n_repeats=100,
                     tableModifyFun = x->shuffle(deepcopy(rng),x),
                     
                     # component / signal
@@ -26,11 +26,10 @@ function predef_eeg(rng;
                     )
 
     design = SingleSubjectDesign(;
-        n_trials = n_trials,
         conditions=Dict(:condition=>["car","face"],
                         :continuous=>range(-5,5,length=10)),
         tableModifyFun = tableModifyFun
-        );
+        ) |> x->RepeatDesign(x,n_repeats);
 
 
     p1 =  LinearModelComponent(p1...)
@@ -43,9 +42,14 @@ function predef_eeg(rng;
     return data,events
 end
 
+"""
+todo
+
+Careful if you modify n_items with n_subjects = 1, n_items has to be a multiple of 4 (or your equivalent conditions factorial, e.g. all combinations length)
+"""
 function predef_2x2(rng;
                     # design
-                    n_trials=100,
+                    n_items=100,
                     n_subjects=1,
                     conditions = Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"]),
                     tableModifyFun = x->shuffle(deepcopy(rng),x),
@@ -71,9 +75,8 @@ function predef_2x2(rng;
                     
     if n_subjects == 1
         design = SingleSubjectDesign(;
-            n_trials=n_trials,
             conditions = conditions,
-            tableModifyFun = tableModifyFun)
+            tableModifyFun = tableModifyFun) |> x->RepeatDesign(x,n_items./length(x))
 
         signal = LinearModelComponent(;
             basis=basis,
@@ -83,9 +86,9 @@ function predef_2x2(rng;
     );
     else
         design = MultiSubjectDesign(;           
-                n_subj = n_subjects,
-                n_item = n_trials  ,              
-                item_btwn = conditions,
+                n_subjects = n_subjects,
+                n_items = n_items  ,              
+                items_between = conditions,
                 tableModifyFun = tableModifyFun)
         signal = MixedModelComponent(;
                 basis=basis,

@@ -1,6 +1,6 @@
 """ 
 - n_subjects::Int -> number of subjects
-- n_items::Int -> number of items (=trials)
+- n_items::Int -> number of items (sometimes ≈trials)
 - subjects_between = nothing -> effects between subjects, e.g. young vs old 
 - items_between = nothing -> effects between items, e.g. natural vs artificial images, but shown to all subjects
 - both_within = nothing	-> effects completly crossed
@@ -29,15 +29,16 @@ end
 
 
 """
-
-- n_trials::Int -> number of trials
 - conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
 - tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+
+Number of trials / rows in `generate(design)` depend on the full factorial of your `conditions`.
+
+To increase the number of repetitions simply use `RepeatDesign(SingleSubjectDesign(...),5)`
 
 tipp: check the resulting dataframe using `generate(design)`
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
-	n_trials::Int
 	conditions = nothing
 	tableModifyFun = x->x;
 end
@@ -45,22 +46,22 @@ end
 
 """ Returns dimension of experiment design"""
 size(expdesign::MultiSubjectDesign) = (expdesign.n_items, expdesign.n_subjects)
-size(expdesign::SingleSubjectDesign) = (expdesign.n_trials,)
+size(expdesign::SingleSubjectDesign) = (*(length.(values(expdesign.conditions))...),)
 
 """
-Generates full factorial DataFrame of expdesign.conditions x expdesign.n_trials.
+Generates full-factorial DataFrame of expdesign.conditions
+
 Afterwards applies expdesign.tableModifyFun.
 
-julia> d = SingleSubjectDesign(;n_trials = 10,conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
+julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate(d)
 """
 function generate(expdesign::SingleSubjectDesign)
 	# we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
 	# of named tuples for MixedModelsSim.factorproduct function.
 	evts = factorproduct(
-		(;trial=1:expdesign.n_trials),
 		((;k=>v) for (k,v) in pairs(expdesign.conditions))...) |> DataFrame
-	select!(evts,Not(:trial))
+	
 	# by default does nothing
 	return expdesign.tableModifyFun(evts)
 end
