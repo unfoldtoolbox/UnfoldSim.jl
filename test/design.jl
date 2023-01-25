@@ -7,7 +7,7 @@
         @test names(generate(des)) == ["A","B"]
         @test sum(generate(des).A .== "S2") == 2
         @test sum(generate(des).B .== "S2") == 5
-        @test sum((generate(des).B .== "S2").&&(generate(des).A .== "S2")) == 100
+        @test sum((generate(des).B .== "S2").&&(generate(des).A .== "S2")) == 1
         des = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)),
         tableModifyFun = x->sort(x,order(:B,rev=true)))
         @test generate(des).B[1] == "S2"
@@ -55,7 +55,7 @@
 
         design = RepeatDesign(designOnce,3); 
         @test size(generate(design)) == (5*2*3,2)
-        @test size(design) == (3,)
+        @test size(design) == (3*5*2,)
     end
     
 end
