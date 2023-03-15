@@ -18,7 +18,7 @@ DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive=true
 makedocs(;
     modules=[UnfoldSim],
 authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
-    repo="https://github.com/behinger/UnfoldSim.jl/blob/{commit}{path}#{line}",
+    repo="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/{commit}{path}#{line}",
     sitename="UnfoldSim.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
