@@ -23,7 +23,7 @@ Produces continuous "EEG" with PinkNoise and some Overlap between 20 events
 # Slightly longer
 ```julia
 # start by defining the design / event-table
-design = SingleSubjectDesign(;n_trials=10,conditions=Dict(:condA=>["levelA","levelB"]));
+design = SingleSubjectDesign(;n_repeats=10,conditions=Dict(:condA=>["levelA","levelB"]));
 # next define a ground-truth signal + relation to events/design with Wilkinson Formulas
 signal = LinearModelComponent(;
         basis=[0,0,0,0.5,1,1,0.5,0,0],
