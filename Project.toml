@@ -26,7 +26,7 @@ MixedModels = "4"
 MixedModelsSim = "0.2"
 Parameters = "0.12"
 SignalAnalysis = "0.4"
-StatsModels = "0.6"
+StatsModels = "0.6, 0.7"
 ToeplitzMatrices = "0.7"
 julia = "1"
 
