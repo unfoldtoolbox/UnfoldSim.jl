@@ -3,7 +3,27 @@
 predef_2x2(;kwargs...) = predef_2x2(MersenneTwister(1);kwargs...) # without rng always call same one
 predef_eeg(;kwargs...) = predef_eeg(MersenneTwister(1);kwargs...) # without rng always call same one
 
+"""
+Generates a P1/N1/P3 complex.
 
+Default params:
+  n_repeats=100
+  tableModifyFun = x->shuffle(deepcopy(rng),x # random trial order
+                    
+  # component / signal
+  sfreq = 100,
+  p1 = (p100(;sfreq=sfreq), @formula(0~1),[5],Dict()), # P1 amp 5, no effects
+  n1 = (n170(;sfreq=sfreq), @formula(0~1+condition),[5,-3],Dict()), # N1 amp 5, dummycoded condition effect (levels "car", "face") of -3
+  p3 = (p300(;sfreq=sfreq), @formula(0~1+continuous),[5,1],Dict()), # P3 amp 5, continuous effect range [-5,5] with slope 1
+
+  # noise
+  noiselevel = 0.2,
+  noise = PinkNoise(;noiselevel=noiselevel),
+                    
+  # onset
+  overlap = (0.5,0.2), # offset + width/length of Uniform noise. put offset to 1 for no overlap. put width to 0 for no jitter
+  onset=UniformOnset(;offset=sfreq*0.5*overlap[1],width=sfreq*0.5*overlap[2]), 
+"""
 function predef_eeg(rng;
                     # design
                     n_repeats=100,
@@ -21,7 +41,7 @@ function predef_eeg(rng;
                     
                     # onset
                     overlap = (0.5,0.2),
-                    onset=UniformOnset(;offset=sfreq*0.5*overlap[1],width=sfreq*0.5*overlap[2]), #put offset to 1 for no overlap. put width to 0 for no jitter
+                    onset=UniformOnset(;offset=sfreq*overlap[1],width=sfreq*overlap[2]), #put offset to 1 for no overlap. put width to 0 for no jitter
                     kwargs...
                     )
 
