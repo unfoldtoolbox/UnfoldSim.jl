@@ -26,7 +26,7 @@ Produces continuous "EEG" with PinkNoise and some Overlap between 20 events
 # Slightly longer
 ```julia
 # start by defining the design / event-table
-design = SingleSubjectDesign(;n_repeats=10,conditions=Dict(:condA=>["levelA","levelB"]));
+design = SingleSubjectDesign(;conditions=Dict(:condA=>["levelA","levelB"])) |> d->RepeatDesign(d,10);
 # next define a ground-truth signal + relation to events/design with Wilkinson Formulas
 signal = LinearModelComponent(;
         basis=[0,0,0,0.5,1,1,0.5,0,0],
@@ -34,6 +34,6 @@ signal = LinearModelComponent(;
         β = [1,0.5]
         );
 # finally, define some Onset Distribution and Noise, and simulate!
-data,events = simulate(design, signal,  UniformOnset(;offset=5,width=4), PinkNoise());        
+data,events = simulate(Random.MersenneTwister(1),design, signal,  UniformOnset(;offset=5,width=4), PinkNoise());        
 ```
 All components (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
