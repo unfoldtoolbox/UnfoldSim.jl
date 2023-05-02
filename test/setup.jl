@@ -17,7 +17,7 @@ end
 
 function gen_debug_component()
     basisfunction = [zeros(10) ones(10) zeros(10)]
-    formula = @formula(dv ~ 1 + stimType + (1 + stimType | subj))
+    formula = @formula(0 ~ 1 + stimType + (1 + stimType | subj))
     contrasts = Dict(:stimType => DummyCoding())
     β = [2.0, 0.5]
     σ_ranef = Dict(:subj => [1, 0.0])

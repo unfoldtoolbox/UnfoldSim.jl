@@ -81,6 +81,12 @@ julia> generate(d)
 """
 function generate(expdesign::MultiSubjectDesign)
 	#generate(expdesign::AbstractDesign) = generate(MersenneTwister(1),expdesign)
+	
+	# check that :dv is not in any condition
+	allconditions = [expdesign.subjects_between,expdesign.items_between,expdesign.both_within]
+	@assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
+
+	
 	data = DataFrame(
 		MixedModelsSim.simdat_crossed(
 			expdesign.n_subjects, 
@@ -91,7 +97,7 @@ function generate(expdesign::MultiSubjectDesign)
 		)
 	)
 	rename!(data,:subj => :subject)
-	
+	select!(data,Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
 	# by default does nothing
 	data = expdesign.tableModifyFun(data)
 	
