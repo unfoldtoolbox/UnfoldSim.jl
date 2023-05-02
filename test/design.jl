@@ -18,15 +18,15 @@
                                 n_items = 100,both_within= Dict(:A=>nlevels(5),:B=>nlevels(2)))
         
         
-        @test size(generate(des)) == (10*100*5*2,5)
-        @test names(generate(des)) == ["subject","item","A","B","dv"]
+        @test size(generate(des)) == (10*100*5*2,4)
+        @test names(generate(des)) == ["subject","item","A","B"]
         @test sum(generate(des).A .== "S2") == 10*100*2
         @test sum(generate(des).B .== "S2") == 10*100*5
 
         # check that finally everything is sorted by subject
         des = MultiSubjectDesign(;n_subjects=10,
                                 n_items = 100,both_within= Dict(:A=>nlevels(5),:B=>nlevels(2)),
-                                tableModifyFun = x->sort(x,order(:dv,rev=true)))
+                                tableModifyFun = x->sort(x,order(:item,rev=true)))
         @test generate(des).subject[1] == "S01"
              
         # check tableModifyFun
@@ -35,6 +35,10 @@
         tableModifyFun = x->sort(x,order(:B,rev=true)))
         @test generate(des).B[1] == "S2"
 
+        # check that this throws an error because of `dv` as condition name
+        des = MultiSubjectDesign(;n_subjects=10,
+            n_items = 100,both_within= Dict(:dv=>nlevels(5),:B=>nlevels(2)))
+        @test_throws AssertionError generate(des)
     end
 
     @testset "RepeatDesign" begin
@@ -47,7 +51,7 @@
         );
 
         design = RepeatDesign(designOnce,3); 
-        @test size(generate(design)) == (8*12*3,4)
+        @test size(generate(design)) == (8*12*3,3)
         @test size(design) == (8*3,12)
         #--- single sub
 

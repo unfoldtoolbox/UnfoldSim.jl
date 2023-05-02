@@ -81,8 +81,12 @@ julia> generate(d)
 """
 function generate(expdesign::MultiSubjectDesign)
 	#generate(expdesign::AbstractDesign) = generate(MersenneTwister(1),expdesign)
+	
+	# check that :dv is not in any condition
+	allconditions = [expdesign.subjects_between,expdesign.items_between,expdesign.both_within]
+	@assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
 
-	@assert :dv ∉ keys(merge(expdesign.subjects_between,expdesign.items_betwee,expdesign.both_within)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
+	
 	data = DataFrame(
 		MixedModelsSim.simdat_crossed(
 			expdesign.n_subjects, 
