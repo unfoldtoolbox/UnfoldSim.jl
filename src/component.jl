@@ -2,7 +2,7 @@
 A component that adds a hierarchical relation between parameters according to a LMM defined via MixedModels.jl
 
 - `basis`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model-prediction
-- `formula`: Formula-Object in the style of MixedModels.jl e.g. `@formula dv~1+cond + (1|subject)` - left side must be `dv`
+- `formula`: Formula-Object in the style of MixedModels.jl e.g. `@formula 0~1+cond + (1|subject)` - left-handside is ignored
 - `β` Vector of betas, must fit the formula
 - `σs` Dict of random effect variances, e.g. `Dict(:subject=>[0.5,0.4])` or to specify correlationmatrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to MixedModels.jl `create_re` function, which creates the θ matrices.
 - `contrasts`: Dict in the style of MixedModels.jl. Default is empty.
@@ -13,7 +13,7 @@ Works best with `MultiSubjectDesign`
 ```julia
 MixedModelComponent(;
     basis=hanning(40),
-    formula=@formula(dv~1+cond+(1+cond|subject)),
+    formula=@formula(0~1+cond+(1+cond|subject)),
     β = [1.,2.],
     σs= Dict(:subject=>[0.5,0.4]),
     contrasts=Dict(:cond=>EffectsCoding())
@@ -23,7 +23,7 @@ MixedModelComponent(;
 """
 @with_kw struct MixedModelComponent <: AbstractComponent
     basis
-    formula # e.g. dv~1+cond - left side must be "dv"
+    formula # e.g. 0~1+cond 
     β::Vector
     σs::Dict # Dict(:subject=>[0.5,0.4]) or to specify correlationmatrix Dict(:subject=>[0.5,0.4,I(2,2)],...)
     contrasts::Dict = Dict()
@@ -96,18 +96,24 @@ end
 simulate MixedModelComponent
 
 julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
-julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(dv~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
+julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
 julia> simulate(StableRNG(1),c,design)
 
 """
 function simulate(rng,c::MixedModelComponent,design::AbstractDesign)
 	evts = generate(design)
 
+    # add the mixed models lefthandside
+    lhs_column = :tmp_dv
+    @assert string(lhs_column) ∉ names(evts) "Error: Wow you are unlucky, we have to introduce a temporary lhs-symbol which we name ``:tmp_dv` - you seem to have a condition called `:tmp_dv` in your dataset as well. Please rename it!"
+    f = FormulaTerm(Term(:tmp_dv),c.formula.rhs)
+    evts[!,lhs_column] .= 0
+
 	# create dummy
     if isempty(c.contrasts)
-        m = MixedModels.MixedModel(c.formula, evts)
+        m = MixedModels.MixedModel(f, evts)
     else
-	    m = MixedModels.MixedModel(c.formula, evts; contrasts=c.contrasts)
+	    m = MixedModels.MixedModel(f, evts; contrasts=c.contrasts)
     end
 
 
