@@ -1,15 +1,22 @@
 # here we can define some predefined Simulations. Convenient if you just want to have a quick simulation :)
 
+
+
 predef_2x2(;kwargs...) = predef_2x2(MersenneTwister(1);kwargs...) # without rng always call same one
 predef_eeg(;kwargs...) = predef_eeg(MersenneTwister(1);kwargs...) # without rng always call same one
 
 """
 Generates a P1/N1/P3 complex.
+predef_eeg(;kwargs...)
+predef_eeg(rng;kwargs...)
+predef_eeg(rng,n_subjects;kwargs...)
+
+In case of n_subjects, MixedModelComponents are generated
 
 Default params:
   n_repeats=100
   tableModifyFun = x->shuffle(deepcopy(rng),x # random trial order
-                    
+  conditions = Dict(...),
   # component / signal
   sfreq = 100,
   p1 = (p100(;sfreq=sfreq), @formula(0~1),[5],Dict()), # P1 amp 5, no effects
@@ -35,6 +42,20 @@ function predef_eeg(rng;
                     n1 = (n170(;sfreq=sfreq), @formula(0~1+condition),[5,-3],Dict()),
                     p3 = (p300(;sfreq=sfreq), @formula(0~1+continuous),[5,1],Dict()),
 
+                    
+                    kwargs...
+                    )
+
+    design = SingleSubjectDesign(;
+        conditions=Dict(:condition=>["car","face"],
+                        :continuous=>range(-5,5,length=10)),
+        tableModifyFun = tableModifyFun
+        ) |> x->RepeatDesign(x,n_repeats);
+        return predef_eeg(rng,design,LinearModelComponent,[p1,n1,p3];sfreq,kwargs...)
+end
+
+function predef_eeg(rng,design::AbstractDesign,T::Type{<:AbstractComponent},comps;
+                    sfreq=100,
                     # noise
                     noiselevel = 0.2,
                     noise = PinkNoise(;noiselevel=noiselevel),
@@ -45,23 +66,46 @@ function predef_eeg(rng;
                     kwargs...
                     )
 
-    design = SingleSubjectDesign(;
-        conditions=Dict(:condition=>["car","face"],
-                        :continuous=>range(-5,5,length=10)),
-        tableModifyFun = tableModifyFun
-        ) |> x->RepeatDesign(x,n_repeats);
-
-
-    p1 =  LinearModelComponent(p1...)
-    n1 =  LinearModelComponent(n1...)
-    p3 =  LinearModelComponent(p3...)
-
-
-    components = [p1,n1,p3] 
-    data,events = simulate(rng,design, components,  onset, noise;kwargs...);
-    return data,events
+    components = []
+    for c = comps
+        @show c
+        @show T
+        append!(components,[T(c...)])
+    end
+    @show components
+    return simulate(rng,design, components,  onset, noise;kwargs...);
 end
 
+
+"""
+predef_eeg(rng,n_subjects;kwargs...)
+Runs predef_eeg(rng;kwargs...) n_subject times and concatenates the results.
+
+"""
+function predef_eeg(rng,n_subjects;
+                    # design
+                    n_items=100,
+                    tableModifyFun = x->shuffle(deepcopy(rng),x),
+                    
+                    conditions = Dict(:condition=>["car","face"],
+                    :continuous=>range(-5,5,length=10)),
+                    # component / signal
+                    sfreq = 100,
+                    p1 = (;s=p100(;sfreq=sfreq), f=@formula(0~1+(1|subject)+(1|item)),β=[5],σs=Dict(:subject=>[1],:item=>[1]),c=Dict()),
+                    n1 = (;s=n170(;sfreq=sfreq), f=@formula(0~1+condition+ (1+condition|subject)+ (1+condition|item)), β=[5,-3],σs=Dict(:subject=>[1,1],:item=>[0.5,0.5]),c=Dict()),
+                    p3 = (;s=p300(;sfreq=sfreq), f=@formula(0~1+continuous+(1+continuous|subject)+(1+continuous|item)),β=[5,1], σs=Dict(:subject=>[1,1],:item=>[0.5,0.5]),c=Dict()),
+                    kwargs...)
+
+
+    design = MultiSubjectDesign(;
+        n_subjects = n_subjects,
+        n_items = n_items,
+        items_between = conditions,
+        tableModifyFun = tableModifyFun)
+
+    return predef_eeg(rng,design,MixedModelComponent,[p1,n1,p3];sfreq,kwargs...)
+    
+end
 """
 todo
 
