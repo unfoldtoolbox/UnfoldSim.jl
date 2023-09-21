@@ -4,6 +4,7 @@
 
 predef_2x2(;kwargs...) = predef_2x2(MersenneTwister(1);kwargs...) # without rng always call same one
 predef_eeg(;kwargs...) = predef_eeg(MersenneTwister(1);kwargs...) # without rng always call same one
+predef_eeg(nsubjects::Int;kwargs...) = predef_eeg(MersenneTwister(1),nsubjects;kwargs...) # without rng always call same one
 
 """
 Generates a P1/N1/P3 complex.
@@ -54,7 +55,7 @@ function predef_eeg(rng;
         return predef_eeg(rng,design,LinearModelComponent,[p1,n1,p3];sfreq,kwargs...)
 end
 
-function predef_eeg(rng,design::AbstractDesign,T::Type{<:AbstractComponent},comps;
+function predef_eeg(rng::AbstractRNG,design::AbstractDesign,T::Type{<:AbstractComponent},comps;
                     sfreq=100,
                     # noise
                     noiselevel = 0.2,
@@ -68,11 +69,8 @@ function predef_eeg(rng,design::AbstractDesign,T::Type{<:AbstractComponent},comp
 
     components = []
     for c = comps
-        @show c
-        @show T
         append!(components,[T(c...)])
     end
-    @show components
     return simulate(rng,design, components,  onset, noise;kwargs...);
 end
 
@@ -82,7 +80,7 @@ predef_eeg(rng,n_subjects;kwargs...)
 Runs predef_eeg(rng;kwargs...) n_subject times and concatenates the results.
 
 """
-function predef_eeg(rng,n_subjects;
+function predef_eeg(rng::AbstractRNG,n_subjects;
                     # design
                     n_items=100,
                     tableModifyFun = x->shuffle(deepcopy(rng),x),
@@ -111,7 +109,7 @@ todo
 
 Careful if you modify n_items with n_subjects = 1, n_items has to be a multiple of 4 (or your equivalent conditions factorial, e.g. all combinations length)
 """
-function predef_2x2(rng;
+function predef_2x2(rng::AbstractRNG;
                     # design
                     n_items=100,
                     n_subjects=1,
