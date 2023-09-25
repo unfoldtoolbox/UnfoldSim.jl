@@ -1,6 +1,6 @@
 name = "UnfoldSim"
 uuid = "ed8ae6d2-84d3-44c6-ab46-0baf21700804"
-authors = ["Luis Lips", "Benedikt Ehinger", "Judith Schepers","Maanik Marathe"]
+authors = ["Luis Lips", "Benedikt Ehinger", "Judith Schepers", "Maanik Marathe"]
 version = "0.1.4"
 
 [deps]
@@ -25,8 +25,8 @@ ImageFiltering = "0.7"
 MixedModels = "4"
 MixedModelsSim = "0.2"
 Parameters = "0.12"
-SignalAnalysis = "0.4, 0.5"
-StatsModels = "0.6"
+SignalAnalysis = "0.4, 0.5,0.6"
+StatsModels = "0.6,0.7"
 ToeplitzMatrices = "0.7, 0.8"
 julia = "1"
 
