@@ -1,7 +1,7 @@
 name = "UnfoldSim"
 uuid = "ed8ae6d2-84d3-44c6-ab46-0baf21700804"
-authors = ["Luis Lips", "Benedikt Ehinger", "Judith Schepers", "Maanik Marathe"]
-version = "0.1.4"
+authors = ["Benedikt Ehinger","Luis Lips", "Judith Schepers","Maanik Marathe"]
+version = "0.1.5"
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
