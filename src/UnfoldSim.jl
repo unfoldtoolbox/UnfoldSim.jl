@@ -29,7 +29,7 @@ module UnfoldSim
    include("bases.jl")
 
    export size,length
-   export AbstractComponent,AbstractNoise,AbstactOnset,AbstractDesign
+   export AbstractComponent,AbstractNoise,AbstractOnset,AbstractDesign
    # statsmodels re-export
    export @formula,DummyCoding,EffectsCoding
    # mixedModels re-export
