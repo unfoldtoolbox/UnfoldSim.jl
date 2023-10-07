@@ -23,7 +23,6 @@ end
 
 function PuRF(;n = 10.1,tmax = 0.93,sfreq=100)
     t = (0:1/sfreq:3*tmax)
-    @show t
     return PuRF(t,n,tmax)./PuRF(tmax,n,tmax)
 end
 
