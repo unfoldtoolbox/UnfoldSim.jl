@@ -1,0 +1,6 @@
+[hartmut]
+git-tree-sha1 = "07d7f285b4fed914b2ab5dc25dae3e108b8ce35e"
+
+    [[hartmut.download]]
+    sha256 = "8fa88ed124e2307ad757956fcdf4f670193a6c58974f3adb8473b56afeb995a7"
+    url = "https://gist.github.com/behinger/96973aae77e56a73ddeea83792bc52ad/raw/07d7f285b4fed914b2ab5dc25dae3e108b8ce35e.tar.gz"

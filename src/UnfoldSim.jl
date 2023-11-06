@@ -13,11 +13,14 @@ module UnfoldSim
    using LinearAlgebra
    using ToeplitzMatrices # for AR Expo. Noise "Circulant"
    using StatsModels
-   
+   using HDF5,Artifacts,FileIO
+
+   using LinearAlgebra # headmodel
 
    import DSP.hanning
    import Base.length
    import Base.size
+   import Base.show
    include("types.jl")
    include("design.jl")
    include("component.jl")
@@ -27,6 +30,7 @@ module UnfoldSim
    include("predefinedSimulations.jl")
    include("helper.jl")
    include("bases.jl")
+   include("headmodel.jl")
 
    export size,length
    export AbstractComponent,AbstractNoise,AbstractOnset,AbstractDesign
@@ -61,4 +65,7 @@ module UnfoldSim
 
    # export bases
    export p100,n170,p300,n400,hrf
+
+   # headmodel
+   export AbstractHeadmodel,Hartmut,headmodel,leadfield,orientation,magnitude
 end

@@ -31,21 +31,21 @@ function convert(eeg, onsets, design;reshape=true)
 end
 
 """
-Takes an array of 'm' target coordinate arrays (1-by-3) and a matrix (n-by-3) of all available positions, and returns an array of size 'm' containing the indices of the respective items in 'pos' that are nearest to each of the target coordinates.
+Takes an array of 'm' target coordinate vector (size 3) (or vector of vectors) and a matrix (n-by-3) of all available positions, and returns an array of size 'm' containing the indices of the respective items in 'pos' that are nearest to each of the target coordinates.
 """
-function closest_srcs(coords_list, pos) 
-	out = [];
+closest_srcs(coords_list::AbstractVector{AbstractVector}, pos)  = closest_srcs.(coords_list, Ref(pos))
+
+function closest_srcs(coords::Vector{<:Real}, pos) 
 	s = size(pos);
 	dist = zeros(s[1]);
 	diff = zeros(s[2]);
-	for coords in coords_list
 		for i=1:s[1] 
 			for j=1:s[2]
 				diff[j] = pos[i,j] - coords[j];
 			end
 			dist[i] = norm(diff);
 		end
-		push!(out,findmin(dist)[2]) #retain only the index of the minimum difference.
-	end
-	return out
+	return findmin(dist)[2]
+	
+	
 end
