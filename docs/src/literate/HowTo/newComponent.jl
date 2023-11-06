@@ -2,7 +2,7 @@
 # We want a new component that changes it's duration and shift depending on a column in the event-design. This is somewhat already implemented in the HRF + Pupil bases
 begin
 	using UnfoldSim
-	using Unfold
+    using Unfold
 	using Random
 	using DSP
     using CairoMakie
@@ -51,5 +51,5 @@ function basis_shiftduration(evts,maxlength)
 end
                 
                 
-erp = Unfold.simulate(MersenneTwister(1),TimeVaryingComponent(basis_shiftduration,50),design)
+erp = UnfoldSim.simulate(MersenneTwister(1),TimeVaryingComponent(basis_shiftduration,50),design)
 heatmap(hcat(erp...))
