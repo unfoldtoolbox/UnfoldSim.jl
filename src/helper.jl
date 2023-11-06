@@ -33,7 +33,7 @@ end
 """
 Takes an array of 'm' target coordinate vector (size 3) (or vector of vectors) and a matrix (n-by-3) of all available positions, and returns an array of size 'm' containing the indices of the respective items in 'pos' that are nearest to each of the target coordinates.
 """
-closest_srcs(coords_list::AbstractVector{AbstractVector}, pos)  = closest_srcs.(coords_list, Ref(pos))
+closest_srcs(coords_list::AbstractVector{<:AbstractVector}, pos)  = closest_srcs.(coords_list, Ref(pos))
 
 function closest_srcs(coords::Vector{<:Real}, pos) 
 	s = size(pos);
