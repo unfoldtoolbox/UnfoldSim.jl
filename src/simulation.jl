@@ -43,7 +43,7 @@ function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 		eeg = erps
 		onsets = [] # this is still a bit ugly
 	end
-	add_noise!(rng,noisetype,eeg)
+	add_noise!(deepcopy(rng),noisetype,eeg)
 
 	return convert(eeg,onsets,design;reshape=!return_epoched)
 
