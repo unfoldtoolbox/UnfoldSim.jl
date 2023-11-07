@@ -10,14 +10,25 @@ function padarray(arr::Vector, len::Int, val)
 end
 
 
+
 """
 Function to convert output similar to unfold (data, evts)
 """
-function convert(eeg, onsets, design;reshape=true)
+function convert(eeg, onsets, design,n_ch,n_trial,n_subj;reshape=true)
 	evt = UnfoldSim.generate(design)
+	@debug size(eeg)
 	if reshape
+		if n_ch == 1
 		data = eeg[:,]
+		
 		evt.latency = (onsets' .+ range(0,size(eeg,2)-1).*size(eeg,1) )'[:,]
+		elseif n_subj == 1
+			data = eeg
+			evt.latency = onsets
+		else # multi subject + multi channel
+			data = eeg[:,:,]
+			evt.latency = (onsets' .+ range(0,size(eeg,3)-1).*size(eeg,2) )'[:,]
+		end
 	else
 		data = eeg
 	end

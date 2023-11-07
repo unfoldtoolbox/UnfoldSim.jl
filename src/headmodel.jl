@@ -36,7 +36,7 @@ Currently only `type="hartmut"` is implemented
 """
 function headmodel(;type="hartmut")
     if type == "hartmut"
-        println("""Please cite: $hartmut_citation()""")
+        println("""Please cite: $(hartmut_citation())""")
         path = joinpath(artifact"hartmut", "hartmut.h5")
         h = h5open(path)
         headmodel = Hartmut(

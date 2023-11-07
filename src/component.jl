@@ -57,6 +57,44 @@ LinearModelComponent(;
     contrasts::Dict = Dict()
 end
 
+@with_kw struct MultichannelComponent <:AbstractComponent
+    component::AbstractComponent
+    projection::AbstractVector
+    noise::AbstractNoise
+end
+
+MultichannelComponent(c,p) = MultichannelComponent(c::AbstractComponent,p::AbstractVector,NoNoise())
+Base.length(c::MultichannelComponent) = length(c.component)
+
+"""
+Returns the number of channels. By default = 1
+"""
+n_channels(c::AbstractComponent) = 1
+
+"""
+for `MultichannelComponent` returns the length of the projection vector
+"""
+n_channels(c::MultichannelComponent) = length(c.projection)
+
+
+function n_channels(c::Vector{<:AbstractComponent})
+    all_channels = n_channels.(c)
+    @assert length(unique(all_channels)) == 1 "Error - projections of different channels cannot be different from eachother"
+    return all_channels[1]
+end
+
+function simulate(rng,c::MultichannelComponent,design::AbstractDesign)
+    y = simulate(rng,c.component,design)
+    
+    for tr = 1:size(y,2)
+        y[:,tr] .= y[:,tr] .+ gen_noise(rng,c.noise,size(y,1))
+    end
+     
+    y_proj = kron(y,c.projection)    
+    return reshape(y_proj,length(c.projection),size(y)...,)
+end
+    
+
 
 Base.length(c::AbstractComponent) = length(c.basis)
 maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
