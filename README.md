@@ -86,6 +86,7 @@ You are very welcome to raise issues and start pull requests!
 
 - **Benedikt Ehinger**
 - **Luis Lips**
+- **Maanik Marathe**
 - **Judith Schepers**
 
 ## Citation
