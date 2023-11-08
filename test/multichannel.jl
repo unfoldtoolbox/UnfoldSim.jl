@@ -32,3 +32,10 @@ onset = UniformOnset(;width=20,offset=4);
     @test data[1,:] == data[2,:]*2
     @test all(data[3,:] .== 0)
 end
+
+@testset "multichannel with helper" begin
+
+    mc = UnfoldSim.MultichannelComponent(signal, hart=>"Left Middle Temporal Gyrus, posterior division")
+    data,events = simulate(StableRNG(1),design, mc,  onset, NoNoise())
+    @test size(data,1) == 231
+end

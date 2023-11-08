@@ -57,13 +57,23 @@ LinearModelComponent(;
     contrasts::Dict = Dict()
 end
 
+
+"""
+Wrapper for an `AbstractComponent` to project it to multiple target-channels via `projection`. optional adds `noise` to the source prior to projection.
+"""
 @with_kw struct MultichannelComponent <:AbstractComponent
     component::AbstractComponent
     projection::AbstractVector
-    noise::AbstractNoise
+    noise::AbstractNoise # optional
 end
 
-MultichannelComponent(c,p) = MultichannelComponent(c::AbstractComponent,p::AbstractVector,NoNoise())
+MultichannelComponent(c::AbstractComponent,p) = MultichannelComponent(c::AbstractComponent,p,NoNoise())
+
+function MultichannelComponent(c::AbstractComponent,p::Pair{<:AbstractHeadmodel,String},n::AbstractNoise)
+    ix = closest_src(p[1],p[2])
+    mg = magnitude(p[1])
+    return MultichannelComponent(c,mg[:,ix],n)
+end
 Base.length(c::MultichannelComponent) = length(c.component)
 
 """
