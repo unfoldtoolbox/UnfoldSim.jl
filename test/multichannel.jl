@@ -37,5 +37,5 @@ end
 
     mc = UnfoldSim.MultichannelComponent(signal, hart=>"Left Middle Temporal Gyrus, posterior division")
     data,events = simulate(StableRNG(1),design, mc,  onset, NoNoise())
-    @test size(data,1) == 231
+    @test size(data,1) == (231 - 4)
 end

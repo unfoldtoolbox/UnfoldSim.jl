@@ -28,9 +28,9 @@ module UnfoldSim
    include("simulation.jl")
    include("onset.jl")
    include("predefinedSimulations.jl")
+   include("headmodel.jl")
    include("helper.jl")
    include("bases.jl")
-   include("headmodel.jl")
 
    export size,length
    export AbstractComponent,AbstractNoise,AbstractOnset,AbstractDesign

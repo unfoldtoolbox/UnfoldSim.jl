@@ -1,4 +1,4 @@
-abstract type AbstractHeadmodel end
+
 
 struct Hartmut  <: AbstractHeadmodel
     artefactual
@@ -39,10 +39,26 @@ function headmodel(;type="hartmut")
         println("""Please cite: $(hartmut_citation())""")
         path = joinpath(artifact"hartmut", "hartmut.h5")
         h = h5open(path)
+
+               
+        weirdchan = ["Nk1","Nk2","Nk3","Nk4"]
+        ## getting index of these channels from imported hartmut model data, exclude them in the topoplot
+        remove_indices = findall(l -> l ∈ weirdchan, h["electrodes"]|>read|>x->x["label"]);
+        
+        function sel_chan(x)
+            
+            if "leadfield" ∈     keys(x)
+                x["leadfield"] = x["leadfield"][Not(remove_indices),:,:].*10e3 # this scaling factor seems to generate potentials with +-1 as max
+            else
+                x["label"] = x["label"][Not(remove_indices)]
+                x["pos"] = x["pos"][Not(remove_indices),:]
+            end
+            return x
+        end
         headmodel = Hartmut(
-                    h["artefacts"]|>read,
-                    h["cortical"]|>read,
-                    h["electrodes"]|>read,
+                    h["artefacts"]|>read|>sel_chan,
+                    h["cortical"]|>read|>sel_chan,
+                    h["electrodes"]|>read|>sel_chan,
                     )
     else
         error("unknown headmodel. currently only 'hartmut' allowed")
