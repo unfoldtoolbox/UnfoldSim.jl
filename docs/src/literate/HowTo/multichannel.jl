@@ -3,6 +3,7 @@ using UnfoldSim
 using UnfoldMakie
 using CairoMakie
 using DataFrames
+using Random
 
 ## Specifcy design
 # We are using a one-level design for testing here.
