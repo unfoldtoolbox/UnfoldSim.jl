@@ -49,9 +49,9 @@ Once the toolbox is registered this will translate to ```Pkg.add("UnfoldSim")```
 
 # Quickstart
 ```julia
-data,evts = UnfoldSim.predef_eeg(;n_trials=20,noiselevel=0.8)
+data,evts = UnfoldSim.predef_eeg(;n_repeats=1,noiselevel=0.8)
 ```
-Produces continuous "EEG" with PinkNoise and some Overlap between 20 events
+Produces continuous "EEG" with PinkNoise and some Overlap between 20 events (2 conditions * 10 levels of continuous variable).
 
 ## Slightly longer
 ```julia
