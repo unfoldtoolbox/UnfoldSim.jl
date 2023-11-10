@@ -43,7 +43,7 @@ pos2d = [Point2f(p[1]+0.5,p[2]+0.5) for p in pos2d]
 f = Figure()
 df = DataFrame(:estimate => data[:],:channel => repeat(1:size(data,1),outer=size(data,2)),:time => repeat(1:size(data,2),inner=size(data,1)))
 plot_butterfly!(f[1,1:2],df;positions=pos2d)
-plot_topoplot!(f[2,1],df[df.time .== 31,:];positions=pos2d,visual=(;enlarge=0.5,label_scatter=false),axis=(;limits=((0,1),(0,0.9))))
-plot_topoplot!(f[2,2],df[df.time .== 53,:];positions=pos2d,visual=(;enlarge=0.5,label_scatter=false),axis=(;limits=((0,1),(0,0.9))))
+plot_topoplot!(f[2,1],df[df.time .== 28,:];positions=pos2d,visual=(;enlarge=0.5,label_scatter=false),axis=(;limits=((0,1),(0,0.9))))
+plot_topoplot!(f[2,2],df[df.time .== 48,:];positions=pos2d,visual=(;enlarge=0.5,label_scatter=false),axis=(;limits=((0,1),(0,0.9))))
 f
 

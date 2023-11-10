@@ -34,7 +34,8 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
                 "Poweranalysis" => "literate/tutorials/poweranalysis.md",
         ],
         "Reference"=>[
-                "NoiseTypes" => "./literate/reference/noisetypes.md",
+                "Toolbox Overview" =>"./literate/reference/overview.md",
+                "NoiseTypes" =>      "./literate/reference/noisetypes.md",
                 "ComponentBasisTypes" => "./literate/reference/basistypes.md",
         ],
         "HowTo" => [
