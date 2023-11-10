@@ -21,24 +21,49 @@ bibliography: paper.bib
 
 
 ---
-
 # Summary
 
+UnfoldSim.jl is used to simulate multivariate timeseries, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. Unfold.jl simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. UnfoldSim.jl is modular, providing intuitive entrance points for custom requirements. For instance, support for other modalities, e.g. single-voxel fMRI or pupil dilation signals is easily provided.
 
-Overlapping event responses, (non-)linear effects and confounds, outliers, item effects - all pretty common features limiting the application of neuroimaging methods. Here, we focus on EEG without loss of generality. Especially event-related potentials in naturalistic paradigms (e.g. ET+EEG, VR+EEG, MoBi) but also classical paradigms (evidence Integration, language, even oddball tasks) require such techniques. 
+# Statement of Need
+Simulated EEG data is necessary to test preprocessing and analysis tools, to illustrate issues and to test functions. While other simulation tools exist, they are dominantly based in Matlab (below) and they do not adress our unique challenges and requirements. In our work (e.g. Ehinger & Dimigen 2019), we focus in regression-based deconvolution of ERPs (Smith & Kutas 2015 ab). In short, multiple-regression is used for linear overlap correction, non-linear (hierarchical) effects fitting (similar to GAMMs, Wood et al), often applied to use-cases where events overlap in time (e.g. stimulus and button press or consecutive eye-fixations). The tools used up to now (e.g. mTRF-toolbox, Unfold, Unfold.jl, fitgrid, - add citations!)
 
-Unfold.jl implements the model fitting based on the popular wilkinson~formula+syntax. It is feature-par with matlab-unfold. In addition it offers speed-improvements (up to 100x on GPUs) and extensions for outlier-robust fits, back2back regression, and mixed models.
+# Functionality
+The toolbox provides four abstract components: AbstractDesign, AbstractComponent, AbstractOnset and AbstractNoise.
 
-While implemented in Julia, it is straight forward to also call from Python and tutorials are available.
+## Concrete Designs
+Currently we support a single, and a multi-subject design. They are used to generate an experimental design containing the conditions and levels of all predictors. Randomisation is possible via a user-defined function which is applied after design-generation. Designs could be nested, like our RepeatDesign which simply repeats the generated design multiple times.
+
+## Concrete Components
+We provide a LinearModelComponent and a MixedModelComponent for multi-subject simulation respectively. For the components model-formulae, fixed-effects ($\betas$) and random effects need to be specified. Further the coding-schema can be provided following StatsModels.jl. The component MultichannelComponent can be applied to any component and allows for projecting the simulated source-component to multi-channel electrodes via a headmodel. Using Artifacts.jl we provide on-demand access to the Hartmut (cite) model.
+
+## Concrete Noise
+We provide different noise-types "White","Red" and "Pink", but also an exponentially declining Autoregressive noise type.
+
+## Concerete Onsets
+The onsets define the distance between events for the continuous EEG. Currently UniformOnset and LogNormalOnset are implemented.
 
 
 
-# Statement of need
+# Related tools
+Not many toolboxes for simulating EEG data exist. Nearly all toolboxes have been developed in MATLAB (e.g. EEGg - Vaziri, SimMEEG - Herdman 2021, SEED-G-Toolbox Anzolin 2021) but are largely abandoned. MNE-Python provides basic tutorials to simulate EEG data as well, but no dedicated functionality. Thus we highlight in the following two other excellent matlab-based tools: Brainstorm (Tadel 2021) and SEREEGA (Krol 2017). Both toolboxes are based in matlab and provide forward-simulation of EEG signals. Brainstorm especially excells at the visualization of the forward-model, and provides interesting capabilities to generate ERPs based on phase-aligned oscillations. SEREEGA provides the most complete simulation capabilities with a greater focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification, and more realistic noise simulation (e.g. via random sources).
+
+In relation to these tools, Unfold uniquely focuses on the regression-ERP aspect, providing functions to simulate multi-condition experiments, uniquely allows to model hierarchical, that is, multi-subject EEG datasets, and offers unique support to model continuous EEG data with overlap events.
+
+Due to its different focus, UnfoldSim.jl currently lacks advanced visualizations of leadfields and does not provide any tools for simulating oscillations or phase-based simulation of ERPs.
 
 
 
-# Mathematics
+# Other notes
+SEEREGA - Matlab, best in class, no continuous data
+BRAINSTORM - Matlab, good for forward-model simulation
+EEGg - Vaziri - Matlab, very limited functionality
+SimMEEG - Herdman 2021 -  Matlab, Discontinued
+SEED-G-toolbox - Anzolin 2021 - Matlab, Discontinued, 
 
+MNE-python - matlab, only basic tutorials
+
+## JOSS Stuff
 Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
 
 Double dollars make self-standing equations:
