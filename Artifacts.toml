@@ -1,7 +1,1 @@
-[RealNoise]
-git-tree-sha1 = "6c460cf2eccecd24499618112adbbe7e403fa1ee"
-lazy = true
 
-    [[RealNoise.download]]
-    sha256 = "12a1f72f5e5ee73ff347951e1459cdbad106193da7933cc153003d53b90c5d6a"
-    url = "https://github.com/cormullion/juliamono/releases/download/v0.030/JuliaMono.tar.gz"
