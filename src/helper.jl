@@ -10,14 +10,28 @@ function padarray(arr::Vector, len::Int, val)
 end
 
 
+
 """
 Function to convert output similar to unfold (data, evts)
 """
-function convert(eeg, onsets, design;reshape=true)
+function convert(eeg, onsets, design,n_ch,;reshape=true)
 	evt = UnfoldSim.generate(design)
+	@debug size(eeg)
 	if reshape
+		n_subj = length(size(design))==1 ? 1 : size(design)[2]
+
+		if n_ch == 1
 		data = eeg[:,]
+		
 		evt.latency = (onsets' .+ range(0,size(eeg,2)-1).*size(eeg,1) )'[:,]
+		elseif n_subj == 1
+			data = eeg
+			@debug size(onsets)
+			evt.latency = onsets
+		else # multi subject + multi channel
+			data = eeg[:,:,]
+			evt.latency = (onsets' .+ range(0,size(eeg,3)-1).*size(eeg,2) )'[:,]
+		end
 	else
 		data = eeg
 	end
@@ -30,22 +44,48 @@ function convert(eeg, onsets, design;reshape=true)
 	
 end
 
+
 """
-Takes an array of 'm' target coordinate arrays (1-by-3) and a matrix (n-by-3) of all available positions, and returns an array of size 'm' containing the indices of the respective items in 'pos' that are nearest to each of the target coordinates.
+	closest_src(coords_list::AbstractVector{<:AbstractVector}, pos)
+	closest_src(coords::Vector{<:Real}, pos) 
+	
+Takes an array of 'm' target coordinate vector (size 3) (or vector of vectors) and a matrix (n-by-3) of all available positions, and returns an array of size 'm' containing the indices of the respective items in 'pos' that are nearest to each of the target coordinates.
 """
-function closest_srcs(coords_list, pos) 
-	out = [];
+closest_src(coords_list::AbstractVector{<:AbstractVector}, pos)  = closest_src.(coords_list, Ref(pos))
+
+function closest_src(coords::Vector{<:Real}, pos) 
 	s = size(pos);
 	dist = zeros(s[1]);
 	diff = zeros(s[2]);
-	for coords in coords_list
 		for i=1:s[1] 
 			for j=1:s[2]
 				diff[j] = pos[i,j] - coords[j];
 			end
 			dist[i] = norm(diff);
 		end
-		push!(out,findmin(dist)[2]) #retain only the index of the minimum difference.
-	end
-	return out
+	return findmin(dist)[2]
+	
+	
+end
+
+"""
+	closest_src(head::Hartmut,label::String)
+Returns src-`ix` of the Headmodel `Hartmut` which is closest to the average of the `label`.
+
+!!! important
+	We use the average in eucledean space, but the cortex is a curved surface. In most cases they will not overlap. Ideally we would calculate the average on the surface, but this is a bit more complex to do (you'd need to calculate the vertices etc.)
+
+```julia
+hartmut = headmodel()
+pos = closest_src(hartmut=>"Left Middle Temporal Gyrus, posterior division")
+```
+"""
+function closest_src(head::Hartmut,label::String)
+
+	pos = head.cortical["pos"]
+	ix = findall(head.cortical["label"] .== label)
+	@assert sum(ix)>0 """could not find label $label in hartmut.cortical["label"] - try unique(hartmut.cortical["label"]) for a list"""
+
+	ix = UnfoldSim.closest_src(mean(pos[ix,:],dims=1)[1,:],pos)
+	return ix
 end

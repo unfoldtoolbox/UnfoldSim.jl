@@ -34,13 +34,15 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
                 "Poweranalysis" => "literate/tutorials/poweranalysis.md",
         ],
         "Reference"=>[
-                "NoiseTypes" => "./literate/reference/noisetypes.md",
+                "Toolbox Overview" =>"./literate/reference/overview.md",
+                "NoiseTypes" =>      "./literate/reference/noisetypes.md",
                 "ComponentBasisTypes" => "./literate/reference/basistypes.md",
         ],
         "HowTo" => [
                 "New Experimental Design" => "./literate/HowTo/newDesign.md",
                 "Repeating Trials within a Design" => "./literate/HowTo/repeatTrials.md",
-                "New Duration/Shift-dependent Component" => "./literate/HowTo/newComponent.md"
+                "New Duration/Shift-dependent Component" => "./literate/HowTo/newComponent.md",
+                "Multi Channel Data" =>"./literate/HowTo/multichannel.md",
         ],
         "DocStrings" => "api.md",
     ],
