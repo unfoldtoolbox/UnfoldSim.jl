@@ -70,5 +70,5 @@ module UnfoldSim
    export AbstractHeadmodel,Hartmut,headmodel,leadfield,orientation,magnitude
 
    # multichannel
-   export Multichannelcomponent
+   export MultichannelComponent
 end
