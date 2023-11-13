@@ -51,7 +51,9 @@ function headmodel(;type="hartmut")
                 x["leadfield"] = x["leadfield"][Not(remove_indices),:,:].*10e3 # this scaling factor seems to generate potentials with +-1 as max
             else
                 x["label"] = x["label"][Not(remove_indices)]
-                x["pos"] = x["pos"][Not(remove_indices),:]
+                pos3d= x["pos"][Not(remove_indices),:]
+                pos3d = pos3d ./ (4*maximum(pos3d,dims=1))
+                x["pos"]  = pos3d
             end
             return x
         end
