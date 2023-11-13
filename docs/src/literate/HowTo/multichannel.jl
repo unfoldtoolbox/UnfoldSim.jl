@@ -35,7 +35,7 @@ size(data)
 # Let's plot using Butterfly & Topoplot
 # first we convert the electrodes to positions usable in TopoPlots.jl
 pos3d = hart.electrodes["pos"]
-pos3d = pos3d ./ (4*maximum(pos3d,dims=1))#.+0.5  # standardize
+
 pos2d = to_positions(pos3d')
 pos2d = [Point2f(p[1]+0.5,p[2]+0.5) for p in pos2d]
 
