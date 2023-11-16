@@ -5,7 +5,7 @@ begin
     using Unfold
 	using Random
 	using DSP
-    using CairoMakie
+    using CairoMakie, UnfoldMakie
 end
 
 
@@ -52,4 +52,4 @@ end
                 
                 
 erp = UnfoldSim.simulate(MersenneTwister(1),TimeVaryingComponent(basis_shiftduration,50),design)
-heatmap(hcat(erp...))
+plot_erpimage(hcat(erp...),sortvalues=generate(design).shift)

@@ -37,7 +37,7 @@ p3 =  LinearModelComponent(;
 components = [p1,n1,p3] 
 data,evts = simulate(MersenneTwister(1),design,[p1,n1,p3],UniformOnset(;width=0,offset=1000),PinkNoise());
 
-## Analysis
+# # Analysis
 # Let's check that everything worked out well, by using Unfold
 
 m = fit(UnfoldModel,Dict(Any=>(@formula(0~1+condition+continuous),firbasis(τ=[-0.1,1],sfreq=100,name="basis"))),evts,data);

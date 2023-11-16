@@ -46,7 +46,7 @@ for (ix,pl) = enumerate(plotConfig)
 end
 f
 
-## pupil
+# ## pupil
 # we use the simplified PuRF from Hoeks & Levelt, 1993. Note that https://www.science.org/doi/10.1126/sciadv.abi9979 show some evidence in their supplementary material, that the convolution model is not fully applicable.
 f = Figure()
 plotConfig = (:n=>5:3:15,
