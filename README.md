@@ -93,6 +93,13 @@ You are very welcome to raise issues and start pull requests!
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/maanikmarathe"><img src="https://avatars.githubusercontent.com/u/66105649?v=4?s=100" width="100px;" alt="Maanik Marathe"/><br /><sub><b>Maanik Marathe</b></sub></a><br /><a href="#doc-maanikmarathe" title="Documentation">📖</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
