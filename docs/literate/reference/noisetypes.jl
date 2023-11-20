@@ -4,7 +4,7 @@ using DSP
 using StableRNGs
 import StatsBase.autocor
 # ## What's the noise?
-# There are several noise-types directly implemented. Here is a comparison
+# There are several noise-types directly implemented. Here is a comparison:
 
 f = Figure()
 ax_sig = f[1,1:2] = Axis(f;title="1.000 samples of noise")
@@ -33,5 +33,5 @@ f[1:2,3] = Legend(f,ax_sig,"NoiseType")
 f
 
 
-# !!! Recommendation
-#    We recommed for smaller signals the `ExponentialNoise`, maybe with a removed DC offset or a HighPass filter. For long signals, this Noise requires lot's of memory though. maybe Pinknoise is a better choice
+# !!! hint 
+#        We recommend for smaller signals the `ExponentialNoise`, maybe with a removed DC offset or a HighPass filter. For long signals, this Noise requires lots of memory though. Maybe Pinknoise is a better choice then.

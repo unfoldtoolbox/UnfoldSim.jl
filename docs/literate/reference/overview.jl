@@ -1,5 +1,5 @@
 # # Overview of functionality
-# UnfoldSim has many modules, here we try to collect them to provide you with an overview
+# UnfoldSim has many modules, here we try to collect them to provide you with an overview.
 using UnfoldSim
 using InteractiveUtils
 
@@ -8,11 +8,11 @@ using InteractiveUtils
 subtypes(AbstractDesign)
 
 # ## Component
-# components define a signal. Some components can be nested, e.g. `LinearModelComponent|>MultichannelComponent`, see the multi-channel tutorial for more information
+# Components define a signal. Some components can be nested, e.g. `LinearModelComponent|>MultichannelComponent`, see the multi-channel tutorial for more information.
 subtypes(AbstractComponent)
 
 # ## Onsets
-# Onsets define the distance between events in the continuous signal
+# Onsets define the distance between events in the continuous signal.
 subtypes(AbstractOnset)
 
 # ## Noise
