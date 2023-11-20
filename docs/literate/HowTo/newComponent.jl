@@ -1,18 +1,15 @@
 # # New component: Duration + Shift
-# We want a new component that changes it's duration and shift depending on a column in the event-design. This is somewhat already implemented in the HRF + Pupil bases
-begin
-	using UnfoldSim
-    using Unfold
-	using Random
-	using DSP
-    using CairoMakie
-end
+# We want a new component that changes its duration and shift depending on a column in the event-design. This is somewhat already implemented in the HRF + Pupil bases
+using UnfoldSim
+using Unfold
+using Random
+using DSP
+using CairoMakie
 
+sfreq = 100;
 
-sfreq = 100
-
-## Design
-# Let's genrate a design with two columns, shift + duration
+# ## Design
+# Let's generate a design with two columns, shift + duration
 design = UnfoldSim.SingleSubjectDesign(;conditions= Dict(
             :shift => rand(100).*sfreq/5,
             :duration=>20 .+rand(100).*sfreq/5))
@@ -24,7 +21,7 @@ struct TimeVaryingComponent <: AbstractComponent
     maxlength
 end
 
-# we have to define the length of a component 
+# We have to define the length of a component 
 Base.length(c::TimeVaryingComponent) = length(c.maxlength)
                 
 # While we could have put the TimeVaryingComponent.basisfunction directly into the simulate function, I thought this is a bit more modular

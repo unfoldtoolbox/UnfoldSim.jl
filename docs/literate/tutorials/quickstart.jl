@@ -3,10 +3,10 @@ using Random
 using CairoMakie
 
 
-# !!! tipp
-#       Use `subtypes(AbstractNoise)` (or `subtypes(AbstractComponent)` etc.) to find already implemented building blocks
+# !!! tip
+#       Use `subtypes(AbstractNoise)` (or `subtypes(AbstractComponent)` etc.) to find already implemented building blocks.
 
-# #### "Experimental" Design
+# ## "Experimental" Design
 # Define a 1 x 2 design with 20 trials. That is, one condition (`condaA`) with two levels.
 design = SingleSubjectDesign(;
         conditions=Dict(:condA=>["levelA","levelB"])
@@ -15,7 +15,7 @@ design = SingleSubjectDesign(;
 # #### Component / Signal
 # Define a simple component and ground truth simulation formula. Akin to ERP components, we call one simulation signal a component.
 # 
-# !!! highlight
+# !!! note 
 #        You could easily specify multiple components by providing a vector of components, which are automatically added at the same onsets. This procedure simplifies to generate some response that is independent of simulated condition, whereas other depends on it.
 signal = LinearModelComponent(;
         basis=[0,0,0,0.5,1,1,0.5,0,0],
@@ -30,7 +30,7 @@ onset = UniformOnset(;width=20,offset=4);
 # And we will use some noise
 noise = PinkNoise(;noiselevel=0.2);
 
-# #### Combine & Generate
+# ## Combine & Generate
 # We will put it all together in one `Simulation` type
 simulation = Simulation(design, signal,  onset, noise);
 
