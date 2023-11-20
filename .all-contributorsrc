@@ -43,6 +43,15 @@
         "ideas",
         "bug"
       ]
+    },
+    {
+      "login": "vladdez",
+      "name": "Vladimir Mikheev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/33777074?v=4",
+      "profile": "https://github.com/vladdez",
+      "contributions": [
+        "bug"
+      ]
     }
   ]
 }
