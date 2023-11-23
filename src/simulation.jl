@@ -66,7 +66,7 @@ function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 	add_noise!(deepcopy(rng),noisetype,eeg)
 
 	# create events data frame
-    events = UnfoldSim.generate(design)
+	events = UnfoldSim.generate(design)
 
 	# save the onsets in the events df
 	events.latency = onsets[:,]
