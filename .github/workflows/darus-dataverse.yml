@@ -2,6 +2,7 @@ name: DARUS dataverse sync
 
 on: [release,labeled]
 
+
 jobs:
   dv-sync:
     runs-on: ubuntu-latest
