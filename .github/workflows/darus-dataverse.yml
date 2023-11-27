@@ -5,6 +5,7 @@ on: [release,labeled]
 jobs:
   dv-sync:
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'sync darus')
     steps:
     - uses: actions/checkout@v2
     - name: Synchronize to DV
