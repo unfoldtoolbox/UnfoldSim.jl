@@ -15,4 +15,4 @@ jobs:
       with:
         dataverse_url: "https://darus.uni-stuttgart.de/"
         api_token: ${{ secrets.DV_API_TOKEN }}
-        persistent_id: "https://doi.org/10.18419/darus-3804"
+        persistent_id: "doi:10.18419/darus-3804"
