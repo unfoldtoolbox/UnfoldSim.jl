@@ -30,7 +30,8 @@
 
     # Define headmodel and MultichannelComponent for multi-channel cases
     hartmut_model = headmodel(type="hartmut")
-    signal_multichannel = MultichannelComponent(signal_linear, hartmut_model => "Left Central Opercular Cortex")
+    signal_linear_multichannel = MultichannelComponent(signal_linear, hartmut_model => "Left Central Opercular Cortex")
+    signal_mixed_multichannel = MultichannelComponent(signal_mixed, hartmut_model => "Left Central Opercular Cortex")
     
     # Overlap since offset<length(signal.basis)
     onset = UniformOnset(; width=10, offset=5)
@@ -55,7 +56,7 @@
     @testset "single_subject-multiple_channels" begin
 
         ## Simulate data
-        data, events = simulate(MersenneTwister(42), design_single_subject, signal_multichannel, onset, noise)
+        data, events = simulate(MersenneTwister(42), design_single_subject, signal_linear_multichannel, onset, noise)
 
         ## Tests
         @test typeof(data) == Matrix{Float64}
@@ -86,7 +87,7 @@
     @testset "multiple_subjects-multiple_channels" begin
         
         ## Simulate data
-        data, events = simulate(MersenneTwister(42), design_multiple_subjects, signal_multichannel, onset, noise)
+        data, events = simulate(MersenneTwister(42), design_multiple_subjects, signal_mixed_multichannel, onset, noise)
 
         ## Tests
         # Compute expected number of channels and expected length of the eeg signal
@@ -97,4 +98,5 @@
         @test size(data) == (n_channels_exp, eeg_length_exp, n_subjects)
         @test typeof(data) == Array{Float64,3}
     end
+
 end
