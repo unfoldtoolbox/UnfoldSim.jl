@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Synchronize to DV
-      uses: SimTech-Research-Data-Management/dataverse-sync@v1
+      uses: SimTech-Research-Data-Management/dataverse-sync@main
       with:
         dataverse_url: "https://darus.uni-stuttgart.de/"
         api_token: ${{ secrets.DV_API_TOKEN }}
