@@ -37,6 +37,7 @@ p3 =  LinearModelComponent(;
 components = [p1,n1,p3] 
 data,evts = simulate(MersenneTwister(1),design,[p1,n1,p3],UniformOnset(;width=0,offset=1000),PinkNoise());
 
+
 # ## Analysis
 # Let's check that everything worked out well, by using Unfold
 
