@@ -4,7 +4,7 @@ using DSP
 using StableRNGs
 import StatsBase.autocor
 # ## What's the noise?
-# There are several noise-types directly implemented. Here is a comparison
+# There are several noise-types directly implemented. Here is a comparison:
 
 f = Figure()
 ax_sig = f[1,1:2] = Axis(f;title="1.000 samples of noise")

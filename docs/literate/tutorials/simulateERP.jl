@@ -4,14 +4,14 @@ using Random
 using Unfold
 using UnfoldMakie
 # ## ERP Complex
-# here we will learn how to simulate a typical ERP complex with P100, N170, P300
+# Here we will learn how to simulate a typical ERP complex with P100, N170, P300.
 
-# let's grab a SingleSubjectDesign and add a continuous predictor
+# Let's grab a SingleSubjectDesign and add a continuous predictor
 design = SingleSubjectDesign(;
         conditions=Dict(:condition=>["car","face"],:continuous=>range(-5,5,length=10))
         ) |> x->RepeatDesign(x,100);
 
-# let's make use of the prespecified basis functions, but use different formulas + parameters for each!
+# Let's make use of the prespecified basis functions, but use different formulas + parameters for each!
 
 # **p100** is unaffected by our design and has amplitude of 5
 p1 =  LinearModelComponent(;
@@ -33,11 +33,12 @@ p3 =  LinearModelComponent(;
         β = [5,1]
         );
 
-# now we can simply combine the components and simulate 
+# Now we can simply combine the components and simulate 
 components = [p1,n1,p3] 
 data,evts = simulate(MersenneTwister(1),design,[p1,n1,p3],UniformOnset(;width=0,offset=1000),PinkNoise());
 
-# # Analysis
+
+# ## Analysis
 # Let's check that everything worked out well, by using Unfold
 
 m = fit(UnfoldModel,Dict(Any=>(@formula(0~1+condition+continuous),firbasis(τ=[-0.1,1],sfreq=100,name="basis"))),evts,data);
