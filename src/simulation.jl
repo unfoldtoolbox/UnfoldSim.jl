@@ -11,7 +11,8 @@ Simulate eeg data given a simulation design, effect sizes and variances
 make use of `return_epoched=true` to skip the Onset-calculation + conversion to continuous data and get the epoched data directly
 """
 
-simulate(rng,design::AbstractDesign, signal,  onset::AbstractOnset, noise::AbstractNoise;kwargs...) = simulate(rng,Simulation(design, signal,  onset, noise);kwargs...)
+simulate(rng, design::AbstractDesign, signal, onset::AbstractOnset, noise::AbstractNoise=NoNoise(); kwargs...) = simulate(rng, Simulation(design, signal, onset, noise); kwargs...)
+
 function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 	
 	# unpacking fields
