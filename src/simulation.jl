@@ -25,14 +25,17 @@ function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 	n_trial = size(design)[1]
 	n_ch = n_channels(components)
 
+    # create events data frame
+    events = UnfoldSim.generate(design)
 
 	if !return_epoched
 		# we only need to simulate onsets & pull everything together, if we 
 		# want a continuous EEG 	
 		
 		onsets = generate(deepcopy(rng),onset,simulation)
-		
-		# XXX todo: Separate Subjects in Time by adding offset to onsets!!
+
+        # save the onsets in the events df
+        events.latency = onsets[:,]
 
 		# combine erps with onsets
 		maxlen = maxlength(components)
@@ -58,18 +61,11 @@ function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 		end
 	else
 		eeg = erps
-		onsets = [] # this is still a bit ugly
 
 	end
 
 
 	add_noise!(deepcopy(rng),noisetype,eeg)
-
-	# create events data frame
-	events = UnfoldSim.generate(design)
-
-	# save the onsets in the events df
-	events.latency = onsets[:,]
 
 	return eeg, events
 
