@@ -49,4 +49,4 @@ plot_erp(coeftable(m))
 # and now beautifully visualized as marginal betas / predicted ERPs
 plot_erp(effects(Dict(:condition=>["car","face"],:continuous=>-5:5),m);
         mapping=(:color=>:continuous,linestyle=:condition,group=:continuous),
-        extra=(;categoricalColor=false))
+        categorical_color=false)
