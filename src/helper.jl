@@ -10,7 +10,7 @@ function padarray(arr::Vector, len::Int, val)
 end
 
 
-
+# TODO: Transfer function to Unfold.jl
 """
 Function to convert output similar to unfold (data, evts)
 """
@@ -34,10 +34,6 @@ function convert(eeg, onsets, design,n_ch,;reshape=true)
 		end
 	else
 		data = eeg
-	end
-
-	if :d ∈	names(evt)
-    	select!(evt, Not([:dv]))
 	end
 
 	return data,evt

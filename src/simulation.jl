@@ -11,7 +11,8 @@ Simulate eeg data given a simulation design, effect sizes and variances
 make use of `return_epoched=true` to skip the Onset-calculation + conversion to continuous data and get the epoched data directly
 """
 
-simulate(rng,design::AbstractDesign, signal,  onset::AbstractOnset, noise::AbstractNoise;kwargs...) = simulate(rng,Simulation(design, signal,  onset, noise);kwargs...)
+simulate(rng, design::AbstractDesign, signal, onset::AbstractOnset, noise::AbstractNoise=NoNoise(); kwargs...) = simulate(rng, Simulation(design, signal, onset, noise); kwargs...)
+
 function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 	
 	# unpacking fields
@@ -25,14 +26,17 @@ function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 	n_trial = size(design)[1]
 	n_ch = n_channels(components)
 
+    # create events data frame
+    events = UnfoldSim.generate(design)
 
 	if !return_epoched
 		# we only need to simulate onsets & pull everything together, if we 
 		# want a continuous EEG 	
 		
 		onsets = generate(deepcopy(rng),onset,simulation)
-		
-		# XXX todo: Separate Subjects in Time by adding offset to onsets!!
+
+        # save the onsets in the events df
+        events.latency = onsets[:,]
 
 		# combine erps with onsets
 		maxlen = maxlength(components)
@@ -58,14 +62,13 @@ function simulate(rng, simulation::Simulation;return_epoched::Bool=false)
 		end
 	else
 		eeg = erps
-		onsets = [] # this is still a bit ugly
 
 	end
 
 
 	add_noise!(deepcopy(rng),noisetype,eeg)
 
-	return convert(eeg,onsets,design,n_ch;reshape=!return_epoched)
+	return eeg, events
 
 end
 

@@ -33,5 +33,5 @@ f[1:2,3] = Legend(f,ax_sig,"NoiseType")
 f
 
 
-# !!! hint 
-#        We recommend for smaller signals the `ExponentialNoise`, maybe with a removed DC offset or a HighPass filter. For long signals, this Noise requires lots of memory though. Maybe Pinknoise is a better choice then.
+# !!! hint
+#    We recommed for smaller signals the `ExponentialNoise`, maybe with a removed DC offset or a HighPass filter. For long signals, this Noise requires lot's of memory though. maybe Pinknoise is a better choice then. 
