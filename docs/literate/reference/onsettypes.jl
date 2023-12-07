@@ -14,7 +14,9 @@ using Random
 
 ## Define a simple design and repeat it 10000.
 ## This will result in 20000 events i.e. event onsets.
-design = SingleSubjectDesign(conditions=Dict(:cond => ["A", "B"])) |> x -> RepeatDesign(x, 10000);
+design =
+    SingleSubjectDesign(conditions = Dict(:cond => ["A", "B"])) |>
+    x -> RepeatDesign(x, 10000);
 
 # ```@raw html
 # </details >
