@@ -35,32 +35,44 @@ onset_uniform = UniformOnset(; width = 50, offset = 0);
 
 # In the figure below, it is illustrated how the onset distribution changes when changing one of its parameters.
 let # hide
-    f = Figure(title="Event onsets (Uniform distribution)") # hide
+    f = Figure(title = "Event onsets (Uniform distribution)") # hide
 
     ## Define parameter combinations # hide
-    parameters = [(((50, 0), (80, 0)), "width"), # hide
-        (((50, 0), (50, 20)), "offset")] # hide
+    parameters = [
+        (((50, 0), (80, 0)), "width"), # hide
+        (((50, 0), (50, 20)), "offset"),
+    ] # hide
 
     axes_list = Array{Any}(undef, length(parameters)) # hide
 
     ## Create a subplot for each parameter i.e. one for width and one for offset # hide
     for (index, (combinations, label)) in enumerate(parameters) # hide
-        ax = Axis(f[index, 1], title="Parameter: $label") # hide
+        ax = Axis(f[index, 1], title = "Parameter: $label") # hide
         axes_list[index] = ax # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
         for (width, offset) in combinations # hide
-            onsets = UnfoldSim.rand_onsets(MersenneTwister(42), UniformOnset(; width=width, offset=offset), design) # hide
+            onsets = UnfoldSim.rand_onsets(
+                MersenneTwister(42),
+                UniformOnset(; width = width, offset = offset),
+                design,
+            ) # hide
 
-            hist!(ax, onsets, bins=range(0, 100, step=1), label="($width, $offset)") # hide
+            hist!(ax, onsets, bins = range(0, 100, step = 1), label = "($width, $offset)") # hide
 
             if label == "offset" && offset != 0 # hide 
-                vlines!(offset, color="black") # hide
+                vlines!(offset, color = "black") # hide
             end # hide
         end # hide
         hideydecorations!(ax) # hide
         hidespines!(ax, :t, :r) # hide
-        axislegend(ax, framevisible=false, labelsize=12, markersize=5, patchsize=(10, 10)) # hide
+        axislegend(
+            ax,
+            framevisible = false,
+            labelsize = 12,
+            markersize = 5,
+            patchsize = (10, 10),
+        ) # hide
     end # hide
     axes_list[end].xlabel = "Time between events [samples]" # hide
     linkyaxes!(axes_list...) # hide
@@ -73,32 +85,41 @@ end # hide
 # <summary>Click to show the code for the figure above</summary>
 # ```
 let
-    f = Figure(title="Event onsets (Uniform distribution)")
+    f = Figure(title = "Event onsets (Uniform distribution)")
 
     ## Define parameter combinations
-    parameters = [(((50, 0), (80, 0)), "width"),
-        (((50, 0), (50, 20)), "offset")]
+    parameters = [(((50, 0), (80, 0)), "width"), (((50, 0), (50, 20)), "offset")]
 
     axes_list = Array{Any}(undef, length(parameters))
 
     ## Create a subplot for each parameter i.e. one for width and one for offset
     for (index, (combinations, label)) in enumerate(parameters)
-        ax = Axis(f[index, 1], title="Parameter: $label")
+        ax = Axis(f[index, 1], title = "Parameter: $label")
         axes_list[index] = ax
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets
         for (width, offset) in combinations
-            onsets = UnfoldSim.rand_onsets(MersenneTwister(42), UniformOnset(; width=width, offset=offset), design)
+            onsets = UnfoldSim.rand_onsets(
+                MersenneTwister(42),
+                UniformOnset(; width = width, offset = offset),
+                design,
+            )
 
-            hist!(ax, onsets, bins=range(0, 100, step=1), label="($width, $offset)")
+            hist!(ax, onsets, bins = range(0, 100, step = 1), label = "($width, $offset)")
 
             if label == "offset" && offset != 0
-                vlines!(offset, color="black")
+                vlines!(offset, color = "black")
             end
         end
         hideydecorations!(ax)
         hidespines!(ax, :t, :r)
-        axislegend(ax, framevisible=false, labelsize=12, markersize=5, patchsize=(10, 10))
+        axislegend(
+            ax,
+            framevisible = false,
+            labelsize = 12,
+            markersize = 5,
+            patchsize = (10, 10),
+        )
     end
     axes_list[end].xlabel = "Time between events [samples]"
     linkyaxes!(axes_list...)
@@ -123,36 +144,58 @@ onset_lognormal = LogNormalOnset(; μ = 3, σ = 0.25, offset = 0, truncate_upper
 
 # In the figure below, it is illustrated how the onset distribution changes when changing one of its parameters.
 let # hide
-    f = Figure(title="Event onsets (Lognormal distribution)", size=(600, 800)) # hide
+    f = Figure(title = "Event onsets (Lognormal distribution)", size = (600, 800)) # hide
 
     ## Define parameter combinations # hide
-    parameters = [(((3, 0.25, 0, nothing), (2.5, 0.25, 0, nothing)), "μ"), # hide
+    parameters = [
+        (((3, 0.25, 0, nothing), (2.5, 0.25, 0, nothing)), "μ"), # hide
         (((3, 0.25, 0, nothing), (3, 0.35, 0, nothing)), "σ"), # hide
         (((3, 0.25, 0, nothing), (3, 0.25, 30, nothing)), "offset"), # hide
-        (((3, 0.25, 0, nothing), (3, 0.25, 0, 25)), "truncate_upper")] # hide
+        (((3, 0.25, 0, nothing), (3, 0.25, 0, 25)), "truncate_upper"),
+    ] # hide
 
     axes_list = Array{Any}(undef, length(parameters)) # hide
 
     ## Create a subplot for each parameter i.e. one for μ, one for σ etc # hide
     for (index, (combinations, label)) in enumerate(parameters) # hide
-        ax = Axis(f[index, 1], title="Parameter: $label") # hide
+        ax = Axis(f[index, 1], title = "Parameter: $label") # hide
         axes_list[index] = ax # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
         for (μ, σ, offset, truncate_upper) in combinations # hide
-            onsets = UnfoldSim.rand_onsets(MersenneTwister(42), LogNormalOnset(; μ=μ, σ=σ, offset=offset, truncate_upper=truncate_upper), design) # hide
+            onsets = UnfoldSim.rand_onsets(
+                MersenneTwister(42),
+                LogNormalOnset(;
+                    μ = μ,
+                    σ = σ,
+                    offset = offset,
+                    truncate_upper = truncate_upper,
+                ),
+                design,
+            ) # hide
 
-            hist!(ax, onsets, bins=range(0, 100, step=1), label="($μ,$σ,$offset,$truncate_upper)") # hide
+            hist!(
+                ax,
+                onsets,
+                bins = range(0, 100, step = 1),
+                label = "($μ,$σ,$offset,$truncate_upper)",
+            ) # hide
 
             if label == "offset" && offset !== 0 # hide
-                vlines!(offset, color="black") # hide
+                vlines!(offset, color = "black") # hide
             elseif label == "truncate_upper" && truncate_upper !== nothing # hide
-                vlines!(truncate_upper, color="black") # hide
+                vlines!(truncate_upper, color = "black") # hide
             end # hide
         end # hide
         hideydecorations!(ax) # hide
         hidespines!(ax, :t, :r) # hide
-        axislegend(ax, framevisible=false, labelsize=12, markersize=5, patchsize=(10, 10)) # hide
+        axislegend(
+            ax,
+            framevisible = false,
+            labelsize = 12,
+            markersize = 5,
+            patchsize = (10, 10),
+        ) # hide
     end # hide
     axes_list[end].xlabel = "Time between events [samples]" # hide
     linkyaxes!(axes_list...) # hide
@@ -165,38 +208,60 @@ end # hide
 # <details>
 # <summary>Click to show the code for the figure above</summary>
 # ```
-let 
-    f = Figure(title="Event onsets (Lognormal distribution)", size=(600, 800))
+let
+    f = Figure(title = "Event onsets (Lognormal distribution)", size = (600, 800))
 
     ## Define parameter combinations
-    parameters = [(((3, 0.25, 0, nothing), (2.5, 0.25, 0, nothing)), "μ"),
+    parameters = [
+        (((3, 0.25, 0, nothing), (2.5, 0.25, 0, nothing)), "μ"),
         (((3, 0.25, 0, nothing), (3, 0.35, 0, nothing)), "σ"),
         (((3, 0.25, 0, nothing), (3, 0.25, 30, nothing)), "offset"),
-        (((3, 0.25, 0, nothing), (3, 0.25, 0, 25)), "truncate_upper")]
+        (((3, 0.25, 0, nothing), (3, 0.25, 0, 25)), "truncate_upper"),
+    ]
 
     axes_list = Array{Any}(undef, length(parameters))
 
     ## Create a subplot for each parameter i.e. one for μ, one for σ etc
     for (index, (combinations, label)) in enumerate(parameters)
-        ax = Axis(f[index, 1], title="Parameter: $label")
+        ax = Axis(f[index, 1], title = "Parameter: $label")
         axes_list[index] = ax
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets
         for (μ, σ, offset, truncate_upper) in combinations
-            onsets = UnfoldSim.rand_onsets(MersenneTwister(42), LogNormalOnset(; μ=μ, σ=σ, offset=offset, truncate_upper=truncate_upper), design)
+            onsets = UnfoldSim.rand_onsets(
+                MersenneTwister(42),
+                LogNormalOnset(;
+                    μ = μ,
+                    σ = σ,
+                    offset = offset,
+                    truncate_upper = truncate_upper,
+                ),
+                design,
+            )
 
-            hist!(ax, onsets, bins=range(0, 100, step=1), label="($μ,$σ,$offset,$truncate_upper)")
+            hist!(
+                ax,
+                onsets,
+                bins = range(0, 100, step = 1),
+                label = "($μ,$σ,$offset,$truncate_upper)",
+            )
 
-            if label == "offset" && offset !== 0 
-                vlines!(offset, color="black")
-            elseif label == "truncate_upper" && truncate_upper !== nothing 
-                vlines!(truncate_upper, color="black") 
-            end 
-        end 
-        hideydecorations!(ax) 
-        hidespines!(ax, :t, :r) 
-        axislegend(ax, framevisible=false, labelsize=12, markersize=5, patchsize=(10, 10)) 
-    end 
+            if label == "offset" && offset !== 0
+                vlines!(offset, color = "black")
+            elseif label == "truncate_upper" && truncate_upper !== nothing
+                vlines!(truncate_upper, color = "black")
+            end
+        end
+        hideydecorations!(ax)
+        hidespines!(ax, :t, :r)
+        axislegend(
+            ax,
+            framevisible = false,
+            labelsize = 12,
+            markersize = 5,
+            patchsize = (10, 10),
+        )
+    end
     axes_list[end].xlabel = "Time between events [samples]"
     linkyaxes!(axes_list...)
 end
