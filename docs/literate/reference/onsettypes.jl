@@ -38,9 +38,9 @@ let # hide
     f = Figure(title = "Event onsets (Uniform distribution)") # hide
 
     ## Define parameter combinations # hide
-    parameters = [
+    parameters = [ # hide
         (((50, 0), (80, 0)), "width"), # hide
-        (((50, 0), (50, 20)), "offset"),
+        (((50, 0), (50, 20)), "offset"), # hide
     ] # hide
 
     axes_list = Array{Any}(undef, length(parameters)) # hide
@@ -52,10 +52,10 @@ let # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
         for (width, offset) in combinations # hide
-            onsets = UnfoldSim.rand_onsets(
-                MersenneTwister(42),
-                UniformOnset(; width = width, offset = offset),
-                design,
+            onsets = UnfoldSim.rand_onsets( # hide
+                MersenneTwister(42), # hide
+                UniformOnset(; width = width, offset = offset), # hide
+                design, # hide
             ) # hide
 
             hist!(ax, onsets, bins = range(0, 100, step = 1), label = "($width, $offset)") # hide
@@ -66,12 +66,12 @@ let # hide
         end # hide
         hideydecorations!(ax) # hide
         hidespines!(ax, :t, :r) # hide
-        axislegend(
-            ax,
-            framevisible = false,
-            labelsize = 12,
-            markersize = 5,
-            patchsize = (10, 10),
+        axislegend( # hide
+            ax, # hide
+            framevisible = false, # hide
+            labelsize = 12, # hide
+            markersize = 5, # hide
+            patchsize = (10, 10), # hide
         ) # hide
     end # hide
     axes_list[end].xlabel = "Time between events [samples]" # hide
@@ -147,11 +147,11 @@ let # hide
     f = Figure(title = "Event onsets (Lognormal distribution)", size = (600, 800)) # hide
 
     ## Define parameter combinations # hide
-    parameters = [
+    parameters = [ # hide
         (((3, 0.25, 0, nothing), (2.5, 0.25, 0, nothing)), "μ"), # hide
         (((3, 0.25, 0, nothing), (3, 0.35, 0, nothing)), "σ"), # hide
         (((3, 0.25, 0, nothing), (3, 0.25, 30, nothing)), "offset"), # hide
-        (((3, 0.25, 0, nothing), (3, 0.25, 0, 25)), "truncate_upper"),
+        (((3, 0.25, 0, nothing), (3, 0.25, 0, 25)), "truncate_upper"), # hide
     ] # hide
 
     axes_list = Array{Any}(undef, length(parameters)) # hide
@@ -163,22 +163,22 @@ let # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
         for (μ, σ, offset, truncate_upper) in combinations # hide
-            onsets = UnfoldSim.rand_onsets(
-                MersenneTwister(42),
-                LogNormalOnset(;
-                    μ = μ,
-                    σ = σ,
-                    offset = offset,
-                    truncate_upper = truncate_upper,
-                ),
-                design,
+            onsets = UnfoldSim.rand_onsets( # hide
+                MersenneTwister(42), # hide
+                LogNormalOnset(; # hide
+                    μ = μ, # hide
+                    σ = σ, # hide
+                    offset = offset, # hide
+                    truncate_upper = truncate_upper, # hide
+                ), # hide
+                design, # hide
             ) # hide
 
-            hist!(
-                ax,
-                onsets,
-                bins = range(0, 100, step = 1),
-                label = "($μ,$σ,$offset,$truncate_upper)",
+            hist!( # hide
+                ax, # hide
+                onsets, # hide
+                bins = range(0, 100, step = 1), # hide
+                label = "($μ,$σ,$offset,$truncate_upper)", # hide
             ) # hide
 
             if label == "offset" && offset !== 0 # hide
@@ -189,12 +189,12 @@ let # hide
         end # hide
         hideydecorations!(ax) # hide
         hidespines!(ax, :t, :r) # hide
-        axislegend(
-            ax,
-            framevisible = false,
-            labelsize = 12,
-            markersize = 5,
-            patchsize = (10, 10),
+        axislegend( # hide 
+            ax, # hide
+            framevisible = false, # hide
+            labelsize = 12, # hide
+            markersize = 5, # hide
+            patchsize = (10, 10), # hide
         ) # hide
     end # hide
     axes_list[end].xlabel = "Time between events [samples]" # hide
