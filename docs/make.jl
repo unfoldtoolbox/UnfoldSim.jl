@@ -15,12 +15,13 @@ for subfolder ∈ ["explanations","HowTo","tutorials","reference"]
 end
 
 
-DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive=true)
+DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive = true)
 
 makedocs(;
-    modules=[UnfoldSim],
-authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
-    repo="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/{commit}{path}#{line}",
+    modules = [UnfoldSim],
+    authors = "Luis Lips, Benedikt Ehinger, Judith Schepers",
+    #repo="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/{commit}{path}#{line}",
+    repo=Documenter.Remotes.GitHub("unfoldtoolbox", "UnfoldSim.jl"),
     sitename="UnfoldSim.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
@@ -35,10 +36,11 @@ authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
                 "Simulate ERPs" => "generated/tutorials/simulateERP.md",
                 "Poweranalysis" => "generated/tutorials/poweranalysis.md",
         ],
-        "Reference"=>[
-                "Overview: Toolbox Functions" =>"./generated/reference/overview.md",
-                "Overview: NoiseTypes" =>      "./generated/reference/noisetypes.md",
-                "Overview: Components (EEG, fMRI, Pupil)" => "./generated/reference/basistypes.md",
+        "Reference" => [
+            "Overview: Toolbox Functions" => "./generated/reference/overview.md",
+            "Overview: NoiseTypes" => "./generated/reference/noisetypes.md",
+            "Overview: OnsetTypes" => "./generated/reference/onsettypes.md",
+            "Overview: Components (EEG, fMRI, Pupil)" => "./generated/reference/basistypes.md",
         ],
         "HowTo" => [
                 "Define a new, (imbalanced) design" => "./generated/HowTo/newDesign.md",
