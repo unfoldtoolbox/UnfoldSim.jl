@@ -23,10 +23,10 @@ function rand_onsets(rng,onset::LogNormalOnset,design::AbstractDesign)
     s = size(design)
     fun = LogNormal(onset.μ,onset.σ)
     if !isnothing(onset.truncate_upper)
-        fun = truncated(fun;upper=onset.truncate_upper)
+        fun = truncated(fun; upper = onset.truncate_upper)
     end
     if !isnothing(onset.truncate_lower)
-        fun = truncated(fun;lower=onset.truncate_lower)
+        fun = truncated(fun; lower = onset.truncate_lower)
     end
     return Int.(round.(onset.offset .+ rand(deepcopy(rng), fun, s)))
 end
