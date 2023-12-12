@@ -21,7 +21,7 @@ end
 
 function rand_onsets(rng,onset::LogNormalOnset,design::AbstractDesign)
     s = size(design)
-    fun = LogNormal(onset.μ,onset.σ)
+    fun = LogNormal(onset.μ, onset.σ)
     if !isnothing(onset.truncate_upper)
         fun = truncated(fun; upper = onset.truncate_upper)
     end
