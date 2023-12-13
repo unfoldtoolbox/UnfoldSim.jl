@@ -66,5 +66,5 @@ f = plot_erp(
 
 # Workaround to separate legend and colorbar (will be fixed in a future UnfoldMakie version)
 legend = f.content[2]
-f[:,1] = legend
+f[:, 1] = legend
 current_figure()
