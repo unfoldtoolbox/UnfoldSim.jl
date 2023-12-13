@@ -41,7 +41,17 @@ data,evts = simulate(MersenneTwister(1),design,components,UniformOnset(;width=0,
 
 # ## Analysis
 # Let's check that everything worked out well, by using Unfold
-m = fit(UnfoldModel, Dict(Any=>(@formula(0~1+condition+spl(continuous,4)),firbasis(τ=[-0.1,1],sfreq=100,name="basis"))),evts,data);
+m = fit(
+    UnfoldModel,
+    Dict(
+        Any => (
+            @formula(0 ~ 1 + condition + spl(continuous, 4)),
+            firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
+        ),
+    ),
+    evts,
+    data,
+);
 
 # first the "pure" beta/linear regression parameters
 plot_erp(coeftable(m))
