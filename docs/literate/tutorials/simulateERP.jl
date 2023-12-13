@@ -27,26 +27,32 @@ n1 =  LinearModelComponent(;
         β = [5,-3]
         );
 # **p300** has a continuous effect, higher continuous values will result in larger P300's
+# include both a linear and a quadratic effect of the continuous variable
 p3 =  LinearModelComponent(;
         basis = p300(),
-        formula = @formula(0~1+continuous),
-        β = [5,1]
+        formula=@formula(0 ~ 1 + continuous + continuous^2),
+        β = [5,1,0.2]
         );
 
 # Now we can simply combine the components and simulate 
 components = [p1,n1,p3] 
-data,evts = simulate(MersenneTwister(1),design,[p1,n1,p3],UniformOnset(;width=0,offset=1000),PinkNoise());
+data,evts = simulate(MersenneTwister(1),design,components,UniformOnset(;width=0,offset=1000),PinkNoise());
 
 
 # ## Analysis
 # Let's check that everything worked out well, by using Unfold
-
-m = fit(UnfoldModel,Dict(Any=>(@formula(0~1+condition+continuous),firbasis(τ=[-0.1,1],sfreq=100,name="basis"))),evts,data);
+m = fit(UnfoldModel, Dict(Any=>(@formula(0~1+condition+spl(continuous,4)),firbasis(τ=[-0.1,1],sfreq=100,name="basis"))),evts,data);
 
 # first the "pure" beta/linear regression parameters
 plot_erp(coeftable(m))
 
 # and now beautifully visualized as marginal betas / predicted ERPs
-plot_erp(effects(Dict(:condition=>["car","face"],:continuous=>-5:5),m);
-        mapping=(:color=>:continuous,linestyle=:condition,group=:continuous),
-        categorical_color=false)
+f = plot_erp(effects(Dict(:condition => ["car", "face"], :continuous => -5:5), m);
+        mapping=(:color => :continuous, linestyle=:condition, group=:continuous),
+        legend = (; valign=:top, halign=:right, tellwidth = false),
+        categorical_color=false);
+
+# Workaround to separate legend and colorbar (will be fixed in a future UnfoldMakie version)
+legend = f.content[2]
+f[:,1] = legend
+current_figure()
