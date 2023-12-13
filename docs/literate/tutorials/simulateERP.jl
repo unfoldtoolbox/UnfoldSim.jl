@@ -7,40 +7,40 @@ using UnfoldMakie
 # Here we will learn how to simulate a typical ERP complex with P100, N170, P300.
 
 # Let's grab a SingleSubjectDesign and add a continuous predictor
-design = SingleSubjectDesign(;
-    conditions=Dict(:condition=>["car","face"],:continuous=>range(-5,5,length=10))
-    ) |> x->RepeatDesign(x,100);
+design =
+    SingleSubjectDesign(;
+        conditions = Dict(
+            :condition => ["car","face"],
+            :continuous => range(-5,5,length=10),
+        )
+    ) |> x -> RepeatDesign(x,100);
 
 # Let's make use of the prespecified basis functions, but use different formulas + parameters for each!
 
 # **p100** is unaffected by our design and has amplitude of 5
-p1 =  LinearModelComponent(;
-    basis = p100(),
-    formula = @formula(0~1),
-    β = [5],
-);
+p1 = LinearModelComponent(; basis = p100(), formula = @formula(0~1), β = [5]);
 
 # **n170** has a condition effect, faces are more negative than cars
-n1 =  LinearModelComponent(;
+n1 = LinearModelComponent(;
     basis = n170(),
-    formula = @formula(0~1+condition),
-    β = [5,-3],
+    formula = @formula(0 ~ 1 + condition),
+    β = [5, -3],
 );
 # **p300** has a continuous effect, higher continuous values will result in larger P300's
 # include both a linear and a quadratic effect of the continuous variable
 p3 =  LinearModelComponent(;
-        basis = p300(),
-        formula = @formula(0 ~ 1 + continuous + continuous^2),
-        β = [5,1,0.2],
+    basis = p300(),
+    formula = @formula(0 ~ 1 + continuous + continuous^2),
+    β = [5, 1, 0.2],
 );
 
 # Now we can simply combine the components and simulate 
-components = [p1, n1, p3] 
+components = [p1, n1, p3]
 data, evts = simulate(
     MersenneTwister(1),
     design,
     components,
-    UniformOnset(;width=0,offset=1000),
+    UniformOnset(; width = 0,offset = 1000),
     PinkNoise(),
 );
 
