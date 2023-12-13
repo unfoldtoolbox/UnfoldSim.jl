@@ -36,27 +36,27 @@ p3 =  LinearModelComponent(;
 
 # Now we can simply combine the components and simulate 
 components = [p1, n1, p3] 
-data,evts = simulate(
-        MersenneTwister(1),
-        design,
-        components,
-        UniformOnset(;width=0,offset=1000),
-        PinkNoise(),
+data, evts = simulate(
+    MersenneTwister(1),
+    design,
+    components,
+    UniformOnset(;width=0,offset=1000),
+    PinkNoise(),
 );
 
 
 # ## Analysis
 # Let's check that everything worked out well, by using Unfold
 m = fit(
-        UnfoldModel,
-        Dict(
-                Any => (
-                        @formula(0 ~ 1 + condition + spl(continuous, 4)),
-                        firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
-                ),
+    UnfoldModel,
+    Dict(
+        Any => (
+            @formula(0 ~ 1 + condition + spl(continuous, 4)),
+            firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
         ),
-        evts,
-        data,
+    ),
+    evts,
+    data,
 );
 
 # first the "pure" beta/linear regression parameters
