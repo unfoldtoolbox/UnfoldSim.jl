@@ -57,10 +57,12 @@ m = fit(
 plot_erp(coeftable(m))
 
 # and now beautifully visualized as marginal betas / predicted ERPs
-f = plot_erp(effects(Dict(:condition => ["car", "face"], :continuous => -5:5), m);
-        mapping=(:color => :continuous, linestyle=:condition, group=:continuous),
-        legend = (; valign=:top, halign=:right, tellwidth = false),
-        categorical_color=false);
+f = plot_erp(
+    effects(Dict(:condition => ["car", "face"], :continuous => -5:5), m);
+    mapping = (:color => :continuous, linestyle = :condition, group = :continuous),
+    legend = (; valign = :top, halign = :right, tellwidth = false),
+    categorical_color = false,
+);
 
 # Workaround to separate legend and colorbar (will be fixed in a future UnfoldMakie version)
 legend = f.content[2]
