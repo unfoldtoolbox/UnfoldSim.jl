@@ -30,27 +30,33 @@ n1 =  LinearModelComponent(;
 # include both a linear and a quadratic effect of the continuous variable
 p3 =  LinearModelComponent(;
         basis = p300(),
-        formula=@formula(0 ~ 1 + continuous + continuous^2),
+        formula = @formula(0 ~ 1 + continuous + continuous^2),
         β = [5,1,0.2]
         );
 
 # Now we can simply combine the components and simulate 
-components = [p1,n1,p3] 
-data,evts = simulate(MersenneTwister(1),design,components,UniformOnset(;width=0,offset=1000),PinkNoise());
+components = [p1, n1, p3] 
+data,evts = simulate(
+        MersenneTwister(1),
+        design,
+        components,
+        UniformOnset(;width=0,offset=1000),
+        PinkNoise(),
+);
 
 
 # ## Analysis
 # Let's check that everything worked out well, by using Unfold
 m = fit(
-    UnfoldModel,
-    Dict(
-        Any => (
-            @formula(0 ~ 1 + condition + spl(continuous, 4)),
-            firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
+        UnfoldModel,
+        Dict(
+                Any => (
+                        @formula(0 ~ 1 + condition + spl(continuous, 4)),
+                        firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
+                ),
         ),
-    ),
-    evts,
-    data,
+        evts,
+        data,
 );
 
 # first the "pure" beta/linear regression parameters
@@ -58,10 +64,10 @@ plot_erp(coeftable(m))
 
 # and now beautifully visualized as marginal betas / predicted ERPs
 f = plot_erp(
-    effects(Dict(:condition => ["car", "face"], :continuous => -5:5), m);
-    mapping = (:color => :continuous, linestyle = :condition, group = :continuous),
-    legend = (; valign = :top, halign = :right, tellwidth = false),
-    categorical_color = false,
+        effects(Dict(:condition => ["car", "face"], :continuous => -5:5), m);
+        mapping = (:color => :continuous, linestyle = :condition, group = :continuous),
+        legend = (; valign = :top, halign = :right, tellwidth = false),
+        categorical_color = false,
 );
 
 # Workaround to separate legend and colorbar (will be fixed in a future UnfoldMakie version)
