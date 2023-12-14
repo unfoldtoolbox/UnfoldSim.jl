@@ -35,7 +35,7 @@ onset_uniform = UniformOnset(; width = 50, offset = 0);
 
 # In the figure below, it is illustrated how the onset distribution changes when changing one of its parameters.
 let # hide
-    f = Figure(title = "Event onsets (Uniform distribution)") # hide
+    f = Figure() # hide
 
     ## Define parameter combinations # hide
     parameters = [ # hide
@@ -85,7 +85,7 @@ end # hide
 # <summary>Click to show the code for the figure above</summary>
 # ```
 let
-    f = Figure(title = "Event onsets (Uniform distribution)")
+    f = Figure()
 
     ## Define parameter combinations
     parameters = [(((50, 0), (80, 0)), "width"), (((50, 0), (50, 20)), "offset")]
@@ -144,7 +144,7 @@ onset_lognormal = LogNormalOnset(; μ = 3, σ = 0.25, offset = 0, truncate_upper
 
 # In the figure below, it is illustrated how the onset distribution changes when changing one of its parameters.
 let # hide
-    f = Figure(title = "Event onsets (Lognormal distribution)", size = (600, 800)) # hide
+    f = Figure(size = (600, 800)) # hide
 
     ## Define parameter combinations # hide
     parameters = [ # hide
@@ -209,7 +209,7 @@ end # hide
 # <summary>Click to show the code for the figure above</summary>
 # ```
 let
-    f = Figure(title = "Event onsets (Lognormal distribution)", size = (600, 800))
+    f = Figure(size = (600, 800))
 
     ## Define parameter combinations
     parameters = [
