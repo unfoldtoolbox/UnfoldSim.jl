@@ -7,16 +7,16 @@ import StatsBase.autocor
 # There are several noise-types directly implemented. Here is a comparison:
 
 f = Figure()
-ax_sig = f[1, 1:2] = Axis(f; title="1.000 samples of noise")
-ax_spec = f[2, 1] = Axis(f; title="Welch Periodigram")
-ax_auto = f[2, 2] = Axis(f; title="Autocorrelogram (every 10th lag)")
-for n = [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
+ax_sig = f[1, 1:2] = Axis(f; title = "1.000 samples of noise")
+ax_spec = f[2, 1] = Axis(f; title = "Welch Periodigram")
+ax_auto = f[2, 2] = Axis(f; title = "Autocorrelogram (every 10th lag)")
+for n in [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
 
     ## generate
     noisevec = gen_noise(StableRNG(1), n(), 10000)
 
     ## plot 1000 samples
-    lines!(ax_sig, noisevec[1:1000]; label=string(n))
+    lines!(ax_sig, noisevec[1:1000]; label = string(n))
 
     ## calc spectrum
     perio = welch_pgram(noisevec)

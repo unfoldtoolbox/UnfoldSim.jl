@@ -9,10 +9,10 @@ using UnfoldSim
 # If you struggle with this problem `RepeatDesign` is an easy tool for you:
 
 designOnce = MultiSubjectDesign(;
-	n_items = 2,
-	n_subjects = 2,
-	subjects_between = Dict(:cond => ["levelA", "levelB"]),
-	items_between = Dict(:cond => ["levelA", "levelB"]),
+    n_items = 2,
+    n_subjects = 2,
+    subjects_between = Dict(:cond => ["levelA", "levelB"]),
+    items_between = Dict(:cond => ["levelA", "levelB"]),
 );
 
 design = RepeatDesign(designOnce, 4);

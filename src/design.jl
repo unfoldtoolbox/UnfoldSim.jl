@@ -59,8 +59,9 @@ julia> generate(d)
 function generate(expdesign::SingleSubjectDesign)
     # we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
     # of named tuples for MixedModelsSim.factorproduct function.
-    evts = factorproduct(
-        ((; k => v) for (k, v) in pairs(expdesign.conditions))...) |> DataFrame
+    evts =
+        factorproduct(((; k => v) for (k, v) in pairs(expdesign.conditions))...) |>
+        DataFrame
 
     # by default does nothing
     return expdesign.tableModifyFun(evts)
@@ -83,7 +84,8 @@ function generate(expdesign::MultiSubjectDesign)
     #generate(expdesign::AbstractDesign) = generate(MersenneTwister(1),expdesign)
 
     # check that :dv is not in any condition
-    allconditions = [expdesign.subjects_between, expdesign.items_between, expdesign.both_within]
+    allconditions =
+        [expdesign.subjects_between, expdesign.items_between, expdesign.both_within]
     @assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
 
 
@@ -91,10 +93,10 @@ function generate(expdesign::MultiSubjectDesign)
         MixedModelsSim.simdat_crossed(
             expdesign.n_subjects,
             expdesign.n_items,
-            subj_btwn=expdesign.subjects_between,
-            item_btwn=expdesign.items_between,
-            both_win=expdesign.both_within
-        )
+            subj_btwn = expdesign.subjects_between,
+            item_btwn = expdesign.items_between,
+            both_win = expdesign.both_within,
+        ),
     )
     rename!(data, :subj => :subject)
     select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
@@ -143,5 +145,6 @@ function UnfoldSim.generate(design::RepeatDesign)
     return df
 
 end
-Base.size(design::RepeatDesign{MultiSubjectDesign}) = size(design.design) .* (design.repeat, 1)
+Base.size(design::RepeatDesign{MultiSubjectDesign}) =
+    size(design.design) .* (design.repeat, 1)
 Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
