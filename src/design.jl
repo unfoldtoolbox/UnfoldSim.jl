@@ -10,11 +10,11 @@ tipp: check the resulting dataframe using `generate(design)`
 
 ```julia
 # declaring same condition both sub-between and item-between results in a full between subject/item design
-design = MultiSubjectDesignjectDesign(;
-        n_items=10,
+design = MultiSubjectDesign(;
+        n_items = 10,
 		n_subjects = 30,
-        subjects_between=Dict(:cond=>["levelA","levelB"]),
-		items_between =Dict(:cond=>["levelA","levelB"]),
+        subjects_between = Dict(:cond => ["levelA", "levelB"]),
+		items_between = Dict(:cond => ["levelA", "levelB"]),
         );
 ```
 """
@@ -24,7 +24,7 @@ design = MultiSubjectDesignjectDesign(;
     subjects_between = nothing
     items_between = nothing
     both_within = nothing
-    tableModifyFun = x->x; # can be used to sort, or x->shuffle(rng,x)
+    tableModifyFun = x -> x # can be used to sort, or x->shuffle(rng,x)
 end
 
 
@@ -39,8 +39,8 @@ To increase the number of repetitions simply use `RepeatDesign(SingleSubjectDesi
 tipp: check the resulting dataframe using `generate(design)`
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
-	conditions = nothing
-	tableModifyFun = x->x;
+    conditions = nothing
+    tableModifyFun = x -> x
 end
 
 
@@ -57,13 +57,13 @@ julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate(d)
 """
 function generate(expdesign::SingleSubjectDesign)
-	# we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
-	# of named tuples for MixedModelsSim.factorproduct function.
-	evts = factorproduct(
-		((;k=>v) for (k,v) in pairs(expdesign.conditions))...) |> DataFrame
-	
-	# by default does nothing
-	return expdesign.tableModifyFun(evts)
+    # we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
+    # of named tuples for MixedModelsSim.factorproduct function.
+    evts = factorproduct(
+        ((; k => v) for (k, v) in pairs(expdesign.conditions))...) |> DataFrame
+
+    # by default does nothing
+    return expdesign.tableModifyFun(evts)
 end
 
 """
@@ -80,32 +80,32 @@ julia> d = MultiSubjectDesign(;n_subjects = 10,n_items=20,both_within= Dict(:A=>
 julia> generate(d)
 """
 function generate(expdesign::MultiSubjectDesign)
-	#generate(expdesign::AbstractDesign) = generate(MersenneTwister(1),expdesign)
-	
-	# check that :dv is not in any condition
-	allconditions = [expdesign.subjects_between,expdesign.items_between,expdesign.both_within]
-	@assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
+    #generate(expdesign::AbstractDesign) = generate(MersenneTwister(1),expdesign)
 
-	
-	data = DataFrame(
-		MixedModelsSim.simdat_crossed(
-			expdesign.n_subjects, 
-			expdesign.n_items, 
-			subj_btwn=expdesign.subjects_between, 
-			item_btwn=expdesign.items_between, 
-			both_win=expdesign.both_within
-		)
-	)
-	rename!(data,:subj => :subject)
-	select!(data,Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
-	# by default does nothing
-	data = expdesign.tableModifyFun(data)
-	
-	# sort by subject
-	data = sort!(data,(order(:subject)))
+    # check that :dv is not in any condition
+    allconditions = [expdesign.subjects_between, expdesign.items_between, expdesign.both_within]
+    @assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
 
-	return data
-	
+
+    data = DataFrame(
+        MixedModelsSim.simdat_crossed(
+            expdesign.n_subjects,
+            expdesign.n_items,
+            subj_btwn=expdesign.subjects_between,
+            item_btwn=expdesign.items_between,
+            both_win=expdesign.both_within
+        )
+    )
+    rename!(data, :subj => :subject)
+    select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
+    # by default does nothing
+    data = expdesign.tableModifyFun(data)
+
+    # sort by subject
+    data = sort!(data, (order(:subject)))
+
+    return data
+
 end
 
 
@@ -131,17 +131,17 @@ design = RepeatDesign(designOnce,4);
 ```
 """
 @with_kw struct RepeatDesign{T} <: AbstractDesign
-	design::T
-	repeat::Int = 1
+    design::T
+    repeat::Int = 1
 end
 
-function UnfoldSim.generate(design::RepeatDesign)		
-		df = map(x->generate(design.design),1:design.repeat) |>x->vcat(x...)
-		if isa(design.design,MultiSubjectDesign)
-			sort!(df,[:subject])
-		end
-		return df
-		
+function UnfoldSim.generate(design::RepeatDesign)
+    df = map(x -> generate(design.design), 1:design.repeat) |> x -> vcat(x...)
+    if isa(design.design, MultiSubjectDesign)
+        sort!(df, [:subject])
+    end
+    return df
+
 end
-Base.size(design::RepeatDesign{MultiSubjectDesign}) = size(design.design).*(design.repeat,1)
-Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design).*design.repeat
+Base.size(design::RepeatDesign{MultiSubjectDesign}) = size(design.design) .* (design.repeat, 1)
+Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
