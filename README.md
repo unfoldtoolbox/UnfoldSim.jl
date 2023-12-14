@@ -10,10 +10,10 @@
 |---|---|---|---|---|---|
 | <a href="https://github.com/unfoldtoolbox/Unfold.jl/tree/main"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623787-757575d0-aeb9-4d94-a5f8-832f13dcd2dd.png"></a> | <a href="https://github.com/unfoldtoolbox/UnfoldMakie.jl"><img  src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623793-37af35a0-c99c-4374-827b-40fc37de7c2b.png"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldSim.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623795-328a4ccd-8860-4b13-9fb6-64d3df9e2091.png"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldBIDS.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277622460-2956ca20-9c48-4066-9e50-c5d25c50f0d1.png"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldDecode.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277622487-802002c0-a1f2-4236-9123-562684d39dcf.png"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldStats.jl"><img  src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623799-4c8f2b5a-ea84-4ee3-82f9-01ef05b4f4c6.png"></a>|
 
-A package to simulate single timeseries model-based ERPs, fMRI activity, pupil dilation etc.
-If you have one channel, it is a timeseries of (overlapping) event-related activity and some noise - you might have fun here!
+A Julia package to simulate multivariate time series, e.g. model-based ERPs, fMRI activity, pupil dilation etc.
+UnfoldSim.jl provides multi-channel support via EEG-forward models. Moreover, it is possible to simulate overlapping event-related activity and to add noise of a certain type e.g. Pink noise.
 
-Many Tutorials, Guides, How-Tos and References available in the documentation!
+Many Tutorials, Guides, How-Tos and References available in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)!
 
 ![grafik](https://user-images.githubusercontent.com/10183650/213565922-90feec23-3b51-4602-b50c-31561dbfc261.png)
 
