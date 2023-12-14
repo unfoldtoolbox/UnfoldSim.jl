@@ -26,8 +26,8 @@ n1 = LinearModelComponent(;
     formula = @formula(0 ~ 1 + condition),
     β = [5, -3],
 );
-# **p300** has a continuous effect, higher continuous values will result in larger P300's
-# include both a linear and a quadratic effect of the continuous variable
+# **p300** has a continuous effect, higher continuous values will result in larger P300's.
+# We include both a linear and a quadratic effect of the continuous variable.
 p3 = LinearModelComponent(;
     basis = p300(),
     formula = @formula(0 ~ 1 + continuous + continuous^2),
@@ -70,7 +70,7 @@ f = plot_erp(
     categorical_color = false,
 );
 
-# Workaround to separate legend and colorbar (will be fixed in a future UnfoldMakie version)
+## Workaround to separate legend and colorbar (will be fixed in a future UnfoldMakie version)
 legend = f.content[2]
 f[:, 1] = legend
 current_figure()
