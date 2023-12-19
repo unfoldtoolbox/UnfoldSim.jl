@@ -19,8 +19,8 @@
         @test isapprox(std(log.(rand_vec)),1;atol=0.01)
 
         # test offset
-        logNormalOnset = LogNormalOnset(;μ=4,σ=1,offset=100)
-        rand_vec = UnfoldSim.rand_onsets(StableRNG(1),logNormalOnset, dummydesign)
+        logNormalOnset = LogNormalOnset(; μ = 4, σ = 1, offset = 100)
+        rand_vec = UnfoldSim.rand_onsets(StableRNG(1), logNormalOnset, dummydesign)
         @test minimum(rand_vec) > 100
         # test Truncated
         logNormalOnset =
