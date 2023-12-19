@@ -24,10 +24,10 @@
         @test minimum(rand_vec) > 100
         
         # test Truncated
-        logNormalOnset = LogNormalOnset(;μ=4,σ=1,truncate_upper=100)
+        logNormalOnset = LogNormalOnset(;μ=4,σ=1, truncate_lower = 10, truncate_upper=100)
         rand_vec = UnfoldSim.rand_onsets(StableRNG(1),logNormalOnset, dummydesign)
         @test maximum(rand_vec) <= 100
-        @test minimum(rand_vec) >= 0 
+        @test minimum(rand_vec) >= 10 
     end
     @testset "gen_onsets" begin
         # test accumulate always increasing
