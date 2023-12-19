@@ -16,7 +16,7 @@
         @test size(rand_vec) == (1000,300)
         @test isapprox(mean(log.(rand_vec)), 4;atol=0.01)
         @test minimum(rand_vec) > 0
-        @test isapprox(std(log.(rand_vec)),1;atol=0.01)
+        @test isapprox(std(log.(rand_vec)), 1; atol = 0.01)
 
         # test offset
         logNormalOnset = LogNormalOnset(; μ = 4, σ = 1, offset = 100)
