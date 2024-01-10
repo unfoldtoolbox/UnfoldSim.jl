@@ -83,8 +83,8 @@ function closest_src(head::Hartmut, label::String)
 	ix = findall(head.cortical["label"] .== label)
 	@assert sum(ix) > 0 """could not find label $label in hartmut.cortical["label"] - try unique(hartmut.cortical["label"]) for a list"""
 
-	ix = UnfoldSim.closest_src(mean(pos[ix, :], dims = 1)[1, :], pos)
-	return ix
+    ix = UnfoldSim.closest_src(mean(pos[ix, :], dims = 1)[1, :], pos)
+    return ix
 end
 
 
@@ -92,9 +92,9 @@ end
 
 # One channel case
 function epoch(data::AbstractVector, args...; kwargs...)
-	data_r = reshape(data, (1, :))
-	ep = epoch(data_r, args...; kwargs...)
-	return dropdims(ep; dims = 1)
+    data_r = reshape(data, (1, :))
+    ep = epoch(data_r, args...; kwargs...)
+    return dropdims(ep; dims = 1)
 end
 
 function epoch(
