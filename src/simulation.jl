@@ -123,7 +123,7 @@ end
 Helper function to add inplace the erps to the EEG, but for both 2D (1 channel) and 3D (X channel case)
 """
 function adderp!(eeg, erps::Vector, e, s, tvec, erpvec)
-	@views eeg[e, tvec, s] .+= erps[:, erpvec]
+    @views eeg[e, tvec, s] .+= erps[:, erpvec]
 end
 function adderp!(eeg, erps::Matrix, e, s, tvec, erpvec)#
 	@views eeg[e, tvec, s] .+= erps[:, erpvec]
