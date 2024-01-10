@@ -19,12 +19,12 @@ design = MultiSubjectDesign(;
 ```
 """
 @with_kw struct MultiSubjectDesign <: AbstractDesign
-	n_subjects::Int
-	n_items::Int
-	subjects_between = nothing
-	items_between = nothing
-	both_within = nothing
-	tableModifyFun = x -> x # can be used to sort, or x->shuffle(rng,x)
+    n_subjects::Int
+    n_items::Int
+    subjects_between = nothing
+    items_between = nothing
+    both_within = nothing
+    tableModifyFun = x -> x # can be used to sort, or x->shuffle(rng,x)
 end
 
 
@@ -39,8 +39,8 @@ To increase the number of repetitions simply use `RepeatDesign(SingleSubjectDesi
 tipp: check the resulting dataframe using `generate(design)`
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
-	conditions = nothing
-	tableModifyFun = x -> x
+    conditions = nothing
+    tableModifyFun = x -> x
 end
 
 
@@ -57,14 +57,14 @@ julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate(d)
 """
 function generate(expdesign::SingleSubjectDesign)
-	# we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
-	# of named tuples for MixedModelsSim.factorproduct function.
-	evts =
-		factorproduct(((; k => v) for (k, v) in pairs(expdesign.conditions))...) |>
-		DataFrame
+    # we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
+    # of named tuples for MixedModelsSim.factorproduct function.
+    evts =
+        factorproduct(((; k => v) for (k, v) in pairs(expdesign.conditions))...) |>
+        DataFrame
 
-	# by default does nothing
-	return expdesign.tableModifyFun(evts)
+    # by default does nothing
+    return expdesign.tableModifyFun(evts)
 end
 
 """
@@ -81,12 +81,12 @@ julia> d = MultiSubjectDesign(;n_subjects = 10,n_items=20,both_within= Dict(:A=>
 julia> generate(d)
 """
 function generate(expdesign::MultiSubjectDesign)
-	#generate(expdesign::AbstractDesign) = generate(MersenneTwister(1),expdesign)
+    #generate(expdesign::AbstractDesign) = generate(MersenneTwister(1),expdesign)
 
-	# check that :dv is not in any condition
-	allconditions =
-		[expdesign.subjects_between, expdesign.items_between, expdesign.both_within]
-	@assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
+    # check that :dv is not in any condition
+    allconditions =
+        [expdesign.subjects_between, expdesign.items_between, expdesign.both_within]
+    @assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
 
 
 	data = DataFrame(
