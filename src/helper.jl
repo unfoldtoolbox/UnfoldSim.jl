@@ -51,16 +51,16 @@ closest_src(coords_list::AbstractVector{<:AbstractVector}, pos) =
     closest_src.(coords_list, Ref(pos))
 
 function closest_src(coords::Vector{<:Real}, pos)
-	s = size(pos)
-	dist = zeros(s[1])
-	diff = zeros(s[2])
-	for i ∈ 1:s[1]
-		for j ∈ 1:s[2]
-			diff[j] = pos[i, j] - coords[j]
-		end
-		dist[i] = norm(diff)
-	end
-	return findmin(dist)[2]
+    s = size(pos)
+    dist = zeros(s[1])
+    diff = zeros(s[2])
+    for i ∈ 1:s[1]
+        for j ∈ 1:s[2]
+            diff[j] = pos[i, j] - coords[j]
+        end
+        dist[i] = norm(diff)
+    end
+    return findmin(dist)[2]
 
 
 end
