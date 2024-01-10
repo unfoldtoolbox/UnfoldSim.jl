@@ -1,6 +1,11 @@
 
 # helper to move input ::Component to ::Vector{Component}
-Simulation(design::AbstractDesign, component::AbstractComponent, onset::AbstractOnset, noisetype::AbstractNoise) = Simulation(design, [component], onset, noisetype)
+Simulation(
+    design::AbstractDesign,
+    component::AbstractComponent,
+    onset::AbstractOnset,
+    noisetype::AbstractNoise,
+) = Simulation(design, [component], onset, noisetype)
 
 # by default no noise
 # Simulation(design::AbstractDesign,component,onset::AbstractOnset) = Simulation(design,component,onset,NoNoise())
