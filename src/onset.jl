@@ -42,5 +42,5 @@ function generate(rng, onset::AbstractOnset, simulation::Simulation)
     # accumulate them
     onsets_accum = accumulate(+, onsets, dims = 1)
 
-	return onsets_accum
+    return onsets_accum
 end
