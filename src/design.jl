@@ -89,24 +89,24 @@ function generate(expdesign::MultiSubjectDesign)
     @assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
 
 
-	data = DataFrame(
-		MixedModelsSim.simdat_crossed(
-			expdesign.n_subjects,
-			expdesign.n_items,
-			subj_btwn = expdesign.subjects_between,
-			item_btwn = expdesign.items_between,
-			both_win = expdesign.both_within,
-		),
-	)
-	rename!(data, :subj => :subject)
-	select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
-	# by default does nothing
-	data = expdesign.tableModifyFun(data)
+    data = DataFrame(
+        MixedModelsSim.simdat_crossed(
+            expdesign.n_subjects,
+            expdesign.n_items,
+            subj_btwn = expdesign.subjects_between,
+            item_btwn = expdesign.items_between,
+            both_win = expdesign.both_within,
+        ),
+    )
+    rename!(data, :subj => :subject)
+    select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
+    # by default does nothing
+    data = expdesign.tableModifyFun(data)
 
-	# sort by subject
-	data = sort!(data, (order(:subject)))
+    # sort by subject
+    data = sort!(data, (order(:subject)))
 
-	return data
+    return data
 
 end
 
@@ -133,18 +133,18 @@ design = RepeatDesign(designOnce,4);
 ```
 """
 @with_kw struct RepeatDesign{T} <: AbstractDesign
-	design::T
-	repeat::Int = 1
+    design::T
+    repeat::Int = 1
 end
 
 function UnfoldSim.generate(design::RepeatDesign)
-	df = map(x -> generate(design.design), 1:design.repeat) |> x -> vcat(x...)
-	if isa(design.design, MultiSubjectDesign)
-		sort!(df, [:subject])
-	end
-	return df
+    df = map(x -> generate(design.design), 1:design.repeat) |> x -> vcat(x...)
+    if isa(design.design, MultiSubjectDesign)
+        sort!(df, [:subject])
+    end
+    return df
 
 end
 Base.size(design::RepeatDesign{MultiSubjectDesign}) =
-	size(design.design) .* (design.repeat, 1)
+    size(design.design) .* (design.repeat, 1)
 Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
