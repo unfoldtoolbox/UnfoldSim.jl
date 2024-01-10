@@ -129,7 +129,7 @@ function adderp!(eeg, erps::Matrix, e, s, tvec, erpvec)#
 	@views eeg[e, tvec, s] .+= erps[:, erpvec]
 end
 function adderp!(eeg, erps::AbstractArray, e, s, tvec, erpvec)
-	@views eeg[e, tvec, s] .+= erps[e, :, erpvec]
+    @views eeg[e, tvec, s] .+= erps[e, :, erpvec]
 end
 
 
