@@ -151,13 +151,12 @@ end
 
 function add_noise!(rng, noisetype::AbstractNoise, eeg)
 
-	# generate noise
-	noise = gen_noise(deepcopy(rng), noisetype, length(eeg))
+    # generate noise
+    noise = gen_noise(deepcopy(rng), noisetype, length(eeg))
 
-	noise = reshape(noise, size(eeg))
+    noise = reshape(noise, size(eeg))
 
-	# add noise to data
-	eeg .+= noise
+    # add noise to data
+    eeg .+= noise
 
 end
-
