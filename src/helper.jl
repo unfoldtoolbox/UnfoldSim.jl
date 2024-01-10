@@ -98,55 +98,50 @@ function epoch(data::AbstractVector, args...; kwargs...)
 end
 
 function epoch(
-	data::AbstractArray{T, 2},
-	events,
-	τ::Tuple{Number, Number},
-	sfreq;
-	eventtime::Symbol = :latency,
-) where {T <: Union{Missing, Number}}
-	# data: channels x times
+    data::AbstractArray{T,2},
+    events,
+    τ::Tuple{Number,Number},
+    sfreq;
+    eventtime::Symbol = :latency,
+) where {T<:Union{Missing,Number}}
+    # data: channels x times
 
-	# partial taken from EEG.jl
+    # partial taken from EEG.jl
 
-	numEpochs = size(events, 1)
+    numEpochs = size(events, 1)
 
-	times = range(τ[1], stop = τ[2], step = 1 ./ sfreq)
-	lenEpochs = length(times)
-	numChans = size(data, 1)
-	epochs = Array{T}(
-		undef,
-		Int(numChans),
-		Int(lenEpochs),
-		Int(numEpochs),
-	)
+    times = range(τ[1], stop = τ[2], step = 1 ./ sfreq)
+    lenEpochs = length(times)
+    numChans = size(data, 1)
+    epochs = Array{T}(undef, Int(numChans), Int(lenEpochs), Int(numEpochs))
 
 
-	# User feedback
-	@debug "Creating epochs: $numChans x $lenEpochs x $numEpochs"
+    # User feedback
+    @debug "Creating epochs: $numChans x $lenEpochs x $numEpochs"
 
-	for si ∈ 1:size(events, 1)
-		# d_start and d_end are the start and end of the epoch (in samples) in the data
-		d_start = Int(round(events[si, eventtime]) + times[1] .* sfreq)
-		d_end = Int(round(events[si, eventtime]) + times[end] .* sfreq)
+    for si ∈ 1:size(events, 1)
+        # d_start and d_end are the start and end of the epoch (in samples) in the data
+        d_start = Int(round(events[si, eventtime]) + times[1] .* sfreq)
+        d_end = Int(round(events[si, eventtime]) + times[end] .* sfreq)
 
-		# e_start and e_end are the start and end within the epoch (in samples)
-		e_start = 1
-		e_end = lenEpochs
-		#println("d: $(size(data)),e: $(size(epochs)) | $d_start,$d_end,$e_start,$e_end | $(events[si,eventtime])")
+        # e_start and e_end are the start and end within the epoch (in samples)
+        e_start = 1
+        e_end = lenEpochs
+        #println("d: $(size(data)),e: $(size(epochs)) | $d_start,$d_end,$e_start,$e_end | $(events[si,eventtime])")
 
-		# Case that the start of the epoch is before the start of the data/recording (e.g. if the start is before i.e. negative relative to the event)
-		if d_start < 1
-			#@warn "d_start $d_start"
-			e_start = e_start + (-d_start + 1)
-			d_start = 1
-		end
-		# Case that the end of the epoch is after the end of the data/recording
-		if d_end > size(data, 2)
-			e_end = e_end - (d_end - size(data, 2))
-			d_end = size(data, 2)
-		end
-		#println("d: $(size(data)),e: $(size(epochs)) | $d_start,$d_end,$e_start,$e_end | $(events[si,eventtime])")
-		epochs[:, e_start:e_end, si] = data[:, d_start:d_end]
-	end
-	return epochs
+        # Case that the start of the epoch is before the start of the data/recording (e.g. if the start is before i.e. negative relative to the event)
+        if d_start < 1
+            #@warn "d_start $d_start"
+            e_start = e_start + (-d_start + 1)
+            d_start = 1
+        end
+        # Case that the end of the epoch is after the end of the data/recording
+        if d_end > size(data, 2)
+            e_end = e_end - (d_end - size(data, 2))
+            d_end = size(data, 2)
+        end
+        #println("d: $(size(data)),e: $(size(epochs)) | $d_start,$d_end,$e_start,$e_end | $(events[si,eventtime])")
+        epochs[:, e_start:e_end, si] = data[:, d_start:d_end]
+    end
+    return epochs
 end

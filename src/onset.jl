@@ -3,14 +3,14 @@
 #---------------
 
 @with_kw struct UniformOnset <: AbstractOnset
-	width = 50 # how many samples jitter?
-	offset = 0 # minimal offset?
+    width = 50 # how many samples jitter?
+    offset = 0 # minimal offset?
 end
 @with_kw struct LogNormalOnset <: AbstractOnset
-	μ::Any  # mean
-	σ::Any  # variance
-	offset = 0 # additional offset
-	truncate_upper = nothing # truncate at some sample?
+    μ::Any  # mean
+    σ::Any  # variance
+    offset = 0 # additional offset
+    truncate_upper = nothing # truncate at some sample?
 end
 
 # In the case that the user directly wants the erps/epoched data (no overlap) 
