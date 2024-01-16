@@ -35,7 +35,7 @@ The toolbox provides four abstract components: AbstractDesign, AbstractComponent
 Currently we support a single, and a multi-subject design. They are used to generate an experimental design containing the conditions and levels of all predictors. Randomisation is possible via a user-defined function which is applied after design-generation. Designs could be nested, like our RepeatDesign which simply repeats the generated design multiple times.
 
 ## Concrete Components
-We provide a LinearModelComponent and a MixedModelComponent for multi-subject simulation respectively. For the components model-formulae, fixed-effects ($\betas$) and random effects need to be specified. Further the coding-schema can be provided following StatsModels.jl. The component MultichannelComponent can be applied to any component and allows for projecting the simulated source-component to multi-channel electrodes via a headmodel. Using Artifacts.jl we provide on-demand access to the Hartmut (cite) model.
+We provide a LinearModelComponent and a MixedModelComponent for multi-subject simulation respectively. For the components model-formulae, fixed-effects ($\beta s$) and random effects need to be specified. Further the coding-schema can be provided following StatsModels.jl. The component MultichannelComponent can be applied to any component and allows for projecting the simulated source-component to multi-channel electrodes via a headmodel. Using Artifacts.jl we provide on-demand access to the Hartmut (cite) model.
 
 ## Concrete Noise
 We provide different noise-types "White","Red" and "Pink", but also an exponentially declining Autoregressive noise type.
