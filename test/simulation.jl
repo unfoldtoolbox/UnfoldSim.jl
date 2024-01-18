@@ -136,7 +136,11 @@
     @testset "output dimenions" begin
         for subject ∈ ["single", "multi"]
             if subject == "multi"
-                design = MultiSubjectDesign(; n_subjects = 3, n_items = 7)
+                design = MultiSubjectDesign(;
+                    n_subjects = 3,
+                    n_items = 7,
+                    subjects_between = Dict(:cond => nlevels(3, 'C')),
+                )
 
                 comp = MixedModelComponent(;
                     basis = [1, 2, 3, 4],
@@ -170,13 +174,18 @@
                     for return_epoched ∈ [false, true]
                         simulation = Simulation(design, comp, onset, NoNoise())
 
+                        local data
                         try
                             data, events = simulate(
                                 MersenneTwister(1),
                                 simulation;
                                 return_epoched = return_epoched,
                             )
+                        catch AssertionError
+                            # The AssertionError in the simulate function should be elicited only in the case below
+                            @test (sim_onset == "noonset") & (return_epoched == false)
 
+                        else
                             sz = size(data)
 
                             if channel == "multi"
@@ -198,10 +207,6 @@
                                     @test sz[2+offset] == 3
                                 end
                             end
-
-                        catch AssertionError
-                            # The AssertionError in the simulate function should be elicited only in the case below
-                            @test (sim_onset == "noonset") & (return_epoched == false)
                         end
                     end
                 end

@@ -15,21 +15,21 @@ for subfolder ∈ ["explanations", "HowTo", "tutorials", "reference"]
 end
 
 
-DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive=true)
+DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive = true)
 
 makedocs(;
-    modules=[UnfoldSim],
-    authors="Luis Lips, Benedikt Ehinger, Judith Schepers",
+    modules = [UnfoldSim],
+    authors = "Luis Lips, Benedikt Ehinger, Judith Schepers",
     #repo="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/{commit}{path}#{line}",
-    repo=Documenter.Remotes.GitHub("unfoldtoolbox", "UnfoldSim.jl"),
-    sitename="UnfoldSim.jl",
-    format=Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://unfoldtoolbox.github.io/UnfoldSim.jl",
-        edit_link="main",
-        assets=String[],
+    repo = Documenter.Remotes.GitHub("unfoldtoolbox", "UnfoldSim.jl"),
+    sitename = "UnfoldSim.jl",
+    format = Documenter.HTML(;
+        prettyurls = get(ENV, "CI", "false") == "true",
+        canonical = "https://unfoldtoolbox.github.io/UnfoldSim.jl",
+        edit_link = "main",
+        assets = String[],
     ),
-    pages=[
+    pages = [
         "Home" => "index.md",
         "Tutorials" => [
             "Quickstart" => "generated/tutorials/quickstart.md",
@@ -53,7 +53,4 @@ makedocs(;
     ],
 )
 
-deploydocs(;
-    repo="github.com/unfoldtoolbox/UnfoldSim.jl",
-    devbranch="main",
-)
+deploydocs(; repo = "github.com/unfoldtoolbox/UnfoldSim.jl", devbranch = "main")

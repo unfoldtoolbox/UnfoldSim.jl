@@ -15,28 +15,28 @@ end
 Function to convert output similar to unfold (data, evts)
 """
 function convert(eeg, onsets, design, n_ch, ; reshape = true)
-	evt = UnfoldSim.generate(design)
-	@debug size(eeg)
-	if reshape
-		n_subj = length(size(design)) == 1 ? 1 : size(design)[2]
+    evt = UnfoldSim.generate(design)
+    @debug size(eeg)
+    if reshape
+        n_subj = length(size(design)) == 1 ? 1 : size(design)[2]
 
-		if n_ch == 1
-			data = eeg[:,]
+        if n_ch == 1
+            data = eeg[:,]
 
-			evt.latency = (onsets' .+ range(0, size(eeg, 2) - 1) .* size(eeg, 1))'[:,]
-		elseif n_subj == 1
-			data = eeg
-			@debug size(onsets)
-			evt.latency = onsets
-		else # multi subject + multi channel
-			data = eeg[:, :]
-			evt.latency = (onsets' .+ range(0, size(eeg, 3) - 1) .* size(eeg, 2))'[:,]
-		end
-	else
-		data = eeg
-	end
+            evt.latency = (onsets' .+ range(0, size(eeg, 2) - 1) .* size(eeg, 1))'[:,]
+        elseif n_subj == 1
+            data = eeg
+            @debug size(onsets)
+            evt.latency = onsets
+        else # multi subject + multi channel
+            data = eeg[:, :]
+            evt.latency = (onsets' .+ range(0, size(eeg, 3) - 1) .* size(eeg, 2))'[:,]
+        end
+    else
+        data = eeg
+    end
 
-	return data, evt
+    return data, evt
 
 end
 
@@ -79,9 +79,9 @@ pos = closest_src(hartmut=>"Left Middle Temporal Gyrus, posterior division")
 """
 function closest_src(head::Hartmut, label::String)
 
-	pos = head.cortical["pos"]
-	ix = findall(head.cortical["label"] .== label)
-	@assert sum(ix) > 0 """could not find label $label in hartmut.cortical["label"] - try unique(hartmut.cortical["label"]) for a list"""
+    pos = head.cortical["pos"]
+    ix = findall(head.cortical["label"] .== label)
+    @assert sum(ix) > 0 """could not find label $label in hartmut.cortical["label"] - try unique(hartmut.cortical["label"]) for a list"""
 
     ix = UnfoldSim.closest_src(mean(pos[ix, :], dims = 1)[1, :], pos)
     return ix

@@ -276,6 +276,4 @@ end
 #        - if `offset` > `length(signal.basis)` -> no overlap
 #        - if `offset` < `length(signal.basis)` -> there might be overlap, depending on the other parameters of the onset distribution
 
-
-## Footnotes # hide
 # [^1]: Wikipedia contributors. (2023, December 5). Log-normal distribution. In Wikipedia, The Free Encyclopedia. Retrieved 12:27, December 7, 2023, from https://en.wikipedia.org/w/index.php?title=Log-normal_distribution&oldid=1188400077# 

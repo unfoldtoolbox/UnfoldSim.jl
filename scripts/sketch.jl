@@ -12,5 +12,3 @@ dfB = get_df(2)
 df = dfA # for debug
 
 signal_coef(dfA)
-
-
