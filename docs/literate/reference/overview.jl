@@ -18,5 +18,3 @@ subtypes(AbstractOnset)
 # ## Noise
 # Choose the noise you need!
 subtypes(AbstractNoise)
-
-
