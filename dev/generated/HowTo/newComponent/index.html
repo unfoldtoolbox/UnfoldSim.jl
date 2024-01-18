@@ -5,33 +5,40 @@ using Random
 using DSP
 using CairoMakie, UnfoldMakie
 
-sfreq = 100;</code></pre><h2 id="Design"><a class="docs-heading-anchor" href="#Design">Design</a><a id="Design-1"></a><a class="docs-heading-anchor-permalink" href="#Design" title="Permalink"></a></h2><p>Let&#39;s generate a design with two columns, shift + duration</p><pre><code class="language-julia hljs">design = UnfoldSim.SingleSubjectDesign(;conditions= Dict(
-            :shift =&gt; rand(100).*sfreq/5,
-            :duration=&gt;20 .+rand(100).*sfreq/5))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">SingleSubjectDesign
+sfreq = 100;</code></pre><h2 id="Design"><a class="docs-heading-anchor" href="#Design">Design</a><a id="Design-1"></a><a class="docs-heading-anchor-permalink" href="#Design" title="Permalink"></a></h2><p>Let&#39;s generate a design with two columns, shift + duration</p><pre><code class="language-julia hljs">design = UnfoldSim.SingleSubjectDesign(;
+    conditions = Dict(
+        :shift =&gt; rand(100) .* sfreq / 5,
+        :duration =&gt; 20 .+ rand(100) .* sfreq / 5,
+    ),
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">SingleSubjectDesign
   conditions: Dict{Symbol, Vector{Float64}}
   tableModifyFun: #10 (function of type UnfoldSim.var&quot;#10#14&quot;)
 </code></pre><p>We also need a new AbstractComponent</p><pre><code class="language-julia hljs">struct TimeVaryingComponent &lt;: AbstractComponent
-    basisfunction
-    maxlength
-end</code></pre><p>We have to define the length of a component</p><pre><code class="language-julia hljs">Base.length(c::TimeVaryingComponent) = length(c.maxlength)</code></pre><p>While we could have put the TimeVaryingComponent.basisfunction directly into the simulate function, I thought this is a bit more modular</p><pre><code class="language-julia hljs">function UnfoldSim.simulate(rng,c::TimeVaryingComponent,design::AbstractDesign)
+    basisfunction::Any
+    maxlength::Any
+end</code></pre><p>We have to define the length of a component</p><pre><code class="language-julia hljs">Base.length(c::TimeVaryingComponent) = length(c.maxlength)</code></pre><p>While we could have put the TimeVaryingComponent.basisfunction directly into the simulate function, I thought this is a bit more modular</p><pre><code class="language-julia hljs">function UnfoldSim.simulate(rng, c::TimeVaryingComponent, design::AbstractDesign)
     evts = generate(design)
-    return c.basisfunction(evts,c.maxlength)
-end</code></pre><p>finally, the actual function that does the shifting + duration</p><pre><code class="language-julia hljs">function basis_shiftduration(evts,maxlength)
+    return c.basisfunction(evts, c.maxlength)
+end</code></pre><p>finally, the actual function that does the shifting + duration</p><pre><code class="language-julia hljs">function basis_shiftduration(evts, maxlength)
     basis = hanning.(Int.(round.(evts.duration))) ## hanning as long as duration
     if &quot;shift&quot; ∈ names(evts)
-        basis = padarray.(basis,Int.(round.(.-evts.shift)),0) ## shift by adding 0 in front
+        basis = padarray.(basis, Int.(round.(.-evts.shift)), 0) ## shift by adding 0 in front
     end
     # we should make sure that all bases have maxlength by appending / truncating
     difftomax = maxlength .- length.(basis)
-    if any(difftomax.&lt;0)
+    if any(difftomax .&lt; 0)
         @warn &quot;basis longer than max length in at least one case. either increase maxlength or redefine function. Trying to truncate the basis&quot;
-        basis[difftomax .&gt;0] = padarray.(basis[difftomax .&gt; 0],difftomax[difftomax .&gt; 0],0)
+        basis[difftomax.&gt;0] = padarray.(basis[difftomax.&gt;0], difftomax[difftomax.&gt;0], 0)
         return [b[1:maxlength] for b in basis]
     else
-        return padarray.(basis,difftomax,0)
+        return padarray.(basis, difftomax, 0)
     end
 end
 
 
-erp = UnfoldSim.simulate(MersenneTwister(1),TimeVaryingComponent(basis_shiftduration,50),design)
-plot_erpimage(hcat(erp...),sortvalues=generate(design).shift)</code></pre><img src="530bd8f4.png" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../repeatTrials/">« Repeating a design</a><a class="docs-footer-nextpage" href="../multichannel/">Generate multi channel data »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Thursday 18 January 2024 13:15">Thursday 18 January 2024</span>. Using Julia version 1.10.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+erp = UnfoldSim.simulate(
+    MersenneTwister(1),
+    TimeVaryingComponent(basis_shiftduration, 50),
+    design,
+)
+plot_erpimage(hcat(erp...), sortvalues = generate(design).shift)</code></pre><img src="43b95e30.png" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../repeatTrials/">« Repeating a design</a><a class="docs-footer-nextpage" href="../multichannel/">Generate multi channel data »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Thursday 18 January 2024 19:12">Thursday 18 January 2024</span>. Using Julia version 1.10.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
