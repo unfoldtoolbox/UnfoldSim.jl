@@ -20,7 +20,7 @@ end
 end
 
 
-@with_kw struct RealisticNoise <: AbstractNoise 
+@with_kw struct RealisticNoise <: AbstractNoise
     noiselevel = 1
 end
 
@@ -48,11 +48,11 @@ end
 
 Generate noise of a given type t and length n
 """
-function gen_noise(rng, t::Union{PinkNoise, RedNoise}, n::Int)
-    return t.noiselevel .*rand(rng, t.func(n, 1.0))
+function gen_noise(rng, t::Union{PinkNoise,RedNoise}, n::Int)
+    return t.noiselevel .* rand(rng, t.func(n, 1.0))
 end
 
-function gen_noise(rng,t::NoNoise,n::Int)
+function gen_noise(rng, t::NoNoise, n::Int)
     return zeros(n)
 end
 
@@ -66,7 +66,7 @@ function gen_noise(rng, t::WhiteNoise, n::Int)
     if !isnothing(t.imfilter)
         noisevector = imfilter(noisevector, Kernel.gaussian((t.imfilter,)))
     end
-    return t.noiselevel .*noisevector
+    return t.noiselevel .* noisevector
 end
 
 
@@ -81,17 +81,17 @@ function gen_noise(rng, t::RealisticNoise, n::Int)
 end
 
 
-function gen_noise(rng,t::ExponentialNoise, n::Int)
-       
+function gen_noise(rng, t::ExponentialNoise, n::Int)
+
     function exponentialCorrelation(x; nu = 1, length_ratio = 1)
         # Author: Jaromil Frossard
         # generate exponential function
         R = length(x) * length_ratio
         return exp.(-3 * (x / R) .^ nu)
     end
-    
-    Σ = Symmetric(Circulant(exponentialCorrelation([0:1:(n-1);], nu = t.ν)),:L)
+
+    Σ = Symmetric(Circulant(exponentialCorrelation([0:1:(n-1);], nu = t.ν)), :L)
 
     # cholesky(Σ) is n x n diagonal, lots of RAM :S
-    return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]    
+    return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]
 end

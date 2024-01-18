@@ -12,9 +12,8 @@ abstract type AbstractHeadmodel end
 
 
 struct Simulation
-	design::AbstractDesign
-	components::Vector{AbstractComponent}
-	onset::AbstractOnset
-	noisetype::AbstractNoise
+    design::AbstractDesign
+    components::Vector{AbstractComponent}
+    onset::AbstractOnset
+    noisetype::AbstractNoise
 end
-

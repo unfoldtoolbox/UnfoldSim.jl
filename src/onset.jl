@@ -36,8 +36,8 @@ end
 # main call from `simulation`
 function generate(rng, onset::AbstractOnset, simulation::Simulation)
 
-	# sample different onsets
-	onsets = rand_onsets(rng, onset, simulation.design)
+    # sample different onsets
+    onsets = rand_onsets(rng, onset, simulation.design)
 
     # accumulate them
     onsets_accum = accumulate(+, onsets, dims = 1)
