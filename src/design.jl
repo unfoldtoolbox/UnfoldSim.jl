@@ -11,11 +11,11 @@ tipp: check the resulting dataframe using `generate(design)`
 ```julia
 # declaring same condition both sub-between and item-between results in a full between subject/item design
 design = MultiSubjectDesign(;
-        n_items = 10,
+		n_items = 10,
 		n_subjects = 30,
-        subjects_between = Dict(:cond => ["levelA", "levelB"]),
+		subjects_between = Dict(:cond => ["levelA", "levelB"]),
 		items_between = Dict(:cond => ["levelA", "levelB"]),
-        );
+		);
 ```
 """
 @with_kw struct MultiSubjectDesign <: AbstractDesign
@@ -123,11 +123,11 @@ repeat a design DataFrame multiple times to mimick repeatedly recorded trials
 
 ```julia
 designOnce = MultiSubjectDesign(;
-        n_items=2,
+		n_items=2,
 		n_subjects = 2,
-        subjects_between =Dict(:cond=>["levelA","levelB"]),
+		subjects_between =Dict(:cond=>["levelA","levelB"]),
 		items_between =Dict(:cond=>["levelA","levelB"]),
-        );
+		);
 
 design = RepeatDesign(designOnce,4);
 ```
