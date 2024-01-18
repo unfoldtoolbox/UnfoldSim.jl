@@ -1,216 +1,28 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Poweranalysis · UnfoldSim.jl</title><meta name="title" content="Poweranalysis · UnfoldSim.jl"/><meta property="og:title" content="Poweranalysis · UnfoldSim.jl"/><meta property="twitter:title" content="Poweranalysis · UnfoldSim.jl"/><meta name="description" content="Documentation for UnfoldSim.jl."/><meta property="og:description" content="Documentation for UnfoldSim.jl."/><meta property="twitter:description" content="Documentation for UnfoldSim.jl."/><meta property="og:url" content="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/poweranalysis/"/><meta property="twitter:url" content="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/poweranalysis/"/><link rel="canonical" href="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/poweranalysis/"/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">UnfoldSim.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../quickstart/">Quickstart</a></li><li><a class="tocitem" href="../simulateERP/">Simulate ERPs</a></li><li class="is-active"><a class="tocitem" href>Poweranalysis</a><ul class="internal"><li><a class="tocitem" href="#Simple-Poweranalysis-Script"><span>Simple Poweranalysis Script</span></a></li></ul></li></ul></li><li><span class="tocitem">Reference</span><ul><li><a class="tocitem" href="../../reference/overview/">Overview: Toolbox Functions</a></li><li><a class="tocitem" href="../../reference/noisetypes/">Overview: NoiseTypes</a></li><li><a class="tocitem" href="../../reference/onsettypes/">Overview: OnsetTypes</a></li><li><a class="tocitem" href="../../reference/basistypes/">Overview: Components (EEG, fMRI, Pupil)</a></li></ul></li><li><span class="tocitem">HowTo</span><ul><li><a class="tocitem" href="../../HowTo/newDesign/">Define a new, (imbalanced) design</a></li><li><a class="tocitem" href="../../HowTo/repeatTrials/">Repeating a design</a></li><li><a class="tocitem" href="../../HowTo/newComponent/">Define a new duration &amp; jitter component</a></li><li><a class="tocitem" href="../../HowTo/multichannel/">Generate multi channel data</a></li></ul></li><li><a class="tocitem" href="../../../api/">DocStrings</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Poweranalysis</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Poweranalysis</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/unfoldtoolbox/UnfoldSim.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/main/docs/literate/tutorials/poweranalysis.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><pre><code class="language-julia hljs">using UnfoldSim
-using Unfold
 using Statistics
 using HypothesisTests
 using DataFrames
-using Random</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Module AccessorsDatesExt with build ID ffffffff-ffff-ffff-0000-0115dee9deb2 is missing from the cache.
-<span class="sgr33"><span class="sgr1">│ </span></span>This may mean AccessorsDatesExt [308068fd-b978-57fd-b78f-2a52fb63dba4] does not support precompilation but is imported by a module that does.
-<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1942</span>
-<span class="sgr91"><span class="sgr1">┌ Error: </span></span>Error during loading of extension AccessorsDatesExt of Accessors, use `Base.retry_load_extensions()` to retry.
-<span class="sgr91"><span class="sgr1">│ </span></span>  exception =
-<span class="sgr91"><span class="sgr1">│ </span></span>   1-element ExceptionStack:
-<span class="sgr91"><span class="sgr1">│ </span></span>   Declaring __precompile__(false) is not allowed in files that are being precompiled.
-<span class="sgr91"><span class="sgr1">│ </span></span>   Stacktrace:
-<span class="sgr91"><span class="sgr1">│ </span></span>     [1] <span class="sgr1">_require(</span><span class="sgr90">pkg</span>::Base.PkgId, <span class="sgr90">env</span>::Nothing<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1946</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [2] <span class="sgr1">__require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::Nothing<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1806</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [3] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [4] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [5] <span class="sgr1">_require_prelocked</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1797</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [6] <span class="sgr1">_require_prelocked</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1796</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [7] <span class="sgr1">run_extension_callbacks(</span><span class="sgr90">extid</span>::Base.ExtensionId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1289</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [8] <span class="sgr1">run_extension_callbacks(</span><span class="sgr90">pkgid</span>::Base.PkgId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1324</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [9] <span class="sgr1">run_package_callbacks(</span><span class="sgr90">modkey</span>::Base.PkgId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1158</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [10] <span class="sgr1">__require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1813</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [11] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [12] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [13] <span class="sgr1">_require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1797</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [14] <span class="sgr1">macro expansion</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1784</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [15] <span class="sgr1">macro expansion</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">lock.jl:267</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [16] <span class="sgr1">__require(</span><span class="sgr90">into</span>::Module, <span class="sgr90">mod</span>::Symbol<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1747</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [17] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [18] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [19] <span class="sgr1">require(</span><span class="sgr90">into</span>::Module, <span class="sgr90">mod</span>::Symbol<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1740</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [20] <span class="sgr1">include</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">Base.jl:495</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [21] <span class="sgr1">include_package_for_output(</span><span class="sgr90">pkg</span>::Base.PkgId, <span class="sgr90">input</span>::String, <span class="sgr90">depot_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">dl_load_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">load_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">concrete_deps</span>::Vector<span class="sgr90">{Pair{Base.PkgId, UInt128}}</span>, <span class="sgr90">source</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2216</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [22] top-level scope
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90"><span class="sgr4">stdin:3</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [23] <span class="sgr1">eval</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Core</span> <span class="sgr90">./<span class="sgr4">boot.jl:385</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [24] <span class="sgr1">include_string(</span><span class="sgr90">mapexpr</span>::typeof(identity), <span class="sgr90">mod</span>::Module, <span class="sgr90">code</span>::String, <span class="sgr90">filename</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2070</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [25] <span class="sgr1">include_string</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2080</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [26] <span class="sgr1">exec_options(</span><span class="sgr90">opts</span>::Base.JLOptions<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">client.jl:316</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [27] <span class="sgr1">_start()</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">client.jl:552</span></span>
-<span class="sgr91"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1295</span>
-<span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Module AccessorsDatesExt with build ID ffffffff-ffff-ffff-0000-0115dee9deb2 is missing from the cache.
-<span class="sgr33"><span class="sgr1">│ </span></span>This may mean AccessorsDatesExt [308068fd-b978-57fd-b78f-2a52fb63dba4] does not support precompilation but is imported by a module that does.
-<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1942</span>
-<span class="sgr91"><span class="sgr1">┌ Error: </span></span>Error during loading of extension AccessorsDatesExt of Accessors, use `Base.retry_load_extensions()` to retry.
-<span class="sgr91"><span class="sgr1">│ </span></span>  exception =
-<span class="sgr91"><span class="sgr1">│ </span></span>   1-element ExceptionStack:
-<span class="sgr91"><span class="sgr1">│ </span></span>   Declaring __precompile__(false) is not allowed in files that are being precompiled.
-<span class="sgr91"><span class="sgr1">│ </span></span>   Stacktrace:
-<span class="sgr91"><span class="sgr1">│ </span></span>     [1] <span class="sgr1">_require(</span><span class="sgr90">pkg</span>::Base.PkgId, <span class="sgr90">env</span>::Nothing<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1946</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [2] <span class="sgr1">__require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::Nothing<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1806</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [3] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [4] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [5] <span class="sgr1">_require_prelocked</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1797</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [6] <span class="sgr1">_require_prelocked</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1796</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [7] <span class="sgr1">run_extension_callbacks(</span><span class="sgr90">extid</span>::Base.ExtensionId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1289</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [8] <span class="sgr1">run_extension_callbacks(</span><span class="sgr90">pkgid</span>::Base.PkgId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1324</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [9] <span class="sgr1">run_package_callbacks(</span><span class="sgr90">modkey</span>::Base.PkgId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1158</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [10] <span class="sgr1">__require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1813</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [11] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [12] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [13] <span class="sgr1">_require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1797</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [14] <span class="sgr1">macro expansion</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1784</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [15] <span class="sgr1">macro expansion</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">lock.jl:267</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [16] <span class="sgr1">__require(</span><span class="sgr90">into</span>::Module, <span class="sgr90">mod</span>::Symbol<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1747</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [17] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [18] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [19] <span class="sgr1">require(</span><span class="sgr90">into</span>::Module, <span class="sgr90">mod</span>::Symbol<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1740</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [20] <span class="sgr1">include</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">Base.jl:495</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [21] <span class="sgr1">include_package_for_output(</span><span class="sgr90">pkg</span>::Base.PkgId, <span class="sgr90">input</span>::String, <span class="sgr90">depot_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">dl_load_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">load_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">concrete_deps</span>::Vector<span class="sgr90">{Pair{Base.PkgId, UInt128}}</span>, <span class="sgr90">source</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2216</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [22] top-level scope
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90"><span class="sgr4">stdin:3</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [23] <span class="sgr1">eval</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Core</span> <span class="sgr90">./<span class="sgr4">boot.jl:385</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [24] <span class="sgr1">include_string(</span><span class="sgr90">mapexpr</span>::typeof(identity), <span class="sgr90">mod</span>::Module, <span class="sgr90">code</span>::String, <span class="sgr90">filename</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2070</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [25] <span class="sgr1">include_string</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2080</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [26] <span class="sgr1">exec_options(</span><span class="sgr90">opts</span>::Base.JLOptions<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">client.jl:316</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [27] <span class="sgr1">_start()</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">client.jl:552</span></span>
-<span class="sgr91"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1295</span>
-<span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Module AccessorsLinearAlgebraExt with build ID ffffffff-ffff-ffff-0000-0115f1f64156 is missing from the cache.
-<span class="sgr33"><span class="sgr1">│ </span></span>This may mean AccessorsLinearAlgebraExt [6d540e18-2ad7-59a5-acf8-1761f4011e1b] does not support precompilation but is imported by a module that does.
-<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1942</span>
-<span class="sgr91"><span class="sgr1">┌ Error: </span></span>Error during loading of extension AccessorsLinearAlgebraExt of Accessors, use `Base.retry_load_extensions()` to retry.
-<span class="sgr91"><span class="sgr1">│ </span></span>  exception =
-<span class="sgr91"><span class="sgr1">│ </span></span>   1-element ExceptionStack:
-<span class="sgr91"><span class="sgr1">│ </span></span>   Declaring __precompile__(false) is not allowed in files that are being precompiled.
-<span class="sgr91"><span class="sgr1">│ </span></span>   Stacktrace:
-<span class="sgr91"><span class="sgr1">│ </span></span>     [1] <span class="sgr1">_require(</span><span class="sgr90">pkg</span>::Base.PkgId, <span class="sgr90">env</span>::Nothing<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1946</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [2] <span class="sgr1">__require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::Nothing<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1806</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [3] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [4] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [5] <span class="sgr1">_require_prelocked</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1797</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [6] <span class="sgr1">_require_prelocked</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1796</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [7] <span class="sgr1">run_extension_callbacks(</span><span class="sgr90">extid</span>::Base.ExtensionId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1289</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [8] <span class="sgr1">run_extension_callbacks(</span><span class="sgr90">pkgid</span>::Base.PkgId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1324</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>     [9] <span class="sgr1">run_package_callbacks(</span><span class="sgr90">modkey</span>::Base.PkgId<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1158</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [10] <span class="sgr1">__require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1813</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [11] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [12] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [13] <span class="sgr1">_require_prelocked(</span><span class="sgr90">uuidkey</span>::Base.PkgId, <span class="sgr90">env</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1797</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [14] <span class="sgr1">macro expansion</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1784</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [15] <span class="sgr1">macro expansion</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">lock.jl:267</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [16] <span class="sgr1">__require(</span><span class="sgr90">into</span>::Module, <span class="sgr90">mod</span>::Symbol<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1747</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [17] <span class="sgr1">#invoke_in_world#3</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:921</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [18] <span class="sgr1">invoke_in_world</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">essentials.jl:918</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [19] <span class="sgr1">require(</span><span class="sgr90">into</span>::Module, <span class="sgr90">mod</span>::Symbol<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:1740</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [20] <span class="sgr1">include</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">Base.jl:495</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [21] <span class="sgr1">include_package_for_output(</span><span class="sgr90">pkg</span>::Base.PkgId, <span class="sgr90">input</span>::String, <span class="sgr90">depot_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">dl_load_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">load_path</span>::Vector<span class="sgr90">{String}</span>, <span class="sgr90">concrete_deps</span>::Vector<span class="sgr90">{Pair{Base.PkgId, UInt128}}</span>, <span class="sgr90">source</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2216</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [22] top-level scope
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90"><span class="sgr4">stdin:3</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [23] <span class="sgr1">eval</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Core</span> <span class="sgr90">./<span class="sgr4">boot.jl:385</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [24] <span class="sgr1">include_string(</span><span class="sgr90">mapexpr</span>::typeof(identity), <span class="sgr90">mod</span>::Module, <span class="sgr90">code</span>::String, <span class="sgr90">filename</span>::String<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2070</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [25] <span class="sgr1">include_string</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">loading.jl:2080</span> [inlined]</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [26] <span class="sgr1">exec_options(</span><span class="sgr90">opts</span>::Base.JLOptions<span class="sgr1">)</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">client.jl:316</span></span>
-<span class="sgr91"><span class="sgr1">│ </span></span>    [27] <span class="sgr1">_start()</span>
-<span class="sgr91"><span class="sgr1">│ </span></span>   <span class="sgr90">    @</span> <span class="sgr90">Base</span> <span class="sgr90">./<span class="sgr4">client.jl:552</span></span>
-<span class="sgr91"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1295</span></code></pre><h2 id="Simple-Poweranalysis-Script"><a class="docs-heading-anchor" href="#Simple-Poweranalysis-Script">Simple Poweranalysis Script</a><a id="Simple-Poweranalysis-Script-1"></a><a class="docs-heading-anchor-permalink" href="#Simple-Poweranalysis-Script" title="Permalink"></a></h2><p>For a power analysis, we will repeatedly simulate data, and check whether we can find a significant effect.</p><p>We perform the power analysis on epoched data.</p><pre><code class="language-julia hljs">pvals = fill(NaN,100)
-@time for seed = eachindex(pvals)
+using Random</code></pre><h2 id="Simple-Poweranalysis-Script"><a class="docs-heading-anchor" href="#Simple-Poweranalysis-Script">Simple Poweranalysis Script</a><a id="Simple-Poweranalysis-Script-1"></a><a class="docs-heading-anchor-permalink" href="#Simple-Poweranalysis-Script" title="Permalink"></a></h2><p>For a power analysis, we will repeatedly simulate data, and check whether we can find a significant effect.</p><p>We perform the power analysis on epoched data.</p><pre><code class="language-julia hljs">pvals = fill(NaN, 100)
+@time for seed in eachindex(pvals)
     # Simulate data of 30 subjects
-    data,evts = UnfoldSim.predef_2x2(MersenneTwister(seed);
-                n_subjects=20, ## 30 subjects
-                overlap=(1,0), ## deactivate overlap
-                noiselevel=10,  ## add more noise to make it more challenging
-                return_epoched=true, ## saves us the epoching step
-                )
+    data, evts = UnfoldSim.predef_2x2(
+        MersenneTwister(seed);
+        n_subjects = 20, ## 30 subjects
+        overlap = (1, 0), ## deactivate overlap
+        noiselevel = 10,  ## add more noise to make it more challenging
+        return_epoched = true, ## saves us the epoching step
+    )
 
 
     # take the mean over a pre-specified timewindow
-    evts.y = dropdims(mean(data[40:60,:],dims=1),dims=(1))
+    evts.y = dropdims(mean(data[40:60, :, :], dims = 1), dims = (1))[:]
 
     # extract the two levels of condition A
-    evts_reduced = combine(groupby(evts,[:subject,:A]),:y=&gt;mean)
-    y_big = evts_reduced[evts_reduced.A .==&quot;a_big&quot;,:y_mean]
-    y_small = evts_reduced[evts_reduced.A .==&quot;a_small&quot;,:y_mean]
+    evts_reduced = combine(groupby(evts, [:subject, :A]), :y =&gt; mean)
+    y_big = evts_reduced[evts_reduced.A.==&quot;a_big&quot;, :y_mean]
+    y_small = evts_reduced[evts_reduced.A.==&quot;a_small&quot;, :y_mean]
 
     # calculate a one-sided t-test
-    pvals[seed] = pvalue(OneSampleTTest(y_big,y_small))
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> 11.290609 seconds (14.09 M allocations: 2.574 GiB, 5.17% gc time, 93.84% compilation time: 9% of which was recompilation)</code></pre><p>let&#39;s calculate the power</p><pre><code class="language-julia hljs">power = mean(pvals .&lt;0.05)*100</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">60.0</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../simulateERP/">« Simulate ERPs</a><a class="docs-footer-nextpage" href="../../reference/overview/">Overview: Toolbox Functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Monday 8 January 2024 15:51">Monday 8 January 2024</span>. Using Julia version 1.10.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    pvals[seed] = pvalue(OneSampleTTest(y_big, y_small))
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> 13.398690 seconds (21.94 M allocations: 3.370 GiB, 4.38% gc time, 90.80% compilation time: 8% of which was recompilation)</code></pre><p>let&#39;s calculate the power</p><pre><code class="language-julia hljs">power = mean(pvals .&lt; 0.05) * 100</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">70.0</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../simulateERP/">« Simulate ERPs</a><a class="docs-footer-nextpage" href="../../reference/overview/">Overview: Toolbox Functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Thursday 18 January 2024 13:15">Thursday 18 January 2024</span>. Using Julia version 1.10.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
