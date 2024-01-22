@@ -77,4 +77,32 @@
         @test size(design) == (3 * 5 * 2,)
     end
 
+    @testset "MultiSubjectDesign without conditions" begin
+        # Define number of subjects and items
+        n_subjects = 3
+        n_items = 5
+
+        # Create a multi-subject design without any conditions
+        design_multi = MultiSubjectDesign(; n_subjects = n_subjects, n_items = n_items)
+
+        # Create the events data frame based on the design defined above
+        events_multi = generate(design_multi)
+
+        # Test that there are only subject and item columns (no condition columns) in the events df
+        @test names(events_multi) == ["subject", "item"]
+
+        # Test that the total length of the events df is the number of subjects times
+        # the number of items since every item occurs in every subject
+        @test size(events_multi, 1) == n_subjects * n_items
+
+        # Test that all subjects and items appear in the events df (and also not more)
+        @test length(unique(events_multi.subject)) == n_subjects
+        @test length(unique(events_multi.item)) == n_items
+
+        # Compute number of items per subject
+        n_items_per_subject = combine(groupby(events_multi, :subject), :item => length)
+        # Check that all subjects have the same number of items (and this number equals n_items)
+        @test all(.==(n_items, n_items_per_subject.item_length))
+    end
+
 end
