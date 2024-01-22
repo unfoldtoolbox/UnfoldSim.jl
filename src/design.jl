@@ -89,8 +89,6 @@ function generate(expdesign::MultiSubjectDesign)
 
     @assert all(isnothing.(allconditions)) ||
             :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
-    #@assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
-
 
     data = DataFrame(
         MixedModelsSim.simdat_crossed(
