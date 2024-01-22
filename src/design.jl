@@ -86,7 +86,10 @@ function generate(expdesign::MultiSubjectDesign)
     # check that :dv is not in any condition
     allconditions =
         [expdesign.subjects_between, expdesign.items_between, expdesign.both_within]
-    @assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
+
+    @assert all(isnothing.(allconditions)) ||
+            :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
+    #@assert :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
 
 
     data = DataFrame(
