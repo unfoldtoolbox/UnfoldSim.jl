@@ -36,6 +36,8 @@ Number of trials / rows in `generate(design)` depend on the full factorial of yo
 
 To increase the number of repetitions simply use `RepeatDesign(SingleSubjectDesign(...),5)`
 
+If conditions are omitted (or set to `nothing`), a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
+
 tipp: check the resulting dataframe using `generate(design)`
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
@@ -53,16 +55,22 @@ Generates full-factorial DataFrame of expdesign.conditions
 
 Afterwards applies expdesign.tableModifyFun.
 
+If conditions is `nothing`, a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
+
+
 julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate(d)
 """
 function generate(expdesign::SingleSubjectDesign)
+	if isnothing(expdesign.conditions)
+		evts = DataFrame(:dummy=>[:dummy])
+	else
     # we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
     # of named tuples for MixedModelsSim.factorproduct function.
     evts =
         factorproduct(((; k => v) for (k, v) in pairs(expdesign.conditions))...) |>
         DataFrame
-
+	end
     # by default does nothing
     return expdesign.tableModifyFun(evts)
 end
