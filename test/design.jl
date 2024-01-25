@@ -103,6 +103,30 @@
         n_items_per_subject = combine(groupby(events_multi, :subject), :item => length)
         # Check that all subjects have the same number of items (and this number equals n_items)
         @test all(.==(n_items, n_items_per_subject.item_length))
+
+        # Simulate some data with a multi-subject design without conditions
+
+        # Define a component that only has a 1 as its basis to facilitate counting the peaks
+        component = MixedModelComponent(;
+            basis = [1],
+            formula = @formula(0 ~ 1 + (1 | subject)),
+            β = [5],
+            σs = Dict(:subject => [1]),
+        )
+
+        # Define an onset without Overlap
+        onset = UniformOnset(; width = 10, offset = 3)
+
+        # Simulate data without noise
+        data, events = simulate(StableRNG(1), design_multi, component, onset, NoNoise())
+
+        # Check that the simulated data has as many columns as subjects
+        @test size(data, 2) == n_subjects
+
+        # Check that (for each subject) the data has as many peaks (i.e. events) as set in n_items
+        for s = 1:n_subjects
+            @test count(x -> .!iszero(x), data[:, s]) == n_items
+        end
     end
 
 end
