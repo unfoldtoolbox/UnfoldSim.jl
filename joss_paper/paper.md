@@ -61,21 +61,21 @@ To generate complex activations, it is possible to specify a vector of `<:Abstra
 The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, UniformOnset and LogNormalOnset are implemented. By specifying the parameters of the onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
 \autoref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions.
 
-![Caption for example figure.\label{fig_onset_distributions}](plots/onset_distributions.png){width=90%}
+![Caption for example figure.\label{fig_onset_distributions}](plots/onset_distributions.pdf){width=90%}
 
 ## Concrete Noise
 UnfoldSim.jl offers different noise types: "White", "Red" and "Pink" and exponentially decaying autoregressive noise (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise, and noise based on actual EEG data.
 
-![Caption for example figure.\label{fig_noise_types}](plots/noise_types.pdf){width=90%}
+![Caption for example figure.\label{fig_noise_types}](plots/noise_types.pdf)
 
 # Related tools
-Not many toolboxes for simulating EEG data exist. Nearly all toolboxes have been developed in MATLAB (e.g. EEGg - Vaziri, SimMEEG - Herdman 2021, SEED-G-Toolbox Anzolin 2021) but are largely abandoned. MNE-Python provides basic tutorials to simulate EEG data as well, but no dedicated functionality. Thus we highlight in the following two other excellent matlab-based tools: Brainstorm (Tadel 2021) and SEREEGA (Krol 2017). Both toolboxes are based in matlab and provide forward-simulation of EEG signals. Brainstorm especially excells at the visualization of the forward-model, and provides interesting capabilities to generate ERPs based on phase-aligned oscillations. SEREEGA provides the most complete simulation capabilities with a greater focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification, and more realistic noise simulation (e.g. via random sources).
+Not many toolboxes for simulating EEG data exist. Nearly all toolboxes we are aware of have been developed in proprietary MATLAB, and most have not received any updates in last years or updates at all, and have very specific applications (e.g. EEGg [@vaziri2023eegg], SimMEEG [@herdman2021simmeeg], SEED-G [@anzolin2021seed], EEGSourceSim [@barzegaran2019eegsourcesim], simBCI [@lindgren2018simbci]). 
 
-In relation to these tools, Unfold uniquely focuses on the regression-ERP aspect, providing functions to simulate multi-condition experiments, uniquely allows to model hierarchical, that is, multi-subject EEG datasets, and offers unique support to model continuous EEG data with overlap events.
+In the following, we highlight two actively developed MATLAB-based tools: Brainstorm [@tadel2011brainstorm] and SEREEGA [@krol2018sereega]. Both toolboxes are based in MATLAB and provide forward-simulation of EEG signals. Brainstorm especially excels at the visualization of the forward model, and provides interesting capabilities to generate ERPs based on phase-aligned oscillations. SEREEGA provides the most complete simulation capabilities with a greater focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification, and more realistic noise simulation (e.g. via random sources). 
 
-Due to its different focus, UnfoldSim.jl currently lacks advanced visualizations of leadfields and does not provide any tools for simulating oscillations or phase-based simulation of ERPs.
+In Python, MNE-Python [@GramfortEtAl2013a] provides some tutorials to simulate EEG data, but the functionality is very basic. HNN-Core [@Jas2023] can simulate realistic EEG data, but as it is based on neurocortical column models and dynamics, its usage is very detailed, realistic and involved.
 
-
+In contrast to these tools, UnfoldSim.jl has a higher-level perspective, uniquely focusing on the regression-ERP aspect. UnfoldSim.jl provides functions to simulate multi-condition experiments, uniquely allows for modeling hierarchical, that is, multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events.
 
 # Other notes
 SEEREGA - Matlab, best in class, no continuous data
