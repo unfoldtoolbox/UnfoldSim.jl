@@ -1,26 +1,42 @@
-
 ---
-title: 'Unfold.jl: Regression models for Cognitive Neuroscience'
+title: 'UnfoldSim.jl: A toolbox for simulating continuous event-based time series data for EEG and beyond'
+
 tags:
   - Julia
   - EEG
+  - ERPs
+  - evoked
   - neuroimaging
+  - simulation
+  - time-series
+  - regression ERPs
 authors:
+  - name: Judith Schepers
+	orcid:  0009-0000-9270-730X
+	equal-contrib: false
+	affiliation: "1" # (Multiple affiliations must be quoted)
+  - name: Luis Lips
+	equal-contrib: false
+	affiliation: "1" # (Multiple affiliations must be quoted)
+  - name: Maanik Marathe
+	equal-contrib: false
+	affiliation: "1" # (Multiple affiliations must be quoted)
   - name: Benedikt V. Ehinger
-    orcid:  0000-0002-6276-3332 
-    equal-contrib: false
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  
+	orcid:  0000-0002-6276-3332
+	equal-contrib: false
+	affiliation: "1, 2" # (Multiple affiliations must be quoted)
+ 
 affiliations:
- - name: Stuttgart Center for Simulation Science, University of Stuttgart, Germany
+ - name: Institute for Visualisation and Interactive Systems, University of Stuttgart, Germany
    index: 1
- - name: Institute for Visualization and Interactive Systems, University of Stuttgart, Germany
+ - name: Stuttgart Center for Simulation Science, University of Stuttgart, Germany
    index: 2
-date: 06 November 2023
+date: 31 January 2024
 bibliography: paper.bib
-
+Schepers, J., Lips, L., Marathe, M., & Ehinger, B. UnfoldSim.jl [Computer software]. https://github.com/unfoldtoolbox/UnfoldSim.jl
 
 ---
+
 # Summary
 
 UnfoldSim.jl is used to simulate multivariate timeseries, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. Unfold.jl simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. UnfoldSim.jl is modular, providing intuitive entrance points for custom requirements. For instance, support for other modalities, e.g. single-voxel fMRI or pupil dilation signals is easily provided.
