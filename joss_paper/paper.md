@@ -5,7 +5,7 @@ tags:
   - Julia
   - EEG
   - ERPs
-  - evoked
+  - evoked potentials
   - neuroimaging
   - simulation
   - time-series
@@ -45,21 +45,25 @@ In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze 
 While other EEG simulation toolboxes exist, they each have limitations: they are dominantly MATLAB-based, they do not simulate continuous EEG, and they offer little support for designs more complex than two conditions or with non-linear effects.
 
 # Functionality
-The toolbox provides four abstract components: AbstractDesign, AbstractComponent, AbstractOnset and AbstractNoise.
+The toolbox provides four abstract types: `AbstractDesign`, `AbstractComponent`, `AbstractOnset` and `AbstractNoise`.
 
 ## Concrete Designs
-Currently we support a single, and a multi-subject design. They are used to generate an experimental design containing the conditions and levels of all predictors. Randomisation is possible via a user-defined function which is applied after design-generation. Designs could be nested, like our RepeatDesign which simply repeats the generated design multiple times.
+Currently, we support a single and a multi-subject design. They are used to generate an experimental design containing the conditions and levels of all predictors. The multi-subject design uses the MixedModelsSim.jl toolbox [@phillip_alday_2022_7407741] and allows a flexible specification of the random-effects structure by indicating which predictors are within- or between-subject (or item). Tailored randomisation is possible via a user-specified function, which is applied after design generation. Designs can be encapsulated, for instance, the RepeatDesign-type which repeats the generated event tables multiple times, thus generating new trials. Currently, only balanced designs are implemented, i.e. all possible combinations of predictor levels have the same number of trials. However, [a tutorial on how to implement a new design](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/generated/HowTo/newDesign) for imbalanced datasets is provided.
 
 ## Concrete Components
-We provide a LinearModelComponent and a MixedModelComponent for multi-subject simulation respectively. For the components model-formulae, fixed-effects ($\beta s$) and random effects need to be specified. Further the coding-schema can be provided following StatsModels.jl. The component MultichannelComponent can be applied to any component and allows for projecting the simulated source-component to multi-channel electrodes via a headmodel. Using Artifacts.jl we provide on-demand access to the Hartmut (cite) model.
+UnfoldSim.jl provides a LinearModelComponent and a MixedModelComponent for multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is multiplied with the user-defined coefficient of a regression model. The user specifies a basis function for the component by either providing a custom vector or choosing one of the prespecified bases. For example, the toolbox provides simplified versions of typical EEG components e.g. N170 which are implemented as temporally shifted hanning windows. Further, in the components’ model formulae, fixed-effects ($\betas$) and random effects  (MultiSubject designs only) need to be specified.
+
+Each component can be nested in a MultichannelComponent, which, using a forward headmodel, projects the simulated source component to the multi-channel electrode space. Using Artifacts.jl we provide on-demand access to the Hartmut (#TODO cite) model. 
+
+To generate complex activations, it is possible to specify a vector of `<:AbstractComponents`.
+
+## Concerete Onsets
+The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, UniformOnset and LogNormalOnset are implemented. By specifying the parameters of the onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
+\ref{fig:onset_distributions} illustrates the parameterization of the two implemented onset distributions. \autoref{fig:onset_distributions}
+![Caption for example figure.\label{fig:onset_distributions}](plots/onset_distributions.pdf)
 
 ## Concrete Noise
 We provide different noise-types "White","Red" and "Pink", but also an exponentially declining Autoregressive noise type.
-
-## Concerete Onsets
-The onsets define the distance between events for the continuous EEG. Currently UniformOnset and LogNormalOnset are implemented.
-
-
 
 # Related tools
 Not many toolboxes for simulating EEG data exist. Nearly all toolboxes have been developed in MATLAB (e.g. EEGg - Vaziri, SimMEEG - Herdman 2021, SEED-G-Toolbox Anzolin 2021) but are largely abandoned. MNE-Python provides basic tutorials to simulate EEG data as well, but no dedicated functionality. Thus we highlight in the following two other excellent matlab-based tools: Brainstorm (Tadel 2021) and SEREEGA (Krol 2017). Both toolboxes are based in matlab and provide forward-simulation of EEG signals. Brainstorm especially excells at the visualization of the forward-model, and provides interesting capabilities to generate ERPs based on phase-aligned oscillations. SEREEGA provides the most complete simulation capabilities with a greater focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification, and more realistic noise simulation (e.g. via random sources).
