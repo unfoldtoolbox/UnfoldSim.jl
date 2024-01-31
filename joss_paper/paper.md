@@ -59,9 +59,8 @@ To generate complex activations, it is possible to specify a vector of `<:Abstra
 
 ## Concerete Onsets
 The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, UniformOnset and LogNormalOnset are implemented. By specifying the parameters of the onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
-\ref{fig:onset_distributions} illustrates the parameterization of the two implemented onset distributions. \autoref{fig:onset_distributions2}
-![Caption for example figure.\label{fig:onset_distributions}](plots/onset_distributions.pdf){width=90%}
-![Caption for example figure.]{label="fig:onset_distributions2"}(plots/onset_distributions.pdf){width=90%}
+\ref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions. \autoref{fig_onset_distributions}
+![Caption for example figure.\label{fig_onset_distributions}](plots/onset_distributions.pdf){width=90%}
 
 ## Concrete Noise
 We provide different noise-types "White","Red" and "Pink", but also an exponentially declining Autoregressive noise type.
