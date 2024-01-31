@@ -14,17 +14,17 @@ authors:
   - name: Judith Schepers
 	orcid:  0009-0000-9270-730X
 	equal-contrib: false
-	affiliation: "1" # (Multiple affiliations must be quoted)
+	affiliation: "1"
   - name: Luis Lips
 	equal-contrib: false
-	affiliation: "1" # (Multiple affiliations must be quoted)
+	affiliation: "1"
   - name: Maanik Marathe
 	equal-contrib: false
-	affiliation: "1" # (Multiple affiliations must be quoted)
+	affiliation: "1"
   - name: Benedikt V. Ehinger
 	orcid:  0000-0002-6276-3332
 	equal-contrib: false
-	affiliation: "1, 2" # (Multiple affiliations must be quoted)
+	affiliation: "1, 2"
  
 affiliations:
  - name: Institute for Visualisation and Interactive Systems, University of Stuttgart, Germany
@@ -37,10 +37,12 @@ bibliography: paper.bib
 
 # Summary
 
-UnfoldSim.jl is used to simulate multivariate timeseries, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. Unfold.jl simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. UnfoldSim.jl is modular, providing intuitive entrance points for custom requirements. For instance, support for other modalities, e.g. single-voxel fMRI or pupil dilation signals is easily provided.
+UnfoldSim.jl is a Julia package used to simulate multivariate time series, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. UnfoldSim.jl then simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. UnfoldSim.jl is modular, providing intuitive entrance points for individual customizations. The user can implement custom designs, components, onset distributions or noise types to tailor the toolbox to their needs. This allows support even for other modalities, e.g. single-voxel fMRI or pupil dilation signals.
 
 # Statement of Need
-Simulated EEG data is necessary to test preprocessing and analysis tools, to illustrate issues and to test functions. While other simulation tools exist, they are dominantly based in Matlab (below) and they do not adress our unique challenges and requirements. In our work (e.g. Ehinger & Dimigen 2019), we focus in regression-based deconvolution of ERPs (Smith & Kutas 2015 ab). In short, multiple-regression is used for linear overlap correction, non-linear (hierarchical) effects fitting (similar to GAMMs, Wood et al), often applied to use-cases where events overlap in time (e.g. stimulus and button press or consecutive eye-fixations). The tools used up to now (e.g. mTRF-toolbox, Unfold, Unfold.jl, fitgrid, - add citations!)
+In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we need to simulate such kind of data: Simulated EEG data is necessary to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows.
+
+While other EEG simulation toolboxes exist, they each have limitations: they are dominantly MATLAB-based, they do not simulate continuous EEG, and they offer little support for designs more complex than two conditions or with non-linear effects.
 
 # Functionality
 The toolbox provides four abstract components: AbstractDesign, AbstractComponent, AbstractOnset and AbstractNoise.
