@@ -68,6 +68,77 @@ UnfoldSim.jl offers different noise types: "White", "Red" and "Pink" and exponen
 
 ![Caption for example figure.\label{fig_noise_types}](plots/noise_types.pdf)
 
+# Simulation example
+In the following, one can find an example of how to use UnfoldSim.jl to simulate continuous EEG data. Additional examples can be found in the [UnfoldSim.jl documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/).
+
+1. We specify an experimental design with one subject in two experimental conditions including a continuous variable with 10 levels. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
+
+```julia
+design =
+	SingleSubjectDesign(;
+    	conditions = Dict(
+        	:condition => ["car", "face"],
+        	:continuous => range(-5, 5, length = 10),
+    	),
+	) |> x -> RepeatDesign(x, 100);
+```
+
+2. Next, we create a signal consisting of two different components. For the first component, we use the prespecified N170 base and include a condition effect of the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
+
+```julia
+n1 = LinearModelComponent(;
+	basis = n170(),
+	formula = @formula(0 ~ 1 + condition),
+	β = [5, -3],
+);
+
+p3 = LinearModelComponent(;
+	basis = p300(),
+	formula = @formula(0 ~ 1 + continuous + continuous^2),
+	β = [5, 1, 0.2],
+);
+
+components = [n1, p3]
+```
+
+3. In the next step, we specify an onset distribution i.e. in this case a uniform distribution with width = 0 and offset = 1000 which means that the inter-event distance will be exactly 1000 samples.
+
+```julia
+onset = UniformOnset(; width = 0, offset = 1000)
+```
+
+4. As the last ingredient, we specify the noise type i.e. in this case Pink noise.
+
+```julia
+noise = PinkNoise()
+```
+
+Finally, we can combine all the ingredients and simulate data. To make the simulation reproducible, one can specify a random generator.
+
+```julia
+eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise);
+```
+
+To validate the simulation results, we use Unfold.jl [@Ehinger_Unfold_an_integrated] to fit a regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a linear predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
+
+```julia
+m = fit(
+	UnfoldModel,
+	Dict( Any => (
+        	@formula(0 ~ 1 + condition + spl(continuous, 4)),
+        	firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
+    	)),
+	events_df,
+	eeg_data,
+);
+```
+
+In subplot A of \autoref{fig_example_coefficients_effects}, one can see the model estimates for the different coefficients and as intended there is a condition effect in the first negative component and an effect of the continuous variable on the second (positive) component. The relation between the levels of the continuous variable and the scaling of the second component is even clearer visible in subplot B of \autoref{fig_example_coefficients_effects} which depicts the estimated marginal effects of the predictors. Instead of showing the regression coefficients, we can evaluate the estimated function at specific values of the continuous variable. 
+
+![Caption for example figure.\label{fig_example_coefficients_effects}](plots/fig_example2_coefficients_effects.pdf)
+
+As shown in this example, UnfoldSim.jl and Unfold.jl can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.
+
 # Related tools
 Not many toolboxes for simulating EEG data exist. Nearly all toolboxes we are aware of have been developed in proprietary MATLAB, and most have not received any updates in last years or updates at all, and have very specific applications (e.g. EEGg [@vaziri2023eegg], SimMEEG [@herdman2021simmeeg], SEED-G [@anzolin2021seed], EEGSourceSim [@barzegaran2019eegsourcesim], simBCI [@lindgren2018simbci]). 
 
