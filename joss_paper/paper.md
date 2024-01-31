@@ -59,12 +59,14 @@ To generate complex activations, it is possible to specify a vector of `<:Abstra
 
 ## Concerete Onsets
 The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, UniformOnset and LogNormalOnset are implemented. By specifying the parameters of the onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
-\ref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions. \autoref{fig_onset_distributions}
+\autoref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions.
 
 ![Caption for example figure.\label{fig_onset_distributions}](plots/onset_distributions.png){width=90%}
 
 ## Concrete Noise
-We provide different noise-types "White","Red" and "Pink", but also an exponentially declining Autoregressive noise type.
+UnfoldSim.jl offers different noise types: "White", "Red" and "Pink" and exponentially decaying autoregressive noise (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise, and noise based on actual EEG data.
+
+![Caption for example figure.\label{fig_noise_types}](plots/noise_types.pdf){width=90%}
 
 # Related tools
 Not many toolboxes for simulating EEG data exist. Nearly all toolboxes have been developed in MATLAB (e.g. EEGg - Vaziri, SimMEEG - Herdman 2021, SEED-G-Toolbox Anzolin 2021) but are largely abandoned. MNE-Python provides basic tutorials to simulate EEG data as well, but no dedicated functionality. Thus we highlight in the following two other excellent matlab-based tools: Brainstorm (Tadel 2021) and SEREEGA (Krol 2017). Both toolboxes are based in matlab and provide forward-simulation of EEG signals. Brainstorm especially excells at the visualization of the forward-model, and provides interesting capabilities to generate ERPs based on phase-aligned oscillations. SEREEGA provides the most complete simulation capabilities with a greater focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification, and more realistic noise simulation (e.g. via random sources).
