@@ -53,14 +53,14 @@ Currently, we support a single and a multi-subject design. They are used to gene
 ## Concrete Components
 UnfoldSim.jl provides a LinearModelComponent and a MixedModelComponent for multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is multiplied with the user-defined coefficient of a regression model. The user specifies a basis function for the component by either providing a custom vector or choosing one of the prespecified bases. For example, the toolbox provides simplified versions of typical EEG components e.g. N170 which are implemented as temporally shifted hanning windows. Further, in the components’ model formulae, fixed-effects ($\beta s$) and random effects  (MultiSubject designs only) need to be specified.
 
-Each component can be nested in a MultichannelComponent, which, using a forward headmodel, projects the simulated source component to the multi-channel electrode space. Using Artifacts.jl we provide on-demand access to the Hartmut (#TODO cite) model. 
+Each component can be nested in a MultichannelComponent, which, using a forward headmodel, projects the simulated source component to the multi-channel electrode space. Using Artifacts.jl we provide on-demand access to the Hartmut [@harmening2022hartmut] model. 
 
 To generate complex activations, it is possible to specify a vector of `<:AbstractComponents`.
 
 ## Concerete Onsets
 The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, UniformOnset and LogNormalOnset are implemented. By specifying the parameters of the onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
 \ref{fig:onset_distributions} illustrates the parameterization of the two implemented onset distributions. \autoref{fig:onset_distributions}
-![Caption for example figure.\label{fig:onset_distributions}](plots/onset_distributions.pdf)
+![Caption for example figure.\label{fig:onset_distributions}](plots/onset_distributions.pdf){width=50%}
 
 ## Concrete Noise
 We provide different noise-types "White","Red" and "Pink", but also an exponentially declining Autoregressive noise type.
