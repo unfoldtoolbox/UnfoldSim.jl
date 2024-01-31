@@ -33,7 +33,6 @@ affiliations:
    index: 2
 date: 31 January 2024
 bibliography: paper.bib
-Schepers, J., Lips, L., Marathe, M., & Ehinger, B. UnfoldSim.jl [Computer software]. https://github.com/unfoldtoolbox/UnfoldSim.jl
 ---
 
 # Summary
