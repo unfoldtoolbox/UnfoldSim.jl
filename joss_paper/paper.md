@@ -71,7 +71,7 @@ UnfoldSim.jl offers different noise types: "White", "Red" and "Pink" and exponen
 # Simulation example
 In the following, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/).
 
-1. We specify an experimental design with one subject in two experimental conditions including a continuous variable with 10 levels. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
+1) We specify an experimental design with one subject in two experimental conditions including a continuous variable with 10 levels. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 
 ```julia
 design =
@@ -84,6 +84,7 @@ design =
 ```
 
 2. Next, we create a signal consisting of two different components. For the first component, we use the prespecified N170 base and include a condition effect of the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
+
 ```julia
 n1 = LinearModelComponent(;
 	basis = n170(),
@@ -99,6 +100,7 @@ p3 = LinearModelComponent(;
 
 components = [n1, p3]
 ```
+
 3. In the next step, we specify an onset distribution i.e. in this case a uniform distribution with width = 0 and offset = 1000 which means that the inter-event distance will be exactly 1000 samples.
 
 ```julia
@@ -146,60 +148,44 @@ In Python, `MNE-Python` [@GramfortEtAl2013a] provides some tutorials to simulate
 
 In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. `UnfoldSim.jl` provides functions to simulate multi-condition experiments, uniquely allows for modeling hierarchical, that is, multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events.
 
-# Other notes
-SEEREGA - Matlab, best in class, no continuous data
-BRAINSTORM - Matlab, good for forward-model simulation
-EEGg - Vaziri - Matlab, very limited functionality
-SimMEEG - Herdman 2021 -  Matlab, Discontinued
-SEED-G-toolbox - Anzolin 2021 - Matlab, Discontinued, 
-
-MNE-python - matlab, only basic tutorials
-
-## JOSS Stuff
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
-
-Double dollars make self-standing equations:
-
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-Test
-@Documenter_jl
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
-
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany´s Excellence Strategy – EXC 2075 – 390740016.
+
+The authors thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers.
+
+# Package references
+Please note that we only mention the main dependencies here, but the dependencies of the dependencies can be found in the respective `Manifest.toml` files.
+
+**Julia** [@Julia-2017]
+**DSP.jl**
+DataFrames.jl
+Distributions.jl
+Documenter.jl
+FileIO.jl (?)
+Glob.jl  (?)
+HDF5.jl  (?)
+HypothesisTests.jl
+ImageFiltering.jl
+InteractiveUtils.jl (?)
+LinearAlgebra.jl (?)
+Literate.jl
+LiveServer.jl
+Makie.jl
+MixedModels.jl
+MixedModelsSim.jl
+Parameters.jl (?)
+ProjectRoot.jl
+Random.jl (?)
+SignalAnalysis.jl
+Statistics.jl (?)
+StableRNGs.jl (?)
+StatsBase.jl (?)
+StatsModels.jl
+Test.jl (?)
+TimerOutputs.jl (?)
+ToeplitzMatrices.jl
+Unfold.jl
+UnfoldMakie.jl
 
 # References
