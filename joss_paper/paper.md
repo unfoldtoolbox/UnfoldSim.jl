@@ -37,7 +37,7 @@ bibliography: paper.bib
 
 # Summary
 
-UnfoldSim.jl is a Julia package used to simulate multivariate time series, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. UnfoldSim.jl then simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. UnfoldSim.jl is modular, providing intuitive entrance points for individual customizations. The user can implement custom designs, components, onset distributions or noise types to tailor the toolbox to their needs. This allows support even for other modalities, e.g. single-voxel fMRI or pupil dilation signals.
+`UnfoldSim.jl` is a Julia package used to simulate multivariate time series, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. `UnfoldSim.jl` then simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. `UnfoldSim.jl` is modular, providing intuitive entrance points for individual customizations. The user can implement custom designs, components, onset distributions or noise types to tailor the toolbox to their needs. This allows support even for other modalities, e.g. single-voxel fMRI or pupil dilation signals.
 
 # Statement of Need
 In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we need to simulate such kind of data: Simulated EEG data is necessary to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows.
@@ -48,17 +48,17 @@ While other EEG simulation toolboxes exist, they each have limitations: they are
 The toolbox provides four abstract types: `AbstractDesign`, `AbstractComponent`, `AbstractOnset` and `AbstractNoise`.
 
 ## Concrete Designs
-Currently, we support a single and a multi-subject design. They are used to generate an experimental design containing the conditions and levels of all predictors. The multi-subject design uses the MixedModelsSim.jl toolbox [@phillip_alday_2022_7407741] and allows a flexible specification of the random-effects structure by indicating which predictors are within- or between-subject (or item). Tailored randomisation is possible via a user-specified function, which is applied after design generation. Designs can be encapsulated, for instance, the RepeatDesign-type which repeats the generated event tables multiple times, thus generating new trials. Currently, only balanced designs are implemented, i.e. all possible combinations of predictor levels have the same number of trials. However, [a tutorial on how to implement a new design](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/generated/HowTo/newDesign) for imbalanced datasets is provided.
+Currently, we support a single and a multi-subject design. They are used to generate an experimental design containing the conditions and levels of all predictors. The multi-subject design uses the `MixedModelsSim.jl` toolbox [@phillip_alday_2022_7407741] and allows a flexible specification of the random-effects structure by indicating which predictors are within- or between-subject (or item). Tailored randomisation is possible via a user-specified function, which is applied after design generation. Designs can be encapsulated, for instance, the `RepeatDesign` type which repeats the generated event tables multiple times, thus generating new trials. Currently, only balanced designs are implemented, i.e. all possible combinations of predictor levels have the same number of trials. However, [a tutorial on how to implement a new design](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/generated/HowTo/newDesign) for imbalanced datasets is provided.
 
 ## Concrete Components
-UnfoldSim.jl provides a LinearModelComponent and a MixedModelComponent for multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is multiplied with the user-defined coefficient of a regression model. The user specifies a basis function for the component by either providing a custom vector or choosing one of the prespecified bases. For example, the toolbox provides simplified versions of typical EEG components e.g. N170 which are implemented as temporally shifted hanning windows. Further, in the components’ model formulae, fixed-effects ($\beta s$) and random effects  (MultiSubject designs only) need to be specified.
+`UnfoldSim.jl` provides a `LinearModelComponent` and a `MixedModelComponent` for multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is multiplied with the user-defined coefficient of a regression model. The user specifies a basis function for the component by either providing a custom vector or choosing one of the prespecified bases. For example, the toolbox provides simplified versions of typical EEG components e.g. N170 which are implemented as temporally shifted hanning windows. Further, in the components’ model formulae, fixed-effects ($\beta s$) and random effects  (`MultiSubjectDesign`s only) need to be specified.
 
-Each component can be nested in a MultichannelComponent, which, using a forward headmodel, projects the simulated source component to the multi-channel electrode space. Using Artifacts.jl we provide on-demand access to the Hartmut [@harmening2022hartmut] model. 
+Each component can be nested in a `MultichannelComponent`, which, using a forward headmodel, projects the simulated source component to the multi-channel electrode space. Using `Artifacts.jl` we provide on-demand access to the HArtMuT [@harmening2022hartmut] model. 
 
 To generate complex activations, it is possible to specify a vector of `<:AbstractComponents`.
 
 ## Concerete Onsets
-The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, UniformOnset and LogNormalOnset are implemented. By specifying the parameters of the onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
+The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, `UniformOnset` and `LogNormalOnset` are implemented. By specifying the parameters of the onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
 \autoref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions.
 
 ![Caption for example figure.\label{fig_onset_distributions}](plots/onset_distributions.pdf){width=90%}
@@ -69,7 +69,7 @@ UnfoldSim.jl offers different noise types: "White", "Red" and "Pink" and exponen
 ![Caption for example figure.\label{fig_noise_types}](plots/noise_types.pdf)
 
 # Simulation example
-In the following, one can find an example of how to use UnfoldSim.jl to simulate continuous EEG data. Additional examples can be found in the [UnfoldSim.jl documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/).
+In the following, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/).
 
 1. We specify an experimental design with one subject in two experimental conditions including a continuous variable with 10 levels. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 
@@ -119,7 +119,7 @@ Finally, we can combine all the ingredients and simulate data. To make the simul
 eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise);
 ```
 
-To validate the simulation results, we use Unfold.jl [@Ehinger_Unfold_an_integrated] to fit a regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a linear predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
+To validate the simulation results, we use `Unfold.jl` [@Ehinger_Unfold_an_integrated] to fit a regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a linear predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
 
 ```julia
 m = fit(
@@ -135,18 +135,18 @@ m = fit(
 
 In subplot A of \autoref{fig_example_coefficients_effects}, one can see the model estimates for the different coefficients and as intended there is a condition effect in the first negative component and an effect of the continuous variable on the second (positive) component. The relation between the levels of the continuous variable and the scaling of the second component is even clearer visible in subplot B of \autoref{fig_example_coefficients_effects} which depicts the estimated marginal effects of the predictors. Instead of showing the regression coefficients, we can evaluate the estimated function at specific values of the continuous variable. 
 
-![Caption for example figure.\label{fig_example_coefficients_effects}](plots/fig_example2_coefficients_effects.pdf)
+![Caption for example figure.\label{fig_example_coefficients_effects}](plots/example2_coefficients_effects.pdf)
 
-As shown in this example, UnfoldSim.jl and Unfold.jl can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.
+As shown in this example, `UnfoldSim.jl` and `Unfold.jl` can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.
 
 # Related tools
-Not many toolboxes for simulating EEG data exist. Nearly all toolboxes we are aware of have been developed in proprietary MATLAB, and most have not received any updates in last years or updates at all, and have very specific applications (e.g. EEGg [@vaziri2023eegg], SimMEEG [@herdman2021simmeeg], SEED-G [@anzolin2021seed], EEGSourceSim [@barzegaran2019eegsourcesim], simBCI [@lindgren2018simbci]). 
+Not many toolboxes for simulating EEG data exist. Nearly all toolboxes we are aware of have been developed in proprietary MATLAB, and most have not received any updates in last years or updates at all, and have very specific applications (e.g. `EEGg` [@vaziri2023eegg], `SimMEEG` [@herdman2021simmeeg], `SEED-G` [@anzolin2021seed], `EEGSourceSim` [@barzegaran2019eegsourcesim], `simBCI` [@lindgren2018simbci]). 
 
-In the following, we highlight two actively developed MATLAB-based tools: Brainstorm [@tadel2011brainstorm] and SEREEGA [@krol2018sereega]. Both toolboxes are based in MATLAB and provide forward-simulation of EEG signals. Brainstorm especially excels at the visualization of the forward model, and provides interesting capabilities to generate ERPs based on phase-aligned oscillations. SEREEGA provides the most complete simulation capabilities with a greater focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification, and more realistic noise simulation (e.g. via random sources). 
+In the following, we highlight two actively developed MATLAB-based tools: `Brainstorm` [@tadel2011brainstorm] and `SEREEGA` [@krol2018sereega]. Both toolboxes are based in MATLAB and provide forward-simulation of EEG signals. `Brainstorm` especially excels at the visualization of the forward model, and provides interesting capabilities to generate ERPs based on phase-aligned oscillations. `SEREEGA` provides the most complete simulation capabilities with a greater focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification, and more realistic noise simulation (e.g. via random sources). 
 
-In Python, MNE-Python [@GramfortEtAl2013a] provides some tutorials to simulate EEG data, but the functionality is very basic. HNN-Core [@Jas2023] can simulate realistic EEG data, but as it is based on neurocortical column models and dynamics, its usage is very detailed, realistic and involved.
+In Python, `MNE-Python` [@GramfortEtAl2013a] provides some tutorials to simulate EEG data, but the functionality is very basic. `HNN-Core` [@Jas2023] can simulate realistic EEG data, but as it is based on neurocortical column models and dynamics, its usage is very detailed, realistic and involved.
 
-In contrast to these tools, UnfoldSim.jl has a higher-level perspective, uniquely focusing on the regression-ERP aspect. UnfoldSim.jl provides functions to simulate multi-condition experiments, uniquely allows for modeling hierarchical, that is, multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events.
+In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. `UnfoldSim.jl` provides functions to simulate multi-condition experiments, uniquely allows for modeling hierarchical, that is, multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events.
 
 # Other notes
 SEEREGA - Matlab, best in class, no continuous data
