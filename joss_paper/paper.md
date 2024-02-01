@@ -84,7 +84,6 @@ design =
 ```
 
 2. Next, we create a signal consisting of two different components. For the first component, we use the prespecified N170 base and include a condition effect of the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
-
 ```julia
 n1 = LinearModelComponent(;
 	basis = n170(),
@@ -100,7 +99,6 @@ p3 = LinearModelComponent(;
 
 components = [n1, p3]
 ```
-
 3. In the next step, we specify an onset distribution i.e. in this case a uniform distribution with width = 0 and offset = 1000 which means that the inter-event distance will be exactly 1000 samples.
 
 ```julia
@@ -119,7 +117,7 @@ Finally, we can combine all the ingredients and simulate data. To make the simul
 eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise);
 ```
 
-To validate the simulation results, we use `Unfold.jl` [@Ehinger_Unfold_an_integrated] to fit a regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a linear predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
+To validate the simulation results, we use `Unfold.jl` [@ehinger2019unfold] to fit a regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a linear predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
 
 ```julia
 m = fit(
