@@ -83,7 +83,7 @@ design =
 	) |> x -> RepeatDesign(x, 100);
 ```
 
-2. Next, we create a signal consisting of two different components. For the first component, we use the prespecified N170 base and include a condition effect of the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
+2\. Next, we create a signal consisting of two different components. For the first component, we use the prespecified N170 base and include a condition effect of the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
 
 ```julia
 n1 = LinearModelComponent(;
@@ -101,13 +101,13 @@ p3 = LinearModelComponent(;
 components = [n1, p3]
 ```
 
-3. In the next step, we specify an onset distribution i.e. in this case a uniform distribution with width = 0 and offset = 1000 which means that the inter-event distance will be exactly 1000 samples.
+3\. In the next step, we specify an onset distribution i.e. in this case a uniform distribution with width = 0 and offset = 1000 which means that the inter-event distance will be exactly 1000 samples.
 
 ```julia
 onset = UniformOnset(; width = 0, offset = 1000)
 ```
 
-4. As the last ingredient, we specify the noise type i.e. in this case Pink noise.
+4\. As the last ingredient, we specify the noise type i.e. in this case Pink noise.
 
 ```julia
 noise = PinkNoise()
@@ -135,7 +135,7 @@ m = fit(
 
 In subplot A of \autoref{fig_example_coefficients_effects}, one can see the model estimates for the different coefficients and as intended there is a condition effect in the first negative component and an effect of the continuous variable on the second (positive) component. The relation between the levels of the continuous variable and the scaling of the second component is even clearer visible in subplot B of \autoref{fig_example_coefficients_effects} which depicts the estimated marginal effects of the predictors. Instead of showing the regression coefficients, we can evaluate the estimated function at specific values of the continuous variable. 
 
-![Caption for example figure.\label{fig_example_coefficients_effects}](plots/example2_coefficients_effects.pdf)
+![Caption for example figure.\label{fig_example_coefficients_effects}](plots/example2_coefficients_effects.svg)
 
 As shown in this example, `UnfoldSim.jl` and `Unfold.jl` can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.
 
@@ -162,7 +162,7 @@ Please note that we only mention the main dependencies of the toolbox here, but 
 **Distributions.jl** [@Distributions.jl-2019; @JSSv098i16]  
 **Documenter.jl** [@Documenter_jl]  
 **DSP.jl** [@simon_kornblith_2023_8344531]  
-**FileIO.jl** 
+**FileIO.jl**  
 **Glob.jl**  
 **HDF5.jl**  
 **HypothesisTests.jl**  
@@ -185,7 +185,7 @@ Please note that we only mention the main dependencies of the toolbox here, but 
 **Test.jl**  
 **TimerOutputs.jl**  
 **ToeplitzMatrices.jl**  
-**Unfold.jl** [@ehinger2019unfold]
+**Unfold.jl** [@ehinger2019unfold]  
 **UnfoldMakie.jl** [@mikheev_2023_10235220]  
 
 # References
