@@ -155,37 +155,37 @@ Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) unde
 The authors thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers.
 
 # Package references
-Please note that we only mention the main dependencies here, but the dependencies of the dependencies can be found in the respective `Manifest.toml` files.
+Please note that we only mention the main dependencies of the toolbox here, but the dependencies of the dependencies can be found in the respective `Manifest.toml` files.
 
 **Julia** [@Julia-2017]  
-**DSP.jl**  
-DataFrames.jl  
-Distributions.jl
-Documenter.jl
-FileIO.jl (?)
-Glob.jl  (?)
-HDF5.jl  (?)
-HypothesisTests.jl
-ImageFiltering.jl
-InteractiveUtils.jl (?)
-LinearAlgebra.jl (?)
-Literate.jl
-LiveServer.jl
-Makie.jl
-MixedModels.jl
-MixedModelsSim.jl
-Parameters.jl (?)
-ProjectRoot.jl
-Random.jl (?)
-SignalAnalysis.jl
-Statistics.jl (?)
-StableRNGs.jl (?)
-StatsBase.jl (?)
-StatsModels.jl
-Test.jl (?)
-TimerOutputs.jl (?)
-ToeplitzMatrices.jl
-Unfold.jl
-UnfoldMakie.jl
+**DataFrames.jl** [@JSSv107i04]  
+**Distributions.jl** [@Distributions.jl-2019; @JSSv098i16]  
+**Documenter.jl** [@Documenter_jl]  
+**DSP.jl** [@simon_kornblith_2023_8344531]  
+**FileIO.jl** 
+**Glob.jl**  
+**HDF5.jl**  
+**HypothesisTests.jl**  
+**ImageFiltering.jl** 
+**InteractiveUtils.jl**  
+**LinearAlgebra.jl**  
+**Literate.jl**  
+**LiveServer.jl**  
+**Makie.jl** [@DanischKrumbiegel2021]  
+**MixedModels.jl** [@douglas_bates_2023_10268806]  
+**MixedModelsSim.jl** [@phillip_alday_2022_7407741]
+**Parameters.jl**  
+**ProjectRoot.jl**  
+**Random.jl**  
+**SignalAnalysis.jl**  
+**Statistics.jl**  
+**StableRNGs.jl**  
+**StatsBase.jl**  
+**StatsModels.jl**  
+**Test.jl**  
+**TimerOutputs.jl**  
+**ToeplitzMatrices.jl**  
+**Unfold.jl** [@ehinger2019unfold]
+**UnfoldMakie.jl** [@mikheev_2023_10235220]  
 
 # References
