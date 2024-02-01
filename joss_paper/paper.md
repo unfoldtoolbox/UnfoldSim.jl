@@ -71,7 +71,7 @@ UnfoldSim.jl offers different noise types: "White", "Red" and "Pink" and exponen
 # Simulation example
 In the following, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/).
 
-1) We specify an experimental design with one subject in two experimental conditions including a continuous variable with 10 levels. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
+1\. We specify an experimental design with one subject in two experimental conditions including a continuous variable with 10 levels. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 
 ```julia
 design =
@@ -157,9 +157,9 @@ The authors thank the International Max Planck Research School for Intelligent S
 # Package references
 Please note that we only mention the main dependencies here, but the dependencies of the dependencies can be found in the respective `Manifest.toml` files.
 
-**Julia** [@Julia-2017]
-**DSP.jl**
-DataFrames.jl
+**Julia** [@Julia-2017]  
+**DSP.jl**  
+DataFrames.jl  
 Distributions.jl
 Documenter.jl
 FileIO.jl (?)
