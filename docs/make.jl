@@ -47,6 +47,7 @@ makedocs(;
             "Repeating a design" => "./generated/HowTo/repeatTrials.md",
             "Define a new duration & jitter component" => "./generated/HowTo/newComponent.md",
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
+            "Use predefined design / onsets data" => "./generated/HowTo/predefinedData.md",
         ],
         "DocStrings" => "api.md",
     ],
