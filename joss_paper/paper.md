@@ -78,10 +78,25 @@ design =
 	SingleSubjectDesign(;
     	conditions = Dict(
         	:condition => ["car", "face"],
-        	:continuous => range(-5, 5, length = 10),
+        	:continuous => range(0, 5, length = 10),
     	),
+        tableModifyFun = x -> shuffle(deepcopy(StableRNG(1)), x),
 	) |> x -> RepeatDesign(x, 100);
 ```
+
+: Table caption. []{label=”events_df”}
+| **continuous** | **condition** | **latency** |
+|:---------------|:--------------|:------------|
+| 2.22222        | face          | 200         |
+| 4.44444        | car           | 400         |
+| 3.88889        | car           | 600         |
+| 1.11111        | car           | 800         |
+| 0.555556       | car           | 1000        |
+| 0.0            | face          | 1200        |
+| 2.77778        | car           | 1400        |
+| 2.77778        | face          | 1600        |
+| 1.66667        | car           | 1800        |
+| 4.44444        | face          | 2000        |
 
 2\. Next, we create a signal consisting of two different components. For the first component, we use the prespecified N170 base and include a condition effect of the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
 
