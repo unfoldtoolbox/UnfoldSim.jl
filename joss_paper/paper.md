@@ -85,6 +85,7 @@ design =
 ```
 
 : Table caption. []{label=”events_df”}
+
 | **continuous** | **condition** | **latency** |
 |:---------------|:--------------|:------------|
 | 2.22222        | face          | 200         |
