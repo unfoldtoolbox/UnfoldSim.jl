@@ -7,9 +7,29 @@ Simulation(
 ) = Simulation(design, [component], onset, noisetype)
 
 """
-Simulate eeg data given a simulation design, effect sizes and variances
+    simulate(
+    rng,
+    design::AbstractDesign,
+    signal,
+    onset::AbstractOnset,
+    noise::AbstractNoise = NoNoise();
+    return_epoched=false,
+    )
 
-make use of `return_epoched=true` to skip the Onset-calculation + conversion to continuous data and get the epoched data directly
+Main simulation function, given `Design`, [Array of] `Component`, `Onset` and optional [`Noise`], returns continuous or epoched EEG data.
+
+## optional
+- `return_epoched` (Bool, default: `false`):  Skip the Onset-calculation and conversion to continuous data and return the epoched data directly (see also remarks below).
+
+## Return 
+Depending on the design, the components and on `return_epoched`, the output can be a 1-D, 2-D, 3-D or 4-D Array. For example, a 4-D Array would have the dimensions `channels x time x trials x subjects`
+
+## Notes
+Some remarks to how the noise is added:
+  - If `return_epoched = true` and `onset =NoOnset()` the noise is added to the epoched data matrix
+  - If `onset` is not `NoOnset`, a continuous eeg signal is created and the noise is added to this i.e. this means that the noise won't be the same as in the `onset = NoOnset()` case even if `return_epoched = true`.
+  - The case `return_epoched = false` and `onset = NoOnset()` is not possible and therefore covered by an assert statement
+
 """
 
 simulate(
