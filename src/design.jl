@@ -108,7 +108,6 @@ function generate_events(design::MultiSubjectDesign)
     )
     rename!(data, :subj => :subject)
     select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
-  
     # by default does nothing
     data = design.event_order_function(data)
 
