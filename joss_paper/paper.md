@@ -89,6 +89,7 @@ design =
 \autoref{events_df} shows the first rows of the events data frame resulting from the experimental design that we specified. 
 
 : First five rows extracted from the events data frame representing the experimental design. Each row corresponds to one event. The columns *continuous* and *condition* display the levels of the predictor variables for the specific event and the *latency* column denotes the event onset (in samples). [\label{events_df}]
+
 | **continuous** | **condition** | **latency** |
 |:---------------|:--------------|:------------|
 | 2.22222        | face          | 200         |
