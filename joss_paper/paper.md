@@ -88,8 +88,7 @@ design =
 
 \autoref{events_df} shows the first rows of the events data frame resulting from the experimental design that we specified. 
 
-: First five rows extracted from the events data frame representing the experimental design. Each row corresponds to one event. The columns *continuous* and *condition* display the levels of the predictor variables for the specific event and the *latency* column denotes the event onset (in samples). []{label=”events_df”}
-
+: First five rows extracted from the events data frame representing the experimental design. Each row corresponds to one event. The columns *continuous* and *condition* display the levels of the predictor variables for the specific event and the *latency* column denotes the event onset (in samples). [\label{events_df}]
 | **continuous** | **condition** | **latency** |
 |:---------------|:--------------|:------------|
 | 2.22222        | face          | 200         |
@@ -134,6 +133,10 @@ Finally, we can combine all the ingredients and simulate data. To make the simul
 eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise);
 ```
 
+\autoref{fig_example_simulated_data} shows an extract from the continuous EEG data that we simulated.
+
+![First 1400 samples from the simulated continuous EEG data. The vertical lines denote the event onsets and their colour represents the respective condition i.e. car or face.\label{fig_example_simulated_data}](plots/example_simulated_data.svg)
+
 To validate the simulation results, we use `Unfold.jl` [@ehinger2019unfold] to fit a regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a linear predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
 
 ```julia
@@ -147,9 +150,6 @@ m = fit(
 	eeg_data,
 );
 ```
-\autoref{fig_example_simulated_data} shows an extract from the continuous EEG data that we simulated.
-
-![First 1400 samples from the simulated continuous EEG data. The vertical lines denote the event onsets and their colour represents the respective condition i.e. car or face.\label{fig_example_simulated_data}](plots/example_simulated_data.svg)
 
 In subplot A of \autoref{fig_example_coefficients_effects}, one can see the model estimates for the different coefficients and as intended there is a condition effect in the first negative component and an effect of the continuous variable on the second (positive) component. The relation between the levels of the continuous variable and the scaling of the second component is even clearer visible in subplot B of \autoref{fig_example_coefficients_effects} which depicts the estimated marginal effects of the predictors. Instead of showing the regression coefficients, we can evaluate the estimated function at specific values of the continuous variable. 
 
@@ -188,7 +188,7 @@ Please note that we only mention the main dependencies of the toolbox here, but 
 **LiveServer.jl**  
 **Makie.jl** [@DanischKrumbiegel2021]  
 **MixedModels.jl** [@douglas_bates_2023_10268806]  
-**MixedModelsSim.jl** [@phillip_alday_2022_7407741]
+**MixedModelsSim.jl** [@phillip_alday_2022_7407741]  
 **Parameters.jl**  
 **PrettyTables.jl** [@ronan_arraes_jardim_chagas_2023_10214175]  
 **ProjectRoot.jl**  
