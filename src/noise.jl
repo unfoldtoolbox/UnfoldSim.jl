@@ -95,3 +95,23 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
     # cholesky(Σ) is n x n diagonal, lots of RAM :S
     return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]
 end
+
+
+
+
+"""
+Generate and add noise to the data-matrix
+
+Assumes that the signal can be linearized, that is, that the noise is stationary
+"""
+function add_noise!(rng, noisetype::AbstractNoise, signal)
+
+    # generate noise
+    noise = simulate_noise(deepcopy(rng), noisetype, length(signal))
+
+    noise = reshape(noise, size(signal))
+
+    # add noise to data
+    signal .+= noise
+
+end

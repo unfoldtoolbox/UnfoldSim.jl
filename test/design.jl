@@ -2,19 +2,19 @@
 
     @testset "SingleSubjectDesign" begin
         des = SingleSubjectDesign(; conditions = Dict(:A => nlevels(5), :B => nlevels(2)))
-        @test generate_design(des) == generate_design(des)
-        @test size(generate_design(des)) == (5 * 2, 2)
-        @test names(generate_design(des)) == ["A", "B"]
-        @test sum(generate_design(des).A .== "S2") == 2
-        @test sum(generate_design(des).B .== "S2") == 5
+        @test generate_events(des) == generate_events(des)
+        @test size(generate_events(des)) == (5 * 2, 2)
+        @test names(generate_events(des)) == ["A", "B"]
+        @test sum(generate_events(des).A .== "S2") == 2
+        @test sum(generate_events(des).B .== "S2") == 5
         @test sum(
-            (generate_design(des).B .== "S2") .&& (generate_design(des).A .== "S2"),
+            (generate_events(des).B .== "S2") .&& (generate_events(des).A .== "S2"),
         ) == 1
         des = SingleSubjectDesign(;
             conditions = Dict(:A => nlevels(5), :B => nlevels(2)),
             event_order_function = x -> sort(x, order(:B, rev = true)),
         )
-        @test generate_design(des).B[1] == "S2"
+        @test generate_events(des).B[1] == "S2"
     end
 
     @testset "MultiSubjectDesign" begin
@@ -25,10 +25,10 @@
         )
 
 
-        @test size(generate_design(des)) == (10 * 100 * 5 * 2, 4)
-        @test names(generate_design(des)) == ["subject", "item", "A", "B"]
-        @test sum(generate_design(des).A .== "S2") == 10 * 100 * 2
-        @test sum(generate_design(des).B .== "S2") == 10 * 100 * 5
+        @test size(generate_events(des)) == (10 * 100 * 5 * 2, 4)
+        @test names(generate_events(des)) == ["subject", "item", "A", "B"]
+        @test sum(generate_events(des).A .== "S2") == 10 * 100 * 2
+        @test sum(generate_events(des).B .== "S2") == 10 * 100 * 5
 
         # check that finally everything is sorted by subject
         des = MultiSubjectDesign(;
@@ -37,7 +37,7 @@
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
             event_order_function = x -> sort(x, order(:item, rev = true)),
         )
-        @test generate_design(des).subject[1] == "S01"
+        @test generate_events(des).subject[1] == "S01"
 
         # check event_order_function
         des = MultiSubjectDesign(;
@@ -46,7 +46,7 @@
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
             event_order_function = x -> sort(x, order(:B, rev = true)),
         )
-        @test generate_design(des).B[1] == "S2"
+        @test generate_events(des).B[1] == "S2"
 
         # check that this throws an error because of `dv` as condition name
         des = MultiSubjectDesign(;
@@ -54,7 +54,7 @@
             n_items = 100,
             both_within = Dict(:dv => nlevels(5), :B => nlevels(2)),
         )
-        @test_throws AssertionError generate_design(des)
+        @test_throws AssertionError generate_events(des)
     end
 
     @testset "RepeatDesign" begin
@@ -67,7 +67,7 @@
         )
 
         design = RepeatDesign(designOnce, 3)
-        @test size(generate_design(design)) == (8 * 12 * 3, 3)
+        @test size(generate_events(design)) == (8 * 12 * 3, 3)
         @test size(design) == (8 * 3, 12)
         #--- single sub
 
@@ -75,7 +75,7 @@
             SingleSubjectDesign(; conditions = Dict(:A => nlevels(5), :B => nlevels(2)))
 
         design = RepeatDesign(designOnce, 3)
-        @test size(generate_design(design)) == (5 * 2 * 3, 2)
+        @test size(generate_events(design)) == (5 * 2 * 3, 2)
         @test size(design) == (3 * 5 * 2,)
     end
 
@@ -88,7 +88,7 @@
         design_multi = MultiSubjectDesign(; n_subjects = n_subjects, n_items = n_items)
 
         # Create the events data frame based on the design defined above
-        events_multi = generate_design(design_multi)
+        events_multi = generate_events(design_multi)
 
         # Test that there are only subject and item columns (no condition columns) in the events df
         @test names(events_multi) == ["subject", "item"]

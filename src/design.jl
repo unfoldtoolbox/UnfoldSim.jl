@@ -6,7 +6,7 @@
 - both_within = nothing	-> effects completly crossed
 - event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
-tipp: check the resulting dataframe using `generate_design(design)`
+tipp: check the resulting dataframe using `generate_events(design)`
 
 ```julia
 # declaring same condition both sub-between and item-between results in a full between subject/item design
@@ -32,13 +32,13 @@ end
 - conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
 - event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
-Number of trials / rows in `generate_design(design)` depend on the full factorial of your `conditions`.
+Number of trials / rows in `generate_events(design)` depend on the full factorial of your `conditions`.
 
 To increase the number of repetitions simply use `RepeatDesign(SingleSubjectDesign(...),5)`
 
 If conditions are omitted (or set to `nothing`), a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
 
-tipp: check the resulting dataframe using `generate_design(design)`
+tipp: check the resulting dataframe using `generate_events(design)`
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
     conditions = nothing
@@ -59,9 +59,9 @@ If conditions is `nothing`, a single trial is simulated with a column `:dummy` a
 
 
 julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
-julia> generate_design(d)
+julia> generate_events(d)
 """
-function generate_design(expdesign::SingleSubjectDesign)
+function generate_events(expdesign::SingleSubjectDesign)
     if isnothing(expdesign.conditions)
         evts = DataFrame(:dummy => [:dummy])
     else
@@ -86,9 +86,9 @@ Afterwards applies expdesign.event_order_function.  Could be used to duplicate t
 Finally it sorts by `:subject`
 
 julia> d = MultiSubjectDesign(;n_subjects = 10,n_items=20,both_within= Dict(:A=>nlevels(5),:B=>nlevels(2)))
-julia> generate_design(d)
+julia> generate_events(d)
 """
-function generate_design(expdesign::MultiSubjectDesign)
+function generate_events(expdesign::MultiSubjectDesign)
 
     # check that :dv is not in any condition
     allconditions =
@@ -145,8 +145,8 @@ design = RepeatDesign(designOnce,4);
     repeat::Int = 1
 end
 
-function UnfoldSim.generate_design(design::RepeatDesign)
-    df = map(x -> generate_design(design.design), 1:design.repeat) |> x -> vcat(x...)
+function UnfoldSim.generate_events(design::RepeatDesign)
+    df = map(x -> generate_events(design.design), 1:design.repeat) |> x -> vcat(x...)
     if isa(design.design, MultiSubjectDesign)
         sort!(df, [:subject])
     end

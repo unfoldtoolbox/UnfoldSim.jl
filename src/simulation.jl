@@ -48,10 +48,10 @@ function simulate(rng, simulation::Simulation; return_epoched::Bool = false)
     @assert !isa(onset, NoOnset) || return_epoched == true "It is not possible to get continuous data without specifying a specific onset distribution. Please either specify an onset distribution (other than `NoOnset`) or set `return_epoched = true` to get epoched data without overlap."
 
     # create epoch data / erps
-    erps = simulate(deepcopy(rng), components, simulation)
+    erps = simulate_responses(deepcopy(rng), components, simulation)
 
     # create events data frame
-    events = UnfoldSim.generate_design(design)
+    events = UnfoldSim.generate_events(design)
 
     if isa(onset, NoOnset)
         # reshape the erps such that the last dimension is split in two dimensions (trials per subject and subject)
@@ -159,46 +159,4 @@ function adderp!(eeg, erps::Matrix, e, s, tvec, erpvec)#
 end
 function adderp!(eeg, erps::AbstractArray, e, s, tvec, erpvec)
     @views eeg[e, tvec, s] .+= erps[e, :, erpvec]
-end
-
-
-
-"""
-Simulates erp data given the specified parameters 
-"""
-function simulate(rng, components::Vector{<:AbstractComponent}, simulation::Simulation)
-    if n_channels(components) > 1
-        epoch_data =
-            zeros(n_channels(components), maxlength(components), length(simulation.design))
-    else
-        epoch_data = zeros(maxlength(components), length(simulation.design))
-    end
-
-    for c in components
-        simulateandadd!(epoch_data, c, simulation, rng)
-    end
-    return epoch_data
-end
-function simulateandadd!(epoch_data::AbstractMatrix, c, simulation, rng)
-    @debug "matrix"
-    @views epoch_data[1:length(c), :] .+= simulate(rng, c, simulation)
-end
-function simulateandadd!(epoch_data::AbstractArray, c, simulation, rng)
-    @debug "3D Array"
-    @views epoch_data[:, 1:length(c), :] .+= simulate(rng, c, simulation)
-end
-
-
-
-
-function add_noise!(rng, noisetype::AbstractNoise, eeg)
-
-    # generate noise
-    noise = simulate_noise(deepcopy(rng), noisetype, length(eeg))
-
-    noise = reshape(noise, size(eeg))
-
-    # add noise to data
-    eeg .+= noise
-
 end

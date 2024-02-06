@@ -30,7 +30,7 @@ Base.length(c::TimeVaryingComponent) = length(c.maxlength)
 
 # While we could have put the TimeVaryingComponent.basisfunction directly into the simulate function, I thought this is a bit more modular
 function UnfoldSim.simulate(rng, c::TimeVaryingComponent, design::AbstractDesign)
-    evts = generate_design(design)
+    evts = generate_events(design)
     return c.basisfunction(evts, c.maxlength)
 end
 
@@ -57,4 +57,4 @@ erp = UnfoldSim.simulate(
     TimeVaryingComponent(basis_shiftduration, 50),
     design,
 )
-plot_erpimage(hcat(erp...), sortvalues = generate_design(design).shift)
+plot_erpimage(hcat(erp...), sortvalues = generate_events(design).shift)

@@ -98,8 +98,8 @@ function n_channels(c::Vector{<:AbstractComponent})
     return all_channels[1]
 end
 
-function simulate(rng, c::MultichannelComponent, design::AbstractDesign)
-    y = simulate(rng, c.component, design)
+function simulate_component(rng, c::MultichannelComponent, design::AbstractDesign)
+    y = simulate_component(rng, c.component, design)
 
     for tr = 1:size(y, 2)
         y[:, tr] .= y[:, tr] .+ simulate_noise(rng, c.noise, size(y, 1))
@@ -118,18 +118,18 @@ maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
 # by default call simulate with `::Abstractcomponent,::AbstractDesign``, but allow for custom types
 # making use of other information in simulation
 """
-simulate(rng, c::AbstractComponent, simulation::Simulation) =
-    simulate(rng, c, simulation.design)
+simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
+    simulate_component(rng, c, simulation.design)
 
 """
 simulate a linearModel
 
 julia> c = UnfoldSim.LinearModelComponent([0,1,1,0],@formula(0~1+cond),[1,2],Dict())
 julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
-julia> simulate(StableRNG(1),c,design)
+julia> simulate_component(StableRNG(1),c,design)
 """
-function simulate(rng, c::LinearModelComponent, design::AbstractDesign)
-    evts = generate_design(design)
+function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
+    evts = generate_events(design)
 
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
@@ -154,8 +154,8 @@ julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject
 julia> simulate(StableRNG(1),c,design)
 
 """
-function simulate(rng, c::MixedModelComponent, design::AbstractDesign)
-    evts = generate_design(design)
+function simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
+    evts = generate_events(design)
 
     # add the mixed models lefthandside
     lhs_column = :tmp_dv
@@ -251,3 +251,38 @@ function weight_σs(σs::Dict, b_σs::Float64, σ_lmm::Float64)
 
     return namedre
 end
+
+#----
+
+"""
+Simulates multiple component responses and accumulates them on a per-event basis
+"""
+function simulate_responses(
+    rng,
+    components::Vector{<:AbstractComponent},
+    simulation::Simulation,
+)
+    if n_channels(components) > 1
+        epoch_data =
+            zeros(n_channels(components), maxlength(components), length(simulation.design))
+    else
+        epoch_data = zeros(maxlength(components), length(simulation.design))
+    end
+
+    for c in components
+        simulateandadd!(epoch_data, c, simulation, rng)
+    end
+    return epoch_data
+end
+
+
+function simulateandadd!(epoch_data::AbstractMatrix, c, simulation, rng)
+    @debug "matrix"
+    @views epoch_data[1:length(c), :] .+= simulate_component(rng, c, simulation)
+end
+function simulateandadd!(epoch_data::AbstractArray, c, simulation, rng)
+    @debug "3D Array"
+    @views epoch_data[:, 1:length(c), :] .+= simulate_component(rng, c, simulation)
+end
+
+
