@@ -284,5 +284,3 @@ function simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
     @debug "3D Array"
     @views epoch_data[:, 1:length(c), :] .+= simulate_component(rng, c, simulation)
 end
-
-
