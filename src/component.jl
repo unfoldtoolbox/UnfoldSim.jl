@@ -102,7 +102,7 @@ function simulate(rng, c::MultichannelComponent, design::AbstractDesign)
     y = simulate(rng, c.component, design)
 
     for tr = 1:size(y, 2)
-        y[:, tr] .= y[:, tr] .+ gen_noise(rng, c.noise, size(y, 1))
+        y[:, tr] .= y[:, tr] .+ simulate_noise(rng, c.noise, size(y, 1))
     end
 
     y_proj = kron(y, c.projection)

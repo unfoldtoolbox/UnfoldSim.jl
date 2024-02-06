@@ -194,7 +194,7 @@ end
 function add_noise!(rng, noisetype::AbstractNoise, eeg)
 
     # generate noise
-    noise = gen_noise(deepcopy(rng), noisetype, length(eeg))
+    noise = simulate_noise(deepcopy(rng), noisetype, length(eeg))
 
     noise = reshape(noise, size(eeg))
 

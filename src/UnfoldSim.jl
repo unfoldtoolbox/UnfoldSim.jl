@@ -52,7 +52,7 @@ export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign
 export PinkNoise, RedNoise, WhiteNoise, NoNoise, ExponentialNoise #,RealNoise (not implemented yet)
 
 # UnfoldSim functions 
-export simulate, gen_noise, generate
+export simulate, simulate_noise, generate
 
 # utilities
 export padarray, convert
