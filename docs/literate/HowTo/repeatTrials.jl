@@ -16,7 +16,7 @@ designOnce = MultiSubjectDesign(;
 );
 
 design = RepeatDesign(designOnce, 4);
-generate(design)
+generate_design(design)
 
 # As you can see, the design was simply repeated.
 

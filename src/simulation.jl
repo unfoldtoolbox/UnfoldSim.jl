@@ -51,7 +51,7 @@ function simulate(rng, simulation::Simulation; return_epoched::Bool = false)
     erps = simulate(deepcopy(rng), components, simulation)
 
     # create events data frame
-    events = UnfoldSim.generate(design)
+    events = UnfoldSim.generate_design(design)
 
     if isa(onset, NoOnset)
         # reshape the erps such that the last dimension is split in two dimensions (trials per subject and subject)
@@ -106,7 +106,7 @@ function create_continuous_eeg(rng, erps, simulation)
 
     # we only need to simulate onsets & pull everything together, if we 
     # want a continuous EEG 	
-    onsets = generate(deepcopy(rng), onset, simulation)
+    onsets = simulate_onsets(deepcopy(rng), onset, simulation)
 
     # flatten onsets (since subjects are concatenated in the events df)
     latencies = onsets[:,]

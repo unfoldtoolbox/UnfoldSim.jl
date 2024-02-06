@@ -17,13 +17,13 @@ end
 struct NoOnset <: AbstractOnset end
 
 #-------------
-function rand_onsets(rng, onset::UniformOnset, design::AbstractDesign)
+function simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     return Int.(
         round.(rand(deepcopy(rng), onset.offset:(onset.offset+onset.width), size(design)))
     )
 end
 
-function rand_onsets(rng, onset::LogNormalOnset, design::AbstractDesign)
+function simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
     s = size(design)
     fun = LogNormal(onset.μ, onset.σ)
     if !isnothing(onset.truncate_upper)
@@ -34,10 +34,10 @@ end
 
 
 # main call from `simulation`
-function generate(rng, onset::AbstractOnset, simulation::Simulation)
+function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
 
     # sample different onsets
-    onsets = rand_onsets(rng, onset, simulation.design)
+    onsets = simulate_interonset_distances(rng, onset, simulation.design)
 
     # accumulate them
     onsets_accum = accumulate(+, onsets, dims = 1)

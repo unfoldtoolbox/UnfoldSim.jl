@@ -129,7 +129,7 @@ julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond
 julia> simulate(StableRNG(1),c,design)
 """
 function simulate(rng, c::LinearModelComponent, design::AbstractDesign)
-    evts = generate(design)
+    evts = generate_design(design)
 
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
@@ -155,7 +155,7 @@ julia> simulate(StableRNG(1),c,design)
 
 """
 function simulate(rng, c::MixedModelComponent, design::AbstractDesign)
-    evts = generate(design)
+    evts = generate_design(design)
 
     # add the mixed models lefthandside
     lhs_column = :tmp_dv

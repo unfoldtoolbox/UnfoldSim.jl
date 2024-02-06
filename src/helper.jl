@@ -15,7 +15,7 @@ end
 Function to convert output similar to unfold (data, evts)
 """
 function convert(eeg, onsets, design, n_ch, ; reshape = true)
-    evt = UnfoldSim.generate(design)
+    evt = UnfoldSim.generate_design(design)
     @debug size(eeg)
     if reshape
         n_subj = length(size(design)) == 1 ? 1 : size(design)[2]
