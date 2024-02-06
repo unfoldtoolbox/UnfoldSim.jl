@@ -40,7 +40,7 @@ bibliography: paper.bib
 `UnfoldSim.jl` is a Julia package used to simulate multivariate time series, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. `UnfoldSim.jl` then simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. `UnfoldSim.jl` is modular, providing intuitive entrance points for individual customizations. The user can implement custom designs, components, onset distributions or noise types to tailor the toolbox to their needs. This allows support even for other modalities, e.g. single-voxel fMRI or pupil dilation signals.
 
 # Statement of Need
-In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we need to simulate such kind of data: Simulated EEG data is necessary to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing assumptions of new analysis algorithms and test their robustness against any violation of these assumptions.
+In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we need to simulate such kind of data: Simulated EEG data is necessary to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and test their robustness against any violation of these assumptions.
 
 While other EEG simulation toolboxes exist, they each have limitations: they are dominantly MATLAB-based, they do not simulate continuous EEG, and they offer little support for designs more complex than two conditions or with non-linear effects.
 
@@ -58,7 +58,7 @@ Each component can be nested in a `MultichannelComponent`, which, using a forwar
 To generate complex activations, it is possible to specify a vector of `<:AbstractComponents`.
 
 ## Concerete Onsets
-The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, `UniformOnset` and `LogNormalOnset` are implemented. By specifying the parameters of the onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
+The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, `UniformOnset` and `LogNormalOnset` are implemented. By specifying the parameters of the inter-onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
 \autoref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions.
 
 ![Illustration of the inter-onset distributions. The colour indicates different sets of parameter values.\label{fig_onset_distributions}](plots/onset_distributions.svg)
@@ -66,14 +66,14 @@ The inter-onset distribution defines the distance between events in the case of 
 ## Concrete Noise
 UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise, and noise based on actual EEG data.
 
-![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays their $log_{10}(power)$ at normalized frequencies.\label{fig_noise_types}](plots/noise_types.svg)
+![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its $log_{10}(power)$ at normalized frequencies.\label{fig_noise_types}](plots/noise_types.svg)
 
 # Simulation example
 In the following, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/). Moreover, to get started, the `UnfoldSim.jl` toolbox offers the function `predef_eeg` which, depending on the input, simulates continuous EEG data either for a single subject or multiple subjects.
 
 In the following, we will first provide examples for the four simulation “ingredients” mentioned above which will then be used to simulate data.
 
-1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 levels. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
+1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 levels. To mimic randomization in an experiment, we shuffle the trials using the `tableModifyFun` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 
 ```julia
 design =
