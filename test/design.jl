@@ -10,7 +10,7 @@
         @test sum((generate(des).B .== "S2") .&& (generate(des).A .== "S2")) == 1
         des = SingleSubjectDesign(;
             conditions = Dict(:A => nlevels(5), :B => nlevels(2)),
-            tableModifyFun = x -> sort(x, order(:B, rev = true)),
+            event_order_function = x -> sort(x, order(:B, rev = true)),
         )
         @test generate(des).B[1] == "S2"
     end
@@ -33,16 +33,16 @@
             n_subjects = 10,
             n_items = 100,
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
-            tableModifyFun = x -> sort(x, order(:item, rev = true)),
+            event_order_function = x -> sort(x, order(:item, rev = true)),
         )
         @test generate(des).subject[1] == "S01"
 
-        # check tableModifyFun
+        # check event_order_function
         des = MultiSubjectDesign(;
             n_subjects = 10,
             n_items = 100,
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
-            tableModifyFun = x -> sort(x, order(:B, rev = true)),
+            event_order_function = x -> sort(x, order(:B, rev = true)),
         )
         @test generate(des).B[1] == "S2"
 

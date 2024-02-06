@@ -4,7 +4,7 @@
 - subjects_between = nothing -> effects between subjects, e.g. young vs old 
 - items_between = nothing -> effects between items, e.g. natural vs artificial images, but shown to all subjects
 - both_within = nothing	-> effects completly crossed
-- tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+- event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
 tipp: check the resulting dataframe using `generate(design)`
 
@@ -24,13 +24,13 @@ design = MultiSubjectDesign(;
     subjects_between = nothing
     items_between = nothing
     both_within = nothing
-    tableModifyFun = x -> x # can be used to sort, or x->shuffle(rng,x)
+    event_order_function = x -> x # can be used to sort, or x->shuffle(rng,x)
 end
 
 
 """
 - conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
-- tableModifyFun = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+- event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
 Number of trials / rows in `generate(design)` depend on the full factorial of your `conditions`.
 
@@ -42,7 +42,7 @@ tipp: check the resulting dataframe using `generate(design)`
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
     conditions = nothing
-    tableModifyFun = x -> x
+    event_order_function = x -> x
 end
 
 
@@ -53,7 +53,7 @@ size(expdesign::SingleSubjectDesign) = (*(length.(values(expdesign.conditions)).
 """
 Generates full-factorial DataFrame of expdesign.conditions
 
-Afterwards applies expdesign.tableModifyFun.
+Afterwards applies expdesign.event_order_function.
 
 If conditions is `nothing`, a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
 
@@ -62,17 +62,17 @@ julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate(d)
 """
 function generate(expdesign::SingleSubjectDesign)
-	if isnothing(expdesign.conditions)
-		evts = DataFrame(:dummy=>[:dummy])
-	else
-    # we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
-    # of named tuples for MixedModelsSim.factorproduct function.
-    evts =
-        factorproduct(((; k => v) for (k, v) in pairs(expdesign.conditions))...) |>
-        DataFrame
-	end
+    if isnothing(expdesign.conditions)
+        evts = DataFrame(:dummy => [:dummy])
+    else
+        # we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
+        # of named tuples for MixedModelsSim.factorproduct function.
+        evts =
+            factorproduct(((; k => v) for (k, v) in pairs(expdesign.conditions))...) |>
+            DataFrame
+    end
     # by default does nothing
-    return expdesign.tableModifyFun(evts)
+    return expdesign.event_order_function(evts)
 end
 
 """
@@ -81,7 +81,7 @@ Note: n_items = you can think of it as `trials` or better, as stimuli
 
 Note: No condition can be named `dv` which is used internally in MixedModelsSim / MixedModels as a dummy left-side
 
-Afterwards applies expdesign.tableModifyFun.  Could be used to duplicate trials, sort, subselect etc.
+Afterwards applies expdesign.event_order_function.  Could be used to duplicate trials, sort, subselect etc.
 
 Finally it sorts by `:subject`
 
@@ -110,7 +110,7 @@ function generate(expdesign::MultiSubjectDesign)
     rename!(data, :subj => :subject)
     select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
     # by default does nothing
-    data = expdesign.tableModifyFun(data)
+    data = expdesign.event_order_function(data)
 
     # sort by subject
     data = sort!(data, (order(:subject)))
