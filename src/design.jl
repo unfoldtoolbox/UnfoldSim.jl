@@ -53,6 +53,7 @@ size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
 """
 Generates full-factorial DataFrame of design.conditions
 
+
 Afterwards applies design.event_order_function.
 
 If conditions is `nothing`, a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
@@ -107,6 +108,7 @@ function generate_events(design::MultiSubjectDesign)
     )
     rename!(data, :subj => :subject)
     select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
+  
     # by default does nothing
     data = design.event_order_function(data)
 
