@@ -71,13 +71,13 @@ MultichannelComponent(c::AbstractComponent, p) =
     MultichannelComponent(c::AbstractComponent, p, NoNoise())
 
 function MultichannelComponent(
-    c::AbstractComponent,
-    p::Pair{<:AbstractHeadmodel,String},
-    n::AbstractNoise,
+    component::AbstractComponent,
+    projection::Pair{<:AbstractHeadmodel,String},
+    noise::AbstractNoise,
 )
-    ix = closest_src(p[1], p[2])
-    mg = magnitude(p[1])
-    return MultichannelComponent(c, mg[:, ix], n)
+    ix = closest_src(projection[1], projection[2])
+    mg = magnitude(projection[1])
+    return MultichannelComponent(component, mg[:, ix], noise)
 end
 Base.length(c::MultichannelComponent) = length(c.component)
 
@@ -101,8 +101,8 @@ end
 function simulate_component(rng, c::MultichannelComponent, design::AbstractDesign)
     y = simulate_component(rng, c.component, design)
 
-    for tr = 1:size(y, 2)
-        y[:, tr] .= y[:, tr] .+ simulate_noise(rng, c.noise, size(y, 1))
+    for trial = 1:size(y, 2)
+        y[:, trial] .= y[:, trial] .+ simulate_noise(rng, c.noise, size(y, 1))
     end
 
     y_proj = kron(y, c.projection)
@@ -129,17 +129,17 @@ julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond
 julia> simulate_component(StableRNG(1),c,design)
 """
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
-    evts = generate_events(design)
+    events = generate_events(design)
 
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
     if c.formula.rhs == ConstantTerm(1)
-        X = ones(nrow(evts), 1)
+        X = ones(nrow(events), 1)
     else
         if isempty(c.contrasts)
-            m = StatsModels.ModelFrame(c.formula, evts)
+            m = StatsModels.ModelFrame(c.formula, events)
         else
-            m = StatsModels.ModelFrame(c.formula, evts; contrasts = c.contrasts)
+            m = StatsModels.ModelFrame(c.formula, events; contrasts = c.contrasts)
         end
         X = StatsModels.modelmatrix(m)
     end
@@ -155,19 +155,19 @@ julia> simulate(StableRNG(1),c,design)
 
 """
 function simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
-    evts = generate_events(design)
+    events = generate_events(design)
 
     # add the mixed models lefthandside
     lhs_column = :tmp_dv
-    @assert string(lhs_column) ∉ names(evts) "Error: Wow you are unlucky, we have to introduce a temporary lhs-symbol which we name ``:tmp_dv` - you seem to have a condition called `:tmp_dv` in your dataset as well. Please rename it!"
+    @assert string(lhs_column) ∉ names(events) "Error: Wow you are unlucky, we have to introduce a temporary lhs-symbol which we name ``:tmp_dv` - you seem to have a condition called `:tmp_dv` in your dataset as well. Please rename it!"
     f = FormulaTerm(Term(:tmp_dv), c.formula.rhs)
-    evts[!, lhs_column] .= 0
+    events[!, lhs_column] .= 0
 
     # create dummy
     if isempty(c.contrasts)
-        m = MixedModels.MixedModel(f, evts)
+        m = MixedModels.MixedModel(f, events)
     else
-        m = MixedModels.MixedModel(f, evts; contrasts = c.contrasts)
+        m = MixedModels.MixedModel(f, events; contrasts = c.contrasts)
     end
 
 
@@ -177,8 +177,8 @@ function simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
     # residual variance for lmm
     σ_lmm = 0.0001
     if 1 == 1
-        namedre = weight_σs(c.σs, 1.0, σ_lmm)
-        θ = createθ(m; namedre...)
+        named_random_effects = weight_σs(c.σs, 1.0, σ_lmm)
+        θ = createθ(m; named_random_effects...)
         simulate!(deepcopy(rng), m.y, m; β = c.β, σ = σ_lmm, θ = θ)
 
         # save data to array
@@ -270,17 +270,17 @@ function simulate_responses(
     end
 
     for c in components
-        simulateandadd!(epoch_data, c, simulation, rng)
+        simulate_and_add!(epoch_data, c, simulation, rng)
     end
     return epoch_data
 end
 
 
-function simulateandadd!(epoch_data::AbstractMatrix, c, simulation, rng)
+function simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
     @debug "matrix"
     @views epoch_data[1:length(c), :] .+= simulate_component(rng, c, simulation)
 end
-function simulateandadd!(epoch_data::AbstractArray, c, simulation, rng)
+function simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
     @debug "3D Array"
     @views epoch_data[:, 1:length(c), :] .+= simulate_component(rng, c, simulation)
 end

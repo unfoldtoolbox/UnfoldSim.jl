@@ -73,13 +73,13 @@ function simulate(rng, simulation::Simulation; return_epoched::Bool = false)
         if length(size(design)) == 1 # if there is only one subject
             signal = epoch(signal, events, (0, maxlength(components) - 1), 1)
         else # multi-subject case
-            evt_epoch = groupby(events, :subject) |> collect
+            events_epoch = groupby(events, :subject) |> collect
             # Epoch data per subject
             # Note: Ref() is needed to prevent broadcasting of τ and sfreq (due to applying epoch elementwise)
             signal =
                 epoch.(
                     eachslice(signal, dims = length(size(signal))),
-                    evt_epoch,
+                    events_epoch,
                     Ref((0, maxlength(components) - 1)),
                     Ref(1),
                 )
@@ -100,9 +100,9 @@ function create_continuous_signal(rng, responses, simulation)
 
     (; design, components, onset, noisetype) = simulation
 
-    n_subj = length(size(design)) == 1 ? 1 : size(design)[2]
-    n_trial = size(design)[1]
-    n_ch = n_channels(components)
+    n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]
+    n_trials = size(design)[1]
+    n_chan = n_channels(components)
 
     # we only need to simulate onsets & pull everything together, if we 
     # want a continuous signal 	
@@ -116,31 +116,31 @@ function create_continuous_signal(rng, responses, simulation)
     max_length_continuoustime = Int(ceil(maximum(onsets))) .+ max_length_component
 
 
-    signal = zeros(n_ch, max_length_continuoustime, n_subj)
+    signal = zeros(n_chan, max_length_continuoustime, n_subjects)
 
-    for e = 1:n_ch
-        for s = 1:n_subj
-            for i = 1:n_trial
+    for e = 1:n_chan
+        for s = 1:n_subjects
+            for i = 1:n_trials
                 one_onset = onsets[CartesianIndex(i, s)]
-                adderp!(
+                add_responses!(
                     signal,
                     responses,
                     e,
                     s,
                     one_onset:one_onset+max_length_component-1,
-                    (s - 1) * n_trial + i,
+                    (s - 1) * n_trials + i,
                 )
             end
         end
     end
 
     # not all designs have multiple subjects
-    if n_subj == 1
+    if n_subjects == 1
         signal = dropdims(signal, dims = 3)
     end
 
     # not all designs have multiple channels
-    if n_ch == 1
+    if n_chan == 1
         signal = dropdims(signal, dims = 1)
     end
 
@@ -151,12 +151,12 @@ end
 """
 Helper function to add inplace the responses to the signal, but for both 2D (1 channel) and 3D (X channel case)
 """
-function adderp!(signal, responses::Vector, e, s, tvec, erpvec)
+function add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
     @views signal[e, tvec, s] .+= responses[:, erpvec]
 end
-function adderp!(signal, responses::Matrix, e, s, tvec, erpvec)#
+function add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)#
     @views signal[e, tvec, s] .+= responses[:, erpvec]
 end
-function adderp!(signal, responses::AbstractArray, e, s, tvec, erpvec)
+function add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
     @views signal[e, tvec, s] .+= responses[e, :, erpvec]
 end

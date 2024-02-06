@@ -1,5 +1,5 @@
 @testset "onset" begin
-    dummydesign = gen_debug_design(; n_subj = 300, n_item = 1000)
+    dummydesign = gen_debug_design(; n_subjects = 300, n_item = 1000)
     @testset "UniformOnset" begin
         unifOnset = UniformOnset(; offset = 100, width = 50)
 

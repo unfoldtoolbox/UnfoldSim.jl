@@ -83,14 +83,14 @@ end
 
 function simulate_noise(rng, t::ExponentialNoise, n::Int)
 
-    function exponentialCorrelation(x; nu = 1, length_ratio = 1)
+    function exponential_correlation(x; nu = 1, length_ratio = 1)
         # Author: Jaromil Frossard
         # generate exponential function
         R = length(x) * length_ratio
         return exp.(-3 * (x / R) .^ nu)
     end
 
-    Σ = Symmetric(Circulant(exponentialCorrelation([0:1:(n-1);], nu = t.ν)), :L)
+    Σ = Symmetric(Circulant(exponential_correlation([0:1:(n-1);], nu = t.ν)), :L)
 
     # cholesky(Σ) is n x n diagonal, lots of RAM :S
     return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]

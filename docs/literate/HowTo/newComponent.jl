@@ -38,16 +38,16 @@ end
 function basis_shiftduration(evts, maxlength)
     basis = hanning.(Int.(round.(evts.duration))) ## hanning as long as duration
     if "shift" ∈ names(evts)
-        basis = padarray.(basis, Int.(round.(.-evts.shift)), 0) ## shift by adding 0 in front
+        basis = pad_array.(basis, Int.(round.(.-evts.shift)), 0) ## shift by adding 0 in front
     end
     ## we should make sure that all bases have maxlength by appending / truncating
     difftomax = maxlength .- length.(basis)
     if any(difftomax .< 0)
         @warn "basis longer than max length in at least one case. either increase maxlength or redefine function. Trying to truncate the basis"
-        basis[difftomax.>0] = padarray.(basis[difftomax.>0], difftomax[difftomax.>0], 0)
+        basis[difftomax.>0] = pad_array.(basis[difftomax.>0], difftomax[difftomax.>0], 0)
         return [b[1:maxlength] for b in basis]
     else
-        return padarray.(basis, difftomax, 0)
+        return pad_array.(basis, difftomax, 0)
     end
 end
 
