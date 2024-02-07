@@ -16,11 +16,9 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: "1"
-      - uses: julia-actions/julia-buildpkg@v1
       - run: |
           julia --project=joss_paper -e '
             using Pkg
-            Pkg.activate("joss_paper")
             Pkg.instantiate()
             save_plots=true
             include("joss_paper/create_paper_plots.jl")'
@@ -28,6 +26,6 @@ jobs:
       - name: Commit plots to repository
         uses: EndBug/add-and-commit@v9
         with:
-          message: "(auto) Paper plot adding"
+          message: "(auto) add joss paper plots"
           # This should be the path to the paper within your repo.
-          add: "joss_paper/plots" # 'paper/*.pdf' to commit all PDFs in the paper directory
+          add: "joss_paper/plots/*.svg" # 'paper/*.pdf' to commit all PDFs in the paper directory
