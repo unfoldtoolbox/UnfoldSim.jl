@@ -174,6 +174,7 @@ Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) unde
 Please note that we only mention the main dependencies of the toolbox here, but the dependencies of the dependencies can be found in the respective `Manifest.toml` files. Furthermore, please note that we only list rather  than cite the packages for which we could not find any citation file or instruction.
 
 **Julia** [@Julia-2017]  
+**Artifacts.jl**  
 **DataFrames.jl** [@JSSv107i04]  
 **Distributions.jl** [@Distributions.jl-2019; @JSSv098i16]  
 **Documenter.jl** [@Documenter_jl]  
