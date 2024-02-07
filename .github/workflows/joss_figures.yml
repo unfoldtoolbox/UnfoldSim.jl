@@ -11,11 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
           version: "1"
+      - uses: julia-actions/cache@v1
       - run: |
           julia --project=joss_paper -e '
             using Pkg
@@ -28,4 +30,4 @@ jobs:
         with:
           message: "(auto) add joss paper plots"
           # This should be the path to the paper within your repo.
-          add: "joss_paper/plots/*.svg" # 'paper/*.pdf' to commit all PDFs in the paper directory
+          add: "joss_paper/plots/*" # 'paper/*.pdf' to commit all PDFs in the paper directory
