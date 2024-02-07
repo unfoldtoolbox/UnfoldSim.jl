@@ -6,7 +6,7 @@
 - both_within = nothing	-> effects completly crossed
 - event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
-tipp: check the resulting dataframe using `generate(design)`
+tipp: check the resulting dataframe using `generate_events(design)`
 
 ```julia
 # declaring same condition both sub-between and item-between results in a full between subject/item design
@@ -32,13 +32,13 @@ end
 - conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
 - event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
-Number of trials / rows in `generate(design)` depend on the full factorial of your `conditions`.
+Number of trials / rows in `generate_events(design)` depend on the full factorial of your `conditions`.
 
 To increase the number of repetitions simply use `RepeatDesign(SingleSubjectDesign(...),5)`
 
 If conditions are omitted (or set to `nothing`), a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
 
-tipp: check the resulting dataframe using `generate(design)`
+tipp: check the resulting dataframe using `generate_events(design)`
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
     conditions = nothing
@@ -47,32 +47,33 @@ end
 
 
 """ Returns dimension of experiment design"""
-size(expdesign::MultiSubjectDesign) = (expdesign.n_items, expdesign.n_subjects)
-size(expdesign::SingleSubjectDesign) = (*(length.(values(expdesign.conditions))...),)
+size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
+size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
 
 """
-Generates full-factorial DataFrame of expdesign.conditions
+Generates full-factorial DataFrame of design.conditions
 
-Afterwards applies expdesign.event_order_function.
+
+Afterwards applies design.event_order_function.
 
 If conditions is `nothing`, a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
 
 
 julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
-julia> generate(d)
+julia> generate_events(d)
 """
-function generate(expdesign::SingleSubjectDesign)
-    if isnothing(expdesign.conditions)
-        evts = DataFrame(:dummy => [:dummy])
+function generate_events(design::SingleSubjectDesign)
+    if isnothing(design.conditions)
+        events = DataFrame(:dummy => [:dummy])
     else
         # we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
         # of named tuples for MixedModelsSim.factorproduct function.
-        evts =
-            factorproduct(((; k => v) for (k, v) in pairs(expdesign.conditions))...) |>
+        events =
+            factorproduct(((; k => v) for (k, v) in pairs(design.conditions))...) |>
             DataFrame
     end
     # by default does nothing
-    return expdesign.event_order_function(evts)
+    return design.event_order_function(events)
 end
 
 """
@@ -81,36 +82,34 @@ Note: n_items = you can think of it as `trials` or better, as stimuli
 
 Note: No condition can be named `dv` which is used internally in MixedModelsSim / MixedModels as a dummy left-side
 
-Afterwards applies expdesign.event_order_function.  Could be used to duplicate trials, sort, subselect etc.
+Afterwards applies design.event_order_function.  Could be used to duplicate trials, sort, subselect etc.
 
 Finally it sorts by `:subject`
 
 julia> d = MultiSubjectDesign(;n_subjects = 10,n_items=20,both_within= Dict(:A=>nlevels(5),:B=>nlevels(2)))
-julia> generate(d)
+julia> generate_events(d)
 """
-function generate(expdesign::MultiSubjectDesign)
-    #generate(expdesign::AbstractDesign) = generate(MersenneTwister(1),expdesign)
+function generate_events(design::MultiSubjectDesign)
 
     # check that :dv is not in any condition
-    allconditions =
-        [expdesign.subjects_between, expdesign.items_between, expdesign.both_within]
+    allconditions = [design.subjects_between, design.items_between, design.both_within]
 
     @assert all(isnothing.(allconditions)) ||
             :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
 
     data = DataFrame(
         MixedModelsSim.simdat_crossed(
-            expdesign.n_subjects,
-            expdesign.n_items,
-            subj_btwn = expdesign.subjects_between,
-            item_btwn = expdesign.items_between,
-            both_win = expdesign.both_within,
+            design.n_subjects,
+            design.n_items,
+            subj_btwn = design.subjects_between,
+            item_btwn = design.items_between,
+            both_win = design.both_within,
         ),
     )
     rename!(data, :subj => :subject)
     select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
     # by default does nothing
-    data = expdesign.event_order_function(data)
+    data = design.event_order_function(data)
 
     # sort by subject
     data = sort!(data, (order(:subject)))
@@ -121,7 +120,7 @@ end
 
 
 # length is the same of all dimensions
-length(expdesign::AbstractDesign) = *(size(expdesign)...)
+length(design::AbstractDesign) = *(size(design)...)
 
 
 
@@ -146,8 +145,8 @@ design = RepeatDesign(designOnce,4);
     repeat::Int = 1
 end
 
-function UnfoldSim.generate(design::RepeatDesign)
-    df = map(x -> generate(design.design), 1:design.repeat) |> x -> vcat(x...)
+function UnfoldSim.generate_events(design::RepeatDesign)
+    df = map(x -> generate_events(design.design), 1:design.repeat) |> x -> vcat(x...)
     if isa(design.design, MultiSubjectDesign)
         sort!(df, [:subject])
     end

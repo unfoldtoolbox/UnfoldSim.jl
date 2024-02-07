@@ -13,7 +13,7 @@ my_events = DataFrame(:condition => [:A, :B, :B, :A, :A], :latency => [7, 13, 22
 struct MyManualDesign <: AbstractDesign
     my_events::Any
 end
-UnfoldSim.generate(d::MyManualDesign) = deepcopy(d.my_events) ## generate function which is called internally in UnfoldSim
+UnfoldSim.generate_events(d::MyManualDesign) = deepcopy(d.my_events) ## generate function which is called internally in UnfoldSim
 UnfoldSim.size(d::MyManualDesign) = size(d.my_events, 1); ## necessary function to tell what the dimensionality of the experimental design is
 # !!! note
 #     Note the `UnfoldSim.generate` which tells Julia to "overload" the `generate` function as defined in UnfoldSim
@@ -39,8 +39,8 @@ current_figure()
 # ## Custom Timings
 # Finally, we want to use our custom timings as well. For this we define a new `AbstractOnset`. Again, it simply returns our manually provided latencies
 struct MyManualOnset <: AbstractOnset end
-UnfoldSim.generate(rng, onset::MyManualOnset, simulation::Simulation) =
-    generate(simulation.design).latency
+UnfoldSim.simulate_onsets(rng, onset::MyManualOnset, simulation::Simulation) =
+    generate_events(simulation.design).latency
 # !!! hint
 #     This is a bit of a trick, it relies that `MyManualOnset`` is always used in combination with `MyManualDesign`. You could of course repeat the structure from `MyManualDesign` also for `MyManualOnset` and have an explicit field in the structure containing the onsets.
 

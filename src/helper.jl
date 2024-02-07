@@ -1,42 +1,45 @@
 """
 Pads array with specified value, length
-padarray(arr, len, val)
+pad_array(arr, len, val)
 """
-padarray(arr::Vector, len::Tuple, val) = padarray(padarray(arr, len[1], val), len[2], val)
-function padarray(arr::Vector, len::Int, val)
+pad_array(arr::Vector, len::Tuple, val) =
+    pad_array(pad_array(arr, len[1], val), len[2], val)
+function pad_array(arr::Vector, len::Int, val)
     pad = fill(val, abs(len))
     arr = len > 0 ? vcat(arr, pad) : vcat(pad, arr)
     return arr
 end
 
 
-# TODO: Transfer function to Unfold.jl
+
 """
-Function to convert output similar to unfold (data, evts)
+Obsolete - # TODO: Transfer function to Unfold.jl
+
+Function to convert output similar to unfold (data, events)
 """
-function convert(eeg, onsets, design, n_ch, ; reshape = true)
-    evt = UnfoldSim.generate(design)
+function convert(eeg, onsets, design, n_chan; reshape = true)
+    events = UnfoldSim.generate_events(design)
     @debug size(eeg)
     if reshape
-        n_subj = length(size(design)) == 1 ? 1 : size(design)[2]
+        n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]
 
-        if n_ch == 1
+        if n_chan == 1
             data = eeg[:,]
 
-            evt.latency = (onsets' .+ range(0, size(eeg, 2) - 1) .* size(eeg, 1))'[:,]
-        elseif n_subj == 1
+            events.latency = (onsets' .+ range(0, size(eeg, 2) - 1) .* size(eeg, 1))'[:,]
+        elseif n_subjects == 1
             data = eeg
             @debug size(onsets)
-            evt.latency = onsets
+            events.latency = onsets
         else # multi subject + multi channel
             data = eeg[:, :]
-            evt.latency = (onsets' .+ range(0, size(eeg, 3) - 1) .* size(eeg, 2))'[:,]
+            events.latency = (onsets' .+ range(0, size(eeg, 3) - 1) .* size(eeg, 2))'[:,]
         end
     else
         data = eeg
     end
 
-    return data, evt
+    return data, events
 
 end
 
@@ -108,16 +111,16 @@ function epoch(
 
     # partial taken from EEG.jl
 
-    numEpochs = size(events, 1)
+    n_epochs = size(events, 1)
 
     times = range(τ[1], stop = τ[2], step = 1 ./ sfreq)
-    lenEpochs = length(times)
-    numChans = size(data, 1)
-    epochs = Array{T}(undef, Int(numChans), Int(lenEpochs), Int(numEpochs))
+    length_epochs = length(times)
+    n_chan = size(data, 1)
+    epochs = Array{T}(undef, Int(n_chan), Int(length_epochs), Int(n_epochs))
 
 
     # User feedback
-    @debug "Creating epochs: $numChans x $lenEpochs x $numEpochs"
+    @debug "Creating epochs: $n_chan x $length_epochs x $n_epochs"
 
     for si ∈ 1:size(events, 1)
         # d_start and d_end are the start and end of the epoch (in samples) in the data
@@ -126,7 +129,7 @@ function epoch(
 
         # e_start and e_end are the start and end within the epoch (in samples)
         e_start = 1
-        e_end = lenEpochs
+        e_end = length_epochs
         #println("d: $(size(data)),e: $(size(epochs)) | $d_start,$d_end,$e_start,$e_end | $(events[si,eventtime])")
 
         # Case that the start of the epoch is before the start of the data/recording (e.g. if the start is before i.e. negative relative to the event)
