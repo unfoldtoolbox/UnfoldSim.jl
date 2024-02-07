@@ -5,6 +5,10 @@ on:
       - joss_paper/paper.md
       - joss_paper/paper.bib
       - .github/workflows/joss.yml
+  workflow_run:
+    workflows: [JOSS figure generation]
+    types:
+      - completed
 
 jobs:
   paper:
