@@ -200,9 +200,9 @@ function simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
 
 
             # weight random effects by the basis function
-            namedre = weight_σs(c.σs, basis_σs, σ_lmm)
+            named_random_effects = weight_σs(c.σs, basis_σs, σ_lmm)
 
-            θ = createθ(m; namedre...)
+            θ = createθ(m; named_random_effects...)
 
 
             # simulate with new parameters; will update m.y
@@ -247,9 +247,9 @@ function weight_σs(σs::Dict, b_σs::Float64, σ_lmm::Float64)
         push!(vals, v)
     end
 
-    namedre = NamedTuple(keys .=> vals)
+    named_random_effects = NamedTuple(keys .=> vals)
 
-    return namedre
+    return named_random_effects
 end
 
 #----

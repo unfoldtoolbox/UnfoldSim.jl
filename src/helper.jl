@@ -17,13 +17,13 @@ Obsolete - # TODO: Transfer function to Unfold.jl
 
 Function to convert output similar to unfold (data, events)
 """
-function convert(eeg, onsets, design, n_channels; reshape = true)
+function convert(eeg, onsets, design, n_chan; reshape = true)
     events = UnfoldSim.generate_events(design)
     @debug size(eeg)
     if reshape
         n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]
 
-        if n_channels == 1
+        if n_chan == 1
             data = eeg[:,]
 
             events.latency = (onsets' .+ range(0, size(eeg, 2) - 1) .* size(eeg, 1))'[:,]
