@@ -7,6 +7,31 @@ on:
       - .github/workflows/joss.yml
 
 jobs:
+  figures:
+    name: joss-figures
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: "1"
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-docdeploy@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          julia --project=joss_paper -e '
+            save_plots=true
+            include("create_paper_plots.jl")'
+
+      - name: Commit plots to repository
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "(auto) Paper plot adding"
+          # This should be the path to the paper within your repo.
+          add: "joss_paper/plots" # 'paper/*.pdf' to commit all PDFs in the paper directory
   paper:
     runs-on: ubuntu-latest
     name: Paper Draft
@@ -27,4 +52,3 @@ jobs:
           # PDF. Note, this should be the same directory as the input
           # paper.md
           path: joss_paper/paper.pdf
-          
