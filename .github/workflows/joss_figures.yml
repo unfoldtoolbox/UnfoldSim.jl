@@ -19,6 +19,9 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - run: |
           julia --project=joss_paper -e '
+            using Pkg
+            Pkg.activate("joss_paper")
+            Pkg.instantiate()
             save_plots=true
             include("joss_paper/create_paper_plots.jl")'
 
