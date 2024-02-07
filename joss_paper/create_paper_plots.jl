@@ -15,6 +15,12 @@ if !@isdefined save_plots
     save_plots = false
 end
 
+
+# Check whether the plot directory already exists otherwise create it
+if !isdir(@projectroot("plots"))
+    mkdir(@projectroot("plots"))
+end
+
 #----
 # Simulation example: Custom continuous EEG signal
 let
