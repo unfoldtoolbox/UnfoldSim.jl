@@ -50,7 +50,7 @@ let
 
     onset = UniformOnset(; width = 0, offset = 200)
 
-    noise = PinkNoise(; noiselevel = 1)
+    noise = PinkNoise(; noiselevel = 2)
 
     eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise)
 
@@ -255,7 +255,7 @@ let
             titlesize = 18,
             xlabel = "Time",
             ylabel = "Amplitude",
-            xlabelsize = 18,
+            xlabelsize = 16,
             ylabelsize = 16,
             xgridvisible = false,
             ygridvisible = false,
