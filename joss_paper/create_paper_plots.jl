@@ -218,7 +218,7 @@ let
                 global legend_title = "(μ,σ,offset,truncate_upper)"
             end
 
-            onsets = UnfoldSim.rand_onsets(StableRNG(1), onset, design)
+            onsets = UnfoldSim.simulate_interonset_distances(StableRNG(1), onset, design)
             hist!(ax, onsets, bins = range(0, 100, step = 1), label = "$combination")
 
         end
@@ -277,7 +277,7 @@ let
     for n in [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
 
         # Generate noise samples
-        noisevec = gen_noise(StableRNG(1), n(), 10000)
+        noisevec = simulate_noise(StableRNG(1), n(), 10000)
 
         # Plot 1000 samples
         lines!(ax_A, noisevec[1:1000]; label = string(n))
