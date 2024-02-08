@@ -5,7 +5,7 @@ on:
       - joss_paper/paper.md
       - joss_paper/paper.bib
       - .github/workflows/joss.yml
-      - joss_paper/plots # Trigger the paper generation workflow when the plots have changed
+      - joss_paper/plots/* # Trigger the paper generation workflow when the plots have changed
 
   # Apparently this only triggers the workflow if the workflow file is on the default branch
   # (https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run)
