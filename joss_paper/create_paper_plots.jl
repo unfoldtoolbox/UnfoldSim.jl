@@ -205,7 +205,7 @@ let
             title = distribution,
             xgridvisible = false,
             ygridvisible = false,
-            xlabelsize = 15,
+            xlabelsize = 16,
         )
         axes_list[index] = ax
 
