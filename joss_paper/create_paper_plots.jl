@@ -31,7 +31,7 @@ let
                 :condition => ["car", "face"],
                 :continuous => range(0, 5, length = 10),
             ),
-            tableModifyFun = x -> shuffle(deepcopy(StableRNG(1)), x),
+            event_order_function = x -> shuffle(deepcopy(StableRNG(1)), x),
         ) |> x -> RepeatDesign(x, 100)
 
     n1 = LinearModelComponent(;

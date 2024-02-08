@@ -73,7 +73,7 @@ In the following, one can find an example of how to use `UnfoldSim.jl` to simula
 
 In the following, we will first provide examples for the four simulation “ingredients” mentioned above which will then be used to simulate data.
 
-1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 levels. To mimic randomization in an experiment, we shuffle the trials using the `tableModifyFun` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
+1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 levels. To mimic randomization in an experiment, we shuffle the trials using the `event_order_function` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 
 ```julia
 design =
@@ -82,7 +82,7 @@ design =
         	:condition => ["car", "face"],
         	:continuous => range(0, 5, length = 10),
     	),
-        tableModifyFun = x -> shuffle(deepcopy(StableRNG(1)), x),
+        event_order_function = x -> shuffle(deepcopy(StableRNG(1)), x),
 	) |> x -> RepeatDesign(x, 100);
 ```
 
