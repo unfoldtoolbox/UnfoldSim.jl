@@ -154,7 +154,7 @@ m = fit(
 
 In subplot A of \autoref{fig_example_coefficients_effects}, one can see the model estimates for the different coefficients and as intended there is a condition effect in the first negative component and an effect of the continuous variable on the second (positive) component. The relation between the levels of the continuous variable and the scaling of the second component is even clearer visible in subplot B of \autoref{fig_example_coefficients_effects} which depicts the estimated marginal effects of the predictors. Instead of showing the regression coefficients, we can evaluate the estimated function at specific values of the continuous variable. 
 
-![Regression results for the simulated data. Panel **A** displays the estimated regression coefficients over time. Panel **B** shows the estimated marginal effects i.e. the estimated event-related potential atdifferent predictor levels.\label{fig_example_coefficients_effects}](plots/example_coefficients_effects.svg)
+![Regression results for the simulated data. Panel **A** displays the estimated regression coefficients over time. Panel **B** shows the estimated marginal effects i.e. the estimated event-related potential at different predictor levels.\label{fig_example_coefficients_effects}](plots/example_coefficients_effects.svg)
 
 As shown in this example, `UnfoldSim.jl` and `Unfold.jl` can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.
 
@@ -171,10 +171,9 @@ In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniqu
 Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany´s Excellence Strategy – EXC 2075 – 390740016. The authors further thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers.
 
 # Package references
-Please note that we only mention the main dependencies of the toolbox here, but the dependencies of the dependencies can be found in the respective `Manifest.toml` files. Furthermore, please note that we only list rather  than cite the packages for which we could not find any citation file or instruction.
+Please note that we only mention the main dependencies of the toolbox here, but the dependencies of the dependencies can be found in the respective `Manifest.toml` files. Furthermore, please note that we only list rather than cite the packages for which we could not find any citation file or instruction.
 
 **Julia** [@Julia-2017]  
-**Artifacts.jl**  
 **DataFrames.jl** [@JSSv107i04]  
 **Distributions.jl** [@Distributions.jl-2019; @JSSv098i16]  
 **Documenter.jl** [@Documenter_jl]  
@@ -184,8 +183,6 @@ Please note that we only mention the main dependencies of the toolbox here, but 
 **HDF5.jl**  
 **HypothesisTests.jl**  
 **ImageFiltering.jl** 
-**InteractiveUtils.jl**  
-**LinearAlgebra.jl**  
 **Literate.jl**  
 **LiveServer.jl**  
 **Makie.jl** [@DanischKrumbiegel2021]  
@@ -194,13 +191,11 @@ Please note that we only mention the main dependencies of the toolbox here, but 
 **Parameters.jl**  
 **PrettyTables.jl** [@ronan_arraes_jardim_chagas_2023_10214175]  
 **ProjectRoot.jl**  
-**Random.jl**  
 **SignalAnalysis.jl**  
 **Statistics.jl**  
 **StableRNGs.jl**  
 **StatsBase.jl**  
 **StatsModels.jl**  
-**Test.jl**  
 **TimerOutputs.jl**  
 **ToeplitzMatrices.jl**  
 **Unfold.jl** [@ehinger2019unfold]  
