@@ -11,7 +11,7 @@ design =
     SingleSubjectDesign(;
         conditions = Dict(
             :condition => ["car", "face"],
-            :continuous => range(-5, 5, length = 10),
+            :continuous => range(0, 5, length = 10),
         ),
     ) |> x -> RepeatDesign(x, 100);
 
@@ -60,11 +60,19 @@ m = fit(
 );
 
 # first the "pure" beta/linear regression parameters
-plot_erp(coeftable(m))
+plot_erp(
+    coeftable(m);
+    axis = (
+        title = "Estimated regression parameters",
+        xlabel = "Time [s]",
+        ylabel = "Amplitude [μV]",
+    ),
+)
 
 # and now beautifully visualized as marginal betas / predicted ERPs
 f = plot_erp(
-    effects(Dict(:condition => ["car", "face"], :continuous => -5:5), m);
+    effects(Dict(:condition => ["car", "face"], :continuous => 0:0.5:5), m);
+    axis = (title = "Predicted event-related potential (ERP)", xlabel = "Time [s]", ylabel = "Amplitude [μV]"),
     mapping = (:color => :continuous, linestyle = :condition, group = :continuous),
     legend = (; valign = :top, halign = :right, tellwidth = false),
     categorical_color = false,
