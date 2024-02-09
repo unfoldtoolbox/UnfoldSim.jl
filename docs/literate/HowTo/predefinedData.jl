@@ -7,7 +7,7 @@ using DataFrames
 using Random
 using CairoMakie # for plotting
 
-# From a previous study, we (somehow, e.g. by using [pyMNE.jl](https://github.com/beacon-biosignals/PyMNE.jl)) imported an event data frame like this:
+# From a previous study, we (somehow, e.g. by using [pyMNE.jl](https://unfoldtoolbox.github.io/Unfold.jl/dev/HowTo/pymne/)) imported an event data frame like this:
 my_events = DataFrame(:condition => [:A, :B, :B, :A, :A], :latency => [7, 13, 22, 35, 41])
 
 # To use exactly these values, we can generate a new `AbstractDesign`, which will always return this event dataframe
