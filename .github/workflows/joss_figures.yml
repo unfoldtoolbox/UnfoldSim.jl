@@ -9,8 +9,6 @@ jobs:
   figures:
     name: joss-figures
     runs-on: ubuntu-latest
-    outputs:
-      commitid: ${{ steps.commit.outputs.commitid }}
     permissions:
       contents: write
       actions: write
@@ -33,15 +31,10 @@ jobs:
           message: "(auto) add joss paper plots"
           # This should be the path to the plots within your repo.
           add: "joss_paper/plots"
-      - name: Extract commit id
-        id: commit
-        run: SHA=$(git rev-parse HEAD)
-          echo "::set-output name=commitid::$SHA"
   paper: # trigger paper workflow
     needs: figures
-    uses: ./.github/workflows/joss.yml
-    with:
-      ref: ${{ needs.figures.outputs.commitid }}
+    uses:
+      ./.github/workflows/joss.yml
       # - name: Push changes
       #   uses: ad-m/github-push-action@master
       #   with:
