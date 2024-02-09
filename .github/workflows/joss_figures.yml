@@ -14,7 +14,8 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@v2
-        # with:
+        with:
+          persist-credentials: false
         #   github_token: ${{ secrets.PAT}}
       - uses: julia-actions/setup-julia@v1
         with:
@@ -36,7 +37,7 @@ jobs:
           add: "joss_paper/plots"
   #paper: # trigger paper workflow
   #  uses: ./.github/workflows/joss.yml
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ secrets.PAT}}
+  # - name: Push changes
+  #   uses: ad-m/github-push-action@master
+  #   with:
+  #     github_token: ${{ secrets.PAT}}
