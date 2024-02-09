@@ -29,7 +29,6 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: "(auto) add joss paper plots"
-          #github_token: ${{ secrets.PAT}}
           # This should be the path to the plots within your repo.
           add: "joss_paper/plots"
   paper: # trigger paper workflow
