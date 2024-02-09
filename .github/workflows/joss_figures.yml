@@ -33,5 +33,5 @@ jobs:
           message: "(auto) add joss paper plots"
           # This should be the path to the plots within your repo.
           add: "joss_paper/plots"
-  paper: # trigger paper workflow
-    uses: ./.github/workflows/joss.yml
+  #paper: # trigger paper workflow
+  #  uses: ./.github/workflows/joss.yml
