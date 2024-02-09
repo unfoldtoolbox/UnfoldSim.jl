@@ -15,7 +15,7 @@ UnfoldSim.jl provides multi-channel support via EEG-forward models. Moreover, it
 
 Many tutorials, guides, how-tos and references are available in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)!
 
-![grafik](image-1.png)
+![readme_image](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/22366977/e6093d1e-2de7-4da2-86c6-a0d31ecc6420)
 
 ## Install
 
