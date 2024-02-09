@@ -22,11 +22,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        # with:
+        #   fetch-depth: 0
         #uses: actions/checkout@v3.5.3
-      - name: Checkout latest commit
-        run: git checkout HEAD
+      # - name: Checkout latest commit
+      #   run: git checkout HEAD
       - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@master
         with:
