@@ -131,4 +131,30 @@
         end
     end
 
+    @testset "MultiSubjectDesign with between subject and item factors" begin
+
+        # Define number of subjects and items
+        n_subjects = 2
+        n_items = 2
+
+        # Create a multi-subject design with the same factor between subject and item
+        design = MultiSubjectDesign(;
+            n_subjects = n_subjects,
+            n_items = n_items,
+            subjects_between = Dict(:cond => ["levelA", "levelB"]),
+            items_between = Dict(:cond => ["levelA", "levelB"]),
+        )
+
+        # Create events data frame based on the design
+        events_df = generate_events(design)
+
+        # Extract events for subject 2
+        s2 = subset(events_df, :subject => x -> x .== "S2")
+
+        # Since cond is a between_subject factor, each subject should only be in one condition
+        # Currently, this is not the case due to a bug in MixedModelsSim.jl (https://github.com/RePsychLing/MixedModelsSim.jl/pull/66)
+
+        @test_broken length(unique(s2.cond)) == 1
+    end
+
 end
