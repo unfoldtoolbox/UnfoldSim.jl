@@ -25,6 +25,8 @@ jobs:
         with:
           fetch-depth: 0
         #uses: actions/checkout@v3.5.3
+      - name: Checkout latest commit
+        run: git checkout
       - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@master
         with:
