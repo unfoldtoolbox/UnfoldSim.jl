@@ -13,7 +13,7 @@
 A Julia package to simulate multivariate time series, e.g. model-based ERPs, fMRI activity, pupil dilation etc.
 UnfoldSim.jl provides multi-channel support via EEG-forward models. Moreover, it is possible to simulate overlapping event-related activity and to add noise of a certain type e.g. Pink noise.
 
-Many Tutorials, Guides, How-Tos and References available in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)!
+Many tutorials, guides, how-tos and references are available in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)!
 
 ![grafik](https://user-images.githubusercontent.com/10183650/213565922-90feec23-3b51-4602-b50c-31561dbfc261.png)
 
@@ -41,36 +41,42 @@ AppStore -> JuliaUp,  or `winget install julia -s msstore` in CMD
 
 ```julia
 using Pkg
-Pkg.add("https://github.com/unfoldtoolbox/UnfoldSim.jl/tree/main")
+Pkg.add("UnfoldSim")
 ```
-
-Once the toolbox is registered this will translate to ```Pkg.add("UnfoldSim")```
-
 
 # Quickstart
 ```julia
-data,evts = UnfoldSim.predef_eeg(;n_repeats=1,noiselevel=0.8)
+data, evts = UnfoldSim.predef_eeg(; n_repeats = 1, noiselevel = 0.8)
 ```
-Produces continuous "EEG" with PinkNoise and some Overlap between 20 events (2 conditions * 10 levels of continuous variable).
+Produces continuous "EEG" with PinkNoise and some overlap between 20 events (2 conditions * 10 levels of the continuous variable).
 
 ## Slightly longer
 ```julia
-# start by defining the design / event-table
-design = SingleSubjectDesign(;conditions=Dict(:condA=>["levelA","levelB"])) |> d->RepeatDesign(d,10);
-# next define a ground-truth signal + relation to events/design with Wilkinson Formulas
+# Start by defining the design / events data frame
+design =
+    SingleSubjectDesign(; conditions = Dict(:condA => ["levelA", "levelB"])) |>
+    d -> RepeatDesign(d, 10);
+
+# Next define a ground truth signal + relation to events/design with Wilkinson formulas
 signal = LinearModelComponent(;
-        basis=[0,0,0,0.5,1,1,0.5,0,0],
-        formula = @formula(0~1+condA),
-        β = [1,0.5]
-        );
+    basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
+    formula = @formula(0 ~ 1 + condA),
+    β = [1, 0.5],
+);
 # finally, define some Onset Distribution and Noise, and simulate!
-data,events = simulate(Random.MersenneTwister(1),design, signal,  UniformOnset(;offset=5,width=4), PinkNoise());        
+data, events = simulate(
+    Random.MersenneTwister(1),
+    design,
+    signal,
+    UniformOnset(; offset = 5, width = 4),
+    PinkNoise(),
+);    
 ```
 All components (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
 
 ## Contributions
 
-Contributions are very welcome. These could be typos, bugreports, feature-requests, speed-optimization, new solvers, better code, better documentation.
+Contributions are very welcome. These could be typos, bug reports, feature requests, speed-optimization, better code, better documentation.
 
 ### How-to Contribute
 
