@@ -72,7 +72,11 @@ plot_erp(
 # and now beautifully visualized as marginal betas / predicted ERPs
 f = plot_erp(
     effects(Dict(:condition => ["car", "face"], :continuous => 0:0.5:5), m);
-    axis = (title = "Predicted event-related potential (ERP)", xlabel = "Time [s]", ylabel = "Amplitude [μV]"),
+    axis = (
+        title = "Predicted event-related potential (ERP)",
+        xlabel = "Time [s]",
+        ylabel = "Amplitude [μV]",
+    ),
     mapping = (:color => :continuous, linestyle = :condition, group = :continuous),
     legend = (; valign = :top, halign = :right, tellwidth = false),
     categorical_color = false,
