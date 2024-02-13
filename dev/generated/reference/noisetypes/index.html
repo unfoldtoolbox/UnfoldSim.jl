@@ -4,9 +4,23 @@ using CairoMakie
 using DSP
 using StableRNGs
 import StatsBase.autocor</code></pre><h2 id="What&#39;s-the-noise?"><a class="docs-heading-anchor" href="#What&#39;s-the-noise?">What&#39;s the noise?</a><a id="What&#39;s-the-noise?-1"></a><a class="docs-heading-anchor-permalink" href="#What&#39;s-the-noise?" title="Permalink"></a></h2><p>There are several noise-types directly implemented. Here is a comparison:</p><pre><code class="language-julia hljs">f = Figure()
-ax_sig = f[1, 1:2] = Axis(f; title = &quot;1.000 samples of noise&quot;)
-ax_spec = f[2, 1] = Axis(f; title = &quot;Welch Periodigram&quot;)
-ax_auto = f[2, 2] = Axis(f; title = &quot;Autocorrelogram (every 10th lag)&quot;)
+ax_sig =
+    f[1, 1:3] =
+        Axis(f; title = &quot;1.000 samples of noise&quot;, xlabel = &quot;Time&quot;, ylabel = &quot;Amplitude&quot;)
+ax_spec =
+    f[2, 1:2] = Axis(
+        f;
+        title = &quot;Welch Periodogram&quot;,
+        xlabel = &quot;Normalized frequency&quot;,
+        ylabel = &quot;log(Power)&quot;,
+    )
+ax_auto =
+    f[2, 3:4] = Axis(
+        f;
+        title = &quot;Autocorrelogram (every 10th lag)&quot;,
+        xlabel = &quot;Lag&quot;,
+        ylabel = &quot;Autocorrelation&quot;,
+    )
 for n in [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
 
     # generate
@@ -26,5 +40,5 @@ for n in [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
     lines!(ax_auto, lags, autocor_vec)
 
 end
-f[1:2, 3] = Legend(f, ax_sig, &quot;NoiseType&quot;)
-f</code></pre><img src="8ad06c22.png" alt="Example block output"/><div class="admonition is-category-hint"><header class="admonition-header">Hint</header><div class="admonition-body"><p>We recommed for smaller signals the <code>ExponentialNoise</code>, maybe with a removed DC offset or a HighPass filter. For long signals, this Noise requires lots of memory though. maybe Pinknoise is a better choice then.</p></div></div><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../overview/">« Overview: Toolbox Functions</a><a class="docs-footer-nextpage" href="../onsettypes/">Overview: OnsetTypes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Thursday 8 February 2024 11:02">Thursday 8 February 2024</span>. Using Julia version 1.10.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+f[1, 4] = Legend(f, ax_sig, &quot;Noise type&quot;, tellheight = true)
+f</code></pre><img src="e8da381a.png" alt="Example block output"/><div class="admonition is-category-hint"><header class="admonition-header">Hint</header><div class="admonition-body"><p>We recommed for smaller signals the <code>ExponentialNoise</code>, maybe with a removed DC offset or a HighPass filter. For long signals, this Noise requires lots of memory though. maybe Pinknoise is a better choice then.</p></div></div><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../overview/">« Overview: Toolbox Functions</a><a class="docs-footer-nextpage" href="../onsettypes/">Overview: OnsetTypes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Tuesday 13 February 2024 09:47">Tuesday 13 February 2024</span>. Using Julia version 1.10.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
