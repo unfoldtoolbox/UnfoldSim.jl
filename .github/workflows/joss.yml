@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 0
         #uses: actions/checkout@v3.5.3
       - name: Checkout latest commit
-        run: echo $GITHUB_SHA && git reset --hard && git checkout HEAD && GITHUB_SHA=$(git rev-parse HEAD) && echo $GITHUB_SHA
+        run: echo $LATEST_SHA && echo $GITHUB_SHA && git reset --hard && git checkout $LATEST_SHA && GITHUB_SHA=$(git rev-parse HEAD) && echo $GITHUB_SHA
       - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@master
         with:
