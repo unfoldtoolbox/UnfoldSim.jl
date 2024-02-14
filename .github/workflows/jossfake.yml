@@ -13,6 +13,7 @@ jobs:
       contents: write
       actions: write
     steps:
+      - uses: actions/checkout@v2
       - run: echo "A" >> fakefile.txt
       - name: Commit plots to repository
         uses: EndBug/add-and-commit@v9
