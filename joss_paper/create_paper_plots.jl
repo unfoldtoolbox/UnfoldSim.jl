@@ -43,14 +43,14 @@ let
     p3 = LinearModelComponent(;
         basis = p300(),
         formula = @formula(0 ~ 1 + continuous + continuous^2),
-        β = [-5, 1, 0.2],
+        β = [5, 1, 0.2],
     )
 
     components = [n1, p3]
 
     onset = UniformOnset(; width = 0, offset = 200)
 
-    noise = PinkNoise(; noiselevel = 1)
+    noise = PinkNoise(; noiselevel = 2)
 
     eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise)
 
