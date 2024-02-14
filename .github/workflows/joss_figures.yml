@@ -31,13 +31,7 @@ jobs:
           message: "(auto) add joss paper plots"
           # This should be the path to the plots within your repo.
           add: "joss_paper/plots"
-      - name: Save last commit
-        run: GITHUB_SHA=$(git show -s --format=%H) && LATEST_SHA=$(git show -s --format=%H) && echo $LATEST_SHA && echo $GITHUB_SHA
   paper: # trigger paper workflow
     needs: figures
     uses:
       ./.github/workflows/joss.yml
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ secrets.PAT}}
