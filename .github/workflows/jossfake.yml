@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - joss_paper/create_paper_plots.jl
-      - .github/workflows/joss_figures.yml
+      - .github/workflows/jossfake.yml
 
 jobs:
   figures:
