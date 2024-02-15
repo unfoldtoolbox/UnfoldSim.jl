@@ -57,7 +57,7 @@ Each component can be nested in a `MultichannelComponent`, which, using a forwar
 
 To generate complex activations, it is possible to specify a vector of `<:AbstractComponents`.
 
-## Concerete Onsets
+## Concrete Onsets
 The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, `UniformOnset` and `LogNormalOnset` are implemented. By specifying the parameters of the inter-onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
 \autoref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions.
 
