@@ -35,7 +35,3 @@ jobs:
     needs: figures
     uses:
       ./.github/workflows/joss.yml
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ secrets.PAT}}

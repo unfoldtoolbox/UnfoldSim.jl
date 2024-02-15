@@ -1,0 +1,29 @@
+name: JOSS figure generation fake
+on:
+  push:
+    paths:
+      - joss_paper/create_paper_plots.jl
+      - .github/workflows/jossfake.yml
+
+jobs:
+  figures:
+    name: joss-figures-fake
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo "A" >> fakefile.txt
+      - name: Commit plots to repository
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "(auto) add joss paper plots -fake"
+          # This should be the path to the plots within your repo.
+          add: "fakefile.txt"
+      - name: Save last commit
+        run: GITHUB_SHA=$(git show -s --format=%H) && LATEST_SHA=$(git show -s --format=%H) && echo $LATEST_SHA && echo $GITHUB_SHA
+  paper: # trigger paper workflow
+    needs: figures
+    uses:
+      ./.github/workflows/joss.yml
