@@ -37,7 +37,7 @@ let
     n1 = LinearModelComponent(;
         basis = n170(),
         formula = @formula(0 ~ 1 + condition),
-        β = [5, -30],
+        β = [5, -3],
     )
 
     p3 = LinearModelComponent(;
