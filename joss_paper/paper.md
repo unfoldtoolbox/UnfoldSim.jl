@@ -64,7 +64,7 @@ The inter-onset distribution defines the distance between events in the case of 
 ![Illustration of the inter-onset distributions. The colour indicates different sets of parameter values.\label{fig_onset_distributions}](plots/onset_distributions.svg)
 
 ## Concrete Noise
-UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise, and noise based on actual EEG data.
+UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
 
 ![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its $log_{10}(power)$ at normalized frequencies.\label{fig_noise_types}](plots/noise_types.svg)
 
