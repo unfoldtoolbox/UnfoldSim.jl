@@ -67,7 +67,8 @@
         )
 
         design = RepeatDesign(designOnce, 3)
-        @test size(generate_events(design)) == (8 * 12 * 3, 3)
+        # Note: the number of items has to be divided by the number of cond levels because cond is both between item and subject
+        @test size(generate_events(design)) == ((8 / 2) * 12 * 3, 3)
         @test size(design) == (8 * 3, 12)
         #--- single sub
 
@@ -149,12 +150,16 @@
         events_df = generate_events(design)
 
         # Extract events for subject 2
-        s2 = subset(events_df, :subject => x -> x .== "S2")
+        s2 = subset(events_df, :subject => ByRow(==("S2")))
 
         # Since cond is a between_subject factor, each subject should only be in one condition
-        # Currently, this is not the case due to a bug in MixedModelsSim.jl (https://github.com/RePsychLing/MixedModelsSim.jl/pull/66)
+        @test length(unique(s2.cond)) == 1
 
-        @test_broken length(unique(s2.cond)) == 1
+        # Extract events for item 1
+        i1 = subset(events_df, :item => ByRow(==("I1")))
+
+        # Since cond is a between_item factor, each item should only be in one condition
+        @test length(unique(i1.cond)) == 1
     end
 
 end
