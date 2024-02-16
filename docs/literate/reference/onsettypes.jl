@@ -132,7 +132,7 @@ end
 # The `LogNormalOnset` is based on a log-normal distribution and has four parameters: `μ`, `σ`, `offset` and `truncate_upper`. 
 
 # Example:
-onset_lognormal = LogNormalOnset(; μ = 3, σ = 0.25, offset = 0, truncate_upper = nothing);
+onset_lognormal = LogNormalOnset(; μ = 3, σ = 0.25, offset = 0, truncate_upper = nothing, truncate_lower = nothing);
 
 # The parameters `μ` and `σ` are the location and scale parameter of the log-normal distribution. However, they are not identical to its mean and standard deviation.
 # If a variable $X$ is log-normally distributed then $Y = ln(X)$ is normally distributed with mean `μ` and standard deviation `σ`[^1].
@@ -140,7 +140,7 @@ onset_lognormal = LogNormalOnset(; μ = 3, σ = 0.25, offset = 0, truncate_upper
 # The `offset` parameter determines the minimal distance between two events and its value is added to the value sampled from the log-normal distribution i.e. it shifts the distribution.
 # Its default value is `0`, i.e. no offset.
 
-# The `truncate_upper` parameter allows to truncate the distribution at a certain sample value. Its default value is `nothing`, i.e. no truncation.
+# The `truncate_upper` and 'truncate_lower' parameters allows to truncate the distribution at a certain sample values. Its default value for both is `nothing`, i.e. no truncation.
 
 # In the figure below, it is illustrated how the onset distribution changes when changing one of its parameters.
 let # hide
