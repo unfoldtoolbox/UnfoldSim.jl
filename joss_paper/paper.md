@@ -31,7 +31,7 @@ affiliations:
    index: 1
  - name: Stuttgart Center for Simulation Science, University of Stuttgart, Germany
    index: 2
-date: 31 January 2024
+date: 16 February 2024
 bibliography: paper.bib
 ---
 
@@ -45,28 +45,28 @@ In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze 
 While other EEG simulation toolboxes exist, they each have limitations: they are dominantly MATLAB-based, they do not simulate continuous EEG, and they offer little support for designs more complex than two conditions or with non-linear effects.
 
 # Functionality
-The toolbox provides four abstract types: `AbstractDesign`, `AbstractComponent`, `AbstractOnset` and `AbstractNoise`.
+The toolbox provides four abstract types: `AbstractDesign`, `AbstractComponent`, `AbstractOnset` and `AbstractNoise`. In the following, we present the concrete types that are currently implemented. In addition, users can also implement their own concrete types fitting their individual needs.
 
-## Concrete Designs
+## Experimental designs
 Currently, we support a single and a multi-subject design. They are used to generate an experimental design containing the conditions and levels of all predictors. The multi-subject design uses the `MixedModelsSim.jl` toolbox [@phillip_alday_2024_10669002] and allows a flexible specification of the random-effects structure by indicating which predictors are within- or between-subject (or item). Tailored randomisation is possible via a user-specified function, which is applied after design generation. Designs can be encapsulated, for instance, the `RepeatDesign` type which repeats the generated event table multiple times, thus generating new trials. Currently, only balanced designs are implemented, i.e. all possible combinations of predictor levels have the same number of trials. However, [a tutorial on how to implement a new design](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/generated/HowTo/newDesign) for imbalanced datasets is provided.
 
-## Concrete Components
+## Event basis functions (Components)
 `UnfoldSim.jl` provides a `LinearModelComponent` and a `MixedModelComponent` for single- and multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is weighted by the user-defined regression model. The user specifies a basis function for the component by either providing a custom vector or choosing one of the prespecified bases. For example, the toolbox provides simplified versions of typical EEG components e.g. N170 which are implemented as temporally shifted Hanning windows. Further, in the components’ model formulae, fixed-effects ($\beta s$) and random effects  (`MultiSubjectDesign`s only) need to be specified.
 
 Each component can be nested in a `MultichannelComponent`, which, using a forward headmodel, projects the simulated source component to the multi-channel electrode space. Using `Artifacts.jl` we provide on-demand access to the HArtMuT [@harmening2022hartmut] model. 
 
 To generate complex activations, it is possible to specify a vector of `<:AbstractComponents`.
 
-## Concrete Onsets
+## Inter-onset distributions
 The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, `UniformOnset` and `LogNormalOnset` are implemented. By specifying the parameters of the inter-onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
 \autoref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions.
 
 ![Illustration of the inter-onset distributions. The colour indicates different sets of parameter values.\label{fig_onset_distributions}](plots/onset_distributions.svg)
 
-## Concrete Noise
-UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and `ExponentialNoise` (exponentially decaying autoregressive noise) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
+## Noise types
+UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
 
-![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its $log_{10}(power)$ at normalized frequencies.\label{fig_noise_types}](plots/noise_types.svg)
+![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its $log_{10}(power)$ at normalized frequencies. Note that the legend in panel B also applies to panel A.\label{fig_noise_types}](plots/noise_types.svg)
 
 # Simulation example
 In the following, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/). Moreover, to get started, the `UnfoldSim.jl` toolbox offers the function `predef_eeg` which, depending on the input, simulates continuous EEG data either for a single subject or multiple subjects.
