@@ -36,14 +36,15 @@
         @test minimum(rand_vec) > 100
 
         # test Truncated
-        lognormal_onset = LogNormalOnset(; μ = 4, σ = 1, truncate_upper = 100)
+        lognormal_onset =
+            LogNormalOnset(; μ = 4, σ = 1, truncate_lower = 10, truncate_upper = 100)
         rand_vec = UnfoldSim.simulate_interonset_distances(
             StableRNG(1),
             lognormal_onset,
             dummydesign,
         )
         @test maximum(rand_vec) <= 100
-        @test minimum(rand_vec) >= 0
+        @test minimum(rand_vec) >= 10
     end
     @testset "sim_onsets" begin
         # test accumulate always increasing
