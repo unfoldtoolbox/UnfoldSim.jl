@@ -91,9 +91,24 @@ function closest_src(head::Hartmut, label::String)
 end
 
 
-# Adapted from Unfold.jl: https://github.com/unfoldtoolbox/Unfold.jl/blob/b3a21c2bb7e93d2f45ec64b0197f4663a6d7939a/src/utilities.jl#L40
+
 
 # One channel case
+
+"""
+    epoch(data::AbstractVector, args...; kwargs...)
+    epoch(
+        data::AbstractArray{T,2},
+        events,
+        τ::Tuple{Number,Number},
+        sfreq;
+        eventtime::Symbol = :latency,
+    ) where {T<:Union{Missing,Number}}
+Helper function to epoch data
+
+Adapted from Unfold.jl: https://github.com/unfoldtoolbox/Unfold.jl/blob/b3a21c2bb7e93d2f45ec64b0197f4663a6d7939a/src/utilities.jl#L40
+
+"""
 function epoch(data::AbstractVector, args...; kwargs...)
     data_r = reshape(data, (1, :))
     ep = epoch(data_r, args...; kwargs...)
