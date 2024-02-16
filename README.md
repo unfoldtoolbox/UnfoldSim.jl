@@ -15,7 +15,7 @@ UnfoldSim.jl provides multi-channel support via EEG-forward models. Moreover, it
 
 Many tutorials, guides, how-tos and references are available in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)!
 
-![readme_image](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/22366977/a52dc5f8-54aa-43c1-8235-6d6fb34a79b2)
+![readme_figure](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/22366977/b69d186c-fd3d-4449-9f2e-03d7e01b8cb3)
 
 ## Install
 
@@ -46,12 +46,16 @@ Pkg.add("UnfoldSim")
 
 # Quickstart
 ```julia
-data, evts = UnfoldSim.predef_eeg(; n_repeats = 1, noiselevel = 0.8)
+using UnfoldSim
+data, events = UnfoldSim.predef_eeg(; n_repeats = 1, noiselevel = 0.8)
 ```
 Produces continuous "EEG" with PinkNoise and some overlap between 20 events (2 conditions * 10 levels of the continuous variable).
 
 ## Slightly longer
 ```julia
+using UnfoldSim
+using Random
+
 # Start by defining the design / events data frame
 design =
     SingleSubjectDesign(; conditions = Dict(:condA => ["levelA", "levelB"])) |>
@@ -63,7 +67,7 @@ signal = LinearModelComponent(;
     formula = @formula(0 ~ 1 + condA),
     β = [1, 0.5],
 );
-# finally, define some Onset Distribution and Noise, and simulate!
+# finally, define some inter-onset distribution and noise, and simulate data!
 data, events = simulate(
     Random.MersenneTwister(1),
     design,
@@ -123,4 +127,4 @@ TBA
 
 ## Acknowledgements
 
-Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany´s Excellence Strategy – EXC 2075 – 390740016
+Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany´s Excellence Strategy – EXC 2075 – 390740016. Furthermore, the authors thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers.
