@@ -291,7 +291,7 @@ let
 
     # Add legend
     axislegend(framevisible = false, position = :rt)
-    #f[1, 3] = Legend(f, ax_A, "Noise type", framevisible = false)
+    #f[0, 1:2] = Legend(f, ax_A, "Noise type", framevisible = false, orientation = :horizontal)
 
     # Make the first column (noise samples plot) take up 55% of the available space
     colsize!(f.layout, 1, Relative(0.60))
