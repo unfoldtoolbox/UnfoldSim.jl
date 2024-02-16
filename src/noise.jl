@@ -20,7 +20,7 @@ end
 end
 
 
-@with_kw struct RealisticNoise <: AbstractNoise 
+@with_kw struct RealisticNoise <: AbstractNoise
     noiselevel = 1
 end
 
@@ -44,54 +44,74 @@ end
 
 
 """
-    gen_noise(t::Union{PinkNoise, RedNoise}, n::Int)
+    simulate_noise(t::Union{PinkNoise, RedNoise}, n::Int)
 
 Generate noise of a given type t and length n
 """
-function gen_noise(rng, t::Union{PinkNoise, RedNoise}, n::Int)
-    return t.noiselevel .*rand(rng, t.func(n, 1.0))
+function simulate_noise(rng, t::Union{PinkNoise,RedNoise}, n::Int)
+    return t.noiselevel .* rand(rng, t.func(n, 1.0))
 end
 
-function gen_noise(rng,t::NoNoise,n::Int)
+function simulate_noise(rng, t::NoNoise, n::Int)
     return zeros(n)
 end
 
 """
-    gen_noise(t::WhiteNoise, n::Int)
+    simulate_noise(t::WhiteNoise, n::Int)
 
 Generate noise of a given type t and length n
 """
-function gen_noise(rng, t::WhiteNoise, n::Int)
+function simulate_noise(rng, t::WhiteNoise, n::Int)
     noisevector = randn(rng, n)
     if !isnothing(t.imfilter)
         noisevector = imfilter(noisevector, Kernel.gaussian((t.imfilter,)))
     end
-    return t.noiselevel .*noisevector
+    return t.noiselevel .* noisevector
 end
 
 
 """
-    gen_noise(t::RealisticNoise, n::Int)
+    simulate_noise(t::RealisticNoise, n::Int)
 
 Generate noise of a given type t and length n
 """
-function gen_noise(rng, t::RealisticNoise, n::Int)
+function simulate_noise(rng, t::RealisticNoise, n::Int)
     error("not implemented")
     return 0
 end
 
 
-function gen_noise(rng,t::ExponentialNoise, n::Int)
-       
-    function exponentialCorrelation(x; nu = 1, length_ratio = 1)
+function simulate_noise(rng, t::ExponentialNoise, n::Int)
+
+    function exponential_correlation(x; nu = 1, length_ratio = 1)
         # Author: Jaromil Frossard
         # generate exponential function
         R = length(x) * length_ratio
         return exp.(-3 * (x / R) .^ nu)
     end
-    
-    Σ = Symmetric(Circulant(exponentialCorrelation([0:1:(n-1);], nu = t.ν)),:L)
+
+    Σ = Symmetric(Circulant(exponential_correlation([0:1:(n-1);], nu = t.ν)), :L)
 
     # cholesky(Σ) is n x n diagonal, lots of RAM :S
-    return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]    
+    return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]
+end
+
+
+
+
+"""
+Generate and add noise to the data-matrix
+
+Assumes that the signal can be linearized, that is, that the noise is stationary
+"""
+function add_noise!(rng, noisetype::AbstractNoise, signal)
+
+    # generate noise
+    noise = simulate_noise(deepcopy(rng), noisetype, length(signal))
+
+    noise = reshape(noise, size(signal))
+
+    # add noise to data
+    signal .+= noise
+
 end

@@ -35,7 +35,7 @@ onset_uniform = UniformOnset(; width = 50, offset = 0);
 
 # In the figure below, it is illustrated how the onset distribution changes when changing one of its parameters.
 let # hide
-    f = Figure(title = "Event onsets (Uniform distribution)") # hide
+    f = Figure() # hide
 
     ## Define parameter combinations # hide
     parameters = [ # hide
@@ -52,13 +52,18 @@ let # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
         for (width, offset) in combinations # hide
-            onsets = UnfoldSim.rand_onsets( # hide
+            distances = UnfoldSim.simulate_interonset_distances( # hide
                 MersenneTwister(42), # hide
                 UniformOnset(; width = width, offset = offset), # hide
                 design, # hide
             ) # hide
 
-            hist!(ax, onsets, bins = range(0, 100, step = 1), label = "($width, $offset)") # hide
+            hist!(
+                ax,
+                distances,
+                bins = range(0, 100, step = 1),
+                label = "($width, $offset)",
+            ) # hide
 
             if label == "offset" && offset != 0 # hide 
                 vlines!(offset, color = "black") # hide
@@ -85,7 +90,7 @@ end # hide
 # <summary>Click to show the code for the figure above</summary>
 # ```
 let
-    f = Figure(title = "Event onsets (Uniform distribution)")
+    f = Figure()
 
     ## Define parameter combinations
     parameters = [(((50, 0), (80, 0)), "width"), (((50, 0), (50, 20)), "offset")]
@@ -99,7 +104,7 @@ let
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets
         for (width, offset) in combinations
-            onsets = UnfoldSim.rand_onsets(
+            onsets = UnfoldSim.simulate_interonset_distances(
                 MersenneTwister(42),
                 UniformOnset(; width = width, offset = offset),
                 design,
@@ -144,7 +149,7 @@ onset_lognormal = LogNormalOnset(; μ = 3, σ = 0.25, offset = 0, truncate_upper
 
 # In the figure below, it is illustrated how the onset distribution changes when changing one of its parameters.
 let # hide
-    f = Figure(title = "Event onsets (Lognormal distribution)", size = (600, 800)) # hide
+    f = Figure(size = (600, 800)) # hide
 
     ## Define parameter combinations # hide
     parameters = [ # hide
@@ -163,7 +168,7 @@ let # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
         for (μ, σ, offset, truncate_upper) in combinations # hide
-            onsets = UnfoldSim.rand_onsets( # hide
+            onsets = UnfoldSim.simulate_interonset_distances( # hide
                 MersenneTwister(42), # hide
                 LogNormalOnset(; # hide
                     μ = μ, # hide
@@ -209,7 +214,7 @@ end # hide
 # <summary>Click to show the code for the figure above</summary>
 # ```
 let
-    f = Figure(title = "Event onsets (Lognormal distribution)", size = (600, 800))
+    f = Figure(size = (600, 800))
 
     ## Define parameter combinations
     parameters = [
@@ -228,7 +233,7 @@ let
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets
         for (μ, σ, offset, truncate_upper) in combinations
-            onsets = UnfoldSim.rand_onsets(
+            onsets = UnfoldSim.simulate_interonset_distances(
                 MersenneTwister(42),
                 LogNormalOnset(;
                     μ = μ,
@@ -276,6 +281,4 @@ end
 #        - if `offset` > `length(signal.basis)` -> no overlap
 #        - if `offset` < `length(signal.basis)` -> there might be overlap, depending on the other parameters of the onset distribution
 
-
-## Footnotes # hide
 # [^1]: Wikipedia contributors. (2023, December 5). Log-normal distribution. In Wikipedia, The Free Encyclopedia. Retrieved 12:27, December 7, 2023, from https://en.wikipedia.org/w/index.php?title=Log-normal_distribution&oldid=1188400077# 

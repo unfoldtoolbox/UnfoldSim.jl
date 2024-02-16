@@ -1,40 +1,60 @@
 @testset "onset" begin
-    dummydesign = gen_debug_design(;n_subj=300,n_item=1000)
+    dummydesign = gen_debug_design(; n_subjects = 300, n_item = 1000)
     @testset "UniformOnset" begin
-        unifOnset = UniformOnset(;offset=100,width=50)
+        uniform_onset = UniformOnset(; offset = 100, width = 50)
 
         # test random numbers are UniformOnset
-        rand_vec = UnfoldSim.rand_onsets(StableRNG(1),unifOnset,dummydesign)
-        @test size(rand_vec) == (1000,300)
+        rand_vec = UnfoldSim.simulate_interonset_distances(
+            StableRNG(1),
+            uniform_onset,
+            dummydesign,
+        )
+        @test size(rand_vec) == (1000, 300)
         @test minimum(rand_vec) ≈ 100
         @test maximum(rand_vec) ≈ 150
     end
     @testset "LogNormalOnset" begin
         # test basics
-        logNormalOnset = LogNormalOnset(;μ=4,σ=1)
-        rand_vec = UnfoldSim.rand_onsets(StableRNG(1),logNormalOnset, dummydesign)
-        @test size(rand_vec) == (1000,300)
-        @test isapprox(mean(log.(rand_vec)), 4;atol=0.01)
+        lognormal_onset = LogNormalOnset(; μ = 4, σ = 1)
+        rand_vec = UnfoldSim.simulate_interonset_distances(
+            StableRNG(1),
+            lognormal_onset,
+            dummydesign,
+        )
+        @test size(rand_vec) == (1000, 300)
+        @test isapprox(mean(log.(rand_vec)), 4; atol = 0.01)
         @test minimum(rand_vec) > 0
         @test isapprox(std(log.(rand_vec)), 1; atol = 0.01)
 
         # test offset
-        logNormalOnset = LogNormalOnset(; μ = 4, σ = 1, offset = 100)
-        rand_vec = UnfoldSim.rand_onsets(StableRNG(1), logNormalOnset, dummydesign)
+        lognormal_onset = LogNormalOnset(; μ = 4, σ = 1, offset = 100)
+        rand_vec = UnfoldSim.simulate_interonset_distances(
+            StableRNG(1),
+            lognormal_onset,
+            dummydesign,
+        )
         @test minimum(rand_vec) > 100
+
         # test Truncated
-        logNormalOnset =
-            LogNormalOnset(; μ = 4, σ = 1, truncate_lower = 10, truncate_upper = 100)
-        rand_vec = UnfoldSim.rand_onsets(StableRNG(1), logNormalOnset, dummydesign)
+        lognormal_onset = LogNormalOnset(; μ = 4, σ = 1, truncate_lower = 10, truncate_upper = 100)
+        rand_vec = UnfoldSim.simulate_interonset_distances(
+            StableRNG(1),
+            lognormal_onset,
+            dummydesign,
+        )
         @test maximum(rand_vec) <= 100
         @test minimum(rand_vec) >= 10
     end
-    @testset "gen_onsets" begin
+    @testset "sim_onsets" begin
         # test accumulate always increasing
-        unifOnset = UniformOnset(;offset=0,width=50)
+        uniform_onset = UniformOnset(; offset = 0, width = 50)
 
-        accumOnset = UnfoldSim.generate(StableRNG(1),unifOnset,gen_debug_simulation(onset=unifOnset))
-        @test  all(diff(accumOnset,dims=1) .>= 0)
+        accumulated_onset = UnfoldSim.simulate_onsets(
+            StableRNG(1),
+            uniform_onset,
+            gen_debug_simulation(onset = uniform_onset),
+        )
+        @test all(diff(accumulated_onset, dims = 1) .>= 0)
     end
 
 end

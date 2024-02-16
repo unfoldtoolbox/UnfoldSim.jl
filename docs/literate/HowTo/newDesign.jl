@@ -24,18 +24,18 @@ end;
 size(design::ImbalanceSubjectDesign) = (design.nTrials,);
 
 # #### 3) `generate`
-# We need a type `generate(design::ImbalanceSubjectDesign)` function. This function should return the actual table as a `DataFrame`
-function generate(design::ImbalanceSubjectDesign)
+# We need a type `generate_events(design::ImbalanceSubjectDesign)` function. This function should return the actual table as a `DataFrame`
+function generate_events(design::ImbalanceSubjectDesign)
     nA = Int(round.(design.nTrials .* design.balance))
-    nB = Int(round.(design.nTrials .* (1-design.balance)))
-    @assert nA + nB  ≈ design.nTrials
-    levels = vcat(repeat(["levelA"],nA),repeat(["levelB"],nB))
-    return DataFrame(Dict(:condition=>levels))
+    nB = Int(round.(design.nTrials .* (1 - design.balance)))
+    @assert nA + nB ≈ design.nTrials
+    levels = vcat(repeat(["levelA"], nA), repeat(["levelB"], nB))
+    return DataFrame(Dict(:condition => levels))
 end;
 
 # Finally, we can test the function and see whether it returns a Design-DataFrame as we requested
-design = ImbalanceSubjectDesign(;nTrials=6,balance=0.2)
-generate(design)
+design = ImbalanceSubjectDesign(; nTrials = 6, balance = 0.2)
+generate_events(design)
 
 # !!! warning "Important"
 #       It is the users task to ensure that each run is reproducible. So if you have a random process (e.g. shuffling), be sure to 

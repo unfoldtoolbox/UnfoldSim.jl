@@ -9,16 +9,16 @@ using UnfoldSim
 # If you struggle with this problem `RepeatDesign` is an easy tool for you:
 
 designOnce = MultiSubjectDesign(;
-    n_items=2,
+    n_items = 2,
     n_subjects = 2,
-    subjects_between =Dict(:cond=>["levelA","levelB"]),
-    items_between =Dict(:cond=>["levelA","levelB"]),
+    subjects_between = Dict(:cond => ["levelA", "levelB"]),
+    items_between = Dict(:cond => ["levelA", "levelB"]),
 );
 
-design = RepeatDesign(designOnce,4);
-generate(design)
+design = RepeatDesign(designOnce, 4);
+generate_events(design)
 
-# As you can see, the design was simply repeated. As always, you can ignore the `dv` column, it is for internal consistency with MixedModelsSim.jl
+# As you can see, the design was simply repeated.
 
 # !!! note
 #       If you implemented your own `AbstractDesign`, you need to define the size function accordingly. E.g.:
