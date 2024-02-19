@@ -99,7 +99,7 @@ end
 
 """
     create_continuous_signal(rng, responses, simulation)
-Based on the responses and simulation parameters, simulates onset-latencies and adds together a continuous signal
+Based on the responses and simulation parameters, simulate onset latencies and add together a continuous signal.
 
 
 """
@@ -159,7 +159,7 @@ end
     add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
     add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)
     add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
-Helper function to add inplace the responses to the signal, but for both 2D (1 channel) and 3D (X channel case)
+Helper function to add inplace the responses to the signal, but for both 2D (1 channel) and 3D (X channel case).
 """
 function add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
     @views signal[e, tvec, s] .+= responses[:, erpvec]

@@ -78,8 +78,8 @@ end
 
 """
     generate_events(design::MultiSubjectDesign)
-Generates full factorial Dataframe according to MixedModelsSim.jl 's simdat_crossed function
-Note: n_items = you can think of it as `trials` or better, as stimuli
+Generate full factorial Dataframe according to MixedModelsSim.jl 's `simdat_crossed` function.
+Note: n_items = you can think of it as `trials` or better, as `stimuli`.
 
 Note: No condition can be named `dv` which is used internally in MixedModelsSim / MixedModels as a dummy left-side
 
@@ -129,7 +129,7 @@ length(design::AbstractDesign) = *(size(design)...)
 
 """
     RepeatDesign{T}
-repeat a design DataFrame multiple times to mimick repeatedly recorded trials
+Repeat a design DataFrame multiple times to mimick repeatedly recorded trials.
 
 ```julia
 designOnce = MultiSubjectDesign(;
@@ -150,7 +150,7 @@ end
 """
     UnfoldSim.generate_events(design::RepeatDesign{T})
 
-In a repeated design, iteratively calls the underlying {T} Design and concatenates. In case of MultiSubjectDesign, sorts by subject
+In a repeated design, iteratively calls the underlying {T} Design and concatenates. In case of MultiSubjectDesign, sorts by subject.
 """
 function UnfoldSim.generate_events(design::RepeatDesign)
     df = map(x -> generate_events(design.design), 1:design.repeat) |> x -> vcat(x...)

@@ -11,16 +11,16 @@ predef_eeg(;kwargs...)
 predef_eeg(rng;kwargs...)
 predef_eeg(rng,n_subjects;kwargs...)
 
-Generates a P1/N1/P3 complex.
-In case `n_subjects` is defined - `MixedModelComponents` are generated, else `LinearModelComponents`
+Generate a P1/N1/P3 complex.
+In case `n_subjects` is defined - `MixedModelComponents` are generated, else `LinearModelComponents`.
 
-Most used `kwargs` is: `return_epoched=true` to ignore the overlap/onset bits and return already epoched data
+The most used `kwargs` is: `return_epoched=true` to ignore the overlap/onset bits and return already epoched data.
 
 
 
 ## Default params:
 
-- n_repeats=100
+- n_repeats = 100
 - event_order_function = x->shuffle(deepcopy(rng),x # random trial order
 - conditions = Dict(...),
 

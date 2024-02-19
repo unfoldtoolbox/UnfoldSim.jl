@@ -5,7 +5,7 @@
 
 """
     PinkNoise <: AbstractNoise
-Generates Pink Noise using the SignalAnalysis.jl implementation
+Generate Pink Noise using the SignalAnalysis.jl implementation.
 """
 @with_kw struct PinkNoise <: AbstractNoise
     noiselevel = 1
@@ -15,7 +15,7 @@ end
 
 """
     RedNoise <: AbstractNoise
-Generates Red Noise using the SignalAnalysis.jl implementation
+Generate Red Noise using the SignalAnalysis.jl implementation.
 """
 @with_kw struct RedNoise <: AbstractNoise
     noiselevel = 1
@@ -27,8 +27,8 @@ end
     WhiteNoise <: WhiteNoise
     noiselevel = 1
     imfilter = 0
-Generates White Noise using `randn` - thus Gaussian noise.
-Using imfilter > 0 it is possible to smooth the noise using Image.imfilter
+Generate White Noise using `randn` - thus Gaussian noise.
+Using imfilter > 0 it is possible to smooth the noise using Image.imfilter.
 """
 @with_kw struct WhiteNoise <: AbstractNoise
     noiselevel = 1
@@ -37,7 +37,7 @@ end
 
 """
     RealisticNoise <: AbstractNoise
-Not implemented- planned to use Artefacts.jl to provide real EEG data to add
+Not implemented - planned to use Artefacts.jl to provide real EEG data to add.
 """
 @with_kw struct RealisticNoise <: AbstractNoise
     noiselevel = 1
@@ -46,7 +46,7 @@ end
 """
     NoNoise <: AbstractNoise
 
-Returns zeros instead of noise
+Return zeros instead of noise.
 """
 struct NoNoise <: AbstractNoise end
 
@@ -61,9 +61,9 @@ struct AutoRegressiveNoise <: AbstractNoise end
 """ 
     ExponentialNoise <: AbstractNoise
 
-Noise with exponential decay in AR spectrum
+Noise with exponential decay in AR spectrum.
 !!! warning
-    Current implementation: cholesky of NxN matrix needs to be calculated, might need lot's of RAM
+    Current implementation: Cholesky of NxN matrix needs to be calculated, which might need lots of RAM.
 
 """
 
@@ -76,7 +76,7 @@ end
 """
     simulate_noise(rng, t::Union{PinkNoise,RedNoise}, n::Int)
 
-Generate Pink or Red Noise using the SignalAnalysis.jl implementation
+Generate Pink or Red Noise using the `SignalAnalysis.jl` implementation.
 """
 function simulate_noise(rng, t::Union{PinkNoise,RedNoise}, n::Int)
     return t.noiselevel .* rand(rng, t.func(n, 1.0))
@@ -84,7 +84,7 @@ end
 
 """
     simulate_noise(rng, t::NoNoise, n::Int)
-Returns zeros instead of noise
+Return zeros instead of noise.
 """
 function simulate_noise(rng, t::NoNoise, n::Int)
     return zeros(n)
