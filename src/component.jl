@@ -124,6 +124,7 @@ Base.length(c::AbstractComponent) = length(c.basis)
 
 """
     maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
+maximum of individual component lengths
 """
 maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
 
