@@ -3,25 +3,25 @@
 ## EEG
 """
     p100(;sfreq=100)
-Generator for Hanning window, peak at 100ms, width 100ms, at kwargs `sfreq` (default 100).
+Generator for Hanning window, peak at 100ms, width 100ms, at kwargs `sfreq` (default 100). Returns a vector.
 """
 p100(; sfreq = 100) = hanning(0.1, 0.1, sfreq)
 
 """
     p300(;sfreq=100)
-Generator for Hanning window, peak at 300ms, width 300ms, at kwargs `sfreq` (default 100).
+Generator for Hanning window, peak at 300ms, width 300ms, at kwargs `sfreq` (default 100). Returns a vector.
 """
 p300(; sfreq = 100) = hanning(0.3, 0.3, sfreq)
 
 """
     n170(;sfreq=100)
-Generator for Hanning window, negative (!) peak at 170ms, width 150ms, at kwargs `sfreq` (default 100).
+Generator for Hanning window, negative (!) peak at 170ms, width 150ms, at kwargs `sfreq` (default 100). Returns a vector.
 """
 n170(; sfreq = 100) = -hanning(0.15, 0.17, sfreq)
 
 """
     n400(;sfreq=100)
-Generator for Hanning window, negative (!) peak at 400ms, width 400ms, at kwargs `sfreq` (default 100).
+Generator for Hanning window, negative (!) peak at 400ms, width 400ms, at kwargs `sfreq` (default 100). Returns a vector.
 """
 n400(; sfreq = 100) = -hanning(0.4, 0.4, sfreq)
 
