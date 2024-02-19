@@ -14,7 +14,7 @@ predef_eeg(rng,n_subjects;kwargs...)
 Generate a P1/N1/P3 complex.
 In case `n_subjects` is defined - `MixedModelComponents` are generated, else `LinearModelComponents`.
 
-The most used `kwargs` is: `return_epoched=true` to ignore the overlap/onset bits and return already epoched data.
+The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset=NoOnset()` and `return_epoched=true`
 
 
 
@@ -141,7 +141,7 @@ end
 
     predef_2x2(rng::AbstractRNG;kwargs...)
 
-Most used kwargs is: `return_epoched=true` to ignore the overlap/onset bits and return already epoched data
+The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset=NoOnset()` and `return_epoched=true`
 
 #### design
 - `n_items`=100,
