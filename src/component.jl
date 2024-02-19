@@ -140,7 +140,7 @@ simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
 Generate a linear model design matrix, weight it by c.β and multiply the result with the given basis vector.
 
 julia> c = UnfoldSim.LinearModelComponent([0,1,1,0],@formula(0~1+cond),[1,2],Dict())
-julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
+julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
 julia> simulate_component(StableRNG(1),c,design)
 """
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
@@ -169,7 +169,7 @@ A trick is used to remove the Normal-Noise from the MixedModel which might lead 
 
 Currently, it is not possible to use a different basis for fixed and random effects, but a code-stub exists (it is slow though).
 
-julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
+julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
 julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
 julia> simulate(StableRNG(1),c,design)
 
