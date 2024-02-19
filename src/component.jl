@@ -89,7 +89,7 @@ n_channels(c::AbstractComponent) = 1
 
 """
     n_channels(c::MultichannelComponent)
-for `MultichannelComponent` returns the length of the projection vector.
+For `MultichannelComponent` return the length of the projection vector.
 
 """
 n_channels(c::MultichannelComponent) = length(c.projection)
