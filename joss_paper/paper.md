@@ -69,7 +69,7 @@ UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise`
 ![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its $log_{10}(power)$ at normalized frequencies.\label{fig_noise_types}](plots/noise_types.svg)
 
 # Simulation example
-In the following, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/). Moreover, to get started, the `UnfoldSim.jl` toolbox offers the function `predef_eeg` which, depending on the input, simulates continuous EEG data either for a single subject or multiple subjects.
+In this section, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/). Moreover, to get started, the `UnfoldSim.jl` toolbox offers the function `predef_eeg` which, depending on the input, simulates continuous EEG data either for a single subject or multiple subjects.
 
 In the following, we will first provide examples for the four simulation “ingredients” mentioned above which will then be used to simulate data.
 
@@ -165,7 +165,7 @@ In the following, we highlight two actively developed MATLAB-based tools: `Brain
 
 In Python, `MNE-Python` [@GramfortEtAl2013a] provides some tutorials to simulate EEG data, but the functionality is very basic. `HNN-Core` [@Jas2023] can simulate realistic EEG data, but as it is based on neurocortical column models and dynamics, its usage is very detailed, realistic and involved.
 
-In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. `UnfoldSim.jl` provides functions to simulate multi-condition experiments, uniquely allows for modeling hierarchical, that is, multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events. Further, the implementation in Julia offers a platform that is free, that actively encourages research software engineering methods, that makes it easy to add custom expansions via the AbstractTypes, and finally, if one is not convinced about the elegancy and speed of Julia, it allows for easy and transparent access from Python and R.
+In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. `UnfoldSim.jl` provides functions to simulate multi-condition experiments, uniquely allows for modeling hierarchical, that is, multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events. Further, the implementation in Julia offers a platform that is free, that actively encourages research software engineering methods, that makes it easy to add custom expansions via the `AbstractTypes`, and finally, if one is not convinced about the elegancy and speed of Julia, it allows for easy and transparent access from Python and R.
 
 # Acknowledgements
 Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany´s Excellence Strategy – EXC 2075 – 390740016. The authors further thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers. Moreover, the authors would like to thank Tanja Bien for her valuable feedback on the paper manuscript.
