@@ -83,7 +83,7 @@ Base.length(c::MultichannelComponent) = length(c.component)
 
 """
     n_channels(c::AbstractComponent)
-Returns the number of channels. By default = 1
+Return the number of channels. By default = 1.
 """
 n_channels(c::AbstractComponent) = 1
 
@@ -95,7 +95,7 @@ For `MultichannelComponent` return the length of the projection vector.
 n_channels(c::MultichannelComponent) = length(c.projection)
 
 """
-for a vector of multichanelcomponents, returns the first but asserts all are of equal length
+For a vector of `MultichannelComponent`s, return the first but asserts all are of equal length.
 """
 function n_channels(c::Vector{<:AbstractComponent})
     all_channels = n_channels.(c)
@@ -105,7 +105,7 @@ end
 
 """
     simulate_component(rng,c::MultichannelComponent,design::AbstractDesign)
-Returns the projection of a component from source to "sensor" space
+Return the projection of a component from source to "sensor" space.
 """
 function simulate_component(rng, c::MultichannelComponent, design::AbstractDesign)
     y = simulate_component(rng, c.component, design)
@@ -129,14 +129,14 @@ maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
 
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
-by default call simulate_component with `(::Abstractcomponent,::AbstractDesign)` instead of whole simulation. This allows users to provide a hook to do something completly different :)
+By default call `simulate_component` with `(::Abstractcomponent,::AbstractDesign)` instead of the whole simulation. This allows users to provide a hook to do something completely different :)
 """
 simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
     simulate_component(rng, c, simulation.design)
 
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
-Generates a linear model design matrix and weights it by c.β
+Generate a linear model design matrix, weight it by c.β and multiply the result with the given basis vector.
 
 julia> c = UnfoldSim.LinearModelComponent([0,1,1,0],@formula(0~1+cond),[1,2],Dict())
 julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
@@ -162,11 +162,11 @@ function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign
 end
 """
     simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
-Generates a MixedModel and simulates data according to c.β and c.σs
+Generates a MixedModel and simulates data according to c.β and c.σs.
 
 A trick is used to remove the Normal-Noise from the MixedModel which might lead to rare numerical instabilities. Practically, we upscale the σs by factor 10000, and provide a σ=0.0001. Internally this results in a normalization where the response scale is 10000 times larger than the noise.
 
-Currently it is not possible to use a different basis for fixed and random effects, but a code-stub exists (it is slow though)
+Currently, it is not possible to use a different basis for fixed and random effects, but a code-stub exists (it is slow though).
 
 julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
 julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
@@ -278,7 +278,7 @@ end
         rng,
         components::Vector{<:AbstractComponent},
         simulation::Simulation)
-Simulates multiple component responses and accumulates them on a per-event basis
+Simulate multiple component responses and accumulates them on a per-event basis.
 """
 function simulate_responses(
     rng,
@@ -302,7 +302,7 @@ end
 """
     simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
     simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
-Helper function to call `simulate_component` and add it to a provided Array`
+Helper function to call `simulate_component` and add it to a provided Array.
 """
 function simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
     @debug "matrix"

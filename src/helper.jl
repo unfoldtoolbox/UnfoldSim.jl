@@ -104,7 +104,7 @@ end
         sfreq;
         eventtime::Symbol = :latency,
     ) where {T<:Union{Missing,Number}}
-Helper function to epoch data
+Helper function to epoch data.
 
 Adapted from Unfold.jl: https://github.com/unfoldtoolbox/Unfold.jl/blob/b3a21c2bb7e93d2f45ec64b0197f4663a6d7939a/src/utilities.jl#L40
 

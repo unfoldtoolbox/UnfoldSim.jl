@@ -4,9 +4,9 @@
 
 """
     struct UniformOnset <: AbstractOnset
-Provides a Uniform Distribution in the inter-event-distances.
-`width`  is the width of the uniform distribution (=> the jitter)
-`offset` is the minimal distance. The maximal distance is `offset + width`
+Provide a Uniform Distribution of the inter-event-distances.
+`width`  is the width of the uniform distribution (=> the jitter). Since the lower bound is 0, `width` is also the upper bound.
+`offset` is the minimal distance. The maximal distance is `offset + width`.
 """
 @with_kw struct UniformOnset <: AbstractOnset
     width = 50 # how many samples jitter?
@@ -14,7 +14,7 @@ Provides a Uniform Distribution in the inter-event-distances.
 end
 """
     @with_kw struct LogNormalOnset <: AbstractOnset
-log-normal inter-event-distances using the Distributions.jl truncated LogNormal distribution
+Log-normal inter-event distances using the `Distributions.jl` truncated LogNormal distribution.
 
 Be careful with large `μ` and `σ` values, as they are on logscale. σ>8 can quickly give you out-of-memory sized signals!
 """
@@ -27,14 +27,14 @@ end
 
 """
     struct NoOnset <: AbstractOnset end
-In the case that the user directly wants no overlap to be simulated (=> epoched data)
+In the case that the user directly wants no overlap to be simulated (=> epoched data).
 """
 struct NoOnset <: AbstractOnset end
 
 """
     simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
-Generate the inter-event-onset vector in samples (returns Int)
+Generate the inter-event-onset vector in samples (returns Int).
 """
 
 function simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
@@ -56,7 +56,7 @@ end
 
 """
     simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
-Calls `simulate_interonset_distances` to generate distances between events and then adds them up to generate the actual latencies in samples
+Call `simulate_interonset_distances` to generate distances between events and then add them up to generate the actual latencies in samples.
 # main call from `simulation`
 """
 function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
