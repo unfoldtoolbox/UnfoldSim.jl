@@ -128,13 +128,11 @@ onset = UniformOnset(; width = 0, offset = 200)
 noise = PinkNoise(; noiselevel = 2)
 ```
 
-Finally, we combine all the ingredients and simulate data. To make the simulation reproducible, one can specify a random generator.
+Finally, we combine all the ingredients and simulate data (see \autoref{fig_example_simulated_data}). To make the simulation reproducible, one can specify a random generator.
 
 ```julia
 eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise);
 ```
-
-\autoref{fig_example_simulated_data} shows an extract from the continuous EEG data that we simulated.
 
 ![First 1400 samples from the simulated continuous EEG data. The vertical lines denote the event onsets and their colour represents the respective condition i.e. car or face.\label{fig_example_simulated_data}](plots/example_simulated_data.svg)
 
