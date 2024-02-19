@@ -6,6 +6,8 @@
 """
     PinkNoise <: AbstractNoise
 Generate Pink Noise using the SignalAnalysis.jl implementation.
+
+`noiselevel` is used to scale the noise
 """
 @with_kw struct PinkNoise <: AbstractNoise
     noiselevel = 1
@@ -16,6 +18,8 @@ end
 """
     RedNoise <: AbstractNoise
 Generate Red Noise using the SignalAnalysis.jl implementation.
+
+`noiselevel` is used to scale the noise
 """
 @with_kw struct RedNoise <: AbstractNoise
     noiselevel = 1
@@ -28,7 +32,9 @@ end
     noiselevel = 1
     imfilter = 0
 Generate White Noise using `randn` - thus Gaussian noise.
-Using imfilter > 0 it is possible to smooth the noise using Image.imfilter.
+`noiselevel` is used to scale the noise
+
+Using `imfilter` > 0 it is possible to smooth the noise using Image.imfilter.
 """
 @with_kw struct WhiteNoise <: AbstractNoise
     noiselevel = 1
@@ -62,11 +68,12 @@ struct AutoRegressiveNoise <: AbstractNoise end
     ExponentialNoise <: AbstractNoise
 
 Noise with exponential decay in AR spectrum.
+
+`noiselevel` is used to scale the noise
+
 !!! warning
     Current implementation: Cholesky of NxN matrix needs to be calculated, which might need lots of RAM.
-
 """
-
 @with_kw struct ExponentialNoise <: AbstractNoise
     noiselevel = 1
     ν = 1.5 # exponential factor of AR decay "nu"
