@@ -7,6 +7,8 @@
 Provide a Uniform Distribution of the inter-event-distances.
 `width`  is the width of the uniform distribution (=> the jitter). Since the lower bound is 0, `width` is also the upper bound.
 `offset` is the minimal distance. The maximal distance is `offset + width`.
+
+For a more advanced parameter specification, see `FormulaUniformOnset``, which allows to specify the onset-parameters depending on the `Design` employed via a linear regression model
 """
 @with_kw struct UniformOnset <: AbstractOnset
     width = 50 # how many samples jitter?
@@ -17,6 +19,8 @@ end
 Log-normal inter-event distances using the `Distributions.jl` truncated LogNormal distribution.
 
 Be careful with large `μ` and `σ` values, as they are on logscale. σ>8 can quickly give you out-of-memory sized signals!
+
+For a more advanced parameter specification, see `FormulaLogNormalOnset, which allows to specify the onset-parameters depending on the `Design` employed via linear regression model
 """
 @with_kw struct LogNormalOnset <: AbstractOnset
     μ::Any  # mean
@@ -34,6 +38,8 @@ struct NoOnset <: AbstractOnset end
 """
     simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
+    simulate_interonset_distances(rng, onset::FormulaUniformOnset, design::AbstractDesign)
+    simulate_interonset_distances(rng, onset::FormulaLogNormalOnset, design::AbstractDesign)
 Generate the inter-event-onset vector in samples (returns Int).
 """
 
@@ -69,3 +75,81 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
 
     return onsets_accum
 end
+
+"""
+    FormulaUniformOnset <: AbstractOnset
+provide a Uniform Distribution of the inter-event-distances, but with regression formulas.
+This is helpful if your overlap/event-distribution should be dependend on some condition, e.g. more overlap in cond='A' than cond='B'.
+
+    - `width`:  is the width of the uniform distribution (=> the jitter). Since the lower bound is 0, `width` is also the upper bound.
+        -`width_formula`: choose a formula depending on your `Design`
+        -`width_β`: Choose a vector of betas, number needs to fit the formula chosen
+        -`width_contrasts` (optional): Choose a contrasts-dictionary according to the StatsModels specifications
+    `offset` is the minimal distance. The maximal distance is `offset + width`.
+        -`offset_formula`: choose a formula depending on your `design`
+        -`offset_β`: Choose a vector of betas, number needs to fit the formula chosen
+        -`offset_contrasts` (optional): Choose a contrasts-dictionary according to the StatsModels specifications
+
+See `UniformOnset` for a simplified version without linear regression specifications
+"""
+@with_kw struct FormulaUniformOnset <: AbstractOnset
+    width_formula = @formula(0 ~ 1)
+    width_β::Vector = [50]
+    width_contrasts::Dict = Dict()
+    offset_formula = @formula(0 ~ 1)
+    offset_β::Vector = [0]
+    offset_contrasts::Dict = Dict()
+end
+
+
+function simulate_interonset_distances(rng, o::FormulaUniformOnset, design::AbstractDesign)
+    events = generate_events(design)
+    widths =
+        UnfoldSim.generate_designmatrix(o.width_formula, events, o.width_contrasts) *
+        o.width_β
+    offsets =
+        UnfoldSim.generate_designmatrix(o.offset_formula, events, o.offset_contrasts) *
+        o.offset_β
+
+    return Int.(
+        round.(reduce(vcat, rand.(deepcopy(rng), range.(offsets, offsets .+ widths), 1)))
+    )
+end
+
+
+@with_kw struct FormulaLogNormalOnset <: AbstractOnset
+    μ_formula = @formula(0 ~ 1)
+    μ_β::Vector = [0]
+    μ_contrasts::Dict = Dict()
+    σ_formula = @formula(0 ~ 1)
+    σ_β::Vector = [0]
+    σ_contrasts::Dict = Dict()
+    offset_formula = @formula(0 ~ 1)
+    offset_β::Vector = [0]
+    offset_contrasts::Dict = Dict()
+    truncate_upper = nothing # truncate at some sample?
+end
+
+function simulate_interonset_distances(
+    rng,
+    o::FormulaLogNormalOnset,
+    design::AbstractDesign,
+)
+    events = generate_events(design)
+
+
+    μs = UnfoldSim.generate_designmatrix(o.μ_formula, events, o.μ_contrasts) * o.μ_β
+    σs = UnfoldSim.generate_designmatrix(o.σ_formula, events, o.σ_contrasts) * o.σ_β
+    offsets =
+        UnfoldSim.generate_designmatrix(o.offset_formula, events, o.offset_contrasts) *
+        o.offset_β
+
+
+    funs = LogNormal.(μs, σs)
+    if !isnothing(o.truncate_upper)
+        fun = truncated.(fun; upper = o.truncate_upper)
+    end
+    return Int.(round.(offsets .+ rand.(deepcopy(rng), funs, 1)))
+end
+
+

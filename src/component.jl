@@ -145,22 +145,32 @@ julia> simulate_component(StableRNG(1),c,design)
 """
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
     events = generate_events(design)
+    X = generate_designmatrix(c.formula, events, c.contrasts)
+    y = X * β
 
+    return y' .* c.basis
+end
+
+
+"""
+Helper function to generate a designmatrix from formula, events and contrasts.
+"""
+function generate_designmatrix(formula, events, contrasts)
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
-    if c.formula.rhs == ConstantTerm(1)
+    if formula.rhs == ConstantTerm(1)
         X = ones(nrow(events), 1)
     else
-        if isempty(c.contrasts)
-            m = StatsModels.ModelFrame(c.formula, events)
+        if isempty(contrasts)
+            m = StatsModels.ModelFrame(formula, events)
         else
-            m = StatsModels.ModelFrame(c.formula, events; contrasts = c.contrasts)
+            m = StatsModels.ModelFrame(formula, events; contrasts = contrasts)
         end
         X = StatsModels.modelmatrix(m)
     end
-    y = X * c.β
-    return y' .* c.basis
+    return X
 end
+
 """
     simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
 Generates a MixedModel and simulates data according to c.β and c.σs.
