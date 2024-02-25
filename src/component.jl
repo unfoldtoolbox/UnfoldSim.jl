@@ -99,10 +99,16 @@ For a vector of `MultichannelComponent`s, return the first but asserts all are o
 """
 function n_channels(c::Vector{<:AbstractComponent})
     all_channels = n_channels.(c)
-    @assert length(unique(all_channels)) == 1 "Error - projections of different channels cannot be different from eachother"
+    @assert length(unique(all_channels)) == 1 "Error - projections of different components have to be of the same output (=> channel) dimension"
     return all_channels[1]
 end
 
+function n_channels(components::Dict)
+    all_channels = [n_channels(c) for c in values(components)]
+    @assert length(unique(all_channels)) == 1 "Error - projections of different components have to be of the same output (=> channel) dimension"
+    return all_channels[1]
+
+end
 """
     simulate_component(rng,c::MultichannelComponent,design::AbstractDesign)
 Return the projection of a component from source to "sensor" space.
@@ -124,10 +130,13 @@ Base.length(c::AbstractComponent) = length(c.basis)
 
 """
     maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
+    maxlength(components::Dict) 
 maximum of individual component lengths
 """
-maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
+maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 
+
+maxlength(components::Dict) = maximum([maximum(length.(c)) for c in values(components)])
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
 By default call `simulate_component` with `(::Abstractcomponent,::AbstractDesign)` instead of the whole simulation. This allows users to provide a hook to do something completely different :)
@@ -146,7 +155,7 @@ julia> simulate_component(StableRNG(1),c,design)
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
     events = generate_events(design)
     X = generate_designmatrix(c.formula, events, c.contrasts)
-    y = X * β
+    y = X * c.β
 
     return y' .* c.basis
 end
@@ -296,19 +305,55 @@ function simulate_responses(
     components::Vector{<:AbstractComponent},
     simulation::Simulation,
 )
-    if n_channels(components) > 1
-        epoch_data =
-            zeros(n_channels(components), maxlength(components), length(simulation.design))
-    else
-        epoch_data = zeros(maxlength(components), length(simulation.design))
-    end
+    epoch_data = init_epoch_data(components, simulation.design)
+    simulate_responses!(rng, epoch_data, components, simulation)
+    return epoch_data
+end
 
+function simulate_responses!(
+    rng,
+    epoch_data::AbstractArray,
+    components::Vector,
+    simulation::Simulation,
+)
     for c in components
         simulate_and_add!(epoch_data, c, simulation, rng)
     end
     return epoch_data
 end
+function init_epoch_data(components, design)
+    if n_channels(components) > 1
+        epoch_data = zeros(n_channels(components), maxlength(components), length(design))
+    else
+        epoch_data = zeros(maxlength(components), length(design))
+    end
+    return epoch_data
+end
 
+function simulate_responses(rng, components::Dict, s::Simulation)
+    epoch_data = init_epoch_data(components, s.design)
+    evts = generate_events(s.design)
+    multichannel = n_channels(components) > 1
+    for key in keys(components)
+        if key == '_'
+            continue
+        end
+        s_key = Simulation(
+            s.design |> x -> SubselectDesign(x, key),
+            components[key],
+            s.onset,
+            s.noisetype,
+        )
+        ix = evts.event .== key
+        if multichannel
+            simulate_responses!(rng, @view(epoch_data[:, :, ix]), components[key], s_key)
+        else
+            #@debug sum(ix), size(simulate_responses(rng, components[key], s_key)), key
+            simulate_responses!(rng, @view(epoch_data[:, ix]), components[key], s_key)
+        end
+    end
+    return epoch_data
+end
 
 """
     simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)

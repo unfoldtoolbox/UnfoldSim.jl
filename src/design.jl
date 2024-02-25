@@ -147,6 +147,28 @@ design = RepeatDesign(designOnce,4);
     repeat::Int = 1
 end
 
+
+@with_kw struct SequenceDesign{T} <: AbstractDesign
+    design::T
+    sequence::String = ""
+end
+
+UnfoldSim.generate_events(design::SequenceDesign{MultiSubjectDesign}) =
+    error("not yet implemented")
+
+function UnfoldSim.generate_events(design::SequenceDesign)
+    df = generate_events(design.design)
+    nrows_df = size(df, 1)
+    currentsequence = sequencestring(design.sequence)
+    currentsequence = replace(currentsequence, "_" => "")
+    df = repeat(df, inner = length(currentsequence))
+    df.event .= repeat(collect(currentsequence), nrows_df)
+
+    return df
+
+end
+
+
 """
     UnfoldSim.generate_events(design::RepeatDesign{T})
 
@@ -160,6 +182,28 @@ function UnfoldSim.generate_events(design::RepeatDesign)
     return df
 
 end
+
+
+"""
+Internal helper design to subset a sequence design in its individual components
+"""
+struct SubselectDesign{T} <: AbstractDesign
+    design::T
+    key::Char
+end
+
+function generate_events(design::SubselectDesign)
+    return subset(generate_events(design.design), :event => x -> x .== design.key)
+end
+
+
 Base.size(design::RepeatDesign{MultiSubjectDesign}) =
     size(design.design) .* (design.repeat, 1)
 Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
+Base.size(design::SequenceDesign) =
+    size(design.design) .* length(replace(design.sequence, "_" => ""))
+
+Base.size(design::RepeatDesign{SequenceDesign{SingleSubjectDesign}}) =
+    size(design.design) .* design.repeat
+
+Base.size(design::SubselectDesign) = size(generate_events(design), 1)

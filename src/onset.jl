@@ -59,6 +59,14 @@ function simulate_interonset_distances(rng, onset::LogNormalOnset, design::Abstr
 end
 
 
+#function simulate_interonset_distances(rng, onset::AbstractOnset,design::)
+
+
+contains_design(d::AbstractDesign, target::Type) = false
+contains_design(d::Union{RepeatDesign,SequenceDesign,SubselectDesign}, target::Type) =
+    d.design isa target ? true : contains_design(d.design, target)
+
+sequencestring(d::RepeatDesign) = sequencestring(d.design)
 
 """
     simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
@@ -70,6 +78,21 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
     # sample different onsets
     onsets = simulate_interonset_distances(rng, onset, simulation.design)
 
+    if contains_design(simulation.design, SequenceDesign)
+        currentsequence = sequencestring(simulation.design)
+        if !isnothing(findfirst("_", currentsequence))
+
+            @assert currentsequence[end] == '_' "the blank-indicator '_' has to be the last sequence element"
+            df = generate_events(simulation.design)
+            nrows_df = size(df, 1)
+            stepsize = length(currentsequence) - 1
+            # add to every stepsize onset the maxlength of the response
+            #@debug onsets[stepsize:stepsize:end]
+            @debug stepsize
+            onsets[stepsize+1:stepsize:end] .= 2 .* maxlength(simulation.components)
+            #@debug onsets[stepsize:stepsize:end]
+        end
+    end
     # accumulate them
     onsets_accum = accumulate(+, onsets, dims = 1)
 
