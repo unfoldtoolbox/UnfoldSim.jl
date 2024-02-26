@@ -4,7 +4,7 @@ using CairoMakie
 using UnfoldMakie
 using DataFrames
 
-# # Multi-Subject simulation
+# # Multi-subject simulation
 # Similar to the single subject case, multi-subject simulation depends on:
 # - `Design` (typically a `MultiSubjectDesign`)
 # - `Components` (typically a `MixedModelComponent`)
@@ -40,7 +40,7 @@ design = MultiSubjectDesign(
     :item => [1], # the item-variability is higher than the subject-variability 
 )
 
-# now we are ready to build it together
+# now we are ready to assemble the parts
 signal = MixedModelComponent(;
     basis = UnfoldSim.hanning(50),
     formula = @formula(0 ~ 1 + condition + (1 + condition | subject) + (1 | item)),
@@ -52,7 +52,7 @@ signal = MixedModelComponent(;
 # and simulate!
 data, evts = simulate(design, signal, NoOnset(), NoNoise(), return_epoched = true);
 
-# We get data with 50 samples (our `basis` from above), with `2` trials/items and 20 subjects. We get items and subjects separately because we chose no-overlap (via `NoOnset`) and `return_epoched=true``.
+# We get data with 50 samples (our `basis` from above), with `4` items and 20 subjects. We get items and subjects separately because we chose no-overlap (via `NoOnset`) and `return_epoched = true``.
 size(data)
 
 first(evts, 5)
@@ -72,7 +72,7 @@ end
 f
 
 # Some remarks on interpreting the plot:
-# - The β main-effect of small / Large (#1 and #3 vs. #2 and #4) is clearly visible. 
+# - The β main-effect of small (#2 and #4) vs. large (#1 and #3) is clearly visible. 
 # - The variability between subjects, is the variability between the individual curves.
 # - The item effect shows up e.g. that #2 vs. #4 column show different values.
 
@@ -80,16 +80,16 @@ f
 # # Continuous Signals / Overlap
 # Let's continue our tutorial and simulate overlapping signals instead.
 #
-# We replace the `NoOnset` with an `UniformOnset` between 20 and 70 sampples after each event.` We further remove the `return_epoched`, because we want to have continuous data for now.
+# We replace the `NoOnset` with an `UniformOnset` with 20 to 70 samples between subsequent events.  We further remove the `return_epoched`, because we want to have continuous data for now.
 data, evts = simulate(design, signal, UniformOnset(offset = 20, width = 50), NoNoise());
 size(data)
 
 # The data is now $size(data,1) x $size(data,2), with the first dimension being continuous data, and the latter still the subjects.
 series(data', solid_color = :black)
 
-# Each line is one subject, and it looks a bit unstructured, because the event-onsets are of course random or each subject.
+# Each line is one subject, and it looks a bit unstructured, because the event-onsets are of course random for each subject.
 # !!! note
-#     All subjects have the same sequence of trials, if you need to change this, specify a `event_order_function` in the `MultiSubjectDesign`
+#     All subjects have the same sequence of trials, if you need to change this, specify a `event_order_function` in the `MultiSubjectDesign`.
 
 
 # # Analyzing these data with Unfold.jl
