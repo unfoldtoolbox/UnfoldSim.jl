@@ -84,7 +84,7 @@ f
 data, evts = simulate(design, signal, UniformOnset(offset = 20, width = 50), NoNoise());
 size(data)
 
-# The data is now $size(data,1) x $size(data,2), with the first dimension being continuous data, and the latter still the subjects.
+# with the first dimension being continuous data, and the latter still the subjects.
 series(data', solid_color = :black)
 
 # Each line is one subject, and it looks a bit unstructured, because the event-onsets are of course random for each subject.
