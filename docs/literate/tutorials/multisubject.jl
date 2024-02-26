@@ -53,7 +53,8 @@ signal = MixedModelComponent(;
 data, evts = simulate(design, signal, NoOnset(), NoNoise(), return_epoched = true);
 
 # We get data with 50 samples (our `basis` from above), with `2` trials/items and 20 subjects. We get items and subjects separately because we chose no-overlap (via `NoOnset`) and `return_epoched=true``.
-@info size(data)
+size(data)
+
 first(evts, 5)
 
 # Finally, let's plot the data
