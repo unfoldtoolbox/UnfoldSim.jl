@@ -50,7 +50,7 @@ makedocs(;
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
             "Use predefined design / onsets data" => "./generated/HowTo/predefinedData.md",
         ],
-        "DocStrings" => "api.md",
+        "API / DocStrings" => "api.md",
     ],
 )
 
