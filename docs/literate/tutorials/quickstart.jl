@@ -31,11 +31,11 @@ onset = UniformOnset(; width = 20, offset = 4);
 noise = PinkNoise(; noiselevel = 0.2);
 
 # ## Combine & Generate
-# finally, we will simulate some data
+# Finally, we will simulate some data
 data, events = simulate(MersenneTwister(1), design, signal, onset, noise);
-# Data is a `n-sample` Vector (but could be a Matrix for e.g. `MultiSubjectDesign`).
+# `Data` is a `n-sample` Vector (but could be a Matrix for e.g. `MultiSubjectDesign`).
 
-# events is a DataFrame that contains a column `latency` with the onsets of events.
+# `Events` is a DataFrame that contains a column `latency` with the onsets of events.
 
 # ## Plot them!
 lines(data; color = "black")
