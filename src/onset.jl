@@ -65,7 +65,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
     onsets = simulate_interonset_distances(rng, onset, simulation.design)
 
     # accumulate them
-    onsets_accum = accumulate(+, onsets, dims = 1)
+    onsets_accum = accumulate(+, onsets, dims = 1, init = 1)
 
     return onsets_accum
 end
