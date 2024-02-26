@@ -1,6 +1,5 @@
 ---
 title: 'UnfoldSim.jl: A toolbox for simulating continuous event-based time series data for EEG and beyond'
-
 tags:
   - Julia
   - EEG
@@ -12,25 +11,24 @@ tags:
   - regression ERPs
 authors:
   - name: Judith Schepers
-	orcid:  0009-0000-9270-730X
-	equal-contrib: false
-	affiliation: "1"
+    orcid:  0009-0000-9270-730X
+    equal-contrib: false
+    affiliation: "1"
   - name: Luis Lips
-	equal-contrib: false
-	affiliation: "1"
+    equal-contrib: false
+    affiliation: "1"
   - name: Maanik Marathe
-	equal-contrib: false
-	affiliation: "1"
+    equal-contrib: false
+    affiliation: "1"
   - name: Benedikt V. Ehinger
-	orcid:  0000-0002-6276-3332
-	equal-contrib: false
-	affiliation: "1, 2"
- 
+    orcid:  0000-0002-6276-3332
+    equal-contrib: false
+    affiliation: "1, 2"
 affiliations:
- - name: Institute for Visualisation and Interactive Systems, University of Stuttgart, Germany
-   index: 1
- - name: Stuttgart Center for Simulation Science, University of Stuttgart, Germany
-   index: 2
+  - name: Institute for Visualisation and Interactive Systems, University of Stuttgart, Germany
+    index: 1
+  - name: Stuttgart Center for Simulation Science, University of Stuttgart, Germany
+    index: 2
 date: 19 February 2024
 bibliography: paper.bib
 ---
