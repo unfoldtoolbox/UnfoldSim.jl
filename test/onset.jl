@@ -46,7 +46,6 @@
         @test minimum(rand_vec) >= 0
     end
     @testset "sim_onsets" begin
-        
         uniform_onset = UniformOnset(; offset = 0, width = 50)
 
         accumulated_onset = UnfoldSim.simulate_onsets(
