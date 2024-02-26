@@ -1,10 +1,12 @@
 """ 
-- n_subjects::Int -> number of subjects
-- n_items::Int -> number of items (sometimes ≈trials)
-- subjects_between = nothing -> effects between subjects, e.g. young vs old 
-- items_between = nothing -> effects between items, e.g. natural vs artificial images, but shown to all subjects
-- both_within = nothing	-> effects completly crossed
-- event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+    MultiSubjectDesign
+
+- `n_subjects`::Int -> number of subjects
+- `n_items`::Int -> number of items (sometimes ≈trials)
+- `subjects_between` = nothing -> effects between subjects, e.g. young vs old 
+- `items_between` = nothing -> effects between items, e.g. natural vs artificial images, (but shown to all subjects if not specified also in `subjects_between`)
+- `both_within` = nothing	-> effects completly crossed
+- `event_order_function` = `x->x`; # can be used to sort, or e.g. `x->shuffle(MersenneTwister(42),x)` - be sure to fix/update the rng accordingly!!
 
 tipp: check the resulting dataframe using `generate_events(design)`
 
@@ -30,7 +32,7 @@ end
 
 """
 - conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
-- event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+- `event_order_function` = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
 Number of trials / rows in `generate_events(design)` depend on the full factorial of your `conditions`.
 
@@ -83,7 +85,7 @@ Note: n_items = you can think of it as `trials` or better, as `stimuli`.
 
 Note: No condition can be named `dv` which is used internally in MixedModelsSim / MixedModels as a dummy left-side
 
-Afterwards applies design.event_order_function.  Could be used to duplicate trials, sort, subselect etc.
+Afterwards applies `design.event_order_function``.  Could be used to duplicate trials, sort, subselect etc.
 
 Finally it sorts by `:subject`
 
