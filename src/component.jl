@@ -146,7 +146,7 @@ julia> simulate_component(StableRNG(1),c,design)
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
     events = generate_events(design)
     X = generate_designmatrix(c.formula, events, c.contrasts)
-    y = X * β
+    y = X * c.β
 
     return y' .* c.basis
 end
