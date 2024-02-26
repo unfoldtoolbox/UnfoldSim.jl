@@ -218,9 +218,6 @@ function simulate_component(
         rethrow(e)
     end
 
-    # save data to array
-
-
     # in case the parameters are of interest, we will return those, not them weighted by basis
     epoch_data_component = kron(return_parameters ? [1.0] : c.basis, m.y')
     return epoch_data_component
