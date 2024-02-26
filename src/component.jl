@@ -123,10 +123,10 @@ end
 Base.length(c::AbstractComponent) = length(c.basis)
 
 """
-    maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
+    maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 maximum of individual component lengths
 """
-maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
+maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
@@ -199,7 +199,17 @@ function simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
     if 1 == 1
         named_random_effects = weight_σs(c.σs, 1.0, σ_lmm)
         θ = createθ(m; named_random_effects...)
-        simulate!(deepcopy(rng), m.y, m; β = c.β, σ = σ_lmm, θ = θ)
+        @debug named_random_effects, θ, m.θ
+        try
+            simulate!(deepcopy(rng), m.y, m; β = c.β, σ = σ_lmm, θ = θ)
+        catch e
+            if isa(e, DimensionMismatch)
+                @warn "Most likely your σs's do not match the formula!"
+            elseif isa(e, ArgumentError)
+                @warn "Most likely your β's do not match the formula!"
+            end
+            rethrow(e)
+        end
 
         # save data to array
         #@show size(m.y)
