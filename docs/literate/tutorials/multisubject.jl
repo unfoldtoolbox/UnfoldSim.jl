@@ -32,7 +32,7 @@ design = MultiSubjectDesign(
 
 # ## Components
 # For multi-subject, similar to the `LinearModelComponent` specified before, we have to define the fixed effect `β`, the model parameters that are applied to all subjects.
-β = [1, 2] # 1 = intercept, 2 = condition_is_large effect
+β = [1, 2] # 1 = intercept, 2 = difference between large and small
 
 # In addition, we have to provide random effects `σs`, which define the spread (and  correlation) of the subjects around the fixed effects, foreach parameter
 σs = Dict(
