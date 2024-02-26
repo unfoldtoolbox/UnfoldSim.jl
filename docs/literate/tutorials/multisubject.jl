@@ -65,7 +65,7 @@ for k = 1:4
         f[1, k],
         data[:, k, :]',
         solid_color = :black,
-        axis = (; limits = ((0, 50), (-4, 5))),
+        axis = (; limits = ((0, 50), (-5, 6))),
     )
     Label(f[1, k, Top()], text = "Item:" * evts[k, :item] * ", c:" * evts[k, :condition])
 end
@@ -93,7 +93,7 @@ series(data', solid_color = :black)
 
 
 # # Analyzing these data with Unfold.jl
-# We will analyze these data using the `Unfold.jl` toolbox. While preliminary support for deconvolution (overlap correction) for mixed models is available, here we will simply apply it separately to each timepoint, following the MassUnivariate approach.
+# We will analyze these data using the `Unfold.jl` toolbox. While preliminary support for deconvolution (overlap correction) for mixed models is available, here we will not make use of it, but rather apply a MixedModel to each timepoint, following the Mass-univariate approach.
 data, evts = simulate(
     design,
     signal,
@@ -114,3 +114,5 @@ m = fit(
     times,
 )
 plot_erp(coeftable(m))#, mapping = (; col = :group)) # FIXME facetting by col currently broken, waiting for new UnfoldMakie release!
+
+# The first column shows the fixed effects, the latter the item and subject random effects as they evolve across time
