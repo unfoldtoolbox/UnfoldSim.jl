@@ -13,7 +13,7 @@ using DataFrames
 
 # ## Design
 
-# Our first design should be 20 subjects, with 3 items each. Any individual image is shown  only either as large or small, thus we choose `items_between`. 
+# Our first design should be 20 subjects, with 4 items each. Any individual image is shown only either as large or small, thus we choose `items_between`. 
 design = MultiSubjectDesign(
     n_subjects = 20,
     n_items = 4,
