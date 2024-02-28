@@ -93,6 +93,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
             onsets[stepsize+1:stepsize:end] .= 2 .* maxlength(simulation.components)
             #@debug onsets[stepsize:stepsize:end]
         end
+    end
 
     if maximum(onsets) > 10000
         @warn "Maximum of inter-event-distances was $(maximum(onsets)) - are you sure this is what you want?"
