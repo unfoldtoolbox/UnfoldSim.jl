@@ -156,15 +156,18 @@ end
 @with_kw struct SequenceDesign{T} <: AbstractDesign
     design::T
     sequence::String = ""
+    sequencelength::Int = 0
+    rng = nothing
 end
+SequenceDesign(design, sequence) = SequenceDesign(design = design, sequence = sequence)
 
-UnfoldSim.generate_events(design::SequenceDesign{MultiSubjectDesign}) =
-    error("not yet implemented")
+generate_events(design::SequenceDesign{MultiSubjectDesign}) = error("not yet implemented")
 
-function UnfoldSim.generate_events(design::SequenceDesign)
+
+function generate_events(design::SequenceDesign)
     df = generate_events(design.design)
     nrows_df = size(df, 1)
-    currentsequence = sequencestring(design.sequence)
+    currentsequence = sequencestring(deepcopy(design.rng), design.sequence)
     currentsequence = replace(currentsequence, "_" => "")
     df = repeat(df, inner = length(currentsequence))
     df.event .= repeat(collect(currentsequence), nrows_df)
@@ -175,11 +178,11 @@ end
 
 
 """
-    UnfoldSim.generate_events(design::RepeatDesign{T})
+    generate_events(rng,design::RepeatDesign{T})
 
 In a repeated design, iteratively calls the underlying {T} Design and concatenates. In case of MultiSubjectDesign, sorts by subject.
 """
-function UnfoldSim.generate_events(design::RepeatDesign)
+function generate_events(design::RepeatDesign)
     df = map(x -> generate_events(design.design), 1:design.repeat) |> x -> vcat(x...)
     if isa(design.design, MultiSubjectDesign)
         sort!(df, [:subject])

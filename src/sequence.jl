@@ -1,4 +1,4 @@
-function rand_re(machine::Automa.Machine)
+function rand_re(rng::AbstractRNG, machine::Automa.Machine)
     out = IOBuffer()
     node = machine.start
 
@@ -7,16 +7,16 @@ function rand_re(machine::Automa.Machine)
             (rand() ≤ 1 / (length(node.edges) + 1)) && break
         end
 
-        edge, node = rand(node.edges)
-        label = rand(collect(edge.labels))
+        edge, node = rand(rng, node.edges)
+        label = rand(rng, collect(edge.labels))
         print(out, Char(label))
     end
 
     return String(take!(out))
 end
 
-sequencestring(d::SequenceDesign) = sequencestring(d.sequence)
-function sequencestring(str::String)
+sequencestring(rng, d::SequenceDesign) = sequencestring(rng, d.sequence)
+function sequencestring(rng, str::String)
     #match curly brackets and replace them
     @assert isnothing(findfirst("*", str)) && isnothing(findfirst("+", str)) "'infinite' sequences currently not supported"
     crly = collect(eachmatch(r"(\{[\d],[\d]\})", str))
@@ -36,13 +36,13 @@ function sequencestring(str::String)
             repeat_string = string(str[c.offset-1])
         end
 
-        replacement_string = repeat(repeat_string, rand(rep_minimum:rep_maximum))
+        replacement_string = repeat(repeat_string, rand(rng, rep_minimum:rep_maximum))
         #@info "rep" replacement_string
         str =
             str[1:bracket_start_idx-1] *
             replacement_string *
             str[bracket_end_idx+length(c.match)+1:end]
-        @info str
+        #@info str
     end
-    return rand_re(Automa.compile(RE(str)))
+    return rand_re(rng, Automa.compile(RE(str)))
 end

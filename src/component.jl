@@ -27,6 +27,7 @@ MixedModelComponent(;
     β::Vector
     σs::Dict # Dict(:subject=>[0.5,0.4]) or to specify correlationmatrix Dict(:subject=>[0.5,0.4,I(2,2)],...)
     contrasts::Dict = Dict()
+    offset::Int = 0
 end
 
 """
@@ -55,7 +56,24 @@ LinearModelComponent(;
     formula::Any # e.g. 0~1+cond - left side must be "0"
     β::Vector
     contrasts::Dict = Dict()
+    offset::Int = 0
 end
+
+
+"""
+    offset(AbstractComponent)
+
+Should the `basis` be shifted? Returns c.offset for most components, if not implemented for a type, returns 0. Can be positive or negative, but has to be Integer
+"""
+offset(c::AbstractComponent)::Int = 0
+offset(c::LinearModelComponent)::Int = c.offset
+offset(c::MixedModelComponent)::Int = c.offset
+
+maxoffset(c::Vector{<:AbstractComponent}) = maximum(offset.(c))
+maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(maxoffset.(values(d)))
+minoffset(c::Vector{<:AbstractComponent}) = minimum(offset.(c))
+minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = minimum(minoffset.(values(d)))
+
 
 
 """
@@ -93,6 +111,7 @@ For `MultichannelComponent` return the length of the projection vector.
 
 """
 n_channels(c::MultichannelComponent) = length(c.projection)
+
 
 """
 For a vector of `MultichannelComponent`s, return the first but asserts all are of equal length.
@@ -145,7 +164,7 @@ simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
     simulate_component(rng, c, simulation.design)
 
 """
-    simulate_component(rng, c::AbstractComponent, simulation::Simulation)
+    simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
 Generate a linear model design matrix, weight it by c.β and multiply the result with the given basis vector.
 
 julia> c = UnfoldSim.LinearModelComponent([0,1,1,0],@formula(0~1+cond),[1,2],Dict())
@@ -192,13 +211,13 @@ Currently, it is not possible to use a different basis for fixed and random effe
 
 julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
 julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
-julia> simulate(StableRNG(1),c,design)
+julia> simulate_component(StableRNG(1),c,design)
 
 """
 function simulate_component(
     rng,
     c::MixedModelComponent,
-    design::AbstractDesign;
+    design::AbstractDesign,
     return_parameters = false,
 )
     events = generate_events(design)
@@ -335,34 +354,51 @@ function simulate_responses!(
     return epoch_data
 end
 function init_epoch_data(components, design)
+    max_offset = maxoffset(components)
+    min_offset = minoffset(components)
+    range_offset = (max_offset - min_offset)
     if n_channels(components) > 1
-        epoch_data = zeros(n_channels(components), maxlength(components), length(design))
+        epoch_data = zeros(
+            n_channels(components),
+            maxlength(components) + range_offset,
+            length(design),
+        )
     else
-        epoch_data = zeros(maxlength(components), length(design))
+        epoch_data = zeros(maxlength(components) + range_offset, length(design))
     end
     return epoch_data
 end
 
-function simulate_responses(rng, components::Dict, s::Simulation)
-    epoch_data = init_epoch_data(components, s.design)
+function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
+    epoch_data = init_epoch_data(event_component_dict, s.design)
     evts = generate_events(s.design)
-    multichannel = n_channels(components) > 1
-    for key in keys(components)
+    multichannel = n_channels(event_component_dict) > 1
+    for key in keys(event_component_dict)
         if key == '_'
             continue
         end
         s_key = Simulation(
             s.design |> x -> SubselectDesign(x, key),
-            components[key],
+            event_component_dict,
             s.onset,
             s.noisetype,
         )
         ix = evts.event .== key
         if multichannel
-            simulate_responses!(rng, @view(epoch_data[:, :, ix]), components[key], s_key)
+            simulate_responses!(
+                rng,
+                @view(epoch_data[:, :, ix]),
+                event_component_dict[key],
+                s_key,
+            )
         else
-            #@debug sum(ix), size(simulate_responses(rng, components[key], s_key)), key
-            simulate_responses!(rng, @view(epoch_data[:, ix]), components[key], s_key)
+            #@debug sum(ix), size(simulate_responses(rng, event_component_dict[key], s_key)), key
+            simulate_responses!(
+                rng,
+                @view(epoch_data[:, ix]),
+                event_component_dict[key],
+                s_key,
+            )
         end
     end
     return epoch_data
@@ -373,11 +409,28 @@ end
     simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
 Helper function to call `simulate_component` and add it to a provided Array.
 """
-function simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
+function simulate_and_add!(
+    epoch_data::AbstractMatrix,
+    component::AbstractComponent,
+    simulation,
+    rng,
+)
     @debug "matrix"
-    @views epoch_data[1:length(c), :] .+= simulate_component(rng, c, simulation)
+
+    off = offset(component) - minoffset(simulation.components)
+    @debug off
+    @debug offset(component), minoffset(simulation.components)
+    @views epoch_data[1+off:length(component)+off, :] .+=
+        simulate_component(rng, component, simulation)
 end
-function simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
+function simulate_and_add!(
+    epoch_data::AbstractArray,
+    component::AbstractComponent,
+    simulation,
+    rng,
+)
     @debug "3D Array"
-    @views epoch_data[:, 1:length(c), :] .+= simulate_component(rng, c, simulation)
+    off = offset(component) - minoffset(simulation.components)
+    @views epoch_data[:, 1+off:length(component)+off, :] .+=
+        simulate_component(rng, component, simulation)
 end

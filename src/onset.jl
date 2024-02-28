@@ -66,7 +66,7 @@ contains_design(d::AbstractDesign, target::Type) = false
 contains_design(d::Union{RepeatDesign,SequenceDesign,SubselectDesign}, target::Type) =
     d.design isa target ? true : contains_design(d.design, target)
 
-sequencestring(d::RepeatDesign) = sequencestring(d.design)
+sequencestring(rng, d::RepeatDesign) = sequencestring(rng, d.design)
 
 """
     simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
@@ -80,7 +80,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
 
 
     if contains_design(simulation.design, SequenceDesign)
-        currentsequence = sequencestring(simulation.design)
+        currentsequence = sequencestring(deepcopy(rng), simulation.design)
         if !isnothing(findfirst("_", currentsequence))
 
             @assert currentsequence[end] == '_' "the blank-indicator '_' has to be the last sequence element"

@@ -47,6 +47,21 @@ simulate(
     kwargs...,
 ) = simulate(rng, Simulation(design, signal, onset, noise); kwargs...)
 
+function simulate(
+    rng::AbstractRNG,
+    design::SequenceDesign,
+    signal,
+    onset::AbstractOnset,
+    noise::AbstractNoise = NoNoise();
+    kwargs...,
+)
+    design =
+        isnothing(design.rng) ?
+        SequenceDesign(design.design, design.sequence, design.sequencelength, rng) : design
+    simulate(rng, Simulation(design, signal, onset, noise); kwargs...)
+end
+
+
 
 function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool = false)
     (; design, components, onset, noisetype) = simulation
@@ -127,11 +142,13 @@ function create_continuous_signal(rng, responses, simulation)
 
     # combine responses with onsets
     max_length_component = maxlength(components)
-    max_length_continuoustime = Int(ceil(maximum(onsets))) .+ max_length_component
+    offset_range = maxoffset(simulation.components) - minoffset(simulation.components)
+    max_length_continuoustime =
+        Int(ceil(maximum(onsets))) .+ max_length_component .+ offset_range
 
 
     signal = zeros(n_chan, max_length_continuoustime, n_subjects)
-
+    @debug size(signal), offset_range
     for e = 1:n_chan
         for s = 1:n_subjects
             for i = 1:n_trials
@@ -141,7 +158,9 @@ function create_continuous_signal(rng, responses, simulation)
                     responses,
                     e,
                     s,
-                    one_onset:one_onset+max_length_component-1,
+                    one_onset+minoffset(simulation.components):one_onset+max_length_component-1+maxoffset(
+                        simulation.components,
+                    ),
                     (s - 1) * n_trials + i,
                 )
             end
@@ -172,6 +191,8 @@ function add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
     @views signal[e, tvec, s] .+= responses[:, erpvec]
 end
 function add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)#
+    @debug size(signal), size(responses), e, s, size(tvec), size(erpvec)
+    @debug tvec, erpvec
     @views signal[e, tvec, s] .+= responses[:, erpvec]
 end
 function add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
