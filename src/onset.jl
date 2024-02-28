@@ -66,7 +66,6 @@ contains_design(d::AbstractDesign, target::Type) = false
 contains_design(d::Union{RepeatDesign,SequenceDesign,SubselectDesign}, target::Type) =
     d.design isa target ? true : contains_design(d.design, target)
 
-sequencestring(rng, d::RepeatDesign) = sequencestring(rng, d.design)
 
 """
     simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)

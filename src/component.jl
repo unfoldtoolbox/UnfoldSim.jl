@@ -370,8 +370,12 @@ function init_epoch_data(components, design)
 end
 
 function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
+    #@debug rng.state
     epoch_data = init_epoch_data(event_component_dict, s.design)
+    #@debug rng.state
     evts = generate_events(s.design)
+    #@debug rng.state
+    @debug size(epoch_data), size(evts)
     multichannel = n_channels(event_component_dict) > 1
     for key in keys(event_component_dict)
         if key == '_'
@@ -418,8 +422,8 @@ function simulate_and_add!(
     @debug "matrix"
 
     off = offset(component) - minoffset(simulation.components)
-    @debug off
-    @debug offset(component), minoffset(simulation.components)
+
+
     @views epoch_data[1+off:length(component)+off, :] .+=
         simulate_component(rng, component, simulation)
 end

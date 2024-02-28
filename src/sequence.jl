@@ -16,10 +16,11 @@ function rand_re(rng::AbstractRNG, machine::Automa.Machine)
 end
 
 sequencestring(rng, d::SequenceDesign) = sequencestring(rng, d.sequence)
+
 function sequencestring(rng, str::String)
     #match curly brackets and replace them
     @assert isnothing(findfirst("*", str)) && isnothing(findfirst("+", str)) "'infinite' sequences currently not supported"
-    crly = collect(eachmatch(r"(\{[\d],[\d]\})", str))
+    crly = collect(eachmatch(r"(\{[\d]+,[\d]+\})", str))
     for c in reverse(crly)
         m = replace(c.match, "{" => "", "}" => "")
         rep_minimum, rep_maximum = parse.(Int, split(m, ","))
@@ -42,7 +43,9 @@ function sequencestring(rng, str::String)
             str[1:bracket_start_idx-1] *
             replacement_string *
             str[bracket_end_idx+length(c.match)+1:end]
-        #@info str
+        #        @debug str
     end
     return rand_re(rng, Automa.compile(RE(str)))
 end
+
+sequencestring(rng, d::RepeatDesign) = sequencestring(rng, d.design)

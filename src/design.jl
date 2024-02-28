@@ -153,23 +153,45 @@ design = RepeatDesign(designOnce,4);
 end
 
 
+function check_sequence(s::String)
+    blankfind = findall('_', s)
+    @assert length(blankfind) <= 1 && (length(blankfind) == 0 || length(s) == blankfind[1]) "the blank-indicator '_' has to be the last sequence element"
+    return s
+end
 @with_kw struct SequenceDesign{T} <: AbstractDesign
     design::T
     sequence::String = ""
     sequencelength::Int = 0
     rng = nothing
+
+    SequenceDesign{T}(d, s, sl, r) where {T<:AbstractDesign} =
+        new(d, check_sequence(s), sl, r)
 end
+
 SequenceDesign(design, sequence) = SequenceDesign(design = design, sequence = sequence)
 
 generate_events(design::SequenceDesign{MultiSubjectDesign}) = error("not yet implemented")
 
 
-function generate_events(design::SequenceDesign)
+generate_events(rng, design::AbstractDesign) = generate_events(design)
+generate_events(design::SequenceDesign) = generate_events(deepcopy(design.rng), design)
+
+function generate_events(rng, design::SequenceDesign)
     df = generate_events(design.design)
     nrows_df = size(df, 1)
-    currentsequence = sequencestring(deepcopy(design.rng), design.sequence)
+
+    rng = if isnothing(rng)
+        @warn "Could not (yet) find an rng for `SequenceDesign` - ignore this message if you called `generate_events` yourself, be worried if you called `simulate` and still see this message. Surpress this message by defining the `rng` when creating the `SequenceDesign`"
+        MersenneTwister(1)
+    else
+        rng
+    end
+    #   @debug design.sequence
+    currentsequence = sequencestring(rng, design.sequence)
+    #    @debug currentsequence
     currentsequence = replace(currentsequence, "_" => "")
     df = repeat(df, inner = length(currentsequence))
+
     df.event .= repeat(collect(currentsequence), nrows_df)
 
     return df
@@ -177,13 +199,19 @@ function generate_events(design::SequenceDesign)
 end
 
 
+get_rng(design::AbstractDesign) = nothing
+get_rng(design::SequenceDesign) = design.rng
+
 """
     generate_events(rng,design::RepeatDesign{T})
 
 In a repeated design, iteratively calls the underlying {T} Design and concatenates. In case of MultiSubjectDesign, sorts by subject.
 """
 function generate_events(design::RepeatDesign)
-    df = map(x -> generate_events(design.design), 1:design.repeat) |> x -> vcat(x...)
+    design = deepcopy(design)
+    df =
+        map(x -> generate_events(get_rng(design.design), design.design), 1:design.repeat) |>
+        x -> vcat(x...)
     if isa(design.design, MultiSubjectDesign)
         sort!(df, [:subject])
     end
@@ -208,10 +236,12 @@ end
 Base.size(design::RepeatDesign{MultiSubjectDesign}) =
     size(design.design) .* (design.repeat, 1)
 Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
-Base.size(design::SequenceDesign) =
-    size(design.design) .* length(replace(design.sequence, "_" => ""))
+#Base.size(design::SequenceDesign) =
+#size(design.design) .* length(replace(design.sequence, "_" => "",r"\{.*\}"=>""))
 
-Base.size(design::RepeatDesign{SequenceDesign{SingleSubjectDesign}}) =
-    size(design.design) .* design.repeat
+#Base.size(design::) = size(design.design) .* design.repeat
 
-Base.size(design::SubselectDesign) = size(generate_events(design), 1)
+# No way to find out what size it is without actually generating first...
+Base.size(
+    design::Union{<:SequenceDesign,<:SubselectDesign,<:RepeatDesign{<:SequenceDesign}},
+) = size(generate_events(design), 1)
