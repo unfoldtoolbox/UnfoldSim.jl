@@ -35,6 +35,7 @@ makedocs(;
             "Quickstart" => "generated/tutorials/quickstart.md",
             "Simulate ERPs" => "generated/tutorials/simulateERP.md",
             "Poweranalysis" => "generated/tutorials/poweranalysis.md",
+            "Multi-subject simulation" => "generated/tutorials/multisubject.md",
         ],
         "Reference" => [
             "Overview: Toolbox Functions" => "./generated/reference/overview.md",
@@ -50,7 +51,7 @@ makedocs(;
             "Use predefined design / onsets data" => "./generated/HowTo/predefinedData.md",
             "Produce specific sequences of events" => "./generated/HowTo/sequence.md",
         ],
-        "DocStrings" => "api.md",
+        "API / DocStrings" => "api.md",
     ],
 )
 

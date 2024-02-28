@@ -78,6 +78,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
     # sample different onsets
     onsets = simulate_interonset_distances(rng, onset, simulation.design)
 
+
     if contains_design(simulation.design, SequenceDesign)
         currentsequence = sequencestring(simulation.design)
         if !isnothing(findfirst("_", currentsequence))
@@ -92,9 +93,12 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
             onsets[stepsize+1:stepsize:end] .= 2 .* maxlength(simulation.components)
             #@debug onsets[stepsize:stepsize:end]
         end
+
+    if maximum(onsets) > 10000
+        @warn "Maximum of inter-event-distances was $(maximum(onsets)) - are you sure this is what you want?"
     end
     # accumulate them
-    onsets_accum = accumulate(+, onsets, dims = 1)
+    onsets_accum = accumulate(+, onsets, dims = 1, init = 1)
 
     return onsets_accum
 end
