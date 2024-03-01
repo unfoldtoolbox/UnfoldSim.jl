@@ -199,6 +199,7 @@ function generate_events(rng, design::SequenceDesign)
 end
 
 
+
 get_rng(design::AbstractDesign) = nothing
 get_rng(design::SequenceDesign) = design.rng
 

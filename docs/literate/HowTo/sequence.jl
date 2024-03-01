@@ -1,3 +1,4 @@
+using Base: add_sum
 using UnfoldSim
 using CairoMakie
 using StableRNGs
@@ -13,11 +14,15 @@ design = SequenceDesign(design, "SR{1,2}_", 0, StableRNG(1))
 generate_events(design)
 # The main thing that happened is that the design was repeated for every event (each 'letter') of the sequence, and an `eventtype` column was added.
 # !!! hint
-#     more advaned sequences exist, like "SR{1,3}", or "A[BC]" etc.
+#     more advaned sequences are possible as well, like "SR{1,3}", or "A[BC]". Infinite sequences are not possible like "AB*"
 
-# Finally, let's repeat the design 2 times
+# Finally, let's repeat the design 2 times - because we can
 design = RepeatDesign(design, 4)
 generate_events(design)
+
+#design = UnfoldSim.AddSaccadeAmplitudeDesign4(design,:rt,Normal(0,1),MersenneTwister(1))
+#generate_events(design)
+
 
 # This results in 12 trials that nicely follow our sequence
 
