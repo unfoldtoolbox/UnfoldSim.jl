@@ -52,11 +52,18 @@ LinearModelComponent(;
 ```
 """
 @with_kw struct LinearModelComponent <: AbstractComponent
-    basis::Any
-    formula::Any # e.g. 0~1+cond - left side must be "0"
+    basis::Union{Tuple{Function,Int},Array}
+    formula::FormulaTerm # e.g. 0~1+cond - left side must be "0"
     β::Vector
     contrasts::Dict = Dict()
     offset::Int = 0
+    function LinearModelComponent(basis, formula, β, contrasts, offset)
+        @assert isa(basis, Tuple{Function,Int}) ".basis needs to be an `::Array` or a `Tuple(function::Function,maxlength::Int)`"
+        @assert basis[2] > 0 "`maxlength` needs to be longer than 0"
+        new(basis, formula, β, contrasts, offset)
+    end
+    LinearModelComponent(basis::Array, formula, β, contrasts, offset) =
+        new(basis, formula, β, contrasts, offset)
 end
 
 
@@ -143,9 +150,51 @@ function simulate_component(rng, c::MultichannelComponent, design::AbstractDesig
     return reshape(y_proj, length(c.projection), size(y)...)
 end
 
+"""
+    basis(c::AbstractComponent)
+
+returns the basis of the component (typically `c.basis`)
+"""
+basis(c::AbstractComponent) = c.basis
+
+"""
+    basis(c::AbstractComponent,design)
+evaluates the basis, if basis is a vector, directly returns it. if basis is a tuple `(f::Function,maxlength::Int)`, evaluates the function with input `design`. Cuts the resulting vector or Matrix at `maxlength`
+"""
+basis(c::AbstractComponent, design) = basis(basis(c), design)
 
 
-Base.length(c::AbstractComponent) = length(c.basis)
+basis(b::AbstractVector, design) = b
+function basis(basis::Tuple{Function,Int}, design)
+    f = basis[1]
+    maxlength = basis[2]
+    basis_out = f(design)
+    if isa(basis_out, AbstractVector{<:AbstractVector}) || isa(basis_out, AbstractMatrix)
+        @assert length(basis_out) == size(design)[1] "Component basis function needs to either return a Vector, a Matrix with dim(2) == size(design,1), or a Vector of Vectors with length(b) == size(design,1)"
+    end
+    limit_basis(basis_out, maxlength)
+end
+
+
+function limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
+
+    # first cut off maxlength
+    b = limit_basis.(b, maxlength)
+    # now fill up with 0's
+    Δlengths = maxlength .- length.(b)
+
+    b = pad_array.(b, Δlengths, 0)
+    basis_out = reduce(hcat, b)
+
+
+    return basis_out
+end
+limit_basis(b::AbstractVector{<:Number}, maxlength) = b[1:min(length(b), maxlength)]
+limit_basis(b::AbstractMatrix, maxlength) = b[1:min(length(b), maxlength), :]
+
+Base.length(c::AbstractComponent) = isa(basis(c), Tuple) ? basis(c)[2] : length(basis(c))
+
+
 
 """
     maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
@@ -176,7 +225,7 @@ function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign
     X = generate_designmatrix(c.formula, events, c.contrasts)
     y = X * c.β
 
-    return y' .* c.basis
+    return y' .* basis(c, design)
 end
 
 
