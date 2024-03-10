@@ -170,7 +170,12 @@ function basis(basis::Tuple{Function,Int}, design)
     maxlength = basis[2]
     basis_out = f(design)
     if isa(basis_out, AbstractVector{<:AbstractVector}) || isa(basis_out, AbstractMatrix)
-        @assert length(basis_out) == size(design)[1] "Component basis function needs to either return a Vector, a Matrix with dim(2) == size(design,1), or a Vector of Vectors with length(b) == size(design,1)"
+        if isa(basis_out, AbstractMatrix)
+            l = size(basis_out, 2)
+        else
+            l = length(basis_out) # vector of vector case
+        end
+        @assert l == size(generate_events(design))[1] "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == size(design,1) [l / $(size(design,1))], or a Vector of Vectors with length(b) == size(design,1) [$l / $(size(design,1))]. "
     end
     limit_basis(basis_out, maxlength)
 end
@@ -266,7 +271,7 @@ julia> simulate_component(StableRNG(1),c,design)
 function simulate_component(
     rng,
     c::MixedModelComponent,
-    design::AbstractDesign,
+    design::AbstractDesign;
     return_parameters = false,
 )
     events = generate_events(design)
@@ -305,8 +310,15 @@ function simulate_component(
         rethrow(e)
     end
 
+    @debug size(basis(c, design))
     # in case the parameters are of interest, we will return those, not them weighted by basis
-    epoch_data_component = kron(return_parameters ? [1.0] : c.basis, m.y')
+    b = return_parameters ? [1.0] : basis(c, design)
+    @debug :b, typeof(b), size(b), :m, size(m.y')
+    if isa(b, AbstractMatrix)
+        epoch_data_component = ((m.y' .* b))
+    else
+        epoch_data_component = kron(b, m.y')
+    end
     return epoch_data_component
     #=
         else
