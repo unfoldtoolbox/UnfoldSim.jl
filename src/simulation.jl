@@ -33,9 +33,9 @@ Some remarks to how the noise is added:
 """
 
 
-function simulate(args...; kwargs...)
+function simulate(design::AbstractDesign, signal, onset::AbstractOnset, args...; kwargs...)
     @warn "No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!"
-    simulate(MersenneTwister(1), args...; kwargs...)
+    simulate(MersenneTwister(1), design, signal, onset, args...; kwargs...)
 end
 
 simulate(
