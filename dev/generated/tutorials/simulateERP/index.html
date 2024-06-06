@@ -34,14 +34,15 @@ data, evts = simulate(
     ),
     evts,
     data,
-);</code></pre><p>first the &quot;pure&quot; beta/linear regression parameters</p><pre><code class="language-julia hljs">plot_erp(
+);</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr33"><span class="sgr1">┌ Warning: </span></span>using `Dict(:A=&gt;(@formula,times/basisfunction))` is deprecated, please use `[:A=&gt;(@formula,times/basisfunction)]` from now on
+<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Unfold ~/.julia/packages/Unfold/UM7Tq/src/fit.jl:53</span></code></pre><p>first the &quot;pure&quot; beta/linear regression parameters</p><pre><code class="language-julia hljs">plot_erp(
     coeftable(m);
     axis = (
         title = &quot;Estimated regression parameters&quot;,
         xlabel = &quot;Time [s]&quot;,
         ylabel = &quot;Amplitude [μV]&quot;,
     ),
-)</code></pre><img src="8aa3b7ae.png" alt="Example block output"/><p>and now beautifully visualized as marginal betas / predicted ERPs</p><pre><code class="language-julia hljs">f = plot_erp(
+)</code></pre><img src="30d684c2.png" alt="Example block output"/><p>and now beautifully visualized as marginal betas / predicted ERPs</p><pre><code class="language-julia hljs">f = plot_erp(
     effects(Dict(:condition =&gt; [&quot;car&quot;, &quot;face&quot;], :continuous =&gt; 0:0.5:5), m);
     axis = (
         title = &quot;Predicted event-related potential (ERP)&quot;,
@@ -56,4 +57,4 @@ data, evts = simulate(
 # Workaround to separate legend and colorbar (will be fixed in a future UnfoldMakie version)
 legend = f.content[2]
 f[:, 1] = legend
-current_figure()</code></pre><img src="bc172217.png" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../quickstart/">« Quickstart</a><a class="docs-footer-nextpage" href="../poweranalysis/">Poweranalysis »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.0 on <span class="colophon-date" title="Monday 22 April 2024 14:29">Monday 22 April 2024</span>. Using Julia version 1.10.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+current_figure()</code></pre><img src="f5f1a6b9.png" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../quickstart/">« Quickstart</a><a class="docs-footer-nextpage" href="../poweranalysis/">Poweranalysis »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Thursday 6 June 2024 08:32">Thursday 6 June 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
