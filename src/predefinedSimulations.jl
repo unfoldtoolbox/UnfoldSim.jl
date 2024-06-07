@@ -79,7 +79,7 @@ function predef_eeg(
     kwargs...,
 )
 
-    components = []
+    components = AbstractComponent[]
     for c in comps
         append!(components, [T(c...)])
     end
