@@ -1,18 +1,23 @@
-using UnfoldSim
-using Random
-using CairoMakie
+# # Quickstart
 
+using UnfoldSim
+using Random # to get an RNG
+using CairoMakie # for plotting
+
+# To get started with data simulation, the user needs to provide four ingredients: an experimental design, an event basis function (component), an inter-onset distribution and a noise specification.
 
 # !!! tip
 #       Use `subtypes(AbstractNoise)` (or `subtypes(AbstractComponent)` etc.) to find already implemented building blocks.
 
-# ## "Experimental" Design
+# ## Specify the simulation ingredients
+
+# ### Experimental Design
 # Define a 1 x 2 design with 20 trials. That is, one condition (`condaA`) with two levels.
 design =
     SingleSubjectDesign(; conditions = Dict(:condA => ["levelA", "levelB"])) |>
     x -> RepeatDesign(x, 10);
 
-# #### Component / Signal
+# ### Event basis function (Component)
 # Define a simple component and ground truth simulation formula. Akin to ERP components, we call one simulation signal a component.
 # 
 # !!! note 
@@ -23,19 +28,19 @@ signal = LinearModelComponent(;
     β = [1, 0.5],
 );
 
-# #### Onsets and Noise
-# We will start with a uniform (but overlapping, `offset` < `length(signal.basis)`) onset-distribution
+# ### Onsets and Noise
+# We will start with a uniform (but overlapping, `offset` < `length(signal.basis)`) inter-onset distribution.
 onset = UniformOnset(; width = 20, offset = 4);
 
 # And we will use some noise
 noise = PinkNoise(; noiselevel = 0.2);
 
 # ## Combine & Generate
-# Finally, we will simulate some data
+# Finally, we will combine all ingredients and simulate some data.
 data, events = simulate(MersenneTwister(1), design, signal, onset, noise);
-# `Data` is a `n-sample` Vector (but could be a Matrix for e.g. `MultiSubjectDesign`).
+# `data` is a `n-sample` Vector (but could be a Matrix for e.g. `MultiSubjectDesign` or epoched data).
 
-# `Events` is a DataFrame that contains a column `latency` with the onsets of events.
+# `events` is a DataFrame that contains a column `latency` with the onsets of events (in samples).
 
 # ## Plot them!
 lines(data; color = "black")
