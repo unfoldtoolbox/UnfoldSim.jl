@@ -34,7 +34,7 @@ makedocs(;
         "Tutorials" => [
             "Quickstart" => "generated/tutorials/quickstart.md",
             "Simulate ERPs" => "generated/tutorials/simulateERP.md",
-            "Poweranalysis" => "generated/tutorials/poweranalysis.md",
+            "Power analysis" => "generated/tutorials/poweranalysis.md",
             "Multi-subject simulation" => "generated/tutorials/multisubject.md",
         ],
         "Reference" => [

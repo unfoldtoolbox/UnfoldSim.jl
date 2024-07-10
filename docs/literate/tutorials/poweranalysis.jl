@@ -5,7 +5,7 @@ using DataFrames
 using Random
 
 
-# ## Simple Poweranalysis Script
+# ## Simple Power analysis Script
 # For a power analysis, we will repeatedly simulate data, and check whether we can find a significant effect.
 # 
 # We perform the power analysis on epoched data.

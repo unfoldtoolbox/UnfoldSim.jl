@@ -43,7 +43,7 @@ end
 
 """
     RealisticNoise <: AbstractNoise
-Not implemented - planned to use Artefacts.jl to provide real EEG data to add.
+Not implemented - planned to use Artifacts.jl to provide real EEG data to add.
 """
 @with_kw struct RealisticNoise <: AbstractNoise
     noiselevel = 1
