@@ -38,10 +38,10 @@ makedocs(;
             "Multi-subject simulation" => "generated/tutorials/multisubject.md",
         ],
         "Reference" => [
-            "Overview: Toolbox Functions" => "./generated/reference/overview.md",
-            "Overview: NoiseTypes" => "./generated/reference/noisetypes.md",
-            "Overview: OnsetTypes" => "./generated/reference/onsettypes.md",
-            "Overview: Components (EEG, fMRI, Pupil)" => "./generated/reference/basistypes.md",
+            "Overview of functionality" => "./generated/reference/overview.md",
+            "Overview: Basis function (component) types" => "./generated/reference/basistypes.md",
+            "Overview: Onset types" => "./generated/reference/onsettypes.md",
+            "Overview: Noise types" => "./generated/reference/noisetypes.md",
         ],
         "HowTo" => [
             "Define a new, (imbalanced) design" => "./generated/HowTo/newDesign.md",
