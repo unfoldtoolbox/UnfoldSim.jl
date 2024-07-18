@@ -1,10 +1,11 @@
+# # Overview: Noise types
+# There are several noise types directly implemented. Here is a comparison:
+
 using UnfoldSim
 using CairoMakie
 using DSP
 using StableRNGs
 import StatsBase.autocor
-# ## What's the noise?
-# There are several noise-types directly implemented. Here is a comparison:
 
 f = Figure()
 ax_sig =

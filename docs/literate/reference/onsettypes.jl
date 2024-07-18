@@ -1,4 +1,4 @@
-# # Onset types
+# # Overview: Onset types
 # The onset types determine the distances between event onsets in the continuous EEG signal. The distances are sampled from a certain probability distribution.
 # Currently, there are two types of onset distributions implemented: `UniformOnset` and `LogNormalOnset`.
 
@@ -58,11 +58,11 @@ let # hide
                 design, # hide
             ) # hide
 
-            hist!(
-                ax,
-                distances,
-                bins = range(0, 100, step = 1),
-                label = "($width, $offset)",
+            hist!( # hide
+                ax, # hide
+                distances, # hide
+                bins = range(0, 100, step = 1), # hide
+                label = "($width, $offset)", # hide
             ) # hide
 
             if label == "offset" && offset != 0 # hide 
