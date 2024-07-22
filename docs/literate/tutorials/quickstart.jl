@@ -1,9 +1,5 @@
 # # Quickstart
 
-using UnfoldSim
-using Random # to get an RNG
-using CairoMakie # for plotting
-
 # To get started with data simulation, the user needs to provide four ingredients: an experimental design, an event basis function (component), an inter-onset distribution and a noise specification.
 
 # !!! tip
@@ -11,10 +7,24 @@ using CairoMakie # for plotting
 
 # ## Specify the simulation ingredients
 
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
+using UnfoldSim
+using Random # to get an RNG
+using CairoMakie # for plotting
+
+# ```@raw html
+# </details >
+# ```
+
 # ### Experimental Design
-# Define a 1 x 2 design with 20 trials. That is, one condition (`condaA`) with two levels.
+# Define a 1 x 2 design with 20 trials. That is, one condition (`cond_A`) with two levels.
 design =
-    SingleSubjectDesign(; conditions = Dict(:condA => ["levelA", "levelB"])) |>
+    SingleSubjectDesign(; conditions = Dict(:cond_A => ["level_A", "level_B"])) |>
     x -> RepeatDesign(x, 10);
 
 # ### Event basis function (Component)
@@ -24,7 +34,7 @@ design =
 #        You could easily specify multiple components by providing a vector of components, which are automatically added at the same onsets. This procedure simplifies to generate some response that is independent of simulated condition, whereas other depends on it.
 signal = LinearModelComponent(;
     basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
-    formula = @formula(0 ~ 1 + condA),
+    formula = @formula(0 ~ 1 + cond_A),
     β = [1, 0.5],
 );
 
@@ -44,5 +54,10 @@ data, events = simulate(MersenneTwister(1), design, signal, onset, noise);
 
 # ## Plot them!
 lines(data; color = "black")
-vlines!(events.latency; color = ["orange", "teal"][1 .+ (events.condA.=="levelB")])
+vlines!(events.latency; color = ["orange", "teal"][1 .+ (events.cond_A.=="level_B")])
+
+current_axis().title = "Simulated data"
+current_axis().xlabel = "Time [samples]"
+current_axis().ylabel = "Amplitude [μV]"
+
 current_figure()
