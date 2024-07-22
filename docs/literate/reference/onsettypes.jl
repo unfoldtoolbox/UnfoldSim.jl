@@ -7,7 +7,7 @@
 # <details>
 # <summary>Click to expand</summary>
 # ```
-
+## Load required packages
 using UnfoldSim
 using CairoMakie
 using Random
