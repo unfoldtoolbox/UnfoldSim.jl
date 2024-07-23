@@ -1,7 +1,7 @@
 using UnfoldSim
 
 
-# ## Repeating Design entries
+# # [Repeating Design entries](@id howto_repeat_design)
 # Sometimes we want to repeat a design, that is, have multiple trials with identical values, but it is not always straight forward to implement. 
 # For instance, there is no way to easily modify `MultiSubjectDesign` to have multiple identical subject/item combinations,
 # without doing awkward repetitions of condition-levels or something.

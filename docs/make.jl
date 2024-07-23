@@ -39,6 +39,7 @@ makedocs(;
         ],
         "Reference" => [
             "Overview of functionality" => "./generated/reference/overview.md",
+            "Overview: Experimental design types" => "./generated/reference/designtypes.md",
             "Overview: Basis function (component) types" => "./generated/reference/basistypes.md",
             "Overview: Onset types" => "./generated/reference/onsettypes.md",
             "Overview: Noise types" => "./generated/reference/noisetypes.md",
