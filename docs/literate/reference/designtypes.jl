@@ -52,12 +52,12 @@ generate_events(design_single_shuffled)
 # ```
 
 # ## Multi-subject designs
-# The `MultiSubjectDesign` type can be used to simulate data for an experiment with multiple subjects. 
+# The `MultiSubjectDesign` type can be used to simulate data for an experiment with multiple subjects. Internally, it uses the [MixedModelsSim.jl package](https://github.com/RePsychLing/MixedModelsSim.jl).
 # One needs to specify the number of subjects `n_subjects` and the number of items `n_items` i.e. stimuli.
 # In addition, one needs to decide for every experimental factor whether it should be between- or within-subject (and item).
 
 # !!! note 
-# For factors that are not listed in `items_between` it is assumed that they vary within-item ()
+#     For factors that are not listed in `items_between` it is assumed that they vary within-item (accordingly for `subjects_between`).
 
 design_multi = MultiSubjectDesign(
     n_subjects = 6,
@@ -66,7 +66,6 @@ design_multi = MultiSubjectDesign(
     subjects_between = Dict(:age_group => ["young", "old"]),
     both_within = Dict(:luminance => range(0, 1, length = 3)),
 );
-# Caution, designs have to be balanced
 
 # ```@raw html
 # <details>
@@ -75,7 +74,14 @@ design_multi = MultiSubjectDesign(
 generate_events(design_multi)
 # ```@raw html
 # </details >
+# <br />
 # ```
+
+# As with the `SingleSubjectDesign` one can use the `event_order_function` argument to determine the order of events/trials.
+
+# !!! important
+#     The number of subjects/items has to be a divisor of the number of factor level combinations, i.e. it is assumed that the design is balanced
+#     which means that there is an equal number of observations for all possible factor level combinations.
 
 # ## Repeat designs
 # The `RepeatDesign` type is a functionality to encapsulate single- or multi-subject designs. It allows to repeat a generated event table multiple times.
@@ -90,6 +96,7 @@ generate_events(design_multi)
 generate_events(design_single)
 # ```@raw html
 # </details >
+# <br />
 # ```
 
 
