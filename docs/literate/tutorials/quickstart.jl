@@ -1,6 +1,10 @@
 # # Quickstart
 
-# To get started with data simulation, the user needs to provide four ingredients: an experimental design, an event basis function (component), an inter-onset distribution and a noise specification.
+# To get started with data simulation, the user needs to provide four ingredients: 
+# 1) an experimental design, defining which conditions exist and how many events/"trials"
+# 2) an event basis function, defining the simulated event-related response for every event (e.g. the ERP shape in EEG)
+# 3) an inter-onset event distribution, defining the distances in time of the event sequence
+# 4) a noise specification, defining, well, the noise :)
 
 # !!! tip
 #       Use `subtypes(AbstractNoise)` (or `subtypes(AbstractComponent)` etc.) to find already implemented building blocks.
