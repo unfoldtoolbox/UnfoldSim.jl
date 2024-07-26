@@ -72,7 +72,7 @@ Noise with exponential decay in AR spectrum.
 `noiselevel` is used to scale the noise
 
 !!! warning
-    Current implementation: Cholesky of NxN matrix needs to be calculated, which might need lots of RAM.
+    With the current implementation we try to get exponential decay over the whole AR spectrum, which is N-Samples long. This involves the inversion of a cholesky matrix of size NxN matrix, which will need lots of RAM for non-trivial problems.
 """
 @with_kw struct ExponentialNoise <: AbstractNoise
     noiselevel = 1
