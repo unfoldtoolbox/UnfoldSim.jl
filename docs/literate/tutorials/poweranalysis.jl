@@ -1,14 +1,24 @@
+# # Power analysis
+# For a power analysis, we will repeatedly simulate data, and check whether we can find a significant effect.
+# We perform the power analysis on epoched data.
+
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
 using UnfoldSim
 using Statistics
 using HypothesisTests
 using DataFrames
 using Random
+# ```@raw html
+# </details >
+# <br />
+# ```
 
-
-# ## Simple Power analysis Script
-# For a power analysis, we will repeatedly simulate data, and check whether we can find a significant effect.
-# 
-# We perform the power analysis on epoched data.
+# ## Simulation loop
 pvals = fill(NaN, 100)
 @time for seed in eachindex(pvals)
     ## Simulate data of 30 subjects
@@ -33,5 +43,5 @@ pvals = fill(NaN, 100)
     pvals[seed] = pvalue(OneSampleTTest(y_big, y_small))
 end
 
-# let's calculate the power
+# Let's calculate the power
 power = mean(pvals .< 0.05) * 100

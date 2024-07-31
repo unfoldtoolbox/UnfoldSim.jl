@@ -1,5 +1,10 @@
 # # Overview: Noise types
-# There are several noise types directly implemented. Here is a comparison:
+
+# There are different types of noise signals which differ in their power spectra.
+# If you are not familiar with different types/colors of noise yet, have a look at this [source](https://en.wikipedia.org/wiki/Colors_of_noise).
+
+# There are several noise types directly implemented in UnfoldSim.jl. Here is a comparison:
+
 
 using UnfoldSim
 using CairoMakie
