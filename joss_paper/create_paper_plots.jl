@@ -274,7 +274,7 @@ let
             ygridvisible = false,
         )
 
-    for n in [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
+    for n in [PinkNoise RedNoise WhiteNoise ExponentialNoise]
 
         # Generate noise samples
         noisevec = simulate_noise(StableRNG(1), n(), 10000)
