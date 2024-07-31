@@ -3,7 +3,7 @@
 # The experimental design specifies the experimental conditions and other variables that are supposed to have an influence on the simulated data.
 # Currently, there are three types of designs implemented: `SingleSubjectDesign`, `MultiSubjectDesign` and `RepeatDesign`.
 
-# ## Setup
+# ### Setup
 # ```@raw html
 # <details>
 # <summary>Click to expand</summary>

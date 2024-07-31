@@ -4,9 +4,9 @@ CurrentModule = UnfoldSim
 
 # UnfoldSim.jl
 
-Documentation for [UnfoldSim.jl](https://github.com/unfoldtoolbox/UnfoldSim.jl). UnfoldSim.jl is a Julia package for simulating multivariate timeseries data with a special focus on EEG data.
+Documentation for [UnfoldSim.jl](https://github.com/unfoldtoolbox/UnfoldSim.jl): a Julia package for simulating multivariate timeseries data with a special focus on EEG data.
 
-## Start simulating timeseries
+## Start simulating time series data
 We offer some predefined (EEG) signals, check them out!
 
 For instance a P1/N170/P300 complex (containing three typical ERP components).
