@@ -24,6 +24,7 @@ design = MultiSubjectDesign(;
 		items_between = Dict(:cond => ["levelA", "levelB"]),
 		);
 ```
+See also [`SingleSubjectDesign`](@ref), [`RepeatDesign`](@ref)
 """
 @with_kw struct MultiSubjectDesign <: AbstractDesign
     n_subjects::Int
@@ -60,6 +61,7 @@ design = SingleSubjectDesign(;
         :contrast_level => range(0, 1, length = 5),
 );
 ```
+See also [`MultiSubjectDesign`](@ref), [`RepeatDesign`](@ref)
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
     conditions::Dict{Symbol,Vector} = Dict()
@@ -163,6 +165,7 @@ designOnce = MultiSubjectDesign(;
 
 design = RepeatDesign(designOnce,4);
 ```
+See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref)
 """
 @with_kw struct RepeatDesign{T} <: AbstractDesign
     design::T
