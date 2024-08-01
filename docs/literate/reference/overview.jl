@@ -1,5 +1,5 @@
 # # Overview of functionality
-# A UnfoldSim simulation has four ingredients: Design, Component, Onset and Noise. Here we provide a short overview of the implemented functions.
+# A UnfoldSim simulation has four ingredients: Design, Component, Onset and Noise. Here we provide a short overview of the implemented types.
 
 # ### Setup
 # ```@raw html
