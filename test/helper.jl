@@ -1,11 +1,11 @@
 @testset "helper" begin
 
 
-    @testset "padarray" begin
-        @test padarray([2, 2], (-3, 2), -1) == [-1, -1, -1, 2, 2, -1, -1]
-        @test padarray([2, 2], -2, -1) == [-1, -1, 2, 2]
-        @test padarray([2, 2], 2, -1) == [2, 2, -1, -1]
-        @test padarray([2, 2], 2, -1) == [2, 2, -1, -1]
+    @testset "pad_array" begin
+        @test pad_array([2, 2], (-3, 2), -1) == [-1, -1, -1, 2, 2, -1, -1]
+        @test pad_array([2, 2], -2, -1) == [-1, -1, 2, 2]
+        @test pad_array([2, 2], 2, -1) == [2, 2, -1, -1]
+        @test pad_array([2, 2], 2, -1) == [2, 2, -1, -1]
 
     end
 

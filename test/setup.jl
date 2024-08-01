@@ -7,13 +7,13 @@ using LinearAlgebra
 using MixedModelsSim
 using DataFrames
 
-function gen_debug_design(; n_subj = 20, n_item = 100)
+function gen_debug_design(; n_subjects = 20, n_item = 100)
     # define design parameters
-    item_btwn = Dict("stimType" => ["A", "B"])
+    item_btwn = Dict(:stimType => ["A", "B"])
 
     # instantiate the design
     return MultiSubjectDesign(;
-        n_subjects = n_subj,
+        n_subjects = n_subjects,
         n_items = n_item,
         items_between = item_btwn,
     )

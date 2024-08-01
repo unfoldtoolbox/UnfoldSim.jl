@@ -52,10 +52,16 @@ export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign
 export PinkNoise, RedNoise, WhiteNoise, NoNoise, ExponentialNoise #,RealNoise (not implemented yet)
 
 # UnfoldSim functions 
-export simulate, gen_noise, generate
+export simulate,
+    simulate_responses,
+    simulate_interonset_distances,
+    simulate_component,
+    simulate_onsets,
+    simulate_noise,
+    generate_events
 
 # utilities
-export padarray, convert
+export pad_array, convert
 
 # export Offsets
 export UniformOnset, LogNormalOnset, NoOnset
@@ -64,7 +70,7 @@ export UniformOnset, LogNormalOnset, NoOnset
 export DummyCoding, EffectsCoding
 
 # export bases
-export p100, n170, p300, n400, hrf
+export p100, n170, p300, n400, hrf, PuRF
 
 # headmodel
 export AbstractHeadmodel, Hartmut, headmodel, leadfield, orientation, magnitude

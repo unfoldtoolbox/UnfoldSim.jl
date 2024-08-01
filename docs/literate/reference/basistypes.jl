@@ -26,11 +26,11 @@ f
 f = Figure()
 plotConfig = (
     :peak => 1:3:10,
-    :psUnder => 10:5:30,
+    :post_undershoot => 10:5:30,
     :amplitude => 2:5,
     :shift => 0:3:10,
     :peak_width => 0.1:0.5:1.5,
-    :psUnder_width => 0.1:0.5:1.5,
+    :post_undershoot_width => 0.1:0.5:1.5,
 )
 
 for (ix, pl) in enumerate(plotConfig)

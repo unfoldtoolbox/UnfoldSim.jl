@@ -52,13 +52,18 @@ let # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
         for (width, offset) in combinations # hide
-            onsets = UnfoldSim.rand_onsets( # hide
+            distances = UnfoldSim.simulate_interonset_distances( # hide
                 MersenneTwister(42), # hide
                 UniformOnset(; width = width, offset = offset), # hide
                 design, # hide
             ) # hide
 
-            hist!(ax, onsets, bins = range(0, 100, step = 1), label = "($width, $offset)") # hide
+            hist!(
+                ax,
+                distances,
+                bins = range(0, 100, step = 1),
+                label = "($width, $offset)",
+            ) # hide
 
             if label == "offset" && offset != 0 # hide 
                 vlines!(offset, color = "black") # hide
@@ -99,7 +104,7 @@ let
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets
         for (width, offset) in combinations
-            onsets = UnfoldSim.rand_onsets(
+            onsets = UnfoldSim.simulate_interonset_distances(
                 MersenneTwister(42),
                 UniformOnset(; width = width, offset = offset),
                 design,
@@ -163,7 +168,7 @@ let # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
         for (μ, σ, offset, truncate_upper) in combinations # hide
-            onsets = UnfoldSim.rand_onsets( # hide
+            onsets = UnfoldSim.simulate_interonset_distances( # hide
                 MersenneTwister(42), # hide
                 LogNormalOnset(; # hide
                     μ = μ, # hide
@@ -228,7 +233,7 @@ let
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets
         for (μ, σ, offset, truncate_upper) in combinations
-            onsets = UnfoldSim.rand_onsets(
+            onsets = UnfoldSim.simulate_interonset_distances(
                 MersenneTwister(42),
                 LogNormalOnset(;
                     μ = μ,
