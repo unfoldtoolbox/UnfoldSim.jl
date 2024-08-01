@@ -64,7 +64,7 @@ The inter-onset distribution defines the distance between events in the case of 
 ## Noise types
 UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
 
-![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its log<sub>10</sub>(power) at normalized frequencies.\label{fig_noise_types}](plots/noise_types.svg)
+![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its log<sub>10</sub>(power) $\text{log_{10}(power)}$ at normalized frequencies.\label{fig_noise_types}](plots/noise_types.svg)
 
 # Simulation example
 In this section, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/). Moreover, to get started, the `UnfoldSim.jl` package offers the function `predef_eeg` which, depending on the input, simulates continuous EEG data either for a single subject or multiple subjects.
@@ -96,7 +96,7 @@ design =
 | 1.11111        | car           |
 | 0.555556       | car           |
 
-2\. Next, we create a signal consisting of two different **components**. For the first component, we use the prespecified N170 base with an intercept of 5 µV and a condition effect of 3&nbsp;µV for the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
+2\. Next, we create a signal consisting of two different **components**. For the first component, we use the prespecified N170 base with an intercept of 5&nbsp;µV and a condition effect of 3&nbsp;µV for the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
 
 ```julia
 n1 = LinearModelComponent(;
