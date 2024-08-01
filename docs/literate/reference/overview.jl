@@ -1,5 +1,5 @@
 # # Overview of functionality
-# UnfoldSim has many modules, here we try to collect them to provide you with an overview.
+# A UnfoldSim simulation has four ingredients: Design, Component, Onset and Noise. Here we provide a short overview of the implemented functions.
 
 # ### Setup
 # ```@raw html
