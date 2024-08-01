@@ -64,7 +64,7 @@ The inter-onset distribution defines the distance between events in the case of 
 ## Noise types
 UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
 
-![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its log<sub>10</sub>(power) $\log_{10}(power)$ $\text{\log_{10}(power)}$ $\text{log}_{\text{10}}\text{(power)}$ at normalized frequencies.\label{fig_noise_types}](plots/noise_types.svg)
+![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Panel **B** displays its $\log_{10}(power)$ $\text{\log_{10}(power)}$ $\text{log}_{\text{10}}\text{(power)}$ at normalized frequencies. \label{fig_noise_types}](plots/noise_types.svg)
 
 # Simulation example
 In this section, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/). Moreover, to get started, the `UnfoldSim.jl` package offers the function `predef_eeg` which, depending on the input, simulates continuous EEG data either for a single subject or multiple subjects.
