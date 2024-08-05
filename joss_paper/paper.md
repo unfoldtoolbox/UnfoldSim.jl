@@ -59,7 +59,7 @@ To generate complex activations, it is possible to specify a vector of `<:Abstra
 The inter-onset distribution defines the distance between events in the case of a continuous EEG. Currently, `UniformOnset` and `LogNormalOnset` are implemented. By specifying the parameters of the inter-onset distribution, one indirectly controls the amount of overlap between two or more event-related responses.
 \autoref{fig_onset_distributions} illustrates the parameterization of the two implemented onset distributions.
 
-![Illustration of the inter-onset distributions. The colours indicate different sets of parameter values. Please note that for the lognormal distribution, the parameters are defined on a logarithmic scale, while the distribution is shown on a linear scale. \label{fig_onset_distributions}](plots/onset_distributions.svg){height="230pt"}
+![Illustration of the inter-onset distributions. The colours indicate different sets of parameter values. Please note that for the lognormal distribution, the parameters are defined on a logarithmic scale, while the distribution is shown on a linear scale. \label{fig_onset_distributions}](plots/onset_distributions.svg){height="220pt"}
 
 ## Noise types
 UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
