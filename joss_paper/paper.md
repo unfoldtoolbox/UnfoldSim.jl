@@ -64,7 +64,7 @@ The inter-onset distribution defines the distance between events in the case of 
 ## Noise types
 UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
 
-![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Please note that the noise signals are shifted by 5&nbsp;µV for visualisation purposes. Panel **B** displays its $\text{log}_{\text{10}}\text{(power)}$ at normalized frequencies. \label{fig_noise_types}](plots/noise_types.svg){height="250pt"}
+![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Please note that the noise signals are shifted by 5&nbsp;µV for visualisation purposes. Panel **B** displays its $\text{log}_{\text{10}}\text{(power)}$ at normalized frequencies. \label{fig_noise_types}](plots/noise_types.svg){height="230pt"}
 
 # Simulation example
 In this section, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/). Moreover, to get started, the `UnfoldSim.jl` package offers the function `predef_eeg` which, depending on the input, simulates continuous EEG data either for a single subject or multiple subjects.
@@ -132,7 +132,7 @@ Finally, we combine all the ingredients and simulate data (see \autoref{fig_exam
 eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise)
 ```
 
-![First 1400 samples from the simulated continuous EEG data. The vertical lines denote the event onsets and their colour represents the respective condition i.e. car or face.\label{fig_example_simulated_data}](plots/example_simulated_data.svg)
+![First 1400 samples from the simulated continuous EEG data. The vertical lines denote the event onsets and their colour represents the respective condition i.e. car or face.\label{fig_example_simulated_data}](plots/example_simulated_data.svg){height="250pt"}
 
 To validate the simulation results, we use the `Unfold.jl` package [@ehinger2019unfold] to fit an Unfold regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a categorical predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
 
@@ -150,7 +150,7 @@ m = fit(
 
 In subplot A of \autoref{fig_example_coefficients_effects}, one can see the model estimates for the different coefficients and as intended there is a condition effect in the first negative component and an effect of the continuous variable on the second (positive) component. The relation between the levels of the continuous variable and the scaling of the second component is even clearer visible in subplot B of \autoref{fig_example_coefficients_effects} which depicts the estimated marginal effects of the predictors. Instead of showing the regression coefficients, we can evaluate the estimated function at specific values of the continuous variable. 
 
-![Regression results for the simulated data. Panel **A** displays the estimated regression coefficients over time. Panel **B** shows the estimated marginal effects i.e. the estimated event-related potential at different predictor levels.\label{fig_example_coefficients_effects}](plots/example_coefficients_effects.svg)
+![Regression results for the simulated data. Panel **A** displays the estimated regression coefficients over time. Panel **B** shows the estimated marginal effects i.e. the estimated event-related potential at different predictor levels.\label{fig_example_coefficients_effects}](plots/example_coefficients_effects.svg){height="250pt"}
 
 As shown in this example, `UnfoldSim.jl` and `Unfold.jl` can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.
 
