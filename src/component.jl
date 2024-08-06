@@ -71,38 +71,47 @@ MultichannelComponent(c::AbstractComponent, p) =
     MultichannelComponent(c::AbstractComponent, p, NoNoise())
 
 function MultichannelComponent(
-    c::AbstractComponent,
-    p::Pair{<:AbstractHeadmodel,String},
-    n::AbstractNoise,
+    component::AbstractComponent,
+    projection::Pair{<:AbstractHeadmodel,String},
+    noise::AbstractNoise,
 )
-    ix = closest_src(p[1], p[2])
-    mg = magnitude(p[1])
-    return MultichannelComponent(c, mg[:, ix], n)
+    ix = closest_src(projection[1], projection[2])
+    mg = magnitude(projection[1])
+    return MultichannelComponent(component, mg[:, ix], noise)
 end
 Base.length(c::MultichannelComponent) = length(c.component)
 
 """
-Returns the number of channels. By default = 1
+    n_channels(c::AbstractComponent)
+Return the number of channels. By default = 1.
 """
 n_channels(c::AbstractComponent) = 1
 
 """
-for `MultichannelComponent` returns the length of the projection vector
+    n_channels(c::MultichannelComponent)
+For `MultichannelComponent` return the length of the projection vector.
+
 """
 n_channels(c::MultichannelComponent) = length(c.projection)
 
-
+"""
+For a vector of `MultichannelComponent`s, return the first but asserts all are of equal length.
+"""
 function n_channels(c::Vector{<:AbstractComponent})
     all_channels = n_channels.(c)
     @assert length(unique(all_channels)) == 1 "Error - projections of different channels cannot be different from eachother"
     return all_channels[1]
 end
 
-function simulate(rng, c::MultichannelComponent, design::AbstractDesign)
-    y = simulate(rng, c.component, design)
+"""
+    simulate_component(rng,c::MultichannelComponent,design::AbstractDesign)
+Return the projection of a component from source to "sensor" space.
+"""
+function simulate_component(rng, c::MultichannelComponent, design::AbstractDesign)
+    y = simulate_component(rng, c.component, design)
 
-    for tr = 1:size(y, 2)
-        y[:, tr] .= y[:, tr] .+ gen_noise(rng, c.noise, size(y, 1))
+    for trial = 1:size(y, 2)
+        y[:, trial] .= y[:, trial] .+ simulate_noise(rng, c.noise, size(y, 1))
     end
 
     y_proj = kron(y, c.projection)
@@ -112,34 +121,40 @@ end
 
 
 Base.length(c::AbstractComponent) = length(c.basis)
-maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
 
 """
-# by default call simulate with `::Abstractcomponent,::AbstractDesign``, but allow for custom types
-# making use of other information in simulation
+    maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
+maximum of individual component lengths
 """
-simulate(rng, c::AbstractComponent, simulation::Simulation) =
-    simulate(rng, c, simulation.design)
+maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 
 """
-simulate a linearModel
+    simulate_component(rng, c::AbstractComponent, simulation::Simulation)
+By default call `simulate_component` with `(::Abstractcomponent,::AbstractDesign)` instead of the whole simulation. This allows users to provide a hook to do something completely different :)
+"""
+simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
+    simulate_component(rng, c, simulation.design)
+
+"""
+    simulate_component(rng, c::AbstractComponent, simulation::Simulation)
+Generate a linear model design matrix, weight it by c.β and multiply the result with the given basis vector.
 
 julia> c = UnfoldSim.LinearModelComponent([0,1,1,0],@formula(0~1+cond),[1,2],Dict())
-julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
-julia> simulate(StableRNG(1),c,design)
+julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
+julia> simulate_component(StableRNG(1),c,design)
 """
-function simulate(rng, c::LinearModelComponent, design::AbstractDesign)
-    evts = generate(design)
+function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
+    events = generate_events(design)
 
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
     if c.formula.rhs == ConstantTerm(1)
-        X = ones(nrow(evts), 1)
+        X = ones(nrow(events), 1)
     else
         if isempty(c.contrasts)
-            m = StatsModels.ModelFrame(c.formula, evts)
+            m = StatsModels.ModelFrame(c.formula, events)
         else
-            m = StatsModels.ModelFrame(c.formula, evts; contrasts = c.contrasts)
+            m = StatsModels.ModelFrame(c.formula, events; contrasts = c.contrasts)
         end
         X = StatsModels.modelmatrix(m)
     end
@@ -147,73 +162,91 @@ function simulate(rng, c::LinearModelComponent, design::AbstractDesign)
     return y' .* c.basis
 end
 """
-simulate MixedModelComponent
+    simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
+Generates a MixedModel and simulates data according to c.β and c.σs.
 
-julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,item_between=(;:cond=>["A","B"]))
+A trick is used to remove the Normal-Noise from the MixedModel which might lead to rare numerical instabilities. Practically, we upscale the σs by factor 10000, and provide a σ=0.0001. Internally this results in a normalization where the response scale is 10000 times larger than the noise.
+
+Currently, it is not possible to use a different basis for fixed and random effects, but a code-stub exists (it is slow though).
+
+- `return_parameters` (Bool,false) - can be used to return the per-event parameters used to weight the basis function. Sometimes useful to see what is simulated
+
+julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
 julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
 julia> simulate(StableRNG(1),c,design)
 
 """
-function simulate(rng, c::MixedModelComponent, design::AbstractDesign)
-    evts = generate(design)
+function simulate_component(
+    rng,
+    c::MixedModelComponent,
+    design::AbstractDesign;
+    return_parameters = false,
+)
+    events = generate_events(design)
 
     # add the mixed models lefthandside
     lhs_column = :tmp_dv
-    @assert string(lhs_column) ∉ names(evts) "Error: Wow you are unlucky, we have to introduce a temporary lhs-symbol which we name ``:tmp_dv` - you seem to have a condition called `:tmp_dv` in your dataset as well. Please rename it!"
+    @assert string(lhs_column) ∉ names(events) "Error: Wow you are unlucky, we have to introduce a temporary lhs-symbol which we name ``:tmp_dv` - you seem to have a condition called `:tmp_dv` in your dataset as well. Please rename it!"
     f = FormulaTerm(Term(:tmp_dv), c.formula.rhs)
-    evts[!, lhs_column] .= 0
+    events[!, lhs_column] .= 0
 
     # create dummy
     if isempty(c.contrasts)
-        m = MixedModels.MixedModel(f, evts)
+        m = MixedModels.MixedModel(f, events)
     else
-        m = MixedModels.MixedModel(f, evts; contrasts = c.contrasts)
+        m = MixedModels.MixedModel(f, events; contrasts = c.contrasts)
     end
 
 
     # empty epoch data
-    epoch_data_component = zeros(Int(length(c.basis)), length(design))
+    #epoch_data_component = zeros(Int(length(c.basis)), length(design))
 
     # residual variance for lmm
     σ_lmm = 0.0001
-    if 1 == 1
-        namedre = weight_σs(c.σs, 1.0, σ_lmm)
-        θ = createθ(m; namedre...)
+
+    named_random_effects = weight_σs(c.σs, 1.0, σ_lmm)
+    θ = createθ(m; named_random_effects...)
+    @debug named_random_effects, θ, m.θ
+    try
         simulate!(deepcopy(rng), m.y, m; β = c.β, σ = σ_lmm, θ = θ)
-
-        # save data to array
-        #@show size(m.y)
-        #@show size(c.basis)
-
-
-        epoch_data_component = kron(c.basis, m.y')
-
-
-    else
-        # iterate over each timepoint
-        for t in eachindex(c.basis)
-
-            # select weight from basis
-            # right now, it is the same, but maybe changein thefuture?
-            basis_β = c.basis[t]
-            basis_σs = c.basis[t]
-
-
-            # weight random effects by the basis function
-            namedre = weight_σs(c.σs, basis_σs, σ_lmm)
-
-            θ = createθ(m; namedre...)
-
-
-            # simulate with new parameters; will update m.y
-            simulate!(deepcopy(rng), m.y, m; β = basis_β .* c.β, σ = σ_lmm, θ = θ)
-
-            # save data to array
-            epoch_data_component[t, :] = m.y
+    catch e
+        if isa(e, DimensionMismatch)
+            @warn "Most likely your σs's do not match the formula!"
+        elseif isa(e, ArgumentError)
+            @warn "Most likely your β's do not match the formula!"
         end
+        rethrow(e)
     end
-    return epoch_data_component
 
+    # in case the parameters are of interest, we will return those, not them weighted by basis
+    epoch_data_component = kron(return_parameters ? [1.0] : c.basis, m.y')
+    return epoch_data_component
+    #=
+        else
+            # iterate over each timepoint
+            for t in eachindex(c.basis)
+
+                # select weight from basis
+                # right now, it is the same, but maybe changein thefuture?
+                basis_β = c.basis[t]
+                basis_σs = c.basis[t]
+
+
+                # weight random effects by the basis function
+                named_random_effects = weight_σs(c.σs, basis_σs, σ_lmm)
+
+                θ = createθ(m; named_random_effects...)
+
+
+                # simulate with new parameters; will update m.y
+                simulate!(deepcopy(rng), m.y, m; β = basis_β .* c.β, σ = σ_lmm, θ = θ)
+
+                # save data to array
+                epoch_data_component[t, :] = m.y
+            end
+        end
+        return epoch_data_component
+    =#
 end
 
 
@@ -247,7 +280,49 @@ function weight_σs(σs::Dict, b_σs::Float64, σ_lmm::Float64)
         push!(vals, v)
     end
 
-    namedre = NamedTuple(keys .=> vals)
+    named_random_effects = NamedTuple(keys .=> vals)
 
-    return namedre
+    return named_random_effects
+end
+
+#----
+
+"""
+    simulate_responses(
+        rng,
+        components::Vector{<:AbstractComponent},
+        simulation::Simulation)
+Simulate multiple component responses and accumulates them on a per-event basis.
+"""
+function simulate_responses(
+    rng,
+    components::Vector{<:AbstractComponent},
+    simulation::Simulation,
+)
+    if n_channels(components) > 1
+        epoch_data =
+            zeros(n_channels(components), maxlength(components), length(simulation.design))
+    else
+        epoch_data = zeros(maxlength(components), length(simulation.design))
+    end
+
+    for c in components
+        simulate_and_add!(epoch_data, c, simulation, rng)
+    end
+    return epoch_data
+end
+
+
+"""
+    simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
+    simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
+Helper function to call `simulate_component` and add it to a provided Array.
+"""
+function simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
+    @debug "matrix"
+    @views epoch_data[1:length(c), :] .+= simulate_component(rng, c, simulation)
+end
+function simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
+    @debug "3D Array"
+    @views epoch_data[:, 1:length(c), :] .+= simulate_component(rng, c, simulation)
 end

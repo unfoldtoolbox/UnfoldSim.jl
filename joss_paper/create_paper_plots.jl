@@ -57,22 +57,23 @@ let
     # Analysing data using Unfold
     m = fit(
         UnfoldModel,
-        Dict(
+        [
             Any => (
                 @formula(0 ~ 1 + condition + spl(continuous, 4)),
                 firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
             ),
-        ),
+        ],
         events_df,
         eeg_data,
     )
     #----
-    # Visualise event data frame
+    # Visualise design (event data frame)
+    events_design = generate_events(design)
     pretty_table(
-        events_df[1:5, :],
+        events_design[1:5, :],
         alignment = :l,
         backend = Val(:markdown),
-        header = names(events_df),
+        header = names(events_design),
     )
     #----
     # Visualise simulated data
@@ -254,7 +255,7 @@ let
             title = "Noise samples",
             titlesize = 18,
             xlabel = "Time",
-            ylabel = "Amplitude",
+            ylabel = "Amplitude (including offset)",
             xlabelsize = 16,
             ylabelsize = 16,
             xgridvisible = false,
@@ -274,13 +275,13 @@ let
             ygridvisible = false,
         )
 
-    for n in [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
+    for (ix, n) in enumerate([PinkNoise RedNoise WhiteNoise ExponentialNoise])
 
         # Generate noise samples
-        noisevec = simulate_noise(StableRNG(1), n(), 10000)
+        noisevec = simulate_noise(StableRNG(10), n(), 10000)
 
         # Plot 1000 samples
-        lines!(ax_A, noisevec[1:1000]; label = string(n))
+        lines!(ax_A, noisevec[1:1000] .- (ix - 1) * 5; label = string(n))
 
         # Calculate Welch periodogram
         perio = welch_pgram(noisevec)

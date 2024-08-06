@@ -86,14 +86,18 @@ Fallback: along the third dimension using `norm` - the maximal projection
 magnitude(headmodel::AbstractHeadmodel) = magnitude(leadfield(headmodel))
 
 """
+magnitude(headmodel::Hartmut; type = "perpendicular") =
 Extract magnitude of 3-orientation-leadfield, 
-`type` (default: "perpendicular") => uses the provided source-point orientations - otherwise falls back to `norm`
+`type` (default: "perpendicular") => uses the provided source-point orientations - otherwise falls back to `norm`.
 """
 magnitude(headmodel::Hartmut; type = "perpendicular") =
     type == "perpendicular" ? magnitude(leadfield(headmodel), orientation(headmodel)) :
     magnitude(leadfield(headmodel))
 
-
+"""
+    magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) where {T<:Real}
+Return the magnitude along an orientation of the leadfield.
+"""
 function magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) where {T<:Real}
     si = size(lf)
     magnitude = fill(NaN, si[1:2])
@@ -105,7 +109,10 @@ function magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) wher
     return magnitude
 end
 
-
+"""
+    magnitude(lf::AbstractArray{T,3}) where {T<:Real}
+If orientation is not specified, returns the maximal magnitude (norm of leadfield).
+"""
 function magnitude(lf::AbstractArray{T,3}) where {T<:Real}
     si = size(lf)
     magnitude = fill(NaN, si[1:2])

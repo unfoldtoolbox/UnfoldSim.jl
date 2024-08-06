@@ -11,16 +11,17 @@ predef_eeg(;kwargs...)
 predef_eeg(rng;kwargs...)
 predef_eeg(rng,n_subjects;kwargs...)
 
-Gene
-rates a P1/N1/P3 complex.
-In case `n_subjects` is defined - `MixedModelComponents`` are generated, else `LinearModelComponents`
+Generate a P1/N1/P3 complex.
+In case `n_subjects` is defined - `MixedModelComponents` are generated, else `LinearModelComponents`.
 
-Most used kwargs is: `return_epoched=true` to ignore the overlap/onset bits and return already epoched data
+The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset=NoOnset()` and `return_epoched=true`
+
+
 
 ## Default params:
 
-. n_repeats=100
-- tableModifyFun = x->shuffle(deepcopy(rng),x # random trial order
+- n_repeats = 100
+- event_order_function = x->shuffle(deepcopy(rng),x # random trial order
 - conditions = Dict(...),
 
 #### component / signal
@@ -41,7 +42,7 @@ function predef_eeg(
     rng;
     # design
     n_repeats = 100,
-    tableModifyFun = x -> shuffle(deepcopy(rng), x),
+    event_order_function = x -> shuffle(deepcopy(rng), x),
 
     # component / signal
     sfreq = 100,
@@ -57,7 +58,7 @@ function predef_eeg(
                 :condition => ["car", "face"],
                 :continuous => range(-5, 5, length = 10),
             ),
-            tableModifyFun = tableModifyFun,
+            event_order_function = event_order_function,
         ) |> x -> RepeatDesign(x, n_repeats)
     return predef_eeg(rng, design, LinearModelComponent, [p1, n1, p3]; sfreq, kwargs...)
 end
@@ -90,7 +91,7 @@ function predef_eeg(
     n_subjects;
     # design
     n_items = 100,
-    tableModifyFun = x -> shuffle(deepcopy(rng), x),
+    event_order_function = x -> shuffle(deepcopy(rng), x),
     conditions = Dict(
         :condition => ["car", "face"],
         :continuous => range(-5, 5, length = 10),
@@ -130,7 +131,7 @@ function predef_eeg(
         n_subjects = n_subjects,
         n_items = n_items,
         items_between = conditions,
-        tableModifyFun = tableModifyFun,
+        event_order_function = event_order_function,
     )
 
     return predef_eeg(rng, design, MixedModelComponent, [p1, n1, p3]; sfreq, kwargs...)
@@ -140,13 +141,13 @@ end
 
     predef_2x2(rng::AbstractRNG;kwargs...)
 
-Most used kwargs is: `return_epoched=true` to ignore the overlap/onset bits and return already epoched data
+The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset=NoOnset()` and `return_epoched=true`
 
 #### design
 - `n_items`=100,
 - `n_subjects`=1,
 - `conditions` = Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"]),
-- `tableModifyFun` = x->shuffle(deepcopy(rng),x),
+- `event_order_function` = x->shuffle(deepcopy(rng),x),
 
 #### component / signal
 - `signalsize` = 100, length of simulated hanning window
@@ -173,7 +174,7 @@ function predef_2x2(
     n_items = 100,
     n_subjects = 1,
     conditions = Dict(:A => ["a_small", "a_big"], :B => ["b_tiny", "b_large"]),
-    tableModifyFun = x -> shuffle(deepcopy(rng), x),
+    event_order_function = x -> shuffle(deepcopy(rng), x),
 
     # component / signal
     signalsize = 100,
@@ -201,7 +202,7 @@ function predef_2x2(
         design =
             SingleSubjectDesign(;
                 conditions = conditions,
-                tableModifyFun = tableModifyFun,
+                event_order_function = event_order_function,
             ) |> x -> RepeatDesign(x, n_items ./ length(x))
 
         signal = LinearModelComponent(;
@@ -215,7 +216,7 @@ function predef_2x2(
             n_subjects = n_subjects,
             n_items = n_items,
             items_between = conditions,
-            tableModifyFun = tableModifyFun,
+            event_order_function = event_order_function,
         )
         signal = MixedModelComponent(;
             basis = basis,
