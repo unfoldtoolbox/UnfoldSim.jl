@@ -2,10 +2,20 @@
 
 # Let's say you want to use the events data frame (containing the levels of the experimental variables and the event onsets (latencies)) from a previous study in your simulation.
 
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
 using UnfoldSim
 using DataFrames
 using Random
 using CairoMakie # for plotting
+# ```@raw html
+# </details >
+# <br />
+# ```
 
 # From a previous study, we (somehow, e.g. by using [pyMNE.jl](https://unfoldtoolbox.github.io/Unfold.jl/dev/HowTo/pymne/)) imported an event data frame like this:
 my_events = DataFrame(:condition => [:A, :B, :B, :A, :A], :latency => [7, 13, 22, 35, 41])

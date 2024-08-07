@@ -43,7 +43,7 @@ end
 
 """
     RealisticNoise <: AbstractNoise
-Not implemented - planned to use Artefacts.jl to provide real EEG data to add.
+Not implemented - planned to use Artifacts.jl to provide real EEG data to add.
 """
 @with_kw struct RealisticNoise <: AbstractNoise
     noiselevel = 1
@@ -72,7 +72,7 @@ Noise with exponential decay in AR spectrum.
 `noiselevel` is used to scale the noise
 
 !!! warning
-    Current implementation: Cholesky of NxN matrix needs to be calculated, which might need lots of RAM.
+    With the current implementation we try to get exponential decay over the whole autoregressive (AR) spectrum, which is N samples (the total number of samples in the signal) long. This involves the inversion of a Cholesky matrix of size NxN matrix, which will need lots of RAM for non-trivial problems.
 """
 @with_kw struct ExponentialNoise <: AbstractNoise
     noiselevel = 1

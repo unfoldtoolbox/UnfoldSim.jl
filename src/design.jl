@@ -1,6 +1,9 @@
 """ 
-    MultiSubjectDesign
+    MultiSubjectDesign <: AbstractDesign
 
+A type for specifying the experimental design for multiple subjects (based on the given random-effects structure).
+
+### Fields
 - `n_subjects`::Int -> number of subjects
 - `n_items`::Int -> number of items (sometimes ≈trials)
 - `subjects_between` = Dict{Symbol,Vector} -> effects between subjects, e.g. young vs old 
@@ -8,10 +11,10 @@
 - `both_within` = Dict{Symbol,Vector}	-> effects completly crossed
 - `event_order_function` = `x->x`; # can be used to sort, or e.g. `x->shuffle(MersenneTwister(42),x)` - be sure to fix/update the rng accordingly!!
 
-tipp: check the resulting dataframe using `generate_events(design)`
+Tip: Check the resulting dataframe using `generate_events(design)`
 
 
-
+### Example
 ```julia
 # declaring same condition both sub-between and item-between results in a full between subject/item design
 design = MultiSubjectDesign(;
@@ -21,6 +24,7 @@ design = MultiSubjectDesign(;
 		items_between = Dict(:cond => ["levelA", "levelB"]),
 		);
 ```
+See also [`SingleSubjectDesign`](@ref), [`RepeatDesign`](@ref)
 """
 @with_kw struct MultiSubjectDesign <: AbstractDesign
     n_subjects::Int
@@ -33,6 +37,11 @@ end
 
 
 """
+    SingleSubjectDesign <: AbstractDesign
+
+A type for specifying the experimental for a single subject (based on the given conditions).
+
+### Fields
 - conditions = Dict{Symbol,Vector} of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
 - `event_order_function` = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
@@ -42,7 +51,17 @@ To increase the number of repetitions simply use `RepeatDesign(SingleSubjectDesi
 
 If conditions are omitted (or set to `nothing`), a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
 
-tipp: check the resulting dataframe using `generate_events(design)`
+Tip: Check the resulting dataframe using `generate_events(design)`
+
+### Example
+```julia
+design = SingleSubjectDesign(;
+    conditions = Dict(
+        :stimulus_type => ["natural", "artificial"],
+        :contrast_level => range(0, 1, length = 5),
+);
+```
+See also [`MultiSubjectDesign`](@ref), [`RepeatDesign`](@ref)
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
     conditions::Dict{Symbol,Vector} = Dict()
@@ -133,7 +152,7 @@ length(design::AbstractDesign) = *(size(design)...)
 # ----
 
 """
-    RepeatDesign{T}
+    RepeatDesign{T} <: AbstractDesign
 Repeat a design DataFrame multiple times to mimick repeatedly recorded trials.
 
 ```julia
@@ -146,6 +165,7 @@ designOnce = MultiSubjectDesign(;
 
 design = RepeatDesign(designOnce,4);
 ```
+See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref)
 """
 @with_kw struct RepeatDesign{T} <: AbstractDesign
     design::T

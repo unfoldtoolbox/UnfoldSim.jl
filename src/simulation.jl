@@ -6,9 +6,15 @@ Simulation(
     noisetype::AbstractNoise,
 ) = Simulation(design, [component], onset, noisetype)
 
+
+function simulate(design::AbstractDesign, signal, onset::AbstractOnset, args...; kwargs...)
+    @warn "No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!"
+    simulate(MersenneTwister(1), design, signal, onset, args...; kwargs...)
+end
+
 """
     simulate(
-    rng,
+    [rng::AbstractRNG,]
     design::AbstractDesign,
     signal,
     onset::AbstractOnset,
@@ -31,13 +37,6 @@ Some remarks to how the noise is added:
   - The case `return_epoched = false` and `onset = NoOnset()` is not possible and therefore covered by an assert statement
 
 """
-
-
-function simulate(design::AbstractDesign, signal, onset::AbstractOnset, args...; kwargs...)
-    @warn "No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!"
-    simulate(MersenneTwister(1), design, signal, onset, args...; kwargs...)
-end
-
 simulate(
     rng::AbstractRNG,
     design::AbstractDesign,

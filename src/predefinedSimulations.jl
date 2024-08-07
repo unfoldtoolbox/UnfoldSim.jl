@@ -7,36 +7,36 @@ predef_eeg(; kwargs...) = predef_eeg(MersenneTwister(1); kwargs...) # without rn
 predef_eeg(nsubjects::Int; kwargs...) = predef_eeg(MersenneTwister(1), nsubjects; kwargs...) # without rng always call same one
 
 """
-predef_eeg(;kwargs...)
-predef_eeg(rng;kwargs...)
-predef_eeg(rng,n_subjects;kwargs...)
+    predef_eeg(; kwargs...)
+    predef_eeg(rng; kwargs...)
+    predef_eeg(rng, n_subjects; kwargs...)
 
 Generate a P1/N1/P3 complex.
 In case `n_subjects` is defined - `MixedModelComponents` are generated, else `LinearModelComponents`.
 
-The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset=NoOnset()` and `return_epoched=true`
+The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset = NoOnset()` and `return_epoched = true`
 
 
+## Default parameters:
 
-## Default params:
+#### Design
+- `n_repeats = 100`,
+- `event_order_function = x -> shuffle(deepcopy(rng), x)`, # random trial order
+- `conditions = Dict(...)`,
 
-- n_repeats = 100
-- event_order_function = x->shuffle(deepcopy(rng),x # random trial order
-- conditions = Dict(...),
+#### Component / Signal
+- `sfreq = 100`,
+- `p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict())`, # P1 amp 5, no effects
+- `n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5,-3], Dict())`, # N1 amp 5, dummy-coded condition effect (levels "car", "face") of -3
+- `p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5,1], Dict())`, # P3 amp 5, continuous effect range [-5,5] with slope 1
 
-#### component / signal
-- sfreq = 100,
-- p1 = (p100(;sfreq=sfreq), @formula(0~1),[5],Dict()), # P1 amp 5, no effects
-- n1 = (n170(;sfreq=sfreq), @formula(0~1+condition),[5,-3],Dict()), # N1 amp 5, dummycoded condition effect (levels "car", "face") of -3
-- p3 = (p300(;sfreq=sfreq), @formula(0~1+continuous),[5,1],Dict()), # P3 amp 5, continuous effect range [-5,5] with slope 1
+#### Onset
+- `overlap = (0.5,0.2)`, # offset + width/length of Uniform noise. put offset to 1 for no overlap. put width to 0 for no jitter
+- `onset = UniformOnset(; offset = sfreq * 0.5 * overlap[1], width = sfreq * 0.5 * overlap[2])`, 
 
-#### noise
-- noiselevel = 0.2,
-- noise = PinkNoise(;noiselevel=noiselevel),
-                
-#### onset
-- overlap = (0.5,0.2), # offset + width/length of Uniform noise. put offset to 1 for no overlap. put width to 0 for no jitter
-- onset=UniformOnset(;offset=sfreq*0.5*overlap[1],width=sfreq*0.5*overlap[2]), 
+#### Noise
+- `noiselevel = 0.2`,
+- `noise = PinkNoise(; noiselevel = noiselevel)`,
 """
 function predef_eeg(
     rng;
@@ -139,34 +139,33 @@ function predef_eeg(
 end
 """
 
-    predef_2x2(rng::AbstractRNG;kwargs...)
+    predef_2x2(rng::AbstractRNG; kwargs...)
 
-The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset=NoOnset()` and `return_epoched=true`
+The most used `kwargs` is: `return_epoched = true` which returns already epoched data. If you want epoched data without overlap, specify `onset = NoOnset()` and `return_epoched = true`
 
-#### design
-- `n_items`=100,
-- `n_subjects`=1,
-- `conditions` = Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"]),
-- `event_order_function` = x->shuffle(deepcopy(rng),x),
+#### Design
+- `n_items = 100`,
+- `n_subjects = 1`,
+- `conditions = Dict(:A => ["a_small","a_big"], :B => ["b_tiny","b_large"])`,
+- `event_order_function = x -> shuffle(deepcopy(rng), x)`,
 
-#### component / signal
-- `signalsize` = 100, length of simulated hanning window
-- `basis`` = hanning(signalsize), the actual "function", `signalsize` is only used here
-- `β` = [1,-0.5,.5,+1], the parameters
-- `σs` = Dict(:subject=>[1,0.5,0.5,0.5],:item=>[1]), - only in n_subjects>=2 case, specifies the random effects
-- `contrasts` = Dict(:A=>EffectsCoding(),:B=>EffectsCoding()) - effect coding by default
-- `formula` = n_subjects==1 ? @formula(0~1+A*B) : @formula(dv~1+A*B+(A*B|subject)+(1|item)),
+#### Component / Signal
+- `signalsize = 100`, # Length of simulated hanning window
+- `basis = hanning(signalsize)`, # The actual "function", `signalsize` is only used here
+- `β = [1, -0.5, .5, +1]`, # The parameters
+- `σs = Dict(:subject => [1, 0.5, 0.5, 0.5],:item => [1])`, # Only in n_subjects >= 2 case, specifies the random effects
+- `contrasts = Dict(:A => EffectsCoding(), :B => EffectsCoding())` # Effect coding by default
+- `formula = n_subjects == 1 ? @formula(0 ~ 1 + A*B) : @formula(dv ~ 1 + A*B + (A*B|subject) + (1|item))`,
 
-#### noise
-- `noiselevel` = 0.2,
-- `noise` = PinkNoise(;noiselevel=noiselevel),
+#### Onset
+- `overlap = (0.5,0.2)`,
+- `onset = UniformOnset(; offset = signalsize * overlap[1], width = signalsize * overlap[2])`, # Put offset to 1 for no overlap. put width to 0 for no jitter
 
-#### onset
-- `overlap` = (0.5,0.2),
-- `onset`=UniformOnset(;offset=signalsize*overlap[1],width=signalsize*overlap[2]), #put offset to 1 for no overlap. put width to 0 for no jitter
+#### Noise
+- `noiselevel = 0.2`,
+- `noise = PinkNoise(; noiselevel = noiselevel)`,
 
-
-Careful if you modify n_items with n_subjects = 1, n_items has to be a multiple of 4 (or your equivalent conditions factorial, e.g. all combinations length)
+Be careful if you modify n_items with n_subjects = 1, n_items has to be a multiple of 4 (or your equivalent conditions factorial, e.g. all combinations length)
 """
 function predef_2x2(
     rng::AbstractRNG;

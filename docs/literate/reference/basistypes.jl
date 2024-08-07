@@ -1,16 +1,25 @@
-using UnfoldSim
-using CairoMakie
-using DSP
-using StableRNGs
-
-# ## Basistypes
+# # Overview: Basis function (component) types
 # There are several basis types directly implemented. They can be easily used for the `components`.
 #
 # !!! note
 #       You can use any arbitrary shape defined by yourself! We often make use of `hanning(50)` from the DSP.jl package.
 
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
+using UnfoldSim
+using CairoMakie
+using DSP
+using StableRNGs
+# ```@raw html
+# </details >
+# ```
+
 # ## EEG
-# By default, the EEG bases assume a sampling rate of 100, which can easily be changed by e.g. p100(;sfreq=300)
+# By default, the EEG bases assume a sampling rate of 100, which can easily be changed by e.g. p100(; sfreq=300)
 f = Figure()
 ax = f[1, 1] = Axis(f)
 for b in [p100, n170, p300, n400]
