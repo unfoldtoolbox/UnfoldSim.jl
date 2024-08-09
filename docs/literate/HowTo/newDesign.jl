@@ -1,13 +1,24 @@
+# # Define a new (imbalanced) design
+
+# A design specifies how much data is generated, and how the event-table(s)
+# should be generated. Already implemented examples are `MultiSubjectDesign` and `SingleSubjectDesign`.
+
+# We need 3 things for a new design: a `struct<:AbstractDesign`, a `size` and a `generate` function.
+
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
 using UnfoldSim
 using StableRNGs
 using DataFrames
 using Parameters
-# ## Define a new Design
-# A design specifies how much data is generated, and how the event-table(s)
-# should be generated. Already implemented examples are `MultiSubjectDesign` and `SingleSubjectDesign`
-#
-# We need 3 things for a new design: a `struct<:AbstractDesign`, a `size` and a `generate` function
-#
+# ```@raw html
+# </details>
+# <br />
+# ```
+
 # #### 1) `type`
 # We need a `ImbalanceSubjectDesign` struct. You are free to implement it as you wish, as long as the other two functions are implemented
 #

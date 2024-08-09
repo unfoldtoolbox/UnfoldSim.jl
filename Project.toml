@@ -1,7 +1,7 @@
 name = "UnfoldSim"
 uuid = "ed8ae6d2-84d3-44c6-ab46-0baf21700804"
 authors = ["Benedikt Ehinger", "Luis Lips", "Judith Schepers", "Maanik Marathe"]
-version = "0.3.2"
+version = "0.4.0"
 
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -35,7 +35,7 @@ MixedModels = "4"
 MixedModelsSim = "0.2"
 Parameters = "0.12"
 Random = "1"
-SignalAnalysis = "0.4, 0.5,0.6"
+SignalAnalysis = "0.4, 0.5,0.6,0.7,0.8"
 Statistics = "1"
 StatsModels = "0.6,0.7"
 ToeplitzMatrices = "0.7, 0.8"

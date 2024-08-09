@@ -1,10 +1,16 @@
+# # Overview: Noise types
+
+# There are different types of noise signals which differ in their power spectra.
+# If you are not familiar with different types/colors of noise yet, have a look at the[colors of noise Wikipedia page](https://en.wikipedia.org/wiki/Colors_of_noise).
+
+# There are several noise types directly implemented in UnfoldSim.jl. Here is a comparison:
+
+
 using UnfoldSim
 using CairoMakie
 using DSP
 using StableRNGs
 import StatsBase.autocor
-# ## What's the noise?
-# There are several noise-types directly implemented. Here is a comparison:
 
 f = Figure()
 ax_sig =
