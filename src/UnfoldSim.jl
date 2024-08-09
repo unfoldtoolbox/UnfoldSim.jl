@@ -66,7 +66,7 @@ export simulate,
 export pad_array, convert
 
 # export Offsets
-export UniformOnset, LogNormalOnset, NoOnset
+export UniformOnset, LogNormalOnset, NoOnset, UniformOnsetFormula, LogNormalOnsetFormula
 
 # re-export StatsModels
 export DummyCoding, EffectsCoding

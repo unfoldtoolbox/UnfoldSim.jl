@@ -108,20 +108,23 @@ end
 provide a Uniform Distribution of the inter-event-distances, but with regression formulas.
 This is helpful if your overlap/event-distribution should be dependend on some condition, e.g. more overlap in cond='A' than cond='B'.
 
-    - `width`:  is the width of the uniform distribution (=> the jitter). Since the lower bound is 0, `width` is also the upper bound.
-        -`width_formula`: choose a formula depending on your `Design`
-        -`width_β`: Choose a vector of betas, number needs to fit the formula chosen
-        -`width_contrasts` (optional): Choose a contrasts-dictionary according to the StatsModels specifications
-    `offset` is the minimal distance. The maximal distance is `offset + width`.
-        -`offset_formula`: choose a formula depending on your `design`
-        -`offset_β`: Choose a vector of betas, number needs to fit the formula chosen
-        -`offset_contrasts` (optional): Choose a contrasts-dictionary according to the StatsModels specifications
+**width**
+
+        -`width_formula`: choose a formula depending on your `Design`, default `@formula(0~1)`
+        -`width_β`: Choose a `Vector` of betas, number needs to fit the formula chosen, no default.
+        -`width_contrasts` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications, default `Dict()``
+    
+**offset** is the minimal distance. The maximal distance is `offset + width`.
+
+        -`offset_formula`: choose a formula depending on your `design`, default `@formula(0~1)``
+        -`offset_β`: Choose a `Vector` of betas, number needs to fit the formula chosen, default `[0]`
+        -`offset_contrasts` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications, default `Dict()`
 
 See `UniformOnset` for a simplified version without linear regression specifications
 """
 @with_kw struct UniformOnsetFormula <: AbstractOnset
     width_formula = @formula(0 ~ 1)
-    width_β::Vector = [50]
+    width_β::Vector
     width_contrasts::Dict = Dict()
     offset_formula = @formula(0 ~ 1)
     offset_β::Vector = [0]
@@ -144,12 +147,37 @@ function simulate_interonset_distances(rng, o::UniformOnsetFormula, design::Abst
 end
 
 
+"""
+    LogNormalOnsetFormula <: AbstractOnset
+provide a LogNormal Distribution of the inter-event-distances, but with regression formulas.
+This is helpful if your overlap/event-distribution should be dependend on some condition, e.g. more overlap in cond='A' than cond='B'.
+
+**μ**
+
+        -`μ_formula`: choose a formula depending on your `Design`, default `@formula(0~1)`
+        -`μ_β`: Choose a `Vector` of betas, number needs to fit the formula chosen, default `[0]`
+        -`μ_contrasts` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications, default `Dict()``
+   
+        -`σ_formula`: choose a formula depending on your `Design`, default `@formula(0~1)`
+        -`σ_β`: Choose a `Vector` of betas, number needs to fit the formula chosen, default `[0]`
+        -`σ_contrasts` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications, default `Dict()``
+    
+**offset** is the minimal distance. The maximal distance is `offset + width`.
+
+        -`offset_formula`: choose a formula depending on your `design`, default `@formula(0~1)``
+        -`offset_β`: Choose a `Vector` of betas, number needs to fit the formula chosen, default `[0]`
+        -`offset_contrasts` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications, default `Dict()`
+
+`truncate_upper` - truncate at some sample, default nothing
+
+See `LogNormalOnset` for a simplified version without linear regression specifications
+"""
 @with_kw struct LogNormalOnsetFormula <: AbstractOnset
     μ_formula = @formula(0 ~ 1)
-    μ_β::Vector = [0]
+    μ_β::Vector
     μ_contrasts::Dict = Dict()
     σ_formula = @formula(0 ~ 1)
-    σ_β::Vector = [0]
+    σ_β::Vector
     σ_contrasts::Dict = Dict()
     offset_formula = @formula(0 ~ 1)
     offset_β::Vector = [0]
@@ -174,9 +202,10 @@ function simulate_interonset_distances(
 
     funs = LogNormal.(μs, σs)
     if !isnothing(o.truncate_upper)
-        fun = truncated.(fun; upper = o.truncate_upper)
+        funs = truncated.(funs; upper = o.truncate_upper)
     end
-    return Int.(round.(offsets .+ rand.(deepcopy(rng), funs, 1)))
+    #@debug reduce(hcat, rand.(deepcopy(rng), funs, 1))
+    return Int.(round.(offsets .+ reduce(vcat, rand.(deepcopy(rng), funs, 1))))
 end
 
 
