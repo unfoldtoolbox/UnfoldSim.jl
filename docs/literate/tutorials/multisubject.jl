@@ -113,6 +113,6 @@ m = fit(
     data,
     times,
 )
-plot_erp(coeftable(m))#, mapping = (; col = :group)) # FIXME facetting by col currently broken, waiting for new UnfoldMakie release!
+plot_erp(coeftable(m), mapping = (; col = :group))
 
 # The first column shows the fixed effects, the latter the item and subject random effects as they evolve across time

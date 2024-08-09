@@ -79,18 +79,7 @@ data, events = simulate(
 All components (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
 
 ## Contributions
-
-Contributions are very welcome. These could be typos, bug reports, feature requests, speed-optimization, better code, better documentation.
-
-### How-to Contribute
-
-You are very welcome to raise issues and start pull requests!
-
-### Adding Documentation
-
-1. We recommend to write a Literate.jl document and place it in `docs/literate/FOLDER/FILENAME.jl` with `FOLDER` being `HowTo`, `Explanation`, `Tutorial` or `Reference` ([recommended reading on the 4 categories](https://documentation.divio.com/)).
-2. Literate.jl converts the `.jl` file to a `.md` automatically and places it in `docs/src/generated/FOLDER/FILENAME.md`.
-3. Edit [make.jl](https://github.com/unfoldtoolbox/Unfold.jl/blob/main/docs/make.jl) with a reference to `docs/src/generated/FOLDER/FILENAME.md`.
+Contributions of any kind are very welcome. Please have a look at [CONTRIBUTING.md](https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/main/CONTRIBUTING.md) for guidance on contributing to UnfoldSim.jl.
 
 ## Contributors
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -118,8 +107,7 @@ You are very welcome to raise issues and start pull requests!
 
 
 This project follows the [all-contributors](https://allcontributors.org/docs/en/specification) specification. 
-
-Contributions of any kind welcome!
+Please reach out, if you have contributed to UnfoldSim.jl but we have not listed you as a contributor yet.
 
 ## Citation
 
