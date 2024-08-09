@@ -35,15 +35,16 @@ MixedModelComponent(basis, formula, β, σs, contrasts) =
 """
 A multiple regression component for one subject
 
-- `basis`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model-prediction
+- `basis`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model-prediction. Can also be a tuple `(fun::Function,maxlength::Int)` with a function `fun` that either generates a matrix `size = (maxlength,size(design,1))` or a vector of vectors. If a larger matrix is generated, it is automatically cutoff at `maxlength`
 - `formula`: StatsModels Formula-Object  `@formula 0~1+cond` (left side must be 0)
 - `β` Vector of betas, must fit the formula
 - `contrasts`: Dict. Default is empty, e.g. `Dict(:condA=>EffectsCoding())`
-
-All arguments can be named, in that case `contrasts` is optional
+- `offset`: Int. Default is 0. Can be used to shift the basis function in time
+All arguments can be named, in that case `contrasts` and  `offset` are optional.
 
 Works best with `SingleSubjectDesign`
 ```julia
+# use a hanning window of size 40 as the component basis
 LinearModelComponent(;
     basis=hanning(40),
     formula=@formula(0~1+cond),
@@ -51,9 +52,17 @@ LinearModelComponent(;
     contrasts=Dict(:cond=>EffectsCoding())
 )
 
+# define a function returning random numbers as the component basis
+maxlength = 15
+my_signal_function = d->rand(StableRNG(1),maxlength,length(d))
+LinearModelComponent(;
+    basis=(my_signal_function,maxlength),
+    formula=@formula(0~1),
+    β = [1.],
+)
+
 ```
 """
-# backwards compatability after introducing the `offset` field
 @with_kw struct LinearModelComponent <: AbstractComponent
     basis::Union{Tuple{Function,Int},Array}
     formula::FormulaTerm # e.g. 0~1+cond - left side must be "0"
@@ -69,6 +78,7 @@ LinearModelComponent(;
         new(basis, formula, β, contrasts, offset)
 end
 
+# backwards compatability after introducing the `offset` field
 LinearModelComponent(basis, formula, β, contrasts) =
     LinearModelComponent(basis, formula, β, contrasts, 0)
 """

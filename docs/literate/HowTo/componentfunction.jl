@@ -23,8 +23,8 @@ design = UnfoldSim.SingleSubjectDesign(;
 # !!! important
 #     because any function depending on `design` can be used, two things have to be taken care of:
 #     
-#     1. in case a random component exist, specify a `RNG`, the basis might be evaluated multiple times inside `simulate`
-#     2. a `maxlength` has to be specified via a tuple `(function.maxlength)``
+#     1. in case a random component exist in the function, specify a `<:AbstractRNG` within the function call , the basis might be evaluated multiple times inside `simulate`
+#     2. a `maxlength` has to be specified via a tuple `(function,maxlength)``
 mybasisfun = design -> hanning.(generate_events(design).duration)
 signal = LinearModelComponent(;
     basis = (mybasisfun, 100),
