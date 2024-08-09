@@ -76,7 +76,7 @@ data, events = simulate(
     PinkNoise(),
 );    
 ```
-All components (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
+All simulation ingredients (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
 
 ## Contributions
 Contributions of any kind are very welcome. Please have a look at [CONTRIBUTING.md](https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/main/CONTRIBUTING.md) for guidance on contributing to UnfoldSim.jl.

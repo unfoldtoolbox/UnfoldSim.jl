@@ -1,10 +1,23 @@
+# # Multi-subject simulation
+
+# In this tutorial, you will learn how to simulate data for multiple subjects. In particular, you will learn how to specify fixed and random effects and what their influence on the simulated data looks like.
+
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
 using UnfoldSim
 using Unfold
 using CairoMakie
 using UnfoldMakie
 using DataFrames
+# ```@raw html
+# </details >
+# <br />
+# ```
 
-# # Multi-subject simulation
 # Similar to the single subject case, multi-subject simulation depends on:
 # - `Design` (typically a `MultiSubjectDesign`)
 # - `Components` (typically a `MixedModelComponent`)
