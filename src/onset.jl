@@ -8,7 +8,7 @@ Provide a Uniform Distribution of the inter-event-distances.
 `width`  is the width of the uniform distribution (=> the jitter). Since the lower bound is 0, `width` is also the upper bound.
 `offset` is the minimal distance. The maximal distance is `offset + width`.
 
-For a more advanced parameter specification, see `FormulaUniformOnset``, which allows to specify the onset-parameters depending on the `Design` employed via a linear regression model
+For a more advanced parameter specification, see `UniformOnsetFormula``, which allows to specify the onset-parameters depending on the `Design` employed via a linear regression model
 """
 @with_kw struct UniformOnset <: AbstractOnset
     width = 50 # how many samples jitter?
@@ -20,7 +20,7 @@ Log-normal inter-event distances using the `Distributions.jl` truncated LogNorma
 
 Be careful with large `μ` and `σ` values, as they are on logscale. σ>8 can quickly give you out-of-memory sized signals!
 
-For a more advanced parameter specification, see `FormulaLogNormalOnset, which allows to specify the onset-parameters depending on the `Design` employed via linear regression model
+For a more advanced parameter specification, see `LogNormalOnsetFormula, which allows to specify the onset-parameters depending on the `Design` employed via linear regression model
 """
 @with_kw struct LogNormalOnset <: AbstractOnset
     μ::Any  # mean
@@ -38,8 +38,8 @@ struct NoOnset <: AbstractOnset end
 """
     simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
-    simulate_interonset_distances(rng, onset::FormulaUniformOnset, design::AbstractDesign)
-    simulate_interonset_distances(rng, onset::FormulaLogNormalOnset, design::AbstractDesign)
+    simulate_interonset_distances(rng, onset::UniformOnsetFormula, design::AbstractDesign)
+    simulate_interonset_distances(rng, onset::LogNormalOnsetFormula, design::AbstractDesign)
 Generate the inter-event-onset vector in samples (returns Int).
 """
 
@@ -104,7 +104,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
 end
 
 """
-    FormulaUniformOnset <: AbstractOnset
+    UniformOnsetFormula <: AbstractOnset
 provide a Uniform Distribution of the inter-event-distances, but with regression formulas.
 This is helpful if your overlap/event-distribution should be dependend on some condition, e.g. more overlap in cond='A' than cond='B'.
 
@@ -119,7 +119,7 @@ This is helpful if your overlap/event-distribution should be dependend on some c
 
 See `UniformOnset` for a simplified version without linear regression specifications
 """
-@with_kw struct FormulaUniformOnset <: AbstractOnset
+@with_kw struct UniformOnsetFormula <: AbstractOnset
     width_formula = @formula(0 ~ 1)
     width_β::Vector = [50]
     width_contrasts::Dict = Dict()
@@ -129,7 +129,7 @@ See `UniformOnset` for a simplified version without linear regression specificat
 end
 
 
-function simulate_interonset_distances(rng, o::FormulaUniformOnset, design::AbstractDesign)
+function simulate_interonset_distances(rng, o::UniformOnsetFormula, design::AbstractDesign)
     events = generate_events(design)
     widths =
         UnfoldSim.generate_designmatrix(o.width_formula, events, o.width_contrasts) *
@@ -144,7 +144,7 @@ function simulate_interonset_distances(rng, o::FormulaUniformOnset, design::Abst
 end
 
 
-@with_kw struct FormulaLogNormalOnset <: AbstractOnset
+@with_kw struct LogNormalOnsetFormula <: AbstractOnset
     μ_formula = @formula(0 ~ 1)
     μ_β::Vector = [0]
     μ_contrasts::Dict = Dict()
@@ -159,7 +159,7 @@ end
 
 function simulate_interonset_distances(
     rng,
-    o::FormulaLogNormalOnset,
+    o::LogNormalOnsetFormula,
     design::AbstractDesign,
 )
     events = generate_events(design)
