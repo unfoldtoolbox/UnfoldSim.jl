@@ -21,6 +21,7 @@ MixedModelComponent(;
 
 ```
 """
+# backwards compatability after introducing the `offset` field`
 @with_kw struct MixedModelComponent <: AbstractComponent
     basis::Any
     formula::Any # e.g. 0~1+cond 
@@ -29,7 +30,8 @@ MixedModelComponent(;
     contrasts::Dict = Dict()
     offset::Int = 0
 end
-
+MixedModelComponent(basis, formula, β, σs, contrasts) =
+    MixedModelComponent(basis, formula, β, σs, contrasts, 0)
 """
 A multiple regression component for one subject
 
@@ -51,6 +53,7 @@ LinearModelComponent(;
 
 ```
 """
+# backwards compatability after introducing the `offset` field
 @with_kw struct LinearModelComponent <: AbstractComponent
     basis::Any
     formula::Any # e.g. 0~1+cond - left side must be "0"
@@ -59,7 +62,8 @@ LinearModelComponent(;
     offset::Int = 0
 end
 
-
+LinearModelComponent(basis, formula, β, contrasts) =
+    LinearModelComponent(basis, formula, β, contrasts, 0)
 """
     offset(AbstractComponent)
 

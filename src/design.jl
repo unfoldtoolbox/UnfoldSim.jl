@@ -178,6 +178,34 @@ function check_sequence(s::String)
     @assert length(blankfind) <= 1 && (length(blankfind) == 0 || length(s) == blankfind[1]) "the blank-indicator '_' has to be the last sequence element"
     return s
 end
+
+
+"""
+    SequenceDesign{T} <: AbstractDesign
+Enforce a sequence of events for each entry of a provided `AbstractDesign`.
+The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap.
+
+
+```julia
+design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
+design = SequenceDesign(design, "SCR_", StableRNG(1))
+```
+Would result in a `generate_events(design)`
+```repl
+6×2 DataFrame
+ Row │ condition  event 
+     │ String     Char  
+─────┼──────────────────
+   1 │ one        S
+   2 │ one        C
+   3 │ one        R
+   4 │ two        S
+   5 │ two        C
+   6 │ two        R
+```
+
+See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref), [`RepeatDesign`](@ref)
+"""
 @with_kw struct SequenceDesign{T} <: AbstractDesign
     design::T
     sequence::String = ""
@@ -187,7 +215,8 @@ end
     SequenceDesign{T}(d, s, sl, r) where {T<:AbstractDesign} =
         new(d, check_sequence(s), sl, r)
 end
-
+SequenceDesign(design, sequence, rng::AbstractRNG) =
+    SequenceDesign(design = design, sequence = sequence, rng = rng)
 SequenceDesign(design, sequence) = SequenceDesign(design = design, sequence = sequence)
 
 generate_events(design::SequenceDesign{MultiSubjectDesign}) = error("not yet implemented")
