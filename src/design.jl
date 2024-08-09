@@ -185,6 +185,11 @@ end
 Enforce a sequence of events for each entry of a provided `AbstractDesign`.
 The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap.
 
+It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`'s.
+
+Another variable sequence is defined using `[]`. For example, `S[ABC]` would result in any one sequence `SA`, `SB`, `SC`.
+
+Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the `ImbalancedDesign` tutorial
 
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
@@ -203,6 +208,50 @@ Would result in a `generate_events(design)`
    5 │ two        C
    6 │ two        R
 ```
+
+## Example for Sequence -> Repeat vs. Repeat -> Sequence
+
+### Sequence -> Repeat 
+```julia
+design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
+design = SequenceDesign(design, "[AB]", StableRNG(1))
+design = RepeatDesign(design,2)
+generate_events(design)
+```
+
+
+```repl
+4×2 DataFrame
+ Row │ condition  event 
+     │ String     Char  
+─────┼──────────────────
+   1 │ one        A
+   2 │ two        A
+   3 │ one        B
+   4 │ two        B
+```
+Sequence -> Repeat: a sequence design is repeated, then for each repetition a sequence is generated and applied. Events have different values
+
+### Repeat -> Sequence
+```julia
+design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
+design = RepeatDesign(design,2)
+design = SequenceDesign(design, "[AB]", StableRNG(1))
+generate_events(design)
+```
+
+```repl
+4×2 DataFrame
+ Row │ condition  event 
+     │ String     Char  
+─────┼──────────────────
+   1 │ one        A
+   2 │ two        A
+   3 │ one        A
+   4 │ two        A
+```
+Repeat -> Sequence: the design is first repeated, then for that design one sequence generated and applied. All events are the same
+
 
 See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref), [`RepeatDesign`](@ref)
 """

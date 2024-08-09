@@ -15,17 +15,17 @@ design = SequenceDesign(design, "SR_", StableRNG(1))
 generate_events(design)
 # The main thing that happened is that the design was repeated for every event (each 'letter') of the sequence, and an `eventtype` column was added.
 # !!! hint
-#     more advaned sequences are possible as well, like "SR{1,3}", or "A[BC]". Infinite sequences are **not** possible like "AB*"
+#     more advaned sequences are possible as well, like "SR{1,3}", or "A[BC]". Infinite sequences are **not** possible like "AB*". 
 
 # Finally, let's repeat the current design 4 times
 design = RepeatDesign(design, 4)
 generate_events(design)
 
-#design = UnfoldSim.AddSaccadeAmplitudeDesign4(design,:rt,Normal(0,1),MersenneTwister(1))
-#generate_events(design)
-
-
 # This results in 16 trials that nicely follow our sequence
+
+# !!! hint
+#     There is a difference between `SequenceDesign(RepeatDesign)` and `RepeatDesign(SequenceDesign)` for variable sequences e.g. "A[BC]", where in the former case,  one sequence is drawn e.g. "AC" and applied to all repeated rows, in the latter, one sequence for each repeat is drawn.
+
 
 # Next we have to specify for both events `S` and `R` what the responses should look like.
 p1 = LinearModelComponent(;
