@@ -286,10 +286,10 @@ end
 
 
 
-# ## Design-dependent `FormulaXOnset`
+# ## Design-dependent `X-OnsetFormula`
 
-# For additional control we provide `FormulaUniformOnset` and `FormulaLogNormalOnset` types, that allow to control all parameters by specifying formulas
-o = UnfoldSim.FormulaUniformOnset(
+# For additional control we provide `UniformOnsetFormula` and `LogNormalOnsetFormula` types, that allow to control all parameters by specifying formulas
+o = UnfoldSim.UniformOnsetFormula(
     width_formula = @formula(0 ~ 1 + cond),
     width_β = [50, 20],
 )
