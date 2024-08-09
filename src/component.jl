@@ -123,10 +123,10 @@ end
 Base.length(c::AbstractComponent) = length(c.basis)
 
 """
-    maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
+    maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 maximum of individual component lengths
 """
-maxlength(c::Vector{AbstractComponent}) = maximum(length.(c))
+maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
@@ -179,12 +179,19 @@ A trick is used to remove the Normal-Noise from the MixedModel which might lead 
 
 Currently, it is not possible to use a different basis for fixed and random effects, but a code-stub exists (it is slow though).
 
+- `return_parameters` (Bool,false) - can be used to return the per-event parameters used to weight the basis function. Sometimes useful to see what is simulated
+
 julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
 julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
 julia> simulate(StableRNG(1),c,design)
 
 """
-function simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
+function simulate_component(
+    rng,
+    c::MixedModelComponent,
+    design::AbstractDesign;
+    return_parameters = false,
+)
     events = generate_events(design)
 
     # add the mixed models lefthandside
@@ -202,48 +209,54 @@ function simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
 
 
     # empty epoch data
-    epoch_data_component = zeros(Int(length(c.basis)), length(design))
+    #epoch_data_component = zeros(Int(length(c.basis)), length(design))
 
     # residual variance for lmm
     σ_lmm = 0.0001
-    if 1 == 1
-        named_random_effects = weight_σs(c.σs, 1.0, σ_lmm)
-        θ = createθ(m; named_random_effects...)
+
+    named_random_effects = weight_σs(c.σs, 1.0, σ_lmm)
+    θ = createθ(m; named_random_effects...)
+    @debug named_random_effects, θ, m.θ
+    try
         simulate!(deepcopy(rng), m.y, m; β = c.β, σ = σ_lmm, θ = θ)
-
-        # save data to array
-        #@show size(m.y)
-        #@show size(c.basis)
-
-
-        epoch_data_component = kron(c.basis, m.y')
-
-
-    else
-        # iterate over each timepoint
-        for t in eachindex(c.basis)
-
-            # select weight from basis
-            # right now, it is the same, but maybe changein thefuture?
-            basis_β = c.basis[t]
-            basis_σs = c.basis[t]
-
-
-            # weight random effects by the basis function
-            named_random_effects = weight_σs(c.σs, basis_σs, σ_lmm)
-
-            θ = createθ(m; named_random_effects...)
-
-
-            # simulate with new parameters; will update m.y
-            simulate!(deepcopy(rng), m.y, m; β = basis_β .* c.β, σ = σ_lmm, θ = θ)
-
-            # save data to array
-            epoch_data_component[t, :] = m.y
+    catch e
+        if isa(e, DimensionMismatch)
+            @warn "Most likely your σs's do not match the formula!"
+        elseif isa(e, ArgumentError)
+            @warn "Most likely your β's do not match the formula!"
         end
+        rethrow(e)
     end
-    return epoch_data_component
 
+    # in case the parameters are of interest, we will return those, not them weighted by basis
+    epoch_data_component = kron(return_parameters ? [1.0] : c.basis, m.y')
+    return epoch_data_component
+    #=
+        else
+            # iterate over each timepoint
+            for t in eachindex(c.basis)
+
+                # select weight from basis
+                # right now, it is the same, but maybe changein thefuture?
+                basis_β = c.basis[t]
+                basis_σs = c.basis[t]
+
+
+                # weight random effects by the basis function
+                named_random_effects = weight_σs(c.σs, basis_σs, σ_lmm)
+
+                θ = createθ(m; named_random_effects...)
+
+
+                # simulate with new parameters; will update m.y
+                simulate!(deepcopy(rng), m.y, m; β = basis_β .* c.β, σ = σ_lmm, θ = θ)
+
+                # save data to array
+                epoch_data_component[t, :] = m.y
+            end
+        end
+        return epoch_data_component
+    =#
 end
 
 

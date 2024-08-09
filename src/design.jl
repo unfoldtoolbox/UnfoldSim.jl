@@ -1,12 +1,16 @@
 """ 
-- n_subjects::Int -> number of subjects
-- n_items::Int -> number of items (sometimes ≈trials)
-- subjects_between = nothing -> effects between subjects, e.g. young vs old 
-- items_between = nothing -> effects between items, e.g. natural vs artificial images, but shown to all subjects
-- both_within = nothing	-> effects completly crossed
-- event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+    MultiSubjectDesign
+
+- `n_subjects`::Int -> number of subjects
+- `n_items`::Int -> number of items (sometimes ≈trials)
+- `subjects_between` = Dict{Symbol,Vector} -> effects between subjects, e.g. young vs old 
+- `items_between` = Dict{Symbol,Vector} -> effects between items, e.g. natural vs artificial images, (but shown to all subjects if not specified also in `subjects_between`)
+- `both_within` = Dict{Symbol,Vector}	-> effects completly crossed
+- `event_order_function` = `x->x`; # can be used to sort, or e.g. `x->shuffle(MersenneTwister(42),x)` - be sure to fix/update the rng accordingly!!
 
 tipp: check the resulting dataframe using `generate_events(design)`
+
+
 
 ```julia
 # declaring same condition both sub-between and item-between results in a full between subject/item design
@@ -21,16 +25,16 @@ design = MultiSubjectDesign(;
 @with_kw struct MultiSubjectDesign <: AbstractDesign
     n_subjects::Int
     n_items::Int
-    subjects_between = nothing
-    items_between = nothing
-    both_within = nothing
+    subjects_between::Dict{Symbol,Vector} = Dict()
+    items_between::Dict{Symbol,Vector} = Dict()
+    both_within::Dict{Symbol,Vector} = Dict()
     event_order_function = x -> x # can be used to sort, or x->shuffle(rng,x)
 end
 
 
 """
-- conditions = Dict of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
-- event_order_function = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+- conditions = Dict{Symbol,Vector} of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
+- `event_order_function` = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
 
 Number of trials / rows in `generate_events(design)` depend on the full factorial of your `conditions`.
 
@@ -41,7 +45,7 @@ If conditions are omitted (or set to `nothing`), a single trial is simulated wit
 tipp: check the resulting dataframe using `generate_events(design)`
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
-    conditions = nothing
+    conditions::Dict{Symbol,Vector} = Dict()
     event_order_function = x -> x
 end
 
@@ -63,7 +67,7 @@ julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate_events(d)
 """
 function generate_events(design::SingleSubjectDesign)
-    if isnothing(design.conditions)
+    if isempty(design.conditions)
         events = DataFrame(:dummy => [:dummy])
     else
         # we get a Dict(:A=>["1","2"],:B=>["3","4"]), but needed a list
@@ -83,7 +87,7 @@ Note: n_items = you can think of it as `trials` or better, as `stimuli`.
 
 Note: No condition can be named `dv` which is used internally in MixedModelsSim / MixedModels as a dummy left-side
 
-Afterwards applies design.event_order_function.  Could be used to duplicate trials, sort, subselect etc.
+Afterwards applies `design.event_order_function``.  Could be used to duplicate trials, sort, subselect etc.
 
 Finally it sorts by `:subject`
 
@@ -95,16 +99,17 @@ function generate_events(design::MultiSubjectDesign)
     # check that :dv is not in any condition
     allconditions = [design.subjects_between, design.items_between, design.both_within]
 
-    @assert all(isnothing.(allconditions)) ||
-            :dv ∉ keys(merge(allconditions[.!isnothing.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
+    @assert all(isempty.(allconditions)) ||
+            :dv ∉ keys(merge(allconditions[.!isempty.(allconditions)]...)) "due to technical limitations in MixedModelsSim.jl, `:dv` cannot be used as a factorname"
 
     data = DataFrame(
         MixedModelsSim.simdat_crossed(
             design.n_subjects,
             design.n_items,
-            subj_btwn = design.subjects_between,
-            item_btwn = design.items_between,
-            both_win = design.both_within,
+            subj_btwn = isempty(design.subjects_between) ? nothing :
+                        design.subjects_between,
+            item_btwn = isempty(design.items_between) ? nothing : design.items_between,
+            both_win = isempty(design.both_within) ? nothing : design.both_within,
         ),
     )
     rename!(data, :subj => :subject)

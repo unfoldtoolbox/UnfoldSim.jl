@@ -70,8 +70,11 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
     # sample different onsets
     onsets = simulate_interonset_distances(rng, onset, simulation.design)
 
+    if maximum(onsets) > 10000
+        @warn "Maximum of inter-event-distances was $(maximum(onsets)) - are you sure this is what you want?"
+    end
     # accumulate them
-    onsets_accum = accumulate(+, onsets, dims = 1)
+    onsets_accum = accumulate(+, onsets, dims = 1, init = 1)
 
     return onsets_accum
 end

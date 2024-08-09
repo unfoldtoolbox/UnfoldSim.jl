@@ -9,7 +9,7 @@ using DataFrames
 
 function gen_debug_design(; n_subjects = 20, n_item = 100)
     # define design parameters
-    item_btwn = Dict("stimType" => ["A", "B"])
+    item_btwn = Dict(:stimType => ["A", "B"])
 
     # instantiate the design
     return MultiSubjectDesign(;

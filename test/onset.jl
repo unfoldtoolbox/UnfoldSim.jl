@@ -46,7 +46,6 @@
         @test minimum(rand_vec) >= 0
     end
     @testset "sim_onsets" begin
-        # test accumulate always increasing
         uniform_onset = UniformOnset(; offset = 0, width = 50)
 
         accumulated_onset = UnfoldSim.simulate_onsets(
@@ -54,7 +53,11 @@
             uniform_onset,
             gen_debug_simulation(onset = uniform_onset),
         )
+        # test accumulate always increasing
         @test all(diff(accumulated_onset, dims = 1) .>= 0)
+
+        # test that the first onset is at >=1 (not 0)
+        @test accumulated_onset[1] >= 1
     end
 
 end
