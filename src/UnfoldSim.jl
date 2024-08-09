@@ -14,6 +14,7 @@ using LinearAlgebra
 using ToeplitzMatrices # for AR Expo. Noise "Circulant"
 using StatsModels
 using HDF5, Artifacts, FileIO
+using Automa # for sequence
 
 using LinearAlgebra # headmodel
 
@@ -30,6 +31,7 @@ include("onset.jl")
 include("predefinedSimulations.jl")
 include("headmodel.jl")
 include("helper.jl")
+include("sequence.jl")
 include("bases.jl")
 
 export size, length
@@ -46,7 +48,7 @@ export Simulation
 export MixedModelComponent, LinearModelComponent
 
 # export designs
-export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign
+export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign, SequenceDesign
 
 # noise functions
 export PinkNoise, RedNoise, WhiteNoise, NoNoise, ExponentialNoise #,RealNoise (not implemented yet)
