@@ -19,7 +19,7 @@ design = UnfoldSim.SingleSubjectDesign(;
 );
 
 
-# Instead of defining a boring vector basis function e.g. `[0,0,1,2,3,3,2,1,0,0,0]`, let's use function, generating random values for now.
+# Instead of defining a boring vector basis function e.g. `[0,0,1,2,3,3,2,1,0,0,0]`, let's use function, modulating a hanning windows by the experimental design's duration.
 # !!! important
 #     because any function depending on `design` can be used, two things have to be taken care of:
 #     
