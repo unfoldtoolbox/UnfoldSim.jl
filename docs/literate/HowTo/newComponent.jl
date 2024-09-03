@@ -42,7 +42,7 @@ end
 Base.length(c::TimeVaryingComponent) = length(c.maxlength)
 
 # While we could have put the TimeVaryingComponent.basisfunction directly into the simulate function, I thought this is a bit more modular
-function UnfoldSim.simulate(rng, c::TimeVaryingComponent, design::AbstractDesign)
+function UnfoldSim.simulate_component(rng, c::TimeVaryingComponent, design::AbstractDesign)
     evts = generate_events(design)
     return c.basisfunction(evts, c.maxlength)
 end
