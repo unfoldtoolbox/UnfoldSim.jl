@@ -11,6 +11,7 @@
 # <summary>Click to expand</summary>
 # ```
 using UnfoldSim
+import UnfoldSim.simulate_component
 using Unfold
 using Random
 using DSP
@@ -65,7 +66,7 @@ function basis_shiftduration(evts, maxlength)
 end
 
 # ## Simulate data with the new component type
-erp = UnfoldSim.simulate(
+erp = UnfoldSim.simulate_component(
     MersenneTwister(1),
     TimeVaryingComponent(basis_shiftduration, 50),
     design,
