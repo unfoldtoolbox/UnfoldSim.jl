@@ -1,12 +1,33 @@
+# # Simulate event-related potentials (ERPs)
+
+# One subfield of EEG research focuses on so-called event-related potentials (ERPs) which are defined as brain responses time-locked to a certain event e.g. stimulus onset.
+# The waveform of an ERP usually consists of multiple ERP components which denote the peaks and troughs of the waveform.
+
+# ERP components are characterized (and named) by their timing relative to the event, their polarity (positive or negative) and their scalp topography. 
+# For example, the N170 describes a negative deflection which occurrs roughly 170 ms after the onset of (certain) visual stimuli.
+# Often, researchers are interested how a component (e.g. its amplitude or timing) changes depending on certain experimental factors. 
+# For example, N170 has been shown to be related to face processing and its amplitude is modulated by whether the stimulus is a face or an object e.g. a car.
+# ([Source](https://neuraldatascience.io/7-eeg/components.html))
+
+# Here we will learn how to simulate a typical ERP complex with P100, N170, P300.
+
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
 using UnfoldSim
 using CairoMakie
 using Random
 using Unfold
 using UnfoldMakie
-# ## ERP Complex
-# Here we will learn how to simulate a typical ERP complex with P100, N170, P300.
+# ```@raw html
+# </details >
+# ```
 
-# Let's grab a SingleSubjectDesign and add a continuous predictor
+# ## Simulation
+# Let's grab a `SingleSubjectDesign` and add a continuous predictor
 design =
     SingleSubjectDesign(;
         conditions = Dict(
