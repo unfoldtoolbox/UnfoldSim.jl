@@ -42,12 +42,6 @@ In the case that a TRF is simulated (via `TRFComponent`). This onset returns a v
 """
 struct TRFOnset <: AbstractOnset end
 
-function simulate_interonset_distances(rng,onset::TRFOnset,design)
-	sz = size(design)
-	return Int.(zeros(sz))
-end
-
-
 
 
 """
@@ -71,6 +65,16 @@ function simulate_interonset_distances(rng, onset::LogNormalOnset, design::Abstr
         fun = truncated(fun; upper = onset.truncate_upper)
     end
     return Int.(round.(onset.offset .+ rand(deepcopy(rng), fun, s)))
+end
+
+
+"""
+    simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
+In the case that a TRF is simulated (via `TRFComponent`). This onset returns a vector of zero-latencies, indicating that the TRF starts at the beginning of the signal.
+"""
+function simulate_interonset_distances(rng,onset::TRFOnset,design)
+	sz = size(design)
+	return Int.(zeros(sz))
 end
 
 
