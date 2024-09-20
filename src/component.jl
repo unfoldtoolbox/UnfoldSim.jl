@@ -21,26 +21,30 @@ MixedModelComponent(;
 
 ```
 """
+# backwards compatability after introducing the `offset` field`
 @with_kw struct MixedModelComponent <: AbstractComponent
     basis::Any
     formula::Any # e.g. 0~1+cond 
     β::Vector
     σs::Dict # Dict(:subject=>[0.5,0.4]) or to specify correlationmatrix Dict(:subject=>[0.5,0.4,I(2,2)],...)
     contrasts::Dict = Dict()
+    offset::Int = 0
 end
-
+MixedModelComponent(basis, formula, β, σs, contrasts) =
+    MixedModelComponent(basis, formula, β, σs, contrasts, 0)
 """
 A multiple regression component for one subject
 
-- `basis`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model-prediction
+- `basis`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model-prediction. Can also be a tuple `(fun::Function,maxlength::Int)` with a function `fun` that either generates a matrix `size = (maxlength,size(design,1))` or a vector of vectors. If a larger matrix is generated, it is automatically cutoff at `maxlength`
 - `formula`: StatsModels Formula-Object  `@formula 0~1+cond` (left side must be 0)
 - `β` Vector of betas, must fit the formula
 - `contrasts`: Dict. Default is empty, e.g. `Dict(:condA=>EffectsCoding())`
-
-All arguments can be named, in that case `contrasts` is optional
+- `offset`: Int. Default is 0. Can be used to shift the basis function in time
+All arguments can be named, in that case `contrasts` and  `offset` are optional.
 
 Works best with `SingleSubjectDesign`
 ```julia
+# use a hanning window of size 40 as the component basis
 LinearModelComponent(;
     basis=hanning(40),
     formula=@formula(0~1+cond),
@@ -48,14 +52,49 @@ LinearModelComponent(;
     contrasts=Dict(:cond=>EffectsCoding())
 )
 
+# define a function returning random numbers as the component basis
+maxlength = 15
+my_signal_function = d->rand(StableRNG(1),maxlength,length(d))
+LinearModelComponent(;
+    basis=(my_signal_function,maxlength),
+    formula=@formula(0~1),
+    β = [1.],
+)
+
 ```
 """
 @with_kw struct LinearModelComponent <: AbstractComponent
-    basis::Any
-    formula::Any # e.g. 0~1+cond - left side must be "0"
+    basis::Union{Tuple{Function,Int},Array}
+    formula::FormulaTerm # e.g. 0~1+cond - left side must be "0"
     β::Vector
     contrasts::Dict = Dict()
+    offset::Int = 0
+    function LinearModelComponent(basis, formula, β, contrasts, offset)
+        @assert isa(basis, Tuple{Function,Int}) ".basis needs to be an `::Array` or a `Tuple(function::Function,maxlength::Int)`"
+        @assert basis[2] > 0 "`maxlength` needs to be longer than 0"
+        new(basis, formula, β, contrasts, offset)
+    end
+    LinearModelComponent(basis::Array, formula, β, contrasts, offset) =
+        new(basis, formula, β, contrasts, offset)
 end
+
+# backwards compatability after introducing the `offset` field
+LinearModelComponent(basis, formula, β, contrasts) =
+    LinearModelComponent(basis, formula, β, contrasts, 0)
+"""
+    offset(AbstractComponent)
+
+Should the `basis` be shifted? Returns c.offset for most components, if not implemented for a type, returns 0. Can be positive or negative, but has to be Integer
+"""
+offset(c::AbstractComponent)::Int = 0
+offset(c::LinearModelComponent)::Int = c.offset
+offset(c::MixedModelComponent)::Int = c.offset
+
+maxoffset(c::Vector{<:AbstractComponent}) = maximum(offset.(c))
+maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(maxoffset.(values(d)))
+minoffset(c::Vector{<:AbstractComponent}) = minimum(offset.(c))
+minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = minimum(minoffset.(values(d)))
+
 
 
 """
@@ -94,15 +133,22 @@ For `MultichannelComponent` return the length of the projection vector.
 """
 n_channels(c::MultichannelComponent) = length(c.projection)
 
+
 """
 For a vector of `MultichannelComponent`s, return the first but asserts all are of equal length.
 """
 function n_channels(c::Vector{<:AbstractComponent})
     all_channels = n_channels.(c)
-    @assert length(unique(all_channels)) == 1 "Error - projections of different channels cannot be different from eachother"
+    @assert length(unique(all_channels)) == 1 "Error - projections of different components have to be of the same output (=> channel) dimension"
     return all_channels[1]
 end
 
+function n_channels(components::Dict)
+    all_channels = [n_channels(c) for c in values(components)]
+    @assert length(unique(all_channels)) == 1 "Error - projections of different components have to be of the same output (=> channel) dimension"
+    return all_channels[1]
+
+end
 """
     simulate_component(rng,c::MultichannelComponent,design::AbstractDesign)
 Return the projection of a component from source to "sensor" space.
@@ -118,16 +164,66 @@ function simulate_component(rng, c::MultichannelComponent, design::AbstractDesig
     return reshape(y_proj, length(c.projection), size(y)...)
 end
 
+"""
+    basis(c::AbstractComponent)
+
+returns the basis of the component (typically `c.basis`)
+"""
+basis(c::AbstractComponent) = c.basis
+
+"""
+    basis(c::AbstractComponent,design)
+evaluates the basis, if basis is a vector, directly returns it. if basis is a tuple `(f::Function,maxlength::Int)`, evaluates the function with input `design`. Cuts the resulting vector or Matrix at `maxlength`
+"""
+basis(c::AbstractComponent, design) = basis(basis(c), design)
 
 
-Base.length(c::AbstractComponent) = length(c.basis)
+basis(b::AbstractVector, design) = b
+function basis(basis::Tuple{Function,Int}, design)
+    f = basis[1]
+    maxlength = basis[2]
+    basis_out = f(design)
+    if isa(basis_out, AbstractVector{<:AbstractVector}) || isa(basis_out, AbstractMatrix)
+        if isa(basis_out, AbstractMatrix)
+            l = size(basis_out, 2)
+        else
+            l = length(basis_out) # vector of vector case
+        end
+        @assert l == size(generate_events(design))[1] "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == size(design,1) [l / $(size(design,1))], or a Vector of Vectors with length(b) == size(design,1) [$l / $(size(design,1))]. "
+    end
+    limit_basis(basis_out, maxlength)
+end
+
+
+function limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
+
+    # first cut off maxlength
+    b = limit_basis.(b, maxlength)
+    # now fill up with 0's
+    Δlengths = maxlength .- length.(b)
+
+    b = pad_array.(b, Δlengths, 0)
+    basis_out = reduce(hcat, b)
+
+
+    return basis_out
+end
+limit_basis(b::AbstractVector{<:Number}, maxlength) = b[1:min(length(b), maxlength)]
+limit_basis(b::AbstractMatrix, maxlength) = b[1:min(length(b), maxlength), :]
+
+Base.length(c::AbstractComponent) = isa(basis(c), Tuple) ? basis(c)[2] : length(basis(c))
+
+
 
 """
     maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
+    maxlength(components::Dict) 
 maximum of individual component lengths
 """
 maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 
+
+maxlength(components::Dict) = maximum([maximum(length.(c)) for c in values(components)])
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
 By default call `simulate_component` with `(::Abstractcomponent,::AbstractDesign)` instead of the whole simulation. This allows users to provide a hook to do something completely different :)
@@ -136,7 +232,7 @@ simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
     simulate_component(rng, c, simulation.design)
 
 """
-    simulate_component(rng, c::AbstractComponent, simulation::Simulation)
+    simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
 Generate a linear model design matrix, weight it by c.β and multiply the result with the given basis vector.
 
 julia> c = UnfoldSim.LinearModelComponent([0,1,1,0],@formula(0~1+cond),[1,2],Dict())
@@ -145,22 +241,32 @@ julia> simulate_component(StableRNG(1),c,design)
 """
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
     events = generate_events(design)
+    X = generate_designmatrix(c.formula, events, c.contrasts)
+    y = X * c.β
 
+    return y' .* basis(c, design)
+end
+
+
+"""
+Helper function to generate a designmatrix from formula, events and contrasts.
+"""
+function generate_designmatrix(formula, events, contrasts)
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
-    if c.formula.rhs == ConstantTerm(1)
+    if formula.rhs == ConstantTerm(1)
         X = ones(nrow(events), 1)
     else
-        if isempty(c.contrasts)
-            m = StatsModels.ModelFrame(c.formula, events)
+        if isempty(contrasts)
+            m = StatsModels.ModelFrame(formula, events)
         else
-            m = StatsModels.ModelFrame(c.formula, events; contrasts = c.contrasts)
+            m = StatsModels.ModelFrame(formula, events; contrasts = contrasts)
         end
         X = StatsModels.modelmatrix(m)
     end
-    y = X * c.β
-    return y' .* c.basis
+    return X
 end
+
 """
     simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
 Generates a MixedModel and simulates data according to c.β and c.σs.
@@ -173,7 +279,7 @@ Currently, it is not possible to use a different basis for fixed and random effe
 
 julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
 julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
-julia> simulate(StableRNG(1),c,design)
+julia> simulate_component(StableRNG(1),c,design)
 
 """
 function simulate_component(
@@ -218,8 +324,15 @@ function simulate_component(
         rethrow(e)
     end
 
+    @debug size(basis(c, design))
     # in case the parameters are of interest, we will return those, not them weighted by basis
-    epoch_data_component = kron(return_parameters ? [1.0] : c.basis, m.y')
+    b = return_parameters ? [1.0] : basis(c, design)
+    @debug :b, typeof(b), size(b), :m, size(m.y')
+    if isa(b, AbstractMatrix)
+        epoch_data_component = ((m.y' .* b))
+    else
+        epoch_data_component = kron(b, m.y')
+    end
     return epoch_data_component
     #=
         else
@@ -327,30 +440,104 @@ function simulate_responses(
     components::Vector{<:AbstractComponent},
     simulation::Simulation,
 )
-    if n_channels(components) > 1
-        epoch_data =
-            zeros(n_channels(components), maxlength(components), length(simulation.design))
-    else
-        epoch_data = zeros(maxlength(components), length(simulation.design))
-    end
+    epoch_data = init_epoch_data(components, simulation.design)
+    simulate_responses!(rng, epoch_data, components, simulation)
+    return epoch_data
+end
 
+function simulate_responses!(
+    rng,
+    epoch_data::AbstractArray,
+    components::Vector,
+    simulation::Simulation,
+)
     for c in components
         simulate_and_add!(epoch_data, c, simulation, rng)
     end
     return epoch_data
 end
+function init_epoch_data(components, design)
+    max_offset = maxoffset(components)
+    min_offset = minoffset(components)
+    range_offset = (max_offset - min_offset)
+    if n_channels(components) > 1
+        epoch_data = zeros(
+            n_channels(components),
+            maxlength(components) + range_offset,
+            length(design),
+        )
+    else
+        epoch_data = zeros(maxlength(components) + range_offset, length(design))
+    end
+    return epoch_data
+end
 
+function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
+    #@debug rng.state
+    epoch_data = init_epoch_data(event_component_dict, s.design)
+    #@debug rng.state
+    evts = generate_events(s.design)
+    #@debug rng.state
+    @debug size(epoch_data), size(evts)
+    multichannel = n_channels(event_component_dict) > 1
+    for key in keys(event_component_dict)
+        if key == '_'
+            continue
+        end
+        s_key = Simulation(
+            s.design |> x -> SubselectDesign(x, key),
+            event_component_dict,
+            s.onset,
+            s.noisetype,
+        )
+        ix = evts.event .== key
+        if multichannel
+            simulate_responses!(
+                rng,
+                @view(epoch_data[:, :, ix]),
+                event_component_dict[key],
+                s_key,
+            )
+        else
+            #@debug sum(ix), size(simulate_responses(rng, event_component_dict[key], s_key)), key
+            simulate_responses!(
+                rng,
+                @view(epoch_data[:, ix]),
+                event_component_dict[key],
+                s_key,
+            )
+        end
+    end
+    return epoch_data
+end
 
 """
     simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
     simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
 Helper function to call `simulate_component` and add it to a provided Array.
 """
-function simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
+function simulate_and_add!(
+    epoch_data::AbstractMatrix,
+    component::AbstractComponent,
+    simulation,
+    rng,
+)
     @debug "matrix"
-    @views epoch_data[1:length(c), :] .+= simulate_component(rng, c, simulation)
+
+    off = offset(component) - minoffset(simulation.components)
+
+
+    @views epoch_data[1+off:length(component)+off, :] .+=
+        simulate_component(rng, component, simulation)
 end
-function simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
+function simulate_and_add!(
+    epoch_data::AbstractArray,
+    component::AbstractComponent,
+    simulation,
+    rng,
+)
     @debug "3D Array"
-    @views epoch_data[:, 1:length(c), :] .+= simulate_component(rng, c, simulation)
+    off = offset(component) - minoffset(simulation.components)
+    @views epoch_data[:, 1+off:length(component)+off, :] .+=
+        simulate_component(rng, component, simulation)
 end

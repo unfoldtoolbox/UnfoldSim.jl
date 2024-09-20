@@ -60,4 +60,47 @@
         @test accumulated_onset[1] >= 1
     end
 
+    @testset "OnsetFormula" begin
+
+        design =
+            SingleSubjectDesign(conditions = Dict(:cond => ["A", "B"])) |>
+            x -> RepeatDesign(x, 10000)
+
+
+        o = UniformOnsetFormula(width_formula = @formula(0 ~ 1 + cond), width_β = [50, 20])
+        events = generate_events(design)
+        onsets = UnfoldSim.simulate_interonset_distances(StableRNG(1), o, design)
+        @test minimum(onsets[1:2:end]) == 0
+        @test maximum(onsets[1:2:end]) == 50
+        @test minimum(onsets[2:2:end]) == 0
+        @test maximum(onsets[2:2:end]) == 70
+
+        o = UniformOnsetFormula(
+            offset_formula = @formula(0 ~ 1 + cond),
+            offset_β = [50, 20],
+            width_β = [50],
+        )
+        events = generate_events(design)
+        onsets = UnfoldSim.simulate_interonset_distances(StableRNG(1), o, design)
+        @test minimum(onsets[1:2:end]) == 50
+        @test maximum(onsets[1:2:end]) == 100
+        @test minimum(onsets[2:2:end]) == 70
+        @test maximum(onsets[2:2:end]) == 120
+
+
+        o = LogNormalOnsetFormula(
+            μ_formula = @formula(0 ~ 1 + cond),
+            μ_β = [1, 1],
+            σ_β = [1],
+        )
+        events = generate_events(design)
+        onsets = UnfoldSim.simulate_interonset_distances(StableRNG(1), o, design)
+        @test minimum(onsets[1:2:end]) == 0
+        @test maximum(onsets[1:2:end]) < 150
+        @test minimum(onsets[2:2:end]) == 0
+        @test maximum(onsets[2:2:end]) > 300
+
+
+
+    end
 end

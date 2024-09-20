@@ -1,6 +1,9 @@
 # # Define a new component (with variable duration and shift)
 
 # We want a new component that changes its duration and shift depending on a column in the event design. This is somewhat already implemented in the HRF + Pupil bases.
+# !!! hint
+#     if you are just interested to use duration-dependency in your simulation, check out the component-function tutorial
+
 
 # ### Setup
 # ```@raw html
@@ -8,6 +11,7 @@
 # <summary>Click to expand</summary>
 # ```
 using UnfoldSim
+import UnfoldSim.simulate_component
 using Unfold
 using Random
 using DSP
@@ -39,7 +43,7 @@ end
 Base.length(c::TimeVaryingComponent) = length(c.maxlength)
 
 # While we could have put the TimeVaryingComponent.basisfunction directly into the simulate function, I thought this is a bit more modular
-function UnfoldSim.simulate(rng, c::TimeVaryingComponent, design::AbstractDesign)
+function UnfoldSim.simulate_component(rng, c::TimeVaryingComponent, design::AbstractDesign)
     evts = generate_events(design)
     return c.basisfunction(evts, c.maxlength)
 end
@@ -62,7 +66,7 @@ function basis_shiftduration(evts, maxlength)
 end
 
 # ## Simulate data with the new component type
-erp = UnfoldSim.simulate(
+erp = UnfoldSim.simulate_component(
     MersenneTwister(1),
     TimeVaryingComponent(basis_shiftduration, 50),
     design,

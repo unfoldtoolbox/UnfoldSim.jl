@@ -172,19 +172,175 @@ See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref)
     repeat::Int = 1
 end
 
+
+function check_sequence(s::String)
+    blankfind = findall('_', s)
+    @assert length(blankfind) <= 1 && (length(blankfind) == 0 || length(s) == blankfind[1]) "the blank-indicator '_' has to be the last sequence element"
+    return s
+end
+
+
 """
-    UnfoldSim.generate_events(design::RepeatDesign{T})
+    SequenceDesign{T} <: AbstractDesign
+Enforce a sequence of events for each entry of a provided `AbstractDesign`.
+The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap.
+
+It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`'s.
+
+Another variable sequence is defined using `[]`. For example, `S[ABC]` would result in any one sequence `SA`, `SB`, `SC`.
+
+Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the `ImbalancedDesign` tutorial
+
+```julia
+design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
+design = SequenceDesign(design, "SCR_", StableRNG(1))
+```
+Would result in a `generate_events(design)`
+```repl
+6×2 DataFrame
+ Row │ condition  event 
+     │ String     Char  
+─────┼──────────────────
+   1 │ one        S
+   2 │ one        C
+   3 │ one        R
+   4 │ two        S
+   5 │ two        C
+   6 │ two        R
+```
+
+## Example for Sequence -> Repeat vs. Repeat -> Sequence
+
+### Sequence -> Repeat 
+```julia
+design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
+design = SequenceDesign(design, "[AB]", StableRNG(1))
+design = RepeatDesign(design,2)
+generate_events(design)
+```
+
+
+```repl
+4×2 DataFrame
+ Row │ condition  event 
+     │ String     Char  
+─────┼──────────────────
+   1 │ one        A
+   2 │ two        A
+   3 │ one        B
+   4 │ two        B
+```
+Sequence -> Repeat: a sequence design is repeated, then for each repetition a sequence is generated and applied. Events have different values
+
+### Repeat -> Sequence
+```julia
+design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
+design = RepeatDesign(design,2)
+design = SequenceDesign(design, "[AB]", StableRNG(1))
+generate_events(design)
+```
+
+```repl
+4×2 DataFrame
+ Row │ condition  event 
+     │ String     Char  
+─────┼──────────────────
+   1 │ one        A
+   2 │ two        A
+   3 │ one        A
+   4 │ two        A
+```
+Repeat -> Sequence: the design is first repeated, then for that design one sequence generated and applied. All events are the same
+
+
+See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref), [`RepeatDesign`](@ref)
+"""
+@with_kw struct SequenceDesign{T} <: AbstractDesign
+    design::T
+    sequence::String = ""
+    sequencelength::Int = 0
+    rng = nothing
+
+    SequenceDesign{T}(d, s, sl, r) where {T<:AbstractDesign} =
+        new(d, check_sequence(s), sl, r)
+end
+SequenceDesign(design, sequence, rng::AbstractRNG) =
+    SequenceDesign(design = design, sequence = sequence, rng = rng)
+SequenceDesign(design, sequence) = SequenceDesign(design = design, sequence = sequence)
+
+generate_events(design::SequenceDesign{MultiSubjectDesign}) = error("not yet implemented")
+
+
+generate_events(rng, design::AbstractDesign) = generate_events(design)
+generate_events(design::SequenceDesign) = generate_events(deepcopy(design.rng), design)
+
+function generate_events(rng, design::SequenceDesign)
+    df = generate_events(design.design)
+    nrows_df = size(df, 1)
+
+    rng = if isnothing(rng)
+        @warn "Could not (yet) find an rng for `SequenceDesign` - ignore this message if you called `generate_events` yourself, be worried if you called `simulate` and still see this message. Surpress this message by defining the `rng` when creating the `SequenceDesign`"
+        MersenneTwister(1)
+    else
+        rng
+    end
+    #   @debug design.sequence
+    currentsequence = sequencestring(rng, design.sequence)
+    #    @debug currentsequence
+    currentsequence = replace(currentsequence, "_" => "")
+    df = repeat(df, inner = length(currentsequence))
+
+    df.event .= repeat(collect(currentsequence), nrows_df)
+
+    return df
+
+end
+
+
+
+get_rng(design::AbstractDesign) = nothing
+get_rng(design::SequenceDesign) = design.rng
+
+"""
+    generate_events(rng,design::RepeatDesign{T})
 
 In a repeated design, iteratively calls the underlying {T} Design and concatenates. In case of MultiSubjectDesign, sorts by subject.
 """
-function UnfoldSim.generate_events(design::RepeatDesign)
-    df = map(x -> generate_events(design.design), 1:design.repeat) |> x -> vcat(x...)
+function generate_events(design::RepeatDesign)
+    design = deepcopy(design)
+    df =
+        map(x -> generate_events(get_rng(design.design), design.design), 1:design.repeat) |>
+        x -> vcat(x...)
     if isa(design.design, MultiSubjectDesign)
         sort!(df, [:subject])
     end
     return df
 
 end
+
+
+"""
+Internal helper design to subset a sequence design in its individual components
+"""
+struct SubselectDesign{T} <: AbstractDesign
+    design::T
+    key::Char
+end
+
+function generate_events(design::SubselectDesign)
+    return subset(generate_events(design.design), :event => x -> x .== design.key)
+end
+
+
 Base.size(design::RepeatDesign{MultiSubjectDesign}) =
     size(design.design) .* (design.repeat, 1)
 Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
+#Base.size(design::SequenceDesign) =
+#size(design.design) .* length(replace(design.sequence, "_" => "",r"\{.*\}"=>""))
+
+#Base.size(design::) = size(design.design) .* design.repeat
+
+# No way to find out what size it is without actually generating first...
+Base.size(
+    design::Union{<:SequenceDesign,<:SubselectDesign,<:RepeatDesign{<:SequenceDesign}},
+) = size(generate_events(design), 1)
