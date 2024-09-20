@@ -5,7 +5,7 @@ using Random
 # # Temporal response functions
 # So far, we simulated event-related potentials. In this tutorial, we will switch gears a bit, and simulate a continuous response to a continuous feature vector. 
 #
-# One good example is the visual response to a grayscale circle, which continuously changes its luminance (this goes back to VESPA, described in the ground breaking [Lalor 2006 paper](10.1016/j.neuroimage.2006.05.054). The brain will react to this luminance change continuously. TRFs typically describe the process to recover the brain response (in terms of a filter response). Here we set out to simulate such a dataset first and foremost.
+# One good example is the visual response to a grayscale circle, which continuously changes its luminance (this goes back to VESPA, described in the ground breaking [Lalor 2006 paper](https://doi.org/10.1016/j.neuroimage.2006.05.054). The brain will react to this luminance change continuously. TRFs typically describe the process to recover the brain response (in terms of a filter response). Here we set out to simulate such a dataset first and foremost.
 #
 # ## Simulation
 # we start with the simplest possible design, one condition
