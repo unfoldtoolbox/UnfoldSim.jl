@@ -37,6 +37,7 @@ makedocs(;
             "Simulate event-related potentials (ERPs)" => "generated/tutorials/simulateERP.md",
             "Power analysis" => "generated/tutorials/poweranalysis.md",
             "Multi-subject simulation" => "generated/tutorials/multisubject.md",
+            "Temporal Response Function" => "generated/tutorials/TRF.md",
         ],
         "Reference" => [
             "Overview of functionality" => "./generated/reference/overview.md",

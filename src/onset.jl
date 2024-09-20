@@ -31,6 +31,21 @@ In the case that the user directly wants no overlap to be simulated (=> epoched 
 """
 struct NoOnset <: AbstractOnset end
 
+
+"""
+    struct TRFOnset <: AbstractOnset end
+In the case that a TRF is simulated (via `TRFComponent`). This onset returns a vector of zero-latencies, indicating that the TRF starts at the beginning of the signal.
+"""
+struct TRFOnset <: AbstractOnset end
+
+function UnfoldSim.simulate_interonset_distances(rng,onset::TRFOnset,design)
+	sz = size(design)
+	return Int.(zeros(sz))
+end
+
+
+
+
 """
     simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
