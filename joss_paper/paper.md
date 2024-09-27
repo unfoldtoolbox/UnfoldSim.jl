@@ -169,32 +169,6 @@ Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) unde
 # Package references
 Please note that we only mention the main dependencies of the package here, but the dependencies of the dependencies can be found in the respective `Manifest.toml` files. Furthermore, please note that we only list rather than cite the packages for which we could not find any citation file or instruction.
 
-**Julia** [@Julia-2017]  
-**DataFrames.jl** [@JSSv107i04]  
-**Distributions.jl** [@Distributions.jl-2019; @JSSv098i16]  
-**Documenter.jl** [@Documenter_jl]  
-**DSP.jl** [@simon_kornblith_2023_8344531]  
-**FileIO.jl**  
-**Glob.jl**  
-**HDF5.jl**  
-**HypothesisTests.jl**  
-**ImageFiltering.jl** 
-**Literate.jl**  
-**LiveServer.jl**  
-**Makie.jl** [@DanischKrumbiegel2021]  
-**MixedModels.jl** [@douglas_bates_2023_10268806]  
-**MixedModelsSim.jl** [@phillip_alday_2024_10669002]  
-**Parameters.jl**  
-**PrettyTables.jl** [@ronan_arraes_jardim_chagas_2023_10214175]  
-**ProjectRoot.jl**  
-**SignalAnalysis.jl**  
-**Statistics.jl**  
-**StableRNGs.jl**  
-**StatsBase.jl**  
-**StatsModels.jl**  
-**TimerOutputs.jl**  
-**ToeplitzMatrices.jl**  
-**Unfold.jl** [@ehinger2019unfold]  
-**UnfoldMakie.jl** [@mikheev_2023_10235220]  
+**Julia** [@Julia-2017], **DataFrames.jl** [@JSSv107i04], **Distributions.jl** [@Distributions.jl-2019; @JSSv098i16], **Documenter.jl** [@Documenter_jl], **DSP.jl**[@simon_kornblith_2023_8344531], **FileIO.jl**, **Glob.jl**, **HDF5.jl**, **HypothesisTests.jl**, **ImageFiltering.jl**, **Literate.jl**, **LiveServer.jl**, **Makie.jl** [@DanischKrumbiegel2021], **MixedModels.jl** [@douglas_bates_2023_10268806], **MixedModelsSim.jl** [@phillip_alday_2024_10669002], **Parameters.jl**, **PrettyTables.jl** [@ronan_arraes_jardim_chagas_2023_10214175], **ProjectRoot.jl**, **SignalAnalysis.jl**, **Statistics.jl**, **StableRNGs.jl**, **StatsBase.jl**, **StatsModels.jl**, **TimerOutputs.jl**, **ToeplitzMatrices.jl**, **Unfold.jl** [@ehinger2019unfold], **UnfoldMakie.jl** [@mikheev_2023_10235220]  
 
 # References
