@@ -317,5 +317,3 @@ let
     current_figure()
 end
 #----
-
-#Test
