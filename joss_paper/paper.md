@@ -77,8 +77,7 @@ design =
 	SingleSubjectDesign(;
     	conditions = Dict(
         	:condition => ["car", "face"],
-        	:continuous => range(0, 5, length = 10),
-    	),
+        	:continuous => range(0, 5, length = 10)),
         event_order_function = x -> shuffle(deepcopy(StableRNG(1)), x),
 	) |> x -> RepeatDesign(x, 100)
 ```
@@ -101,14 +100,12 @@ design =
 n1 = LinearModelComponent(;
 	basis = n170(),
 	formula = @formula(0 ~ 1 + condition),
-	β = [5, 3],
-)
+	β = [5, 3])
 
 p3 = LinearModelComponent(;
 	basis = p300(),
 	formula = @formula(0 ~ 1 + continuous + continuous^2),
-	β = [5, 1, 0.2],
-)
+	β = [5, 1, 0.2])
 
 components = [n1, p3]
 ```
@@ -140,11 +137,9 @@ m = fit(
 	UnfoldModel,
 	[Any => (
         	@formula(0 ~ 1 + condition + spl(continuous, 4)),
-        	firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
-    	)],
+        	firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"))],
 	events_df,
-	eeg_data,
-)
+	eeg_data)
 ```
 
 In subplot A of \autoref{fig_example_coefficients_effects}, one can see the model estimates for the different coefficients and as intended there is a condition effect in the first negative component and an effect of the continuous variable on the second (positive) component. The relation between the levels of the continuous variable and the scaling of the second component is even clearer visible in subplot B of \autoref{fig_example_coefficients_effects} which depicts the estimated marginal effects of the predictors. Instead of showing the regression coefficients, we can evaluate the estimated function at specific values of the continuous variable. 
@@ -160,7 +155,7 @@ In the following, we highlight two actively developed MATLAB-based tools: `Brain
 
 In Python, `MNE-Python` [@GramfortEtAl2013a] provides some tutorials to simulate EEG data, but the functionality is very basic. `HNN-Core` [@Jas2023] can simulate realistic EEG data, but requires detailed knowledge of neurocortical column models.
 
-In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. It provides functions to simulate multi-condition experiments, uniquely allows for modeling hierarchical, that is, multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events. Further, the implementation in Julia offers a platform that is free, that actively encourages research software engineering methods, that makes it easy to add custom expansions via the `AbstractTypes`, and it allows for easy access from Python and R.
+In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. It provides functions to simulate multi-condition experiments, uniquely allows for modeling hierarchical, that is, multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events. Further, the implementation in Julia offers a platform that is free, that actively encourages research software engineering methods, that makes it easy to add custom expansions via the `AbstractTypes`, and that allows easy access from Python and R.
 
 # Acknowledgements
 Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany's Excellence Strategy – EXC 2075 – 390740016. The authors further thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers. Moreover, the authors would like to thank Tanja Bien for her valuable feedback on the paper manuscript.
