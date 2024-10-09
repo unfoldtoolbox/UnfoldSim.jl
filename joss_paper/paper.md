@@ -101,10 +101,12 @@ n1 = LinearModelComponent(;
 	basis = n170(),
 	formula = @formula(0 ~ 1 + condition),
 	β = [5, 3])
+
 p3 = LinearModelComponent(;
 	basis = p300(),
 	formula = @formula(0 ~ 1 + continuous + continuous^2),
 	β = [5, 1, 0.2])
+
 components = [n1, p3]
 ```
 
@@ -153,7 +155,7 @@ In the following, we highlight two actively developed MATLAB-based tools: `Brain
 
 In Python, `MNE-Python` [@GramfortEtAl2013a] provides some tutorials to simulate EEG data, but the functionality is very basic. `HNN-Core` [@Jas2023] can simulate realistic EEG data, but requires detailed knowledge of neurocortical column models.
 
-In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. It provides functions to simulate multi-condition experiments, uniquely allows for modeling multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events. Further, the implementation in Julia offers a platform that is free, that actively encourages research software engineering methods, that makes it easy to add custom expansions via the `AbstractTypes`, and that allows easy access from Python and R.
+In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. It provides functions to simulate multi-condition experiments, uniquely allows for modeling multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events. Further, the implementation in Julia offers a platform that is free, that actively encourages research software engineering methods, that makes it easy to add custom expansions via the `AbstractTypes`, and that allows easy access from Python and R [@R].
 
 # Acknowledgements
 Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany's Excellence Strategy – EXC 2075 – 390740016. The authors further thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers. Moreover, the authors would like to thank Tanja Bien for her valuable feedback on the paper manuscript.
