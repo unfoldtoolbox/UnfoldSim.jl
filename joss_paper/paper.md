@@ -68,18 +68,15 @@ UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise`
 # Simulation example
 In this section, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/).
 
-In the following, we will first provide examples for the four simulation “ingredients” mentioned above which will then be used to simulate data.
-
 1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 values. To mimic randomization in an experiment, we shuffle the trials using the `event_order_function` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 
 ```julia
-design =
-	SingleSubjectDesign(;
-    	conditions = Dict(
-        	:condition => ["car", "face"],
-        	:continuous => range(0, 5, length = 10)),
-        event_order_function = x -> shuffle(StableRNG(1), x),
-	) |> x -> RepeatDesign(x, 100)
+design = SingleSubjectDesign(;
+    conditions = Dict(
+        :condition => ["car", "face"],
+        :continuous => range(0, 5, length = 10)),
+    event_order_function = x -> shuffle(StableRNG(1), x),
+) |> x -> RepeatDesign(x, 100)
 ```
 
 The `generate_events` function can be used to create an events data frame from the specified experimental design (see \autoref{events_df}).
