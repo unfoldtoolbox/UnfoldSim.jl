@@ -101,16 +101,14 @@ n1 = LinearModelComponent(;
 	basis = n170(),
 	formula = @formula(0 ~ 1 + condition),
 	β = [5, 3])
-
 p3 = LinearModelComponent(;
 	basis = p300(),
 	formula = @formula(0 ~ 1 + continuous + continuous^2),
 	β = [5, 1, 0.2])
-
 components = [n1, p3]
 ```
 
-3\. In the next step, we specify an **inter-onset distribution**, in this case, a uniform distribution with width = 0 and offset = 200 which means that the inter-event distance will be exactly 200 samples.
+3\. In the next step, we specify an **inter-onset distribution**, in this case, a uniform distribution with an inter-event distance of exactly 200 samples.
 
 ```julia
 onset = UniformOnset(; width = 0, offset = 200)
