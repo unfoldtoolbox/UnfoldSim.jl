@@ -149,7 +149,7 @@ In subplot A of \autoref{fig_example_coefficients_effects}, one can see the mode
 As shown in this example, `UnfoldSim.jl` and `Unfold.jl` can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.
 
 # Related tools
-Few toolboxes for simulating EEG data exist, most being proprietary MATLAB tools that have often not received any updates in the past years or have very specific applications (e.g. `EEGg` [@vaziri2023eegg], `SimMEEG` [@herdman2021simmeeg], `SEED-G` [@anzolin2021seed], `EEGSourceSim` [@barzegaran2019eegsourcesim], `simBCI` [@lindgren2018simbci]). 
+Few toolboxes for simulating EEG data exist, most being proprietary MATLAB [@MATLAB] tools that have often not received any updates in the past years or have very specific applications (e.g. `EEGg` [@vaziri2023eegg], `SimMEEG` [@herdman2021simmeeg], `SEED-G` [@anzolin2021seed], `EEGSourceSim` [@barzegaran2019eegsourcesim], `simBCI` [@lindgren2018simbci]). 
 
 In the following, we highlight two actively developed MATLAB-based tools: `Brainstorm` [@tadel2011brainstorm] which especially excels at visualizing the forward model and generating ERPs from phase-aligned oscillations, and `SEREEGA` [@krol2018sereega], which offers comprehensive simulation capabilities with a focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification and more realistic noise simulation (e.g. via random sources).
 
