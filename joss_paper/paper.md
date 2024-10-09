@@ -43,10 +43,10 @@ In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze 
 While other EEG simulation toolboxes exist, they each have limitations: they are dominantly based on the proprietary MATLAB software, they do not simulate continuous EEG, and they offer little support for designs more complex than two conditions or with non-linear effects. In contrast, UnfoldSim.jl is free and open-source and it allows to simulate continuous EEG signals even for complex designs.
 
 # Functionality
-The package provides four abstract types: `AbstractDesign`, `AbstractComponent`, `AbstractOnset` and `AbstractNoise`. In the following, we present the concrete types that are currently implemented. In addition, users can also implement their own concrete types fitting their individual needs.
+The package provides four abstract types: `AbstractDesign`, `AbstractComponent`, `AbstractOnset` and `AbstractNoise`. In the following, we present the concrete types that are currently implemented.
 
 ## Experimental designs
-Currently, we support a single and a multi-subject design. They are used to generate an experimental design containing the conditions and levels of all predictors. The multi-subject design uses the `MixedModelsSim.jl` package [@phillip_alday_2024_10669002] and allows a flexible specification of the random-effects structure by indicating which predictors are within- or between-subject (or item). Designs can be encapsulated, for instance, the `RepeatDesign` type which repeats the generated event table multiple times, thus generating new trials.
+The design contains the levels of all conditions and predictors. Currently, we support a single and a multi-subject design. The multi-subject design uses the `MixedModelsSim.jl` package [@phillip_alday_2024_10669002] and allows a flexible specification of the random-effects structure by indicating which predictors are within- or between-subject (or item). Designs can be encapsulated, for instance, the `RepeatDesign` type which repeats the generated event table multiple times, thus generating new trials.
 
 ## Event basis functions (Components)
 `UnfoldSim.jl` provides a `LinearModelComponent` and a `MixedModelComponent` for single- and multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is weighted by the user-defined regression model. The user specifies a basis function for the component by either providing a custom vector or selecting from prespecified bases, such as simplified EEG components like the N170, modeled as temporally shifted Hanning windows. Further, in the components’ model formulae, fixed-effects ($\beta s$) and random effects  (`MultiSubjectDesign`s only) need to be specified.
@@ -78,11 +78,11 @@ design =
     	conditions = Dict(
         	:condition => ["car", "face"],
         	:continuous => range(0, 5, length = 10)),
-        event_order_function = x -> shuffle(deepcopy(StableRNG(1)), x),
+        event_order_function = x -> shuffle(StableRNG(1), x),
 	) |> x -> RepeatDesign(x, 100)
 ```
 
-\autoref{events_df} shows the first rows of the events data frame resulting from the experimental design that we specified. 
+The `generate_events` function can be used to create an events data frame from the specified experimental design (see \autoref{events_df}).
 
 : First five rows extracted from the events data frame representing the experimental design. Each row corresponds to one event. The columns *continuous* and *condition* display the levels of the predictor variables for the specific event.\label{events_df}
 
