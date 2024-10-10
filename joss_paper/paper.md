@@ -71,11 +71,13 @@ In this section, one can find an example of how to use `UnfoldSim.jl` to simulat
 1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 values. To mimic randomization in an experiment, we shuffle the trials using the `event_order_function` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 
 ```julia
+using UnfoldSim, Random
+
 design = SingleSubjectDesign(;
     conditions = Dict(
         :condition => ["car", "face"],
         :continuous => range(0, 5, length = 10)),
-    event_order_function = x -> shuffle(StableRNG(1), x),
+    event_order_function = x -> shuffle(x),
 ) |> x -> RepeatDesign(x, 100)
 ```
 
@@ -122,7 +124,7 @@ noise = PinkNoise(; noiselevel = 2)
 Finally, we combine all the ingredients and simulate data (see \autoref{fig_example_simulated_data}). To make the simulation reproducible, one can specify a random generator.
 
 ```julia
-eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise)
+eeg_data, events_df = simulate(MersenneTwister(1), design, components, onset, noise)
 ```
 
 ![First 1400 samples from the simulated continuous EEG data. The vertical lines denote the event onsets and their colour represents the respective condition i.e. car or face.\label{fig_example_simulated_data}](plots/example_simulated_data.svg){height="250pt"}
@@ -130,6 +132,8 @@ eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise)
 To validate the simulation results, we use the `Unfold.jl` package [@ehinger2019unfold] to fit an Unfold regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a categorical predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
 
 ```julia
+using Unfold
+
 m = fit(
 	UnfoldModel,
 	[Any => (
