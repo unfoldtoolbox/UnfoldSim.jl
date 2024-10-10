@@ -29,7 +29,7 @@ affiliations:
     index: 1
   - name: Stuttgart Center for Simulation Science, University of Stuttgart, Germany
     index: 2
-date: 5 August 2024
+date: 10 October 2024
 bibliography: paper.bib
 ---
 
