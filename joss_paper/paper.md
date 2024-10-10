@@ -71,7 +71,7 @@ In this section, one can find an example of how to use `UnfoldSim.jl` to simulat
 1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 values. To mimic randomization in an experiment, we shuffle the trials using the `event_order_function` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 
 ```julia
-using UnfoldSim, Random
+using UnfoldSim, Random, Unfold
 
 design = SingleSubjectDesign(;
     conditions = Dict(
@@ -132,8 +132,6 @@ eeg_data, events_df = simulate(MersenneTwister(1), design, components, onset, no
 To validate the simulation results, we use the `Unfold.jl` package [@ehinger2019unfold] to fit an Unfold regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a categorical predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
 
 ```julia
-using Unfold
-
 m = fit(
 	UnfoldModel,
 	[Any => (
