@@ -77,7 +77,7 @@ design = SingleSubjectDesign(;
     conditions = Dict(
         :condition => ["car", "face"],
         :continuous => range(0, 5, length = 10)),
-    event_order_function = x -> shuffle(x),
+    event_order_function = (rng, x) -> shuffle(rng, x),
 ) |> x -> RepeatDesign(x, 100)
 ```
 
