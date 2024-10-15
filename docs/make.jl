@@ -65,7 +65,7 @@ makedocs(;
 
 deploydocs(;
     repo = "github.com/unfoldtoolbox/UnfoldSim.jl",
-    #devbranch = "main",
-    versions = ["stable" => "v^", "v#.#.#"],
+    devbranch = "main",
+    #versions = ["stable" => "v^", "v#.#.#"],
     push_preview = true,
 )
