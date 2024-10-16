@@ -188,3 +188,50 @@ end
 Base.size(design::RepeatDesign{MultiSubjectDesign}) =
     size(design.design) .* (design.repeat, 1)
 Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
+
+
+# --- 
+# Ground Truth
+
+
+struct GroundTruthDesign
+    design::AbstractDesign
+    effectsdict::Dict
+end
+
+"""
+    expand_grid(design)
+
+Used to expand effects grid. Copied from Effects.jl
+"""
+function expand_grid(design)
+    colnames = tuple(keys(design)...)
+    rowtab = NamedTuple{colnames}.(product(values(design)...))
+
+    return DataFrame(vec(rowtab))
+end
+
+typical_value(v::Vector{<:Number}) = [mean(v)]
+typical_value(v) = unique(v)
+
+"""
+    UnfoldSim.generate_events(design::GroundTruthDesign)
+
+Generates events to simulate ground truth data using an effects dictionary. Every covariate that is in the `GroundTruthDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
+
+```julia
+# Example
+
+effects_dict = Dict{Symbol,Union{<:Number,<:String}}(:conditionA=>[0,1])
+SingleSubjectDesign(...) |> x-> GroundTruthDesign(x,effects_dict)
+```
+"""
+function UnfoldSim.generate_events(t::GroundTruthDesign)
+    effects_dict = Dict{Any,Any}(t.effects_dict)
+    current_design = generate_events(t.des)
+    to_be_added = setdiff(names(current_design), keys(effects_dict))
+    for tba in to_be_added
+        effects_dict[tba] = typical_value(current_design[:, tba])
+    end
+    return expand_grid(effects_grid)
+end
