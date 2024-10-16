@@ -17,26 +17,37 @@
 # <summary>Click to expand</summary>
 # ```
 ## Load required packages
-using UnfoldSim
-using CairoMakie
-using Random
-using Unfold
-using UnfoldMakie
+using UnfoldSim # For simulation
+using Random # For randomization
+using StableRNGs # To get an RNG
+using Unfold # For analysis
+using CairoMakie # For plotting
+using UnfoldMakie # For plotting
 # ```@raw html
 # </details >
 # ```
 
-# ## Simulation
-# Let's grab a `SingleSubjectDesign` and add a continuous predictor
+# ## Specify the simulation "ingredients"
+# 1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 values.
+# To mimic randomization in an experiment, we shuffle the trials using the `event_order_function` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
 design =
     SingleSubjectDesign(;
         conditions = Dict(
             :condition => ["car", "face"],
             :continuous => range(0, 5, length = 10),
         ),
+        event_order_function = x -> shuffle(StableRNG(1), x),
     ) |> x -> RepeatDesign(x, 100);
 
-# Let's make use of the prespecified basis functions, but use different formulas + parameters for each!
+# The `generate_events` function can be used to create an events data frame from the specified experimental design.
+events_df = generate_events(design);
+first(events_df, 5)
+# Above you can see the first five rows extracted from the events data frame representing the experimental design. Each row corresponds to one event.
+# The columns *continuous* and *condition* display the levels of the predictor variables for the specific event.
+
+# 2\. Next, we create a signal consisting of two different **components**.
+# For the first component, we use the prespecified N170 base with an intercept of 5µV and a condition effect of 3&nbsp;µV for the “face/car” condition i.e. faces will have a more negative signal than cars.
+# For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
 
 # **p100** is unaffected by our design and has amplitude of 5
 p1 = LinearModelComponent(; basis = p100(), formula = @formula(0 ~ 1), β = [5]);
