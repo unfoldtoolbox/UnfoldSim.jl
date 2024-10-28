@@ -14,7 +14,6 @@ using LinearAlgebra
 using ToeplitzMatrices # for AR Expo. Noise "Circulant"
 using StatsModels
 using HDF5, Artifacts, FileIO
-
 using LinearAlgebra # headmodel
 
 import DSP.hanning
@@ -46,7 +45,7 @@ export Simulation
 export MixedModelComponent, LinearModelComponent
 
 # export designs
-export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign
+export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign, EffectsDesign
 
 # noise functions
 export PinkNoise, RedNoise, WhiteNoise, NoNoise, ExponentialNoise #,RealNoise (not implemented yet)

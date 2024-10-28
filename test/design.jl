@@ -162,4 +162,39 @@
         @test length(unique(i1.cond)) == 1
     end
 
+    @testset "Effects Design" begin
+        # Begin with simulation design
+        design = SingleSubjectDesign(;
+            conditions = Dict(
+                :condition => ["car", "face"],
+                :continuous => range(0, 5, length = 10),
+            ),
+        )
+
+        # Effects dictionary
+        effects_dict_1 = Dict(:condition => ["car", "face"])
+        effects_dict_2 = Dict(:condition => ["car", "face"], :continuous => [2, 3, 4])
+
+        # Generate effects design
+        ef_design_1 = UnfoldSim.EffectsDesign(design, effects_dict_1)
+        ef_design_2 = UnfoldSim.EffectsDesign(design, effects_dict_2)
+
+        # Generate events
+        ef_events_1 = generate_events(ef_design_1)
+        ef_events_2 = generate_events(ef_design_2)
+
+        # SingleSubject tests
+        @test size(ef_events_1, 1) == 2 # Test correct length of events df
+        @test ef_events_1[1].contiunous == mean(range(0, 5, length = 10)) # Test that average is calculated correctly
+        @test size(ef_events_2, 1) == 6 # Test correct length of events df when continuous variable is marginalizes
+
+        # MultiSubjectDesign -> not implemented yet, so should error
+        design = MultiSubjectDesign(
+            n_subjects = 20,
+            n_items = 8,
+            items_between = Dict(:condition => ["car", "face"], :continuous => [1, 2]),
+        )
+        @test_throws ErrorException UnfoldSim.EffectsDesign(design, effects_dict_1)
+
+    end
 end

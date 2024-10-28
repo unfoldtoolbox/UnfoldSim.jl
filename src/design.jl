@@ -191,13 +191,24 @@ Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* de
 
 
 # --- 
-# Ground Truth
+# Effects
 
+"""
+    EffectsDesign <: AbstractDesign
+Design to obtain ground truth simulation.
 
-struct GroundTruthDesign
+## Fields
+- `design::AbstractDesign`
+   The design of your (main) simulation.
+- `èffects_dict::Dict`
+   Effects.jl style dictionary specifying variable effects. See also [Unfold.jl marginalized effects](https://unfoldtoolbox.github.io/Unfold.jl/stable/generated/HowTo/effects/)
+"""
+struct EffectsDesign <: AbstractDesign
     design::AbstractDesign
-    effectsdict::Dict
+    effects_dict::Dict
 end
+EffectsDesign(design::MultiSubjectDesign,effects_dict::Dict) = error("not yet implemented")
+UnfoldSim.size(t::EffectsDesign) = size(generate_events(t))
 
 """
     expand_grid(design)
@@ -205,8 +216,8 @@ end
 Used to expand effects grid. Copied from Effects.jl
 """
 function expand_grid(design)
-    colnames = tuple(keys(design)...)
-    rowtab = NamedTuple{colnames}.(product(values(design)...))
+    colnames = tuple(Symbol.(keys(design))...)
+    rowtab = NamedTuple{colnames}.(Base.Iterators.product(values(design)...))
 
     return DataFrame(vec(rowtab))
 end
@@ -215,7 +226,7 @@ typical_value(v::Vector{<:Number}) = [mean(v)]
 typical_value(v) = unique(v)
 
 """
-    UnfoldSim.generate_events(design::GroundTruthDesign)
+    UnfoldSim.generate_events(design::EffectsDesign)
 
 Generates events to simulate ground truth data using an effects dictionary. Every covariate that is in the `GroundTruthDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
 
@@ -223,15 +234,16 @@ Generates events to simulate ground truth data using an effects dictionary. Ever
 # Example
 
 effects_dict = Dict{Symbol,Union{<:Number,<:String}}(:conditionA=>[0,1])
-SingleSubjectDesign(...) |> x-> GroundTruthDesign(x,effects_dict)
+SingleSubjectDesign(...) |> x-> EffectsDesign(x,effects_dict)
 ```
 """
-function UnfoldSim.generate_events(t::GroundTruthDesign)
+function UnfoldSim.generate_events(t::EffectsDesign)
     effects_dict = Dict{Any,Any}(t.effects_dict)
-    current_design = generate_events(t.des)
-    to_be_added = setdiff(names(current_design), keys(effects_dict))
+    #effects_dict = t.effects_dict
+    current_design = generate_events(t.design)
+    to_be_added = setdiff(names(current_design), string.(keys(effects_dict)))
     for tba in to_be_added
         effects_dict[tba] = typical_value(current_design[:, tba])
     end
-    return expand_grid(effects_grid)
+    return expand_grid(effects_dict)
 end
