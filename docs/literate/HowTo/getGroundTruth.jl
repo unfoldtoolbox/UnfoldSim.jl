@@ -64,7 +64,7 @@ gt_data, gt_events = simulate(
     components,
     UniformOnset(; width = 0, offset = 1000),
     NoNoise(),
-    return_epoched = true
+    return_epoched = true,
 );
 
 # ## Compare with Unfold.jl results
@@ -82,4 +82,3 @@ m = fit(
 );
 
 eff = effects(effects_dict, m)
-
