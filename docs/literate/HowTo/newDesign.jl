@@ -32,11 +32,11 @@ end;
 # This is used at different places, e.g. in the Default onset implementation
 
 ## note the trailing , to make it a Tuple
-size(design::ImbalanceSubjectDesign) = (design.nTrials,);
+UnfoldSim.size(design::ImbalanceSubjectDesign) = (design.nTrials,);
 
 # #### 3) `generate`
-# We need a type `generate_events(design::ImbalanceSubjectDesign)` function. This function should return the actual table as a `DataFrame`
-function generate_events(design::ImbalanceSubjectDesign)
+# We need a type `generate_events(rng::AbstractRNG, design::ImbalanceSubjectDesign)` function. This function should return the actual table as a `DataFrame`
+function UnfoldSim.generate_events(rng::AbstractRNG, design::ImbalanceSubjectDesign)
     nA = Int(round.(design.nTrials .* design.balance))
     nB = Int(round.(design.nTrials .* (1 - design.balance)))
     @assert nA + nB ≈ design.nTrials
