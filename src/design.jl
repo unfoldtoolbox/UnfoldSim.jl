@@ -9,7 +9,7 @@ A type for specifying the experimental design for multiple subjects (based on th
 - `subjects_between` = Dict{Symbol,Vector} -> effects between subjects, e.g. young vs old 
 - `items_between` = Dict{Symbol,Vector} -> effects between items, e.g. natural vs artificial images, (but shown to all subjects if not specified also in `subjects_between`)
 - `both_within` = Dict{Symbol,Vector}	-> effects completly crossed
-- `event_order_function` = `(rng,x)->x`; # can be used to sort, or e.g. `(rng,x)->shuffle(rng,x)` (or shorter just `event_order_function=shuffle`)
+- `event_order_function = (rng, x) -> x`; # can be used to sort, or e.g. `(rng, x) -> shuffle(rng, x)` (or shorter just `event_order_function = shuffle`)
 
 Tip: Check the resulting dataframe using `generate_events(design)`
 
