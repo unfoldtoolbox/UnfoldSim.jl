@@ -40,7 +40,7 @@ design_single_shuffled = SingleSubjectDesign(;
         :stimulus_type => ["natural", "artificial"],
         :contrast_level => range(0, 1, length = 3),
     ),
-    event_order_function = x -> shuffle(MersenneTwister(42), x),
+    event_order_function = shuffle,
 );
 # ```@raw html
 # <details>
