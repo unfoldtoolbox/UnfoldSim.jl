@@ -411,17 +411,24 @@ Each column of the feature-array will be convolved with one generated response f
 If only a single TRF is needed, a vector can be provided.
 """
 struct TRFComponent <: AbstractComponent
-    components
+    components::Any
     features::AbstractArray
 end
-UnfoldSim.length(t::TRFComponent) = size(t.features,1)
+UnfoldSim.length(t::TRFComponent) = size(t.features, 1)
 
 
-function UnfoldSim.simulate_component(rng,c::TRFComponent,design::AbstractDesign)
-    kernel = UnfoldSim.simulate_responses(rng,c.components,UnfoldSim.Simulation(design,c,NoOnset(),NoNoise()))
+function UnfoldSim.simulate_component(rng, c::TRFComponent, design::AbstractDesign)
+    kernel = UnfoldSim.simulate_responses(
+        rng,
+        c.components,
+        UnfoldSim.Simulation(design, c, NoOnset(), NoNoise()),
+    )
 
-    @assert size(kernel,2) == size(c.features,2) "if the $(typeof(design)) generates multiple columns (sz=$(size(kernel))), the $(typeof(c)) needs to have multiple columns as well (sz=$(size(c.signal)))"
-    x = reduce(hcat,UnfoldSim.conv.(eachcol(c.features),eachcol(kernel)))[1:size(c.features,1),:]
+    @assert size(kernel, 2) == size(c.features, 2) "if the $(typeof(design)) generates multiple columns (sz=$(size(kernel))), the $(typeof(c)) needs to have multiple columns as well (sz=$(size(c.signal)))"
+    x = reduce(hcat, UnfoldSim.conv.(eachcol(c.features), eachcol(kernel)))[
+        1:size(c.features, 1),
+        :,
+    ]
     return x
 
 end

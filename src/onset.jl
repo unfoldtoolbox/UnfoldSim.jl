@@ -72,9 +72,9 @@ end
     simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
 In the case that a TRF is simulated (via `TRFComponent`). This onset returns a vector of zero-latencies, indicating that the TRF starts at the beginning of the signal.
 """
-function simulate_interonset_distances(rng,onset::TRFOnset,design)
-	sz = size(design)
-	return Int.(zeros(sz))
+function simulate_interonset_distances(rng, onset::TRFOnset, design)
+    sz = size(design)
+    return Int.(zeros(sz))
 end
 
 
