@@ -80,7 +80,7 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
     responses = simulate_responses(deepcopy(rng), components, simulation)
 
     # create events data frame
-    events = UnfoldSim.generate_events(design)
+    events = UnfoldSim.generate_events(deepcopy(rng), design)
 
     if isa(onset, NoOnset)
         # reshape the responses such that the last dimension is split in two dimensions (trials per subject and subject)
