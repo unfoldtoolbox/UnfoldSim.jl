@@ -100,6 +100,11 @@ function generate_events(rng::AbstractRNG, design::SingleSubjectDesign)
 
 end
 
+"""
+    apply_event_order_function(fun::Function, rng::AbstractRNG, events::DataFrame)
+
+apply fun(rng,events), raise an error if function is wrongly defined. Convenience function to not repeat the error handling at multiple places.
+"""
 function apply_event_order_function(fun, rng, events)
     try
         return fun(rng, events)
@@ -111,7 +116,7 @@ function apply_event_order_function(fun, rng, events)
     end
 end
 """
-    generate_events([rng::AbstractError],design::MultiSubjectDesign)
+    generate_events([rng::AbstractRNG],design::MultiSubjectDesign)
 Generate full factorial Dataframe according to MixedModelsSim.jl 's `simdat_crossed` function.
 Note: n_items = you can think of it as `trials` or better, as `stimuli`.
 
@@ -124,7 +129,7 @@ Finally it sorts by `:subject`
 julia> d = MultiSubjectDesign(;n_subjects = 10,n_items=20,both_within= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate_events(d)
 """
-generate_events(design::AbstractDesign) = generate_events(MersenneTwister(1), design)
+
 function generate_events(rng::AbstractRNG, design::MultiSubjectDesign)
 
     # check that :dv is not in any condition
@@ -155,10 +160,10 @@ function generate_events(rng::AbstractRNG, design::MultiSubjectDesign)
 
 end
 
+generate_events(design::AbstractDesign) = generate_events(MersenneTwister(1), design)
 
 # length is the same of all dimensions
 length(design::AbstractDesign) = *(size(design)...)
-
 
 
 # ----
