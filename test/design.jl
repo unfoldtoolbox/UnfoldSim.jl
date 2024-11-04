@@ -12,7 +12,7 @@
         ) == 1
         des = SingleSubjectDesign(;
             conditions = Dict(:A => nlevels(5), :B => nlevels(2)),
-            event_order_function = x -> sort(x, order(:B, rev = true)),
+            event_order_function = (rng, x) -> sort(x, order(:B, rev = true)),
         )
         @test generate_events(des).B[1] == "S2"
     end
@@ -35,7 +35,7 @@
             n_subjects = 10,
             n_items = 100,
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
-            event_order_function = x -> sort(x, order(:item, rev = true)),
+            event_order_function = (rng, x) -> sort(x, order(:item, rev = true)),
         )
         @test generate_events(des).subject[1] == "S01"
 
@@ -44,7 +44,7 @@
             n_subjects = 10,
             n_items = 100,
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
-            event_order_function = x -> sort(x, order(:B, rev = true)),
+            event_order_function = (rng, x) -> sort(x, order(:B, rev = true)),
         )
         @test generate_events(des).B[1] == "S2"
 
