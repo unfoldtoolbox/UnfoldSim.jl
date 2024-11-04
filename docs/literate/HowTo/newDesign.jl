@@ -14,6 +14,7 @@ using UnfoldSim
 using StableRNGs
 using DataFrames
 using Parameters
+using Random
 # ```@raw html
 # </details>
 # <br />
