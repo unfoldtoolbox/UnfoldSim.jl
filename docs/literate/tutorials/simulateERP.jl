@@ -38,7 +38,7 @@ design =
             :condition => ["car", "face"],
             :continuous => range(0, 5, length = 10),
         ),
-        event_order_function = x -> shuffle(StableRNG(1), x),
+        event_order_function = shuffle,
     ) |> x -> RepeatDesign(x, 100);
 
 # The `generate_events` function can be used to create an events data frame from the specified experimental design.
@@ -127,9 +127,11 @@ current_figure()
 # To validate the simulation results, we use the [`Unfold.jl` package](https://github.com/unfoldtoolbox/Unfold.jl/) to fit an Unfold regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a categorical predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
 m = fit(
     UnfoldModel,
-    [Any => (
-        @formula(0 ~ 1 + condition + spl(continuous, 4)),
-        firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis")),
+    [
+        Any => (
+            @formula(0 ~ 1 + condition + spl(continuous, 4)),
+            firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
+        ),
     ],
     events_df,
     eeg_data,
