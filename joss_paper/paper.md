@@ -37,6 +37,8 @@ bibliography: paper.bib
 
 `UnfoldSim.jl` is a Julia package for simulating multivariate time series, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. `UnfoldSim.jl` then simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. `UnfoldSim.jl` is modular, allowing users to implement custom designs, components, onset distributions or noise types to tailor the package to their needs. This allows support even for other modalities, e.g. single-voxel fMRI or pupil dilation signals.
 
+One can find an example of using `UnfoldSim.jl` to simulate continuous EEG data in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/generated/tutorials/simulateERP/).
+
 # Statement of Need
 In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kind of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
 
@@ -51,7 +53,7 @@ The design contains the levels of all conditions and predictors. Currently, we s
 ## Event basis functions (Components)
 `UnfoldSim.jl` provides a `LinearModelComponent` and a `MixedModelComponent` for single- and multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is weighted by the user-defined regression model. Users can specify a basis function by providing a custom vector or selecting from predefined options, such as simplified EEG components like the N170, modelled as temporally shifted Hanning windows. Further, in the components’ model formulae, fixed-effects ($\beta s$) and random effects  (`MultiSubjectDesign`s only) need to be specified.
 
-Each component can be nested in a `MultichannelComponent`, which, using a forward headmodel, projects the simulated source component to the multi-channel electrode space. Using `Artifacts.jl` we provide on-demand access to the HArtMuT [@harmening2022hartmut] model. 
+Each component can be nested in a `MultichannelComponent`, which, using a forward head model, projects the simulated source component to the multi-channel electrode space. Using `Artifacts.jl` we provide on-demand access to the HArtMuT [@harmening2022hartmut] model. 
 
 To generate complex activations, it is possible to specify a vector of `<:AbstractComponents`.
 
@@ -64,88 +66,6 @@ The inter-onset distribution defines the distance between events in the continuo
 UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
 
 ![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Please note that the noise signals are shifted by 5&nbsp;µV for visualisation purposes. Panel **B** displays its $\text{log}_{\text{10}}\text{(power)}$ at normalized frequencies. \label{fig_noise_types}](plots/noise_types.svg){height="250pt"}
-
-# Simulation example
-In this section, one can find an example of how to use `UnfoldSim.jl` to simulate continuous EEG data. Additional examples can be found in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/).
-
-1\. We specify an **experimental design** with one subject in two experimental conditions including a continuous variable with 10 values. To mimic randomization in an experiment, we shuffle the trials using the `event_order_function` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
-
-```julia
-using UnfoldSim, Random, Unfold
-
-design = SingleSubjectDesign(;
-    conditions = Dict(
-        :condition => ["car", "face"],
-        :continuous => range(0, 5, length = 10)),
-    event_order_function = shuffle,
-) |> x -> RepeatDesign(x, 100)
-```
-
-The `generate_events` function can be used to create an events data frame from the specified experimental design (see \autoref{events_df}).
-
-: First five rows extracted from the events data frame representing the experimental design. Each row corresponds to one event. The columns *continuous* and *condition* display the levels of the predictor variables for the specific event.\label{events_df}
-
-| **continuous** | **condition** |
-|:---------------|:--------------|
-| 2.22222        | face          |
-| 4.44444        | car           |
-| 3.88889        | car           |
-| 1.11111        | car           |
-| 0.555556       | car           |
-
-2\. Next, we create a signal consisting of two different **components**. For the first component, we use the prespecified N170 base with an intercept of 5&nbsp;µV and a condition effect of 3&nbsp;µV for the “face/car” condition i.e. faces will have a more negative signal than cars. For the second component, we use the prespecified P300 base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.
-
-```julia
-n1 = LinearModelComponent(;
-	basis = n170(),
-	formula = @formula(0 ~ 1 + condition),
-	β = [5, 3])
-
-p3 = LinearModelComponent(;
-	basis = p300(),
-	formula = @formula(0 ~ 1 + continuous + continuous^2),
-	β = [5, 1, 0.2])
-
-components = [n1, p3]
-```
-
-3\. In the next step, we specify an **inter-onset distribution**, in this case, a uniform distribution with an inter-event distance of exactly 200 samples.
-
-```julia
-onset = UniformOnset(; width = 0, offset = 200)
-```
-
-4\. As the last ingredient, we specify the **noise**, in this case, Pink noise.
-
-```julia
-noise = PinkNoise(; noiselevel = 2)
-```
-
-Finally, we combine all the ingredients and simulate data (see \autoref{fig_example_simulated_data}). To make the simulation reproducible, one can specify a random generator.
-
-```julia
-eeg_data, events_df = simulate(MersenneTwister(1), design, components, onset, noise)
-```
-
-![First 1400 samples from the simulated continuous EEG data. The vertical lines denote the event onsets and their colour represents the respective condition i.e. car or face.\label{fig_example_simulated_data}](plots/example_simulated_data.svg){height="250pt"}
-
-To validate the simulation results, we use the `Unfold.jl` package [@ehinger2019unfold] to fit an Unfold regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a categorical predictor for *condition* and a non-linear predictor (based on splines) for *continuous*.
-
-```julia
-m = fit(
-	UnfoldModel,
-	[Any => (
-        	@formula(0 ~ 1 + condition + spl(continuous, 4)),
-        	firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"))],
-	events_df,
-	eeg_data)
-```
-
-In subplot A of \autoref{fig_example_coefficients_effects}, one can see the model coefficient estimates and as intended there is a condition effect in the first negative component and an effect of the continuous variable on the second (positive) component. The relation between the levels of the continuous variable and the scaling of the second component is even clearer visible in subplot B of \autoref{fig_example_coefficients_effects} which depicts the estimated marginal effects of the predictors which are obtained by evaluating the estimated function at specific values of the continuous variable. 
-
-![Regression results for the simulated data. Panel **A** displays the estimated regression coefficients over time. Panel **B** shows the estimated marginal effects i.e. the estimated event-related potential at different predictor levels.\label{fig_example_coefficients_effects}](plots/example_coefficients_effects.svg){height="250pt"}
-
-As shown in this example, `UnfoldSim.jl` and `Unfold.jl` can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.
 
 # Related tools
 Few toolboxes for simulating EEG data exist, most being proprietary MATLAB tools that have often not received any updates in the past years or have very specific applications (e.g. `EEGg` [@vaziri2023eegg], `SimMEEG` [@herdman2021simmeeg], `SEED-G` [@anzolin2021seed], `EEGSourceSim` [@barzegaran2019eegsourcesim], `simBCI` [@lindgren2018simbci]). 
