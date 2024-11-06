@@ -17,8 +17,8 @@ Obsolete - # TODO: Transfer function to Unfold.jl
 
 Function to convert output similar to unfold (data, events)
 """
-function convert(eeg, onsets, design, n_chan; reshape = true)
-    events = UnfoldSim.generate_events(design)
+function convert(rng::AbstractRNG, eeg, onsets, design, n_chan; reshape = true) # TODO: Added an rng but did not test it, either test it or (re)move function
+    events = UnfoldSim.generate_events(rng, design)
     @debug size(eeg)
     if reshape
         n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]

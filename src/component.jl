@@ -111,7 +111,7 @@ function simulate_component(rng, c::MultichannelComponent, design::AbstractDesig
     y = simulate_component(rng, c.component, design)
 
     for trial = 1:size(y, 2)
-        y[:, trial] .= y[:, trial] .+ simulate_noise(rng, c.noise, size(y, 1))
+        y[:, trial] .= y[:, trial] .+ simulate_noise(deepcopy(rng), c.noise, size(y, 1))
     end
 
     y_proj = kron(y, c.projection)
@@ -144,7 +144,7 @@ julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:con
 julia> simulate_component(StableRNG(1),c,design)
 """
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
-    events = generate_events(design)
+    events = generate_events(deepcopy(rng), design)
 
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
@@ -182,7 +182,7 @@ function simulate_component(
     design::AbstractDesign;
     return_parameters = false,
 )
-    events = generate_events(design)
+    events = generate_events(deepcopy(rng), design)
 
     # add the mixed models lefthandside
     lhs_column = :tmp_dv
@@ -307,7 +307,7 @@ function simulate_responses(
     end
 
     for c in components
-        simulate_and_add!(epoch_data, c, simulation, rng)
+        simulate_and_add!(epoch_data, c, simulation, deepcopy(rng)) # TODO: `deepcopy` necessary?
     end
     return epoch_data
 end
