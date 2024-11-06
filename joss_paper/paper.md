@@ -29,7 +29,7 @@ affiliations:
     index: 1
   - name: Stuttgart Center for Simulation Science, University of Stuttgart, Germany
     index: 2
-date: 10 October 2024
+date: 06 November 2024
 bibliography: paper.bib
 ---
 
@@ -37,7 +37,7 @@ bibliography: paper.bib
 
 `UnfoldSim.jl` is a Julia package for simulating multivariate time series, with a focus on EEG, especially event-related potentials (ERPs). The user provides four ingredients: 1) an experimental design, with both categorical and continuous variables, 2) event basis functions specified via linear or hierarchical models, 3) an inter-event onset distribution, and 4) a noise specification. `UnfoldSim.jl` then simulates continuous EEG signals with potentially overlapping events. Multi-channel support via EEG-forward models is available as well. `UnfoldSim.jl` is modular, allowing users to implement custom designs, components, onset distributions or noise types to tailor the package to their needs. This allows support even for other modalities, e.g. single-voxel fMRI or pupil dilation signals.
 
-One can find an example of using `UnfoldSim.jl` to simulate continuous EEG data in the [`UnfoldSim.jl` documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/generated/tutorials/simulateERP/).
+One can find a detailed example of how to use `UnfoldSim.jl` to simulate continuous EEG data in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/generated/tutorials/simulateERP/).
 
 # Statement of Need
 In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kind of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
@@ -48,10 +48,10 @@ While other EEG simulation toolboxes exist, they each have limitations: they are
 The package provides four abstract types: `AbstractDesign`, `AbstractComponent`, `AbstractOnset` and `AbstractNoise`. In the following, we present the concrete types that are currently implemented.
 
 ## Experimental designs
-The design contains the levels of all conditions and predictors. Currently, we support a single and a multi-subject design. The multi-subject design uses the `MixedModelsSim.jl` package [@phillip_alday_2024_10669002] and allows a flexible specification of the random-effects structure by indicating which predictors are within- or between-subject (or item). Designs can be encapsulated, for instance, the `RepeatDesign` type which repeats the generated event table multiple times, thus generating new trials.
+The design contains the levels of all conditions and predictors. Currently, we support a single and a multi-subject design. The multi-subject design uses the `MixedModelsSim.jl` package [@phillip_alday_2024_10669002] and allows a flexible specification of the random-effects structure by indicating which predictors are within- or between-subject (or item). Designs can be encapsulated, for instance, using the `RepeatDesign` type which repeats the generated event table multiple times, thus generating new trials.
 
 ## Event basis functions (Components)
-`UnfoldSim.jl` provides a `LinearModelComponent` and a `MixedModelComponent` for single- and multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is weighted by the user-defined regression model. Users can specify a basis function by providing a custom vector or selecting from predefined options, such as simplified EEG components like the N170, modelled as temporally shifted Hanning windows. Further, in the components’ model formulae, fixed-effects ($\beta s$) and random effects  (`MultiSubjectDesign`s only) need to be specified.
+`UnfoldSim.jl` provides a `LinearModelComponent` and a `MixedModelComponent` for single- and multi-subject simulation respectively. These components determine the shape of the response to an event. They consist of a basis function which is weighted by the user-defined regression model. Users can specify a basis function by providing a custom vector or selecting from predefined options, such as simplified EEG components like the N170, modelled as temporally shifted Hanning windows. Further, in the components’ model formulae, fixed effects ($\beta s$) and random effects  (`MultiSubjectDesign`s only) need to be specified.
 
 Each component can be nested in a `MultichannelComponent`, which, using a forward head model, projects the simulated source component to the multi-channel electrode space. Using `Artifacts.jl` we provide on-demand access to the HArtMuT [@harmening2022hartmut] model. 
 
