@@ -11,7 +11,7 @@ A type for specifying the experimental design for multiple subjects (based on th
 - `both_within` = Dict{Symbol,Vector}	-> effects completly crossed
 - `event_order_function = (rng, x) -> x`; # can be used to sort, or e.g. `(rng, x) -> shuffle(rng, x)` (or shorter just `event_order_function = shuffle`)
 
-Tip: Check the resulting dataframe using `generate_events(design)`
+Tip: Check the resulting dataframe using the [`generate_events`](@ref) function.
 
 
 ### Example
@@ -45,15 +45,15 @@ A type for specifying the experimental for a single subject (based on the given 
 - `conditions = Dict{Symbol,Vector}`` of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
 - `event_order_function` = (rng::AbstractRNG,x::DataFrame)->x; # can be used to sort by specifying `sort`, or shuffling by providing `shuffle`, or custom functions following the interface `(rng,x)->my_shuffle(rng,x)`
 
-Number of trials / rows in `generate_events(design)` depend on the full factorial of your `conditions`.
+Number of trials / rows in `generate_events([rng, ]design)` depend on the full factorial of your `conditions`.
 
 To increase the number of repetitions simply use `RepeatDesign(SingleSubjectDesign(...),5)`
 
 If conditions are omitted (or set to `nothing`), a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
 
-Tip: Check the resulting dataframe using `generate_events(design)`
+Tip: Check the resulting dataframe using the [`generate_events`](@ref) function.
 
-### Example
+### Examples
 ```julia
 design = SingleSubjectDesign(;
     conditions = Dict(
@@ -74,11 +74,11 @@ size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
 size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
 
 """
+    generate_events([rng::AbstractRNG, ]design::SingleSubjectDesign)
+
 Generates full-factorial DataFrame of design.conditions
 
-
-Afterwards applies design.event_order_function.
-
+Afterwards applies `design.event_order_function`.
 If conditions is `nothing`, a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
 
 
@@ -115,21 +115,22 @@ function apply_event_order_function(fun, rng, events)
         )
     end
 end
+
 """
-    generate_events([rng::AbstractRNG],design::MultiSubjectDesign)
+    generate_events([rng::AbstractRNG, ]design::MultiSubjectDesign)
+
 Generate full factorial Dataframe according to MixedModelsSim.jl 's `simdat_crossed` function.
-Note: n_items = you can think of it as `trials` or better, as `stimuli`.
 
+Note: `n_items` = you can think of it as `trials` or better, as `stimuli`.
 Note: No condition can be named `dv` which is used internally in MixedModelsSim / MixedModels as a dummy left-side
-
 Afterwards applies `design.event_order_function`. Could be used to duplicate trials, sort, subselect etc.
-
 Finally it sorts by `:subject`
 
-julia> d = MultiSubjectDesign(;n_subjects = 10,n_items=20,both_within= Dict(:A=>nlevels(5),:B=>nlevels(2)))
-julia> generate_events(d)
+```julia
+d = MultiSubjectDesign(; n_subjects = 10, n_items = 20, both_within = Dict(:A => nlevels(5),:B => nlevels(2)))
+generate_events(d)
+```
 """
-
 function generate_events(rng::AbstractRNG, design::MultiSubjectDesign)
 
     # check that :dv is not in any condition
@@ -190,9 +191,9 @@ See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref)
 end
 
 """
-    UnfoldSim.generate_events(design::RepeatDesign{T})
+    UnfoldSim.generate_events([rng::AbstractRNG, ]design::RepeatDesign{T})
 
-In a repeated design, iteratively calls the underlying {T} Design and concatenates. In case of MultiSubjectDesign, sorts by subject.
+In a repeated design, iteratively calls the underlying {T} design and concatenates. In case of `MultiSubjectDesign`, sorts by subject.
 """
 function UnfoldSim.generate_events(rng::AbstractRNG, design::RepeatDesign)
     df = map(x -> generate_events(rng, design.design), 1:design.repeat) |> x -> vcat(x...)
