@@ -5,6 +5,7 @@
 #     if you are just interested to use duration-dependency in your simulation, check out the component-function tutorial
 
 
+
 # ### Setup
 # ```@raw html
 # <details>
@@ -67,6 +68,7 @@ end
 
 # ## Simulate data with the new component type
 erp = UnfoldSim.simulate_component(
+
     MersenneTwister(1),
     TimeVaryingComponent(basis_shiftduration, 50),
     design,

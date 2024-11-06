@@ -46,13 +46,15 @@ makedocs(;
             "Overview: Noise types" => "./generated/reference/noisetypes.md",
         ],
         "HowTo" => [
-            "Define a new, (imbalanced) design" => "./generated/HowTo/newDesign.md",
+
+            "Define a new (imbalanced) design" => "./generated/HowTo/newDesign.md",
             "Use a component-basis-function (duration)" => "./generated/HowTo/componentfunction.md",
             "Get multiple trials with identical subject/item combinations" => "./generated/HowTo/repeatTrials.md",
             "Define a new component (with variable duration and shift)" => "./generated/HowTo/newComponent.md",
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
             "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
             "Produce specific sequences of events" => "./generated/HowTo/sequence.md",
+
         ],
         "API / Docstrings" => "api.md",
     ],
@@ -61,6 +63,5 @@ makedocs(;
 deploydocs(;
     repo = "github.com/unfoldtoolbox/UnfoldSim.jl",
     devbranch = "main",
-    versions = "v#.#",
     push_preview = true,
 )

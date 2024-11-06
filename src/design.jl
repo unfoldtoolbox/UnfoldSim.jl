@@ -9,7 +9,8 @@ A type for specifying the experimental design for multiple subjects (based on th
 - `subjects_between` = Dict{Symbol,Vector} -> effects between subjects, e.g. young vs old 
 - `items_between` = Dict{Symbol,Vector} -> effects between items, e.g. natural vs artificial images, (but shown to all subjects if not specified also in `subjects_between`)
 - `both_within` = Dict{Symbol,Vector}	-> effects completly crossed
-- `event_order_function` = `x->x`; # can be used to sort, or e.g. `x->shuffle(MersenneTwister(42),x)` - be sure to fix/update the rng accordingly!!
+- `event_order_function = (rng, x) -> x`; # can be used to sort, or e.g. `(rng, x) -> shuffle(rng, x)` (or shorter just `event_order_function = shuffle`)
+
 
 Tip: Check the resulting dataframe using `generate_events(design)`
 
@@ -32,7 +33,7 @@ See also [`SingleSubjectDesign`](@ref), [`RepeatDesign`](@ref)
     subjects_between::Dict{Symbol,Vector} = Dict()
     items_between::Dict{Symbol,Vector} = Dict()
     both_within::Dict{Symbol,Vector} = Dict()
-    event_order_function = x -> x # can be used to sort, or x->shuffle(rng,x)
+    event_order_function = (rng, x) -> x
 end
 
 
@@ -42,8 +43,9 @@ end
 A type for specifying the experimental for a single subject (based on the given conditions).
 
 ### Fields
-- conditions = Dict{Symbol,Vector} of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
-- `event_order_function` = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
+
+- `conditions = Dict{Symbol,Vector}`` of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
+- `event_order_function` = (rng::AbstractRNG,x::DataFrame)->x; # can be used to sort by specifying `sort`, or shuffling by providing `shuffle`, or custom functions following the interface `(rng,x)->my_shuffle(rng,x)`
 
 Number of trials / rows in `generate_events(design)` depend on the full factorial of your `conditions`.
 
@@ -65,7 +67,7 @@ See also [`MultiSubjectDesign`](@ref), [`RepeatDesign`](@ref)
 """
 @with_kw struct SingleSubjectDesign <: AbstractDesign
     conditions::Dict{Symbol,Vector} = Dict()
-    event_order_function = x -> x
+    event_order_function = (rng, x) -> x
 end
 
 
@@ -85,7 +87,7 @@ If conditions is `nothing`, a single trial is simulated with a column `:dummy` a
 julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate_events(d)
 """
-function generate_events(design::SingleSubjectDesign)
+function generate_events(rng::AbstractRNG, design::SingleSubjectDesign)
     if isempty(design.conditions)
         events = DataFrame(:dummy => [:dummy])
     else
@@ -96,24 +98,41 @@ function generate_events(design::SingleSubjectDesign)
             DataFrame
     end
     # by default does nothing
-    return design.event_order_function(events)
+    return apply_event_order_function(design.event_order_function, rng, events)
+
 end
 
 """
-    generate_events(design::MultiSubjectDesign)
+    apply_event_order_function(fun::Function, rng::AbstractRNG, events::DataFrame)
+
+apply fun(rng,events), raise an error if function is wrongly defined. Convenience function to not repeat the error handling at multiple places.
+"""
+function apply_event_order_function(fun, rng, events)
+    try
+        return fun(rng, events)
+
+    catch e
+        error(
+            "Problem in `event_order_function` - Make sure the function allows for two inputs: `(rng::AbstractRNG,x::DataFrame)`",
+        )
+    end
+end
+"""
+    generate_events([rng::AbstractRNG],design::MultiSubjectDesign)
 Generate full factorial Dataframe according to MixedModelsSim.jl 's `simdat_crossed` function.
 Note: n_items = you can think of it as `trials` or better, as `stimuli`.
 
 Note: No condition can be named `dv` which is used internally in MixedModelsSim / MixedModels as a dummy left-side
 
-Afterwards applies `design.event_order_function``.  Could be used to duplicate trials, sort, subselect etc.
+Afterwards applies `design.event_order_function`. Could be used to duplicate trials, sort, subselect etc.
 
 Finally it sorts by `:subject`
 
 julia> d = MultiSubjectDesign(;n_subjects = 10,n_items=20,both_within= Dict(:A=>nlevels(5),:B=>nlevels(2)))
 julia> generate_events(d)
 """
-function generate_events(design::MultiSubjectDesign)
+
+function generate_events(rng::AbstractRNG, design::MultiSubjectDesign)
 
     # check that :dv is not in any condition
     allconditions = [design.subjects_between, design.items_between, design.both_within]
@@ -134,7 +153,7 @@ function generate_events(design::MultiSubjectDesign)
     rename!(data, :subj => :subject)
     select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
     # by default does nothing
-    data = design.event_order_function(data)
+    data = apply_event_order_function(design.event_order_function, rng, data)
 
     # sort by subject
     data = sort!(data, (order(:subject)))
@@ -143,10 +162,10 @@ function generate_events(design::MultiSubjectDesign)
 
 end
 
+generate_events(design::AbstractDesign) = generate_events(MersenneTwister(1), design)
 
 # length is the same of all dimensions
 length(design::AbstractDesign) = *(size(design)...)
-
 
 
 # ----
@@ -306,11 +325,10 @@ get_rng(design::SequenceDesign) = design.rng
 
 In a repeated design, iteratively calls the underlying {T} Design and concatenates. In case of MultiSubjectDesign, sorts by subject.
 """
-function generate_events(design::RepeatDesign)
-    design = deepcopy(design)
-    df =
-        map(x -> generate_events(get_rng(design.design), design.design), 1:design.repeat) |>
-        x -> vcat(x...)
+
+function UnfoldSim.generate_events(rng::AbstractRNG, design::RepeatDesign)
+    df = map(x -> generate_events(rng, design.design), 1:design.repeat) |> x -> vcat(x...)
+  
     if isa(design.design, MultiSubjectDesign)
         sort!(df, [:subject])
     end

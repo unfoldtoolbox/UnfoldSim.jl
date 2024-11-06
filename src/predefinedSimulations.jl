@@ -21,7 +21,8 @@ The most used `kwargs` is: `return_epoched=true` which returns already epoched d
 
 #### Design
 - `n_repeats = 100`,
-- `event_order_function = x -> shuffle(deepcopy(rng), x)`, # random trial order
+
+- `event_order_function = shuffle`, # random trial order
 - `conditions = Dict(...)`,
 
 #### Component / Signal
@@ -42,7 +43,7 @@ function predef_eeg(
     rng;
     # design
     n_repeats = 100,
-    event_order_function = x -> shuffle(deepcopy(rng), x),
+    event_order_function = shuffle,
 
     # component / signal
     sfreq = 100,
@@ -91,7 +92,7 @@ function predef_eeg(
     n_subjects;
     # design
     n_items = 100,
-    event_order_function = x -> shuffle(deepcopy(rng), x),
+    event_order_function = shuffle,
     conditions = Dict(
         :condition => ["car", "face"],
         :continuous => range(-5, 5, length = 10),
@@ -147,7 +148,7 @@ The most used `kwargs` is: `return_epoched = true` which returns already epoched
 - `n_items = 100`,
 - `n_subjects = 1`,
 - `conditions = Dict(:A => ["a_small","a_big"], :B => ["b_tiny","b_large"])`,
-- `event_order_function = x -> shuffle(deepcopy(rng), x)`,
+- `event_order_function = shuffle`,
 
 #### Component / Signal
 - `signalsize = 100`, # Length of simulated hanning window
@@ -173,7 +174,7 @@ function predef_2x2(
     n_items = 100,
     n_subjects = 1,
     conditions = Dict(:A => ["a_small", "a_big"], :B => ["b_tiny", "b_large"]),
-    event_order_function = x -> shuffle(deepcopy(rng), x),
+    event_order_function = shuffle,
 
     # component / signal
     signalsize = 100,
