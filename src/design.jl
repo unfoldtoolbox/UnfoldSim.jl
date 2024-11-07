@@ -414,7 +414,6 @@ function UnfoldSim.generate_events(t::EffectsDesign)
 end
 
 
-  
 #Base.size(design::SequenceDesign) =
 #size(design.design) .* length(replace(design.sequence, "_" => "",r"\{.*\}"=>""))
 
@@ -426,4 +425,3 @@ end
 Base.size(
     design::Union{<:SequenceDesign,<:SubselectDesign,<:RepeatDesign{<:SequenceDesign}},
 ) = size(generate_events(design), 1)
-
