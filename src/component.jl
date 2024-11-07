@@ -1,24 +1,32 @@
 """
-A component that adds a hierarchical relation between parameters according to a LMM defined via MixedModels.jl
+    MixedModelComponent <: AbstractComponent
 
-- `basis`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model-prediction
-- `formula`: Formula-Object in the style of MixedModels.jl e.g. `@formula 0~1+cond + (1|subject)` - left-handside is ignored
-- `β` Vector of betas, must fit the formula
-- `σs` Dict of random effect variances, e.g. `Dict(:subject=>[0.5,0.4])` or to specify correlationmatrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to MixedModels.jl `create_re` function, which creates the θ matrices.
-- `contrasts`: Dict in the style of MixedModels.jl. Default is empty.
+A component that adds a hierarchical relation between parameters according to a Linear Mixed Model (LMM) defined via `MixedModels.jl`.
 
-All arguments can be named, in that case `contrasts` is optional
+All fields can be named. Works best with [`MultiSubjectDesign`](@ref).
 
-Works best with `MultiSubjectDesign`
-```julia
-MixedModelComponent(;
-    basis=hanning(40),
-    formula=@formula(0~1+cond+(1+cond|subject)),
-    β = [1.,2.],
-    σs= Dict(:subject=>[0.5,0.4]),
-    contrasts=Dict(:cond=>EffectsCoding())
-)
+# Fields
+- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model prediction.
+- `formula::Any`: Formula-object in the style of MixedModels.jl e.g. `@formula 0~1+cond + (1|subject)`. The left-handside is ignored.
+- `β::Vector` Vector of betas (fixed effects), must fit the formula
+- `σs::Dict` Dict of random effect variances, e.g. `Dict(:subject=>[0.5,0.4])` or to specify correlation matrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to MixedModels.jl `create_re` function, which creates the θ matrices.
+- `contrasts::Dict` (optional): Dict in the style of MixedModels.jl. Default is empty.
 
+# Examples
+```julia-repl
+julia> MixedModelComponent(;
+           basis=hanning(40),
+           formula=@formula(0~1+cond+(1+cond|subject)),
+           β = [1.,2.],
+           σs= Dict(:subject=>[0.5,0.4]),
+           contrasts=Dict(:cond=>EffectsCoding())
+       )
+MixedModelComponent
+  basis: Array{Float64}((40,)) [0.0, 0.006474868681043577, 0.02573177902642726, 0.0572719871733951, 0.10027861829824952, 0.1536378232452003, 0.21596762663442215, 0.28565371929847283, 0.3608912680417737, 0.43973165987233853  …  0.43973165987233853, 0.3608912680417737, 0.28565371929847283, 0.21596762663442215, 0.1536378232452003, 0.10027861829824952, 0.0572719871733951, 0.02573177902642726, 0.006474868681043577, 0.0]
+  formula: StatsModels.FormulaTerm{StatsModels.ConstantTerm{Int64}, Tuple{StatsModels.ConstantTerm{Int64}, StatsModels.Term, StatsModels.FunctionTerm{typeof(|), Vector{StatsModels.AbstractTerm}}}}
+  β: Array{Float64}((2,)) [1.0, 2.0]
+  σs: Dict{Symbol, Vector{Float64}}
+  contrasts: Dict{Symbol, EffectsCoding}
 ```
 """
 @with_kw struct MixedModelComponent <: AbstractComponent
@@ -30,24 +38,31 @@ MixedModelComponent(;
 end
 
 """
-A multiple regression component for one subject
+    LinearModelComponent <: AbstractComponent
 
-- `basis`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model-prediction
-- `formula`: StatsModels Formula-Object  `@formula 0~1+cond` (left side must be 0)
-- `β` Vector of betas, must fit the formula
-- `contrasts`: Dict. Default is empty, e.g. `Dict(:condA=>EffectsCoding())`
+A multiple regression component for one subject.
 
-All arguments can be named, in that case `contrasts` is optional
+All fields can be named. Works best with [`SingleSubjectDesign`](@ref).
 
-Works best with `SingleSubjectDesign`
-```julia
-LinearModelComponent(;
-    basis=hanning(40),
-    formula=@formula(0~1+cond),
-    β = [1.,2.],
-    contrasts=Dict(:cond=>EffectsCoding())
-)
+# Fields
+- `basis::Any`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model prediction.
+- `formula::Any`: StatsModels Formula-Object  `@formula 0~1+cond` (left side must be 0)
+- `β::Vector` Vector of betas, must fit the formula
+- `contrasts::Dict` (optional): Default is empty, e.g. `Dict(:condA=>EffectsCoding())`
 
+# Examples
+```julia-repl
+julia> LinearModelComponent(;
+           basis=hanning(40),
+           formula=@formula(0~1+cond),
+           β = [1.,2.],
+           contrasts=Dict(:cond=>EffectsCoding())
+       )
+LinearModelComponent
+  basis: Array{Float64}((40,)) [0.0, 0.006474868681043577, 0.02573177902642726, 0.0572719871733951, 0.10027861829824952, 0.1536378232452003, 0.21596762663442215, 0.28565371929847283, 0.3608912680417737, 0.43973165987233853  …  0.43973165987233853, 0.3608912680417737, 0.28565371929847283, 0.21596762663442215, 0.1536378232452003, 0.10027861829824952, 0.0572719871733951, 0.02573177902642726, 0.006474868681043577, 0.0]
+  formula: StatsModels.FormulaTerm{StatsModels.ConstantTerm{Int64}, Tuple{StatsModels.ConstantTerm{Int64}, StatsModels.Term}}
+  β: Array{Float64}((2,)) [1.0, 2.0]
+  contrasts: Dict{Symbol, EffectsCoding}
 ```
 """
 @with_kw struct LinearModelComponent <: AbstractComponent
