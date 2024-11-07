@@ -72,7 +72,7 @@ Few toolboxes for simulating EEG data exist, most being proprietary MATLAB tools
 
 In the following, we highlight two actively developed MATLAB-based tools: `Brainstorm` [@tadel2011brainstorm] which especially excels at visualizing the forward model and generating ERPs from phase-aligned oscillations, and `SEREEGA` [@krol2018sereega], which offers comprehensive simulation capabilities with a focus on ERP-component simulation, tools for benchmarking like signal-to-noise specification and more realistic noise simulation (e.g. via random sources).
 
-In Python, `MNE-Python` [@GramfortEtAl2013a] provides some tutorials to simulate EEG data, but the functionality is very basic. `HNN-Core` [@Jas2023] can simulate realistic EEG data but requires detailed knowledge of neurocortical column models.
+In Python, `MNE-Python` [@GramfortEtAl2013a] provides some tutorials to simulate EEG data, but the functionality is very basic. `HNN-Core` [@Jas2023] can simulate realistic EEG data by parameterising the neuronal activity in cortical columns.
 
 In contrast to these tools, `UnfoldSim.jl` has a higher-level perspective, uniquely focusing on the regression-ERP aspect. It provides functions to simulate multi-condition experiments, uniquely allows for modelling multi-subject EEG datasets, and offers support to model continuous EEG data with overlapping events. Further, the implementation in Julia offers a platform that is free, actively encourages research software engineering methods, makes it easy to add custom expansions via the `AbstractTypes`, and allows easy access from Python and R.
 
