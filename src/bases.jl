@@ -238,6 +238,7 @@ Note: TR = 1/sfreq
 - `shift = 0`: shift the whole HRF
 
 # Returns
+Vector with an HRF BOLD response
 
 # Examples
 ```julia-repl
