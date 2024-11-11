@@ -165,17 +165,22 @@ end
 
 ## Pupil
 """
-    PuRF(; n = 10.1, tmax = 0.93, sfreq = 100)
-    PuRF(t, n, tmax)
 
-Default generator for PuRF Pupil Response Function.
+PuRF(; n = 10.1, tmax = 0.93, sfreq = 100)
+
+Default generator for PuRF Pupil Response Function. The canonical PRF is a gamma function and implemented according to Denison 2020 equation (2) going back to Hoeks & Levelt, 1993.
+
+The pupil response is evaluated at t = 0:1/sfreq:3*tmax. The response is normalized by the peak-maximum at tmax, thus typically a pupil-response of 1 is returned (disregarding numerical issues).
+
 
 # Keyword arguments:
-- `n = 10.1`: 
-- `tmax = 0.93`:
-- `sfreq = 100`:
+- `n = 10.1`: shape parameter
+- `tmax = 0.93`: peak maximum
+- `sfreq = 100`: sampling frequency
 
 # Returns
+
+Vector of a canonical pupil response with length(0:1/sfreq:3*tmax) entries.
 
 # Examples
 ```julia-repl
@@ -196,10 +201,10 @@ julia> PuRF(; n = 5)
 """
 function PuRF(; n = 10.1, tmax = 0.93, sfreq = 100)
     t = (0:1/sfreq:3*tmax)
-    return PuRF(t, n, tmax) ./ PuRF(tmax, n, tmax)
+    return _PuRF(t, n, tmax) ./ _PuRF(tmax, n, tmax)
 end
 
-function PuRF(t, n, tmax)
+function _PuRF(t, n, tmax)
     return t .^ n .* exp.(-n .* t ./ (tmax))
 end
 
@@ -216,14 +221,21 @@ end
     amplitude = 6,
     shift = 0)
 
-Generate an HRF kernel. 
+Generate a parameterized BOLD haemodynamic response function (HRF) kernel based on gamma-functions.
 
-TR = 1/sfreq
-default parameters taken from SPM
+Implementation and default parameters were taken from the SPM-toolbox.
 
-Code adapted from Unfold.jl
+Note: TR = 1/sfreq
 
 # Keyword arguments
+- `TR = 1`: repetition time, 1/sfreq
+- `length = 32.0`: total length of the kernel in seconds
+- `amplitude = 6`: maximal amplitude
+- `peak = 6.0`: peak timing
+- `peak_width = 1.0`: width of the peak
+- `post_undershoot = 16`: post-undershoot timing
+- `post_undershoot_width = 1`: post-undershoot width 
+- `shift = 0`: shift the whole HRF
 
 # Returns
 
