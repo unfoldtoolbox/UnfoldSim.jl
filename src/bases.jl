@@ -130,7 +130,9 @@ n400(; sfreq = 100) = -hanning(0.4, 0.4, sfreq)
 """
     hanning(duration, offset, sfreq)
 
-Generate a (potentially shifted) hanning window with a certain duration.
+Generate a (potentially shifted) hanning window with a certain duration. 
+
+Note: This function extends the `DSP.hanning` function using multiple dispatch.
 
 # Arguments
 - `duration`: in s.
@@ -165,8 +167,7 @@ end
 
 ## Pupil
 """
-
-PuRF(; n = 10.1, tmax = 0.93, sfreq = 100)
+    PuRF(; n = 10.1, tmax = 0.93, sfreq = 100)
 
 Default generator for PuRF Pupil Response Function. The canonical PRF is a gamma function and implemented according to Denison 2020 equation (2) going back to Hoeks & Levelt, 1993.
 
@@ -179,8 +180,7 @@ The pupil response is evaluated at t = 0:1/sfreq:3*tmax. The response is normali
 - `sfreq = 100`: sampling frequency
 
 # Returns
-
-Vector of a canonical pupil response with length(0:1/sfreq:3*tmax) entries.
+- `Vector`: canonical pupil response with length(0:1/sfreq:3*tmax) entries.
 
 # Examples
 ```julia-repl
@@ -228,17 +228,17 @@ Implementation and default parameters were taken from the SPM-toolbox.
 Note: TR = 1/sfreq
 
 # Keyword arguments
-- `TR = 1`: repetition time, 1/sfreq
-- `length = 32.0`: total length of the kernel in seconds
-- `amplitude = 6`: maximal amplitude
-- `peak = 6.0`: peak timing
-- `peak_width = 1.0`: width of the peak
-- `post_undershoot = 16`: post-undershoot timing
-- `post_undershoot_width = 1`: post-undershoot width 
-- `shift = 0`: shift the whole HRF
+- `TR = 1`: repetition time, 1/sfreq.
+- `length = 32.0`: total length of the kernel in seconds.
+- `amplitude = 6`: maximal amplitude.
+- `peak = 6.0`: peak timing.
+- `peak_width = 1.0`: width of the peak.
+- `post_undershoot = 16`: post-undershoot timing.
+- `post_undershoot_width = 1`: post-undershoot width.
+- `shift = 0`: shift the whole HRF.
 
 # Returns
-Vector with an HRF BOLD response
+- `Vector`: HRF BOLD response.
 
 # Examples
 ```julia-repl
