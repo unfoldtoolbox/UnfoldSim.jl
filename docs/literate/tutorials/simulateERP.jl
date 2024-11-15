@@ -44,7 +44,7 @@ design =
     ) |> x -> RepeatDesign(x, 100);
 
 # The `generate_events` function can be used to create an events data frame from the specified experimental design.
-events_df = generate_events(design);
+events_df = generate_events(StableRNG(1), design);
 first(events_df, 5)
 # Above you can see the first five rows extracted from the events data frame representing the experimental design. Each row corresponds to one event.
 # The columns *continuous* and *condition* display the levels of the predictor variables for the specific event.

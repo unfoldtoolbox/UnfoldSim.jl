@@ -91,7 +91,7 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
         size_responses = size(responses)
         signal = reshape(responses, size_responses[1:end-1]..., size(design)...)
     else # if there is an onset distribution given the next step is to create a continuous signal
-        signal, latencies = create_continuous_signal(rng, responses, simulation)
+        signal, latencies = create_continuous_signal(deepcopy(rng), responses, simulation)
         events.latency = latencies
     end
 

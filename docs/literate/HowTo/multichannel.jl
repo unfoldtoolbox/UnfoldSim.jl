@@ -47,7 +47,8 @@ onset = UniformOnset(; width = 20, offset = 4);
 
 # Now as usual we simulate data. Inspecting data shows our result is now indeed ~230 Electrodes large! Nice!
 data, events =
-    simulate(MersenneTwister(1), design, [mc, mc2], onset, PinkNoise(noiselevel = 0.05))
+    simulate(MersenneTwister(1), design, [mc, mc2], onset, PinkNoise(noiselevel = 0.05));
+
 size(data)
 
 
