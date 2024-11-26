@@ -6,7 +6,7 @@ A component that adds a hierarchical relation between parameters according to a 
 All fields can be named. Works best with [`MultiSubjectDesign`](@ref).
 
 # Fields
-- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model prediction.
+- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. Future versions will allow for functions, as of v0.3 this is restricted to array-like objects
 - `formula::Any`: Formula-object in the style of MixedModels.jl e.g. `@formula 0 ~ 1 + cond + (1|subject)`. The left-hand side is ignored.
 - `β::Vector` Vector of betas (fixed effects), must fit the formula.
 - `σs::Dict` Dict of random effect variances, e.g. `Dict(:subject => [0.5, 0.4])` or to specify correlation matrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to the MixedModels.jl `create_re` function, which creates the θ matrices.
@@ -47,7 +47,7 @@ A multiple regression component for one subject.
 All fields can be named. Works best with [`SingleSubjectDesign`](@ref).
 
 # Fields
-- `basis::Any`: an object, if accessed, provides a 'basis-function', e.g. `hanning(40)`, this defines the response at a single event. It will be weighted by the model prediction.
+- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. Future versions will allow for functions, as of v0.3 this is restricted to array-like objects
 - `formula::Any`: StatsModels `formula` object, e.g.  `@formula 0 ~ 1 + cond` (left-hand side must be 0).
 - `β::Vector` Vector of betas/coefficients, must fit the formula.
 - `contrasts::Dict` (optional): Determines which coding scheme to use for which categorical variables. Default is empty which corresponds to dummy coding.
@@ -81,10 +81,10 @@ end
 """
     MultichannelComponent <: AbstractComponent
 
-Wrapper for an `AbstractComponent` to project it to multiple target channels via `projection`.
+Projects a `AbstractComponent` to multiple "channels" via the `projection` vector.
     
 Optionally, `noise` can be added to the source prior to projection.
-A `MultichannelComponent` can be constructed using one of the following options for `projection`:
+By default a `MultichannelComponent` can be constructed using one of the following options for `projection`:
 - `projection::AbstractVector`: Directly pass a custom projection vector.
 - `projection::Pair{<:AbstractHeadmodel,String}`: Generate a projection vector by specifying which headmodel to use and which sources should be active.
 
@@ -178,7 +178,7 @@ maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
 
-By default call `simulate_component` with `(rng, c::Abstractcomponent, design::AbstractDesign)` instead of the whole simulation. This allows users to provide a hook to do something completely different :)
+By default call `simulate_component` with `(rng, c::Abstractcomponent, design::AbstractDesign)` instead of the whole simulation. This function exist solely to provide a "hook" if for a custom component something else than the design is necessary, e.g. a dependency on the onsets, noise or similar.
 """
 simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
     simulate_component(rng, c, simulation.design)
@@ -189,7 +189,7 @@ simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
 Generate a linear model design matrix, weight it by the coefficients `c.β` and multiply the result with the given basis vector.
 
 # Returns
-- `Matrix`: Simulated component for each event in the events dataframe. The output dimensions are `length(c.basis) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events dataframe. The output dimensions are `length(c.basis) x length(design)`.
 
 # Examples
 ```julia-repl
@@ -231,16 +231,23 @@ end
 
 Generate a MixedModel and simulate data according to the given paraemters `c.β` and `c.σs`.
 
-A trick is used to remove the Normal-Noise from the MixedModel which might lead to rare numerical instabilities.
-Practically, we upscale the `σs` by factor 10000, and provide a `σ = 0.0001`.
-Internally this results in a normalization where the response scale is 10000 times larger than the noise.
-Currently, it is not possible to use a different basis for fixed and random effects, but a code-stub exists (it is slow though).
 
 # Keyword arguments
 - `return_parameters::Bool = false`: Can be used to return the per-event parameters used to weight the basis function. Sometimes useful to inspect what is simulated.
 
 # Returns
-- `Matrix`: Simulated component for each event in the events dataframe. The output dimensions are `length(c.basis) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events dataframe. The output dimensions are `length(c.basis) x length(design)`.
+
+# Notes
+1) MixedModels/Sim does not allow simulation of data without white noise of the residuals. Because we want our own noise, we use the following trick to remove the MixedModels-Noise:
+Practically, we upscale the specified `σs` by factor 10_000, and request a white-noise-level of `σ = 0.0001`.
+Internally in MixedModels/Sim, `σs` are relative to `σ`, and thus are normalized correctly, while keeping the noise 10_000 times smaller than the random effects
+
+We cannot exclude that this trick runs into strange numerical issues if the random effect `σs` are very large compared to the fixed effects.
+
+2) Currently, it is not possible to use a different basis for fixed and random effects. If this is needed, some code-scaffold is available but commented out at the moment and requires a bit of implementation work.
+
+
 
 # Examples
 ```julia-repl
@@ -341,7 +348,7 @@ end
 Return the projection of a `MultichannelComponent c` from "source" to "sensor" space.
 
 # Returns
-- `Array`: Projected simulated component for each event in the events dataframe. The output dimensions are `length(c.projection) x length(c.basis) x length(design)`.
+- `Array{Float64,3}`: Projected simulated component for each event in the events dataframe. The output dimensions are `length(c.projection) x length(c.basis) x length(design)`.
 
 # Examples
 ```julia-repl
@@ -387,22 +394,21 @@ end
 """
     weight_σs(σs::Dict, b_σs::Float64, σ_lmm::Float64)
 
-Weight a `σs` Dict for MixedModels.jl by a Float64.
+Weight a `σs` Dict for MixedModels.jl by `b_σs`, a scaling factor typically from a `basis`.
 
-Finally sales it by `σ_lmm`, as a trick to simulate noise-free LMMs.
+Finally scales it again by `σ_lmm`, as a trick to simulate noise-free LMMs (see `MixedModelsComponent`)
 
-I anticipate a function
+In the future, we anticipate a function
     `function weight_σs(σs::Dict,b_σs::Dict,σ_lmm::Float64)`
-where each σs entry can be weighted individually
+where each `σs` entry can be weighted individually by a matching `b_σs`, but it is not implemented.
 
 # Arguments
-
+- `σs::Dict` = a Dict of random effects as output of MixedModels.create_re
+- `b_σs::Float64` = a scaling factor, typically one entry of a basis function from a component
+- `σ_lmm::Float64` = a scaling factor to simulate near-zero noise LMMs
 # Returns
+    `NamedTuple` of the weighted random effects
 
-# Examples
-```julia-repl
-
-```
 """
 function weight_σs(σs::Dict, b_σs::Float64, σ_lmm::Float64)
     #k = (collect(keys(σs))...,)
