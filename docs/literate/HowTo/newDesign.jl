@@ -3,7 +3,9 @@
 # A design specifies how much data is generated, and how the event-table(s)
 # should be generated. Already implemented examples are `MultiSubjectDesign` and `SingleSubjectDesign`.
 
+
 # We need 3 things for a new design: a `struct<:AbstractDesign`, a `size` and a `generate_events` function.
+
 
 # ### Setup
 # ```@raw html
@@ -15,6 +17,7 @@ using StableRNGs
 using DataFrames
 using Parameters
 using Random
+
 # ```@raw html
 # </details>
 # <br />
