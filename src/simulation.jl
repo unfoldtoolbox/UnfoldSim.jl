@@ -37,8 +37,7 @@ Some remarks to how the noise is added:
   - If `return_epoched = true` and `onset =NoOnset()` the noise is added to the epoched data matrix
   - If `onset` is not `NoOnset`, a continuous signal is created and the noise is added to this i.e. this means that the noise won't be the same as in the `onset = NoOnset()` case even if `return_epoched = true`.
   - The case `return_epoched = false` and `onset = NoOnset()` is not possible and therefore covered by an assert statement
-  - `simulate(rng,design::SequenceDesign,...)`
-    If no `design.rng` was defined for `SequenceDesign`, we replace it with the `simulation`-function call `rng` object
+
 
 """
 
@@ -52,24 +51,8 @@ function simulate(
     kwargs...,
 )
 
-    if is_SequenceDesign(design)
-        design = sequencedesign_add_rng(rng, design)
-    end
     simulate(rng, Simulation(design, signal, onset, noise); kwargs...)
 end
-
-
-sequencedesign_add_rng(rng, design::AbstractDesign) = design
-sequencedesign_add_rng(rng, design::RepeatDesign) =
-    RepeatDesign(sequencedesign_add_rng(rng, design.design), design.repeat)
-sequencedesign_add_rng(rng, design::SequenceDesign) =
-    isnothing(design.rng) ?
-    SequenceDesign(design.design, design.sequence, design.sequencelength, rng) : design
-
-
-is_SequenceDesign(d::AbstractDesign) = false
-is_SequenceDesign(d::RepeatDesign) = is_SequenceDesign(d.design)
-is_SequenceDesign(d::SequenceDesign) = true
 
 
 function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool = false)
