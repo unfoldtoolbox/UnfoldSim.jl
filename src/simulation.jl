@@ -14,28 +14,88 @@ end
 
 """
     simulate(
-    [rng::AbstractRNG,]
+    rng::AbstractRNG,
     design::AbstractDesign,
     signal,
     onset::AbstractOnset,
     noise::AbstractNoise = NoNoise();
-    return_epoched=false,
+    return_epoched = false,
     )
 
-Main simulation function, given `Design`, [Array of] `Component`, `Onset` and optional [`Noise`], returns continuous or epoched signal.
+	simulate(
+    design::AbstractDesign,
+    signal,
+    onset::AbstractOnset,
+    noise::AbstractNoise = NoNoise();
+    return_epoched = false,
+    )
 
-## optional
-- `return_epoched` (Bool, default: `false`):  Skip the Onset-calculation and conversion to continuous data and return the epoched data directly (see also remarks below).
+Return continuous or epoched signal, given `Design`, [Array of] `Component`, `Onset` and 
+optional [`Noise`] and [`RNG`]. Main simulation function.
 
-## Return 
-Depending on the design, the components and on `return_epoched`, the output can be a 1-D, 2-D, 3-D or 4-D Array. For example, a 4-D Array would have the dimensions `channels x time x trials x subjects`
+# Arguments
+- `design::AbstractDesign`: Desired experimental design.
+- `signal`: `Component` for the desired signal.
+- `onset::AbstractOnset`: Desired onset.
+- `noise::AbstractNoise = NoNoise()` (optional): Desired noise.
+- `rng::AbstractRNG` (optional): Random number generator, important to ensure reproducibility.
 
-## Notes
+# Keyword arguments
+- `return_epoched = false`: Skip the Onset-calculation and conversion to continuous data 
+    and return the epoched data directly (see also Notes below).
+
+# Returns
+- `signal` : Generated signal. Depending on the design, on the components and on 
+    `return_epoched`, the output can be a 1-D, 2-D, 3-D or 4-D Array. 
+    For example, a 4-D Array would have the dimensions `channels x time x trials x subjects`.
+- `events`: Generated events.
+
+# Examples
+Adapted from the quickstart tutorial in the UnfoldSim docs.
+```julia-repl
+julia> using UnfoldSim
+
+julia> using Random # to get an RNG
+
+julia> design =
+    SingleSubjectDesign(; conditions = Dict(:cond_A => ["level_A", "level_B"])) |>
+    x -> RepeatDesign(x, 10);
+
+julia> signal = LinearModelComponent(; 
+    basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
+    formula = @formula(0 ~ 1 + cond_A),
+    β = [1, 0.5],
+);
+
+julia> onset = UniformOnset(; width = 20, offset = 4);
+
+julia> noise = PinkNoise(; noiselevel = 0.2);
+
+julia> data, events = simulate(MersenneTwister(1), design, signal, onset, noise)
+([-0.045646938524459196, 0.15784406738265955, 0.012640319497460443, 0.026669512219327673, 0.15329144053662508, 0.06412654786607011, -0.16766777448918685, -0.08012027590515228, 0.0020515088981202137, -0.24874482217391175  …  0.24621397283439814, 0.1710771262918883, -0.01527736524528042, 0.7639978745937471, 1.5600315092771557, 1.624219837479329, 1.2889713838347956, 0.26819223928179, 0.16535758767503866, 0.21291936972924855], 20×2 DataFrame
+ Row │ cond_A   latency 
+     │ String   Int64   
+─────┼──────────────────
+   1 │ level_A       18
+   2 │ level_B       39
+   3 │ level_A       45
+   4 │ level_B       49
+  ⋮  │    ⋮        ⋮
+  18 │ level_B      258
+  19 │ level_A      281
+  20 │ level_B      303
+
+julia> data1, events1 = simulate(design, signal, onset, noise)
+┌ Warning: No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!
+```
+
+# Notes
 Some remarks to how the noise is added:
-  - If `return_epoched = true` and `onset =NoOnset()` the noise is added to the epoched data matrix
-  - If `onset` is not `NoOnset`, a continuous signal is created and the noise is added to this i.e. this means that the noise won't be the same as in the `onset = NoOnset()` case even if `return_epoched = true`.
-  - The case `return_epoched = false` and `onset = NoOnset()` is not possible and therefore covered by an assert statement
-
+- If `return_epoched = true` and `onset = NoOnset()` the noise is added to the epoched data matrix.
+- If `onset` is not `NoOnset`, a continuous signal is created and the noise is added to this 
+    i.e. this means that the noise won't be the same as in the `onset = NoOnset()` case even if `return_epoched = true`.
+- The case `return_epoched = false` and `onset = NoOnset()` is not possible and therefore 
+    covered by an assert statement.
 """
 simulate(
     rng::AbstractRNG,
