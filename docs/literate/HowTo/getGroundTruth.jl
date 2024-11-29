@@ -68,18 +68,33 @@ gt_data, gt_events = simulate(
 );
 @show gt_events
 
+# Additionally, we can get the simulated effects into a tidy dataframe using Unfold's `result_to_table`.
+# Note that the data has to be reshaped into a channel X times X predictor form. (In our one channel example `size(gt_data) = (45,2)`, missing the channel dimension)
+
+g = reshape(gt_data,1,size(gt_data)...)
+times = range(1, 45);
+gt_effects = Unfold.result_to_table([g], [gt_events], [times], ["effects"])
+first(gt_effects, 5)
+
+
 # ## Compare with Unfold.jl results
 
 m = fit(
     UnfoldModel,
-    Dict(
+    [
         Any => (
             @formula(0 ~ 1 + condition + spl(continuous, 4)),
             firbasis(τ = [-0.1, 1], sfreq = 100, name = "basis"),
         ),
-    ),
+    ],
     evts,
     data,
 );
 
-eff = effects(effects_dict, m);
+ef = effects(effects_dict, m);
+
+# Display ground truth and effects, note that the ground truth will be shorter because of the missing baseline.
+# If you want to actually compare results with the ground truth, you could either us `UnfoldSim.pad_array()` or forgo the baseline of your estimates.
+lines(ef.yhat)
+lines!(gt_effects.yhat)
+current_figure()
