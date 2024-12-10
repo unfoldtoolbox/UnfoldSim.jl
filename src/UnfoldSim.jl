@@ -45,7 +45,7 @@ export create_re
 export Simulation
 
 # component types
-export MixedModelComponent, LinearModelComponent
+export MixedModelComponent, LinearModelComponent, TRFComponent
 
 # export designs
 export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign, SequenceDesign
@@ -66,7 +66,9 @@ export simulate,
 export pad_array, convert
 
 # export Offsets
-export UniformOnset, LogNormalOnset, NoOnset, UniformOnsetFormula, LogNormalOnsetFormula
+
+export UniformOnset,
+    LogNormalOnset, NoOnset, UniformOnsetFormula, LogNormalOnsetFormula, TRFOnset
 
 # re-export StatsModels
 export DummyCoding, EffectsCoding
