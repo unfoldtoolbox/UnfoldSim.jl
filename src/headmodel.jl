@@ -1,9 +1,36 @@
-
-
 struct Hartmut <: AbstractHeadmodel
     artefactual::Any
     cortical::Any
     electrodes::Any
+end
+
+function Hartmut() # Outer constructor
+    println("""Please cite: $(hartmut_citation())""")
+    path = joinpath(artifact"hartmut", "hartmut.h5")
+    h = h5open(path)
+
+
+    weirdchan = ["Nk1", "Nk2", "Nk3", "Nk4"]
+    ## getting index of these channels from imported hartmut model data, exclude them in the topoplot
+    remove_indices = findall(l -> l ∈ weirdchan, h["electrodes"] |> read |> x -> x["label"])
+
+    function select_channel(x)
+
+        if "leadfield" ∈ keys(x)
+            x["leadfield"] = x["leadfield"][Not(remove_indices), :, :] .* 10e3 # this scaling factor seems to generate potentials with +-1 as max
+        else
+            x["label"] = x["label"][Not(remove_indices)]
+            pos3d = x["pos"][Not(remove_indices), :]
+            pos3d = pos3d ./ (4 * maximum(pos3d, dims = 1))
+            x["pos"] = pos3d
+        end
+        return x
+    end
+    headmodel = Hartmut(
+        h["artefacts"] |> read |> select_channel,
+        h["cortical"] |> read |> select_channel,
+        h["electrodes"] |> read |> select_channel,
+    )
 end
 
 function Base.show(io::IO, h::Hartmut)
@@ -35,46 +62,7 @@ orientation(hart::Hartmut; type = "cortical") =
     type == "cortical" ? hart.cortical["orientation"] : hart.artefactual["orientation"]
 
 
-"""
-Load a headmodel, using Artifacts.jl automatically downloads the required files
-
-Currently only `type="hartmut"` is implemented
-"""
-function headmodel(; type = "hartmut")
-    if type == "hartmut"
-        println("""Please cite: $(hartmut_citation())""")
-        path = joinpath(artifact"hartmut", "hartmut.h5")
-        h = h5open(path)
-
-
-        weirdchan = ["Nk1", "Nk2", "Nk3", "Nk4"]
-        ## getting index of these channels from imported hartmut model data, exclude them in the topoplot
-        remove_indices =
-            findall(l -> l ∈ weirdchan, h["electrodes"] |> read |> x -> x["label"])
-
-        function sel_chan(x)
-
-            if "leadfield" ∈ keys(x)
-                x["leadfield"] = x["leadfield"][Not(remove_indices), :, :] .* 10e3 # this scaling factor seems to generate potentials with +-1 as max
-            else
-                x["label"] = x["label"][Not(remove_indices)]
-                pos3d = x["pos"][Not(remove_indices), :]
-                pos3d = pos3d ./ (4 * maximum(pos3d, dims = 1))
-                x["pos"] = pos3d
-            end
-            return x
-        end
-        headmodel = Hartmut(
-            h["artefacts"] |> read |> sel_chan,
-            h["cortical"] |> read |> sel_chan,
-            h["electrodes"] |> read |> sel_chan,
-        )
-    else
-        error("unknown headmodel. currently only 'hartmut' allowed")
-    end
-
-    return headmodel
-end
+@deprecate headmodel() Hartmut()
 
 """
 Extracts magnitude of the orientation-including leadfield.
