@@ -14,7 +14,6 @@ begin
 	using UnfoldMakie
 	using DataFrames
 end
-	
 
 # ╔═╡ 5d925343-5d02-4887-9337-11cdf810c698
 hart = Hartmut()
