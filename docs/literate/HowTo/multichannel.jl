@@ -33,7 +33,7 @@ c2 = LinearModelComponent(; basis = p300(), formula = @formula(0 ~ 1), β = [1])
 mc = UnfoldSim.MultichannelComponent(c, [1, 2, -1, 3, 5, 2.3, 1])
 
 # or maybe more convenient: use the pair-syntax: Headmodel=>Label which makes use of a headmodel (HaRTmuT is currently easily available in UnfoldSim)
-hart = headmodel(type = "hartmut")
+hart = Hartmut()
 mc = UnfoldSim.MultichannelComponent(c, hart => "Left Postcentral Gyrus")
 mc2 = UnfoldSim.MultichannelComponent(c2, hart => "Right Occipital Pole")
 

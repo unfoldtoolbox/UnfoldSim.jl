@@ -73,7 +73,7 @@ export DummyCoding, EffectsCoding
 export p100, n170, p300, n400, hrf, PuRF
 
 # headmodel
-export AbstractHeadmodel, Hartmut, headmodel, leadfield, orientation, magnitude
+export AbstractHeadmodel, Hartmut, leadfield, orientation, magnitude
 
 # multichannel
 export MultichannelComponent
