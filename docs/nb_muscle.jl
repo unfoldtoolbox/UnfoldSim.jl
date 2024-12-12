@@ -17,7 +17,7 @@ end
 	
 
 # ╔═╡ 5d925343-5d02-4887-9337-11cdf810c698
-hart = headmodel()
+hart = Hartmut()
 
 # ╔═╡ bf4d7bdf-77df-402e-8c4e-098e85fcc34a
 T = 10; # total time
