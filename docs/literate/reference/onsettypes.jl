@@ -282,3 +282,25 @@ end
 #        - if `offset` < `length(signal.basis)` -> there might be overlap, depending on the other parameters of the onset distribution
 
 # [^1]: Wikipedia contributors. (2023, December 5). Log-normal distribution. In Wikipedia, The Free Encyclopedia. Retrieved 12:27, December 7, 2023, from https://en.wikipedia.org/w/index.php?title=Log-normal_distribution&oldid=1188400077# 
+
+
+
+
+# ## Design-dependent `X-OnsetFormula`
+
+# For additional control we provide `UniformOnsetFormula` and `LogNormalOnsetFormula` types, that allow to control all parameters by specifying formulas
+o = UnfoldSim.UniformOnsetFormula(
+    width_formula = @formula(0 ~ 1 + cond),
+    width_β = [50, 20],
+)
+events = generate_events(design)
+onsets = UnfoldSim.simulate_interonset_distances(MersenneTwister(42), o, design)
+
+f = Figure()
+ax = f[1, 1] = Axis(f)
+hist!(ax, onsets[events.cond.=="A"], bins = range(0, 100, step = 1), label = "cond: A")
+hist!(ax, onsets[events.cond.=="B"], bins = range(0, 100, step = 1), label = "cond: B")
+axislegend(ax)
+f
+
+# Voila - the inter-onset intervals are `20` samples longer for condition `B`, exactly as specified.`

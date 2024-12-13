@@ -21,6 +21,7 @@ The most used `kwargs` is: `return_epoched=true` which returns already epoched d
 
 #### Design
 - `n_repeats = 100`,
+
 - `event_order_function = shuffle`, # random trial order
 - `conditions = Dict(...)`,
 
@@ -46,9 +47,9 @@ function predef_eeg(
 
     # component / signal
     sfreq = 100,
-    p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict()),
-    n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, -3], Dict()),
-    p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5, 1], Dict()),
+    p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict(), 0),
+    n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, -3], Dict(), 0),
+    p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5, 1], Dict(), 0),
     kwargs...,
 )
 
@@ -79,7 +80,7 @@ function predef_eeg(
     kwargs...,
 )
 
-    components = []
+    components = AbstractComponent[]
     for c in comps
         append!(components, [T(c...)])
     end
