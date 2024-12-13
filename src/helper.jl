@@ -76,7 +76,7 @@ Returns src-`ix` of the Headmodel `Hartmut` which is closest to the average of t
 	We use the average in eucledean space, but the cortex is a curved surface. In most cases they will not overlap. Ideally we would calculate the average on the surface, but this is a bit more complex to do (you'd need to calculate the vertices etc.)
 
 ```julia
-hartmut = headmodel()
+hartmut = Hartmut()
 pos = closest_src(hartmut=>"Left Middle Temporal Gyrus, posterior division")
 ```
 """
