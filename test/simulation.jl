@@ -1,3 +1,4 @@
+using Base: AbstractCartesianIndex
 @testset "simulation" begin
 
     @testset "general_test_simulate" begin
@@ -213,6 +214,31 @@
 
             end
         end
+    end
+
+    @testset "multi-component sequence #124" begin
+        struct MyLinearModelComponent1 <: AbstractComponent
+            comp::Any
+        end
+        MyLinearModelComponent1(b, f, β) =
+            MyLinearModelComponent1(LinearModelComponent(; basis = b, formula = f, β))
+        UnfoldSim.simulate_component(rng, c::MyLinearModelComponent1, design) =
+            simulate_component(rng, c.comp, design)
+        Simulation(
+            SingleSubjectDesign(),
+            Dict(
+                'A' => [
+                    LinearModelComponent(
+                        basis = p100(),
+                        formula = @formula(0 ~ 1),
+                        β = [0],
+                    ),
+                ],
+                'B' => [MyLinearModelComponent1(p100(), @formula(0 ~ 1), [0])],
+            ),
+            NoOnset(),
+            NoNoise(),
+        )
     end
 
 end

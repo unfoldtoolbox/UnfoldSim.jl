@@ -20,3 +20,11 @@ struct Simulation
     onset::AbstractOnset
     noisetype::AbstractNoise
 end
+
+
+Simulation(
+    design::AbstractDesign,
+    components::Dict{<:Char,<:Vector},
+    onset::AbstractOnset,
+    noisetype::AbstractNoise,
+) = Simulation(design, Dict{Char,Vector{<:AbstractComponent}}(components), onset, noisetype)
