@@ -5,3 +5,11 @@ using UnfoldSim
     @test UnfoldSim.hanning(0.011, 0.02, 1000)[20] == 1.0
     @test_throws Exception UnfoldSim.hanning(0.011, 0.0, 1000)
 end
+
+@testset "p100,N170,p300,n400" begin
+    sfreq = 1000
+    @test argmax(p100(; sfreq)) == 0.1 * sfreq
+    @test argmin(n170(; sfreq)) == 0.17 * sfreq
+    @test argmax(p300(; sfreq)) == 0.3 * sfreq
+    @test argmin(n400(; sfreq)) == 0.4 * sfreq
+end
