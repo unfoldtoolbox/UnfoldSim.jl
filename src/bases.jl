@@ -28,13 +28,18 @@ n400(; sfreq = 100) = -hanning(0.4, 0.4, sfreq)
 """
 generate a hanning window
 
-duration: in s
-offset: in s, defines hanning peak
+width: in s
+offset: in s, defines hanning peak, must be > round(width/2)
 sfreq: sampling rate in Hz
 """
-function DSP.hanning(duration, offset, sfreq)
-    signal = hanning(Int(round(duration * sfreq)))
-    return pad_array(signal, -Int(round(offset * sfreq / 2)), 0)
+function DSP.hanning(width, offset, sfreq)
+    width = width * sfreq
+    offset = offset * sfreq
+    signal = hanning(Int(round(width)))
+    pad_by = Int(round(offset - length(signal) / 2))
+
+    pad_by < 0 ? error("offset has to be > round(width/2)") : ""
+    return pad_array(signal, -pad_by, 0)
 end
 
 ## pupil
