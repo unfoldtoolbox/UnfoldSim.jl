@@ -67,16 +67,19 @@ struct AutoRegressiveNoise <: AbstractNoise end
 """ 
     ExponentialNoise <: AbstractNoise
 
-Noise with exponential decay in AR spectrum.
+Noise with exponential decay in AR spectrum. Implements the algorithm (3) from Markus Deserno 2002: https://www.cmu.edu/biolphys/deserno/pdf/corr_gaussian_random.pdf
+"How to generate exponentially correlated Gaussian random numbers"
+
+The noise has std of 1 and mean of 0 (over many samples)
+
+The factor "τ" defines the decay over samples. 
 
 `noiselevel` is used to scale the noise
 
-!!! warning
-    With the current implementation we try to get exponential decay over the whole autoregressive (AR) spectrum, which is N samples (the total number of samples in the signal) long. This involves the inversion of a Cholesky matrix of size NxN matrix, which will need lots of RAM for non-trivial problems.
 """
 @with_kw struct ExponentialNoise <: AbstractNoise
     noiselevel = 1
-    ν = 1.5 # exponential factor of AR decay "nu"
+    τ = 1000
 end
 
 
@@ -116,21 +119,24 @@ end
 
 function simulate_noise(rng, t::ExponentialNoise, n::Int)
 
-    function exponential_correlation(x; nu = 1, length_ratio = 1)
-        # Author: Jaromil Frossard
-        # generate exponential function
-        R = length(x) * length_ratio
-        return exp.(-3 * (x / R) .^ nu)
+    τ = t.τ
+
+
+    @assert τ > 0
+    f = exp(-1 / τ)
+    #s = 0:n-1
+    g = randn(rng, n)
+    r = similar(g)
+    r[1] = g[1]
+    for n = 1:length(g)-1
+        r[n+1] = f * r[n] + sqrt(1 - f^2) * g[n+1]
     end
 
-    Σ = Symmetric(Circulant(exponential_correlation([0:1:(n-1);], nu = t.ν)), :L)
 
-    # cholesky(Σ) is n x n diagonal, lots of RAM :S
-    return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]
+
+
+    return t.noiselevel .* r
 end
-
-
-
 
 """
     add_noise!(rng, noisetype::AbstractNoise, signal)
@@ -149,3 +155,5 @@ function add_noise!(rng, noisetype::AbstractNoise, signal)
     signal .+= noise
 
 end
+
+

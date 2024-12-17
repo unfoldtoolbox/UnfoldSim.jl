@@ -52,6 +52,9 @@ makedocs(;
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
             "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
         ],
+        "Explanations/Explorations" => [
+            "Leadfield Orientations" => "./generated/explanations/orientations_headmodels.md",
+        ],
         "API / Docstrings" => "api.md",
     ],
 )
