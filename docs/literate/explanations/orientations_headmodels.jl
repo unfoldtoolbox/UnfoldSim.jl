@@ -39,6 +39,7 @@ ix = 50
         visual = (; label_scatter = false),
     ) for k = 1:3
 ]
+f
 
 # These are the simulated source activatios of the source-point `$(ix)`, if the underlying dipolar source would be oriented in x,y, or z direction.
 
@@ -55,6 +56,7 @@ plot_topoplot!(
     visual = (; label_scatter = false),
     axis = (; title = "perpendicular"),
 )
+f
 
 # We could also calculate the vector norm:
 
@@ -67,18 +69,19 @@ plot_topoplot!(
     visual = (; label_scatter = false),
     axis = (; title = "norm"),
 )
+f
 
 # other options are sum, or maximum, or ...
 plot_topoplot!(
     f[2, 3],
-    sum(l[:, ix, :], dims = 2)[:, 1];
+    sum(L[:, ix, :], dims = 2)[:, 1];
     positions = pos,
     visual = (; label_scatter = false),
     axis = (; title = "sum"),
 )
 plot_topoplot!(
     f[3, 3],
-    maximum(l[:, ix, :], dims = 2)[:, 1];
+    maximum(L[:, ix, :], dims = 2)[:, 1];
     positions = pos,
     visual = (; label_scatter = false),
     axis = (; title = "max"),
