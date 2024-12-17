@@ -155,5 +155,3 @@ function add_noise!(rng, noisetype::AbstractNoise, signal)
     signal .+= noise
 
 end
-
-
