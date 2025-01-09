@@ -42,7 +42,7 @@ One can find a detailed example of how to use `UnfoldSim.jl` to simulate continu
 # Statement of Need
 In our work (e.g. @ehinger2019unfold, @dimigen2021regression), we often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kind of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
 
-While other EEG simulation toolboxes exist, they each have limitations: they are dominantly based on the proprietary MATLAB software (The MathWorks Inc., Natick, USA), they do not simulate continuous EEG, and they offer little support for designs more complex than two conditions or with non-linear effects. In contrast, UnfoldSim.jl is free and open-source and it allows to simulate continuous EEG signals even for complex designs.
+While other EEG simulation toolboxes exist, they each have limitations: they are dominantly based on the proprietary MATLAB software [@MATLAB], they do not simulate continuous EEG, and they offer little support for designs more complex than two conditions or with non-linear effects. In contrast, `UnfoldSim.jl` is free and open-source and it allows to simulate continuous EEG signals even for complex designs.
 
 # Functionality
 The package provides four abstract types: `AbstractDesign`, `AbstractComponent`, `AbstractOnset` and `AbstractNoise`. In the following, we present the concrete types that are currently implemented.
@@ -55,15 +55,15 @@ The design contains the levels of all conditions and predictors. Currently, we s
 
 Each component can be nested in a `MultichannelComponent`, which, using a forward head model, projects the simulated source component to the multi-channel electrode space. Using `Artifacts.jl` we provide on-demand access to the HArtMuT [@harmening2022hartmut] model. 
 
-To generate complex activations, it is possible to specify a vector of `<:AbstractComponents`.
+To generate complex activations, it is possible to specify a vector of components.
 
 ## Inter-onset distributions
 The inter-onset distribution defines the distance between events in the continuous (EEG) signal. Currently, `UniformOnset` and `LogNormalOnset` are implemented (see \autoref{fig_onset_distributions}). By adjusting the distribution's parameters, one indirectly controls the amount of overlap between the event-related responses.
 
-![Illustration of the inter-onset distributions. The colours indicate different sets of parameter values. Please note that for the lognormal distribution, the parameters are defined on a logarithmic scale, while the distribution is shown on a linear scale. \label{fig_onset_distributions}](plots/onset_distributions.svg){height="180pt"}
+![Illustration of the inter-onset distributions. The colours indicate different sets of parameter values. Please note that for the lognormal distribution, the parameters are defined on a logarithmic scale, while the histogram is shown on a linear scale. \label{fig_onset_distributions}](plots/onset_distributions.svg){height="180pt"}
 
 ## Noise types
-UnfoldSim.jl offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
+`UnfoldSim.jl` offers different noise types: `WhiteNoise`, `RedNoise`, `PinkNoise` and exponentially decaying autoregressive noise (`ExponentialNoise`) (see \autoref{fig_noise_types}). In the future, we will add simple autoregressive noise and noise based on actual EEG data.
 
 ![Illustration of the different noise types (indicated by colour). Panel **A** shows the noise over time. Please note that the noise signals are shifted by 5&nbsp;µV for visualisation purposes. Panel **B** displays its $\text{log}_{\text{10}}\text{(power)}$ at normalized frequencies. \label{fig_noise_types}](plots/noise_types.svg){height="250pt"}
 
