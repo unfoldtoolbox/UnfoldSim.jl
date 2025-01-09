@@ -171,74 +171,67 @@ orientation(hart::Hartmut; type = "cortical") =
 """
     magnitude(headmodel::AbstractHeadmodel)
 
-Extract magnitude of the orientation-including leadfield.
+Extract the magnitude of the orientation-including leadfield of the given `headmodel`.
 
-By default use the orientation specified in the headmodel
-Fallback: along the third dimension using `norm` - the maximal projection
+By default use the orientations specified in the headmodel.
 
 # Returns
-- `Matrix{Float64}`: ... The output dimensions are `electrodes x sources`.
-"""
-magnitude(headmodel::AbstractHeadmodel) = magnitude(leadfield(headmodel))
-
-"""
-    magnitude(headmodel::Hartmut; type = "perpendicular")
-
-Extract magnitude of 3-orientation-leadfield, `type` (default: "perpendicular") => uses the provided source-point orientations - otherwise falls back to `norm`.
-
-# Keyword arguments
-- `type = "perpendicular"`: 
+- `Matrix{Float64}`: Contribution of each source to the potential measured at each electrode taking into account the orientation of the sources.
+    The output dimensions are `electrodes x sources`.
 
 # Examples
 ```julia-repl
+# Using the HArtMut model as an example
+julia> h = Hartmut();
+Please cite: HArtMuT: Harmening Nils, Klug Marius, Gramann Klaus and Miklody Daniel - 10.1088/1741-2552/aca8ce
+
+julia> magnitude(h)
+227×2004 Matrix{Float64}:
+  0.111706   …   0.301065
+  0.0774359      0.332934
+  ⋮          ⋱  
+ -0.164539      -0.246555
 ```
 """
-magnitude(headmodel::Hartmut; type = "perpendicular") =
-    type == "perpendicular" ? magnitude(leadfield(headmodel), orientation(headmodel)) :
-    magnitude(leadfield(headmodel))
+magnitude(headmodel::AbstractHeadmodel) =
+    magnitude(leadfield(headmodel), orientation(headmodel))
 
 """
     magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) where {T<:Real}
 
-Return the magnitude along an orientation of the leadfield.
+Return the magnitude of the leadfield `lf` along the given `orientation`.
 
 # Arguments
-- `lf::AbstractArray{T,3}`:
-- `orientation::AbstractArray{T,2}`:
+- `lf::AbstractArray{T,3}`: Leadfield with the dimensions `electrodes x sources x spatial dimension`.
+- `orientation::AbstractArray{T,2}`: Source orientations with the dimensions `sources x spatial dimensions`.
 
 # Examples
 ```julia-repl
+# Specify the leadfield (often given by a headmodel)
+julia> lf = cat([1 0; 0 1; 0 0], [1 1; 0 0; 0.5 0.5], dims=3);
+
+# Specify the source orientations
+julia> ori = [1.0 0; 0 1]
+
+# Calculate the magnitude
+julia> magnitude(lf, ori)
+3×2 Matrix{Float64}:
+ 1.0  1.0
+ 0.0  0.0
+ 0.0  0.5
 ```
 """
 function magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) where {T<:Real}
     si = size(lf)
+
+    # Ensure that the given leadfield and orientations have the same number of sources and spatial dimensions
+    @assert si[2:3] == size(orientation) "The dimensions (number of sources and spatial dimensions) of the leadfield and the source orientations do not match. \\
+        leadfield: $(si[2:3]), orientation: $(size(orientation))."
+
     magnitude = fill(NaN, si[1:2])
     for e = 1:si[1]
         for s = 1:si[2]
             magnitude[e, s] = lf[e, s, :]' * orientation[s, :]
-        end
-    end
-    return magnitude
-end
-
-"""
-    magnitude(lf::AbstractArray{T,3}) where {T<:Real}
-
-If orientation is not specified, returns the maximal magnitude (norm of leadfield).
-
-# Arguments:
-- `lf::AbstractArray{T,3}`:
-
-# Examples
-```julia-repl
-```
-"""
-function magnitude(lf::AbstractArray{T,3}) where {T<:Real}
-    si = size(lf)
-    magnitude = fill(NaN, si[1:2])
-    for e = 1:si[1]
-        for s = 1:si[2]
-            magnitude[e, s] = norm(lf[e, s, :])
         end
     end
     return magnitude
