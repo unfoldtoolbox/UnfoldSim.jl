@@ -57,3 +57,9 @@ jobs:
             using UnfoldSim
             DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive=true)
             doctest(UnfoldSim)'
+      - name: Update UnfoldDocs
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.UNFOLDDOCSPAT }}
+          repository: unfoldtoolbox/UnfoldDocs
+          event-type: individual-docs-updated
