@@ -1,7 +1,9 @@
 """
     Hartmut <: AbstractHeadmodel
 
-Type for accessing the HArtMuT model (Harmening et al., 2022) which is a head model including not only brain sources but also muscular and ocular sources.
+Type for accessing the HArtMuT model (Harmening et al., 2022), a head model which includes not only brain sources but also muscular and ocular sources.
+
+Note: Use `Hartmut()` to create an instance of this head model.
 
 # Fields
 - `artefacual::Any`: Dict with artefactual sources (e.g. muscular and ocular) containing label, leadfield, orientation and position.
@@ -174,6 +176,7 @@ orientation(hart::Hartmut; type = "cortical") =
 Return the magnitude for the given `headmodel` based on the leadfield (and potentially the source orientations) specified in the `headmodel`.
 
 If the `headmodel` includes source orientations these are used in the calculations, otherwise the `leadfield` is returned assuming that the source orientations are already included.
+Please note that (at least in the case of the HArtMuT model) the leadfield for the cortical sources is used.
 
 # Returns
 - `Matrix{Float64}`: Contribution of each source to the potential measured at each electrode taking into account the orientation of the sources.
