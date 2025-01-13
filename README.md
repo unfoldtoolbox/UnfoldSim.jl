@@ -59,14 +59,14 @@ using Random
 # Start by defining the design / events data frame
 design =
     SingleSubjectDesign(; conditions = Dict(:condA => ["levelA", "levelB"])) |>
-    d -> RepeatDesign(d, 10);
+    d -> RepeatDesign(d, 10)
 
 # Next define a ground truth signal + relation to events/design with Wilkinson formulas
 signal = LinearModelComponent(;
     basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
     formula = @formula(0 ~ 1 + condA),
     β = [1, 0.5],
-);
+)
 # finally, define some inter-onset distribution and noise, and simulate data!
 data, events = simulate(
     Random.MersenneTwister(1),
@@ -74,7 +74,7 @@ data, events = simulate(
     signal,
     UniformOnset(; offset = 5, width = 4),
     PinkNoise(),
-);    
+)    
 ```
 All simulation ingredients (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
 
