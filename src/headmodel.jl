@@ -171,7 +171,9 @@ orientation(hart::Hartmut; type = "cortical") =
 """
     magnitude(headmodel::AbstractHeadmodel)
 
-Extract the magnitude of the orientation-including leadfield of the given `headmodel`.
+Return the magnitude for the given `headmodel` based on the leadfield (and potentially the source orientations) specified in the `headmodel`.
+
+If the `headmodel` includes source orientations these are used in the calculations, otherwise the `leadfield` is returned assuming that the source orientations are already included.
 
 By default use the orientations specified in the headmodel.
 
