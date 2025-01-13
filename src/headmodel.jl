@@ -175,8 +175,6 @@ Return the magnitude for the given `headmodel` based on the leadfield (and poten
 
 If the `headmodel` includes source orientations these are used in the calculations, otherwise the `leadfield` is returned assuming that the source orientations are already included.
 
-By default use the orientations specified in the headmodel.
-
 # Returns
 - `Matrix{Float64}`: Contribution of each source to the potential measured at each electrode taking into account the orientation of the sources.
     The output dimensions are `electrodes x sources`.
