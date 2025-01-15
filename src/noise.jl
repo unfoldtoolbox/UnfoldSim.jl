@@ -7,6 +7,8 @@
 
 A type for generating Pink Noise using the `SignalAnalysis.jl` implementation.
 
+The noise values are sampled from a standard normal distribution 𝒩(μ=0, σ=1).
+That means that ~95% of the values are between ~-2 and ~2 (with `noiselevel = 1`).\\
 Tip: To manually create noise samples use the [`simulate_noise`](@ref) function.
 
 # Fields
@@ -46,6 +48,8 @@ end
 
 A type for generating Red Noise using the `SignalAnalysis.jl` implementation.
 
+The noise values are sampled from a standard normal distribution 𝒩(μ=0, σ=1).
+That means that ~95% of the values are between ~-2 and ~2 (with `noiselevel = 1`).\\
 Tip: To manually create noise samples use the [`simulate_noise`](@ref) function.
 
 # Fields
@@ -83,19 +87,20 @@ end
 
 A type for generating White Noise using `randn` - thus Gaussian noise.
 
-Using `imfilter` > 0 it is possible to smooth the noise using Image.imfilter.
+The noise values are sampled from a standard normal distribution 𝒩(μ=0, σ=1).
+That means that ~95% of the values are between ~-2 and ~2 (with `noiselevel = 1`).\\
 Tip: To manually create noise samples use the [`simulate_noise`](@ref) function.
 
 # Fields
 - `noiselevel = 1` (optional): Factor that is used to scale the noise.
-- `imfilter = 0` (optional):
+- `imfilter = nothing` (optional): Use `imfilter > 0` to smooth the noise using `Image.imfilter` with a Gaussian kernel with `σ = imfilter`.
 
 # Examples
 ```julia-repl
 julia> noise = WhiteNoise()
 WhiteNoise
   noiselevel: Int64 1
-  imfilter: Int64 0
+  imfilter: Nothing nothing
 
 julia> using StableRNGs
 
@@ -110,7 +115,7 @@ See also [`PinkNoise`](@ref), [`RedNoise`](@ref), [`ExponentialNoise`](@ref), [`
 """
 @with_kw struct WhiteNoise <: AbstractNoise
     noiselevel = 1
-    imfilter = 0
+    imfilter = nothing
 end
 
 """
@@ -200,13 +205,16 @@ end
 
 Generate noise samples of the given type `t`.
 
+For details, see the documentation of the individual noise types.
+Use `subtypes(AbstractNoise)` for a list of the implemented noise types.
+
 # Arguments
 - `rng::AbstractRNG`: Random number generator (RNG) to make the process reproducible.
 - `t::AbstractNoise`: Instance of a noise type e.g. `PinkNoise()`.
 - `n::Int`: The number of noise samples that should be generated.
 
 # Returns
-- `Vector{Float64}`: Vector of length `n` containing the noise samples.
+- `Vector`: Vector of length `n` containing the noise samples.
 
 # Examples
 ```julia-repl
