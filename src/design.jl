@@ -365,7 +365,7 @@ Design to obtain ground truth simulation.
 ## Fields
 - `design::AbstractDesign`
    The design of your (main) simulation.
-- `èffects_dict::Dict`
+- `effects_dict::Dict`
    Effects.jl style dictionary specifying variable effects. See also [Unfold.jl marginalized effects](https://unfoldtoolbox.github.io/Unfold.jl/stable/generated/HowTo/effects/)
 """
 struct EffectsDesign <: AbstractDesign
@@ -378,7 +378,7 @@ UnfoldSim.size(t::EffectsDesign) = size(generate_events(t), 1)
 """
     expand_grid(design)
 
-Used to expand effects grid. Copied from Effects.jl
+calculate all possible combinations of the key/value pairs of the design-dict. Copied from Effects.jl
 """
 function expand_grid(design)
     colnames = tuple(Symbol.(keys(design))...)
@@ -393,7 +393,7 @@ typical_value(v) = unique(v)
 """
     UnfoldSim.generate_events(design::EffectsDesign)
 
-Generates events to simulate ground truth data using an effects dictionary. Every covariate that is in the `GroundTruthDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
+Generates events to simulate marginalized effects using an Effects.jl reference-grid dictionary. Every covariate that is in the `EffectsDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
 
 ```julia
 # Example
