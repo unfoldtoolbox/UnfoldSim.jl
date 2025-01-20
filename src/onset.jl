@@ -91,7 +91,7 @@ Generate the inter-onset distance vector by sampling from the respective distrib
 - `design::AbstractDesign`: Experimental design with conditions and covariates.
 
 # Returns
-- `Vector{Int64}`: Inter-onset distances in samples. Note that these are distances between onsets and no latencies.
+- `Vector{Integer}`: Inter-onset distances in samples. Note that these are distances between onsets and no latencies.
 
 # Examples
 ```julia-repl
