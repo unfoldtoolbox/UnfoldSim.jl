@@ -30,7 +30,7 @@ end
 """
     LogNormalOnset <: AbstractOnset
 
-Log-normal inter-event distances (in samples) using the `Distributions.jl` truncated LogNormal distribution.
+Log-normal inter-event distances (in samples) using the `Distributions.jl` truncated LogNormal distribution ([code and mathematical reference](https://juliastats.org/Distributions.jl/stable/univariate/#Distributions.LogNormal)).
 
 Be careful with large `μ` and `σ` values, as they are on logscale. σ>8 can quickly give you out-of-memory sized signals! \\
 Tip: To manually generate inter-event distance samples use the [`simulate_interonset_distances`](@ref) function.
