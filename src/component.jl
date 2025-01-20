@@ -189,7 +189,7 @@ simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
 Generate a linear model design matrix, weight it by the coefficients `c.β` and multiply the result with the given basis vector.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events dataframe. The output dimensions are `length(c.basis) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(c.basis) x length(design)`.
 
 # Examples
 ```julia-repl
@@ -229,14 +229,14 @@ end
 """
     simulate_component(rng, c::MixedModelComponent, design::AbstractDesign, return_parameters = false)
 
-Generate a MixedModel and simulate data according to the given paraemters `c.β` and `c.σs`.
+Generate a MixedModel and simulate data according to the given parameters `c.β` and `c.σs`.
 
 
 # Keyword arguments
 - `return_parameters::Bool = false`: Can be used to return the per-event parameters used to weight the basis function. Sometimes useful to inspect what is simulated.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events dataframe. The output dimensions are `length(c.basis) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(c.basis) x length(design)`.
 
 # Notes
 1) MixedModels/Sim does not allow simulation of data without white noise of the residuals. Because we want our own noise, we use the following trick to remove the MixedModels-Noise:
@@ -348,7 +348,7 @@ end
 Return the projection of a `MultichannelComponent c` from "source" to "sensor" space.
 
 # Returns
-- `Array{Float64,3}`: Projected simulated component for each event in the events dataframe. The output dimensions are `length(c.projection) x length(c.basis) x length(design)`.
+- `Array{Float64,3}`: Projected simulated component for each event in the events data frame. The output dimensions are `length(c.projection) x length(c.basis) x length(design)`.
 
 # Examples
 ```julia-repl
