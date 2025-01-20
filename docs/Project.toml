@@ -15,3 +15,6 @@ TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 Unfold = "181c99d8-e21b-4ff3-b70b-c233eddec679"
 UnfoldMakie = "69a5ce3b-64fb-4f22-ae69-36dd4416af2a"
 UnfoldSim = "ed8ae6d2-84d3-44c6-ab46-0baf21700804"
+
+[compat]
+Unfold = "0.7"
