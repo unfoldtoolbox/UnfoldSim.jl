@@ -21,8 +21,8 @@ The most used keyword argument is: `return_epoched = true` which returns already
 
 ## Design
 - `n_repeats = 100`: Number of times the experimental design is repeated. Only used in the single-subject case.
-- `event_order_function = shuffle`: Random trial order.
-- `conditions = Dict(:condition => ["car", "face"], :continuous => range(-5, 5, length = 10))`: Conditions and covariates used in the design.
+- `event_order_function = shuffle`: Random trial order. Use `event_order_function = (rng, x) -> x` to deactivate.
+- `conditions = Dict(:condition => ["car", "face"], :continuous => range(-5, 5, length = 10))`: Conditions and covariates used in this predefined design.
 
 ## Component / Signal
 - `sfreq = 100`: Sampling frequency.
@@ -191,6 +191,8 @@ Note that this function is mainly used for demonstration and internal testing pu
 
 The most used keyword argument is: `return_epoched = true` which returns already epoched data. If you want epoched data without overlap, specify `onset = NoOnset()` and `return_epoched = true`. \n
 Be careful if you modify `n_items` with `n_subjects = 1`, `n_items` has to be a multiple of 4 (or your equivalent conditions factorial, e.g. all combinations length).
+
+In difference to `predef_EEG`, `predef_2x2` is sample based (no sampling rate to be specified), and also has a 2x2 design, instead of a 2-categorical, 1-continuous design.
 
 # Keyword arguments
 
