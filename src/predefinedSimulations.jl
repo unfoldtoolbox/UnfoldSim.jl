@@ -31,7 +31,7 @@ The most used keyword argument is: `return_epoched = true` which returns already
 - `p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5,1], Dict())`: P3 with amplitude 5, continuous effect range [-5,5] with slope 1.
 
 ## Onset
-- `overlap = (0.5,0.2)`, # offset + width/length of Uniform noise. put offset to 1 for no overlap. put width to 0 for no jitter
+- `overlap = (0.5,0.2)`, # convenient parameterization for the default `onset::UniformOnset`. (`offset`, `width`) in seconds. If you do not want any overlap, either use `onset=NoOnset()`, or put the offset to a value larger than the maximum used component length, e.g. `overlap=(1,0.2)`. Put the `width` to `0` to have no jitter between events.
 - `onset = UniformOnset(; offset = sfreq * 0.5 * overlap[1], width = sfreq * 0.5 * overlap[2])`, 
 
 ## Noise
