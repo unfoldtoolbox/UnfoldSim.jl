@@ -11,39 +11,6 @@ function pad_array(arr::Vector, len::Int, val)
 end
 
 
-
-"""
-Obsolete - # TODO: Transfer function to Unfold.jl
-
-Function to convert output similar to unfold (data, events)
-"""
-function convert(rng::AbstractRNG, eeg, onsets, design, n_chan; reshape = true) # TODO: Added an rng but did not test it, either test it or (re)move function
-    events = UnfoldSim.generate_events(rng, design)
-    @debug size(eeg)
-    if reshape
-        n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]
-
-        if n_chan == 1
-            data = eeg[:,]
-
-            events.latency = (onsets' .+ range(0, size(eeg, 2) - 1) .* size(eeg, 1))'[:,]
-        elseif n_subjects == 1
-            data = eeg
-            @debug size(onsets)
-            events.latency = onsets
-        else # multi subject + multi channel
-            data = eeg[:, :]
-            events.latency = (onsets' .+ range(0, size(eeg, 3) - 1) .* size(eeg, 2))'[:,]
-        end
-    else
-        data = eeg
-    end
-
-    return data, events
-
-end
-
-
 """
 	closest_src(coords_list::AbstractVector{<:AbstractVector}, pos)
 	closest_src(coords::Vector{<:Real}, pos) 
