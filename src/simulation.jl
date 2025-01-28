@@ -48,13 +48,11 @@ optional [`Noise`] and [`RNG`]. Main simulation function.
 - `signal` : Generated signal. Depending on the design, on the components and on 
     `return_epoched`, the output can be a 1-D, 2-D, 3-D or 4-D Array. 
     For example, a 4-D Array would have the dimensions `channels x time x trials x subjects`.
-- `events`: Generated events.
+- `events`: Generated events dataframe with latencies.
 
 # Examples
-Adapted from the quickstart tutorial in the UnfoldSim docs.
+Adapted from the [quickstart tutorial](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/generated/tutorials/quickstart/) in the UnfoldSim docs.
 ```julia-repl
-julia> using UnfoldSim
-
 julia> using Random # to get an RNG
 
 julia> design =
@@ -165,9 +163,55 @@ end
 
 """
     create_continuous_signal(rng, responses, simulation)
-Based on the responses and simulation parameters, simulate onset latencies and add together a continuous signal.
 
+Simulate onset latencies and add together a continuous signal, based on the given responses and simulation parameters.
 
+# Arguments
+- `rng`: Random number generator, important to ensure reproducibility.
+- `responses`: Responses to be combined with the given onsets.
+- `simulation`: Simulation parameters, including design, components, onsets, and noisetype.
+
+# Returns
+- `signal` : Array of signals generated. Has the dimensions `channels x continuous_time x subjects`.
+- `latencies` : Array of onset latencies.
+
+# Examples
+Adapted from the [quickstart tutorial](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/generated/tutorials/quickstart/) in the UnfoldSim docs.
+```julia-repl
+julia> using Random #to get an RNG
+
+julia> design =
+    SingleSubjectDesign(; conditions = Dict(:cond_A => ["level_A", "level_B"])) |>
+    x -> RepeatDesign(x, 10);
+
+julia> component = LinearModelComponent(; 
+    basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
+    formula = @formula(0 ~ 1 + cond_A),
+    β = [1, 0.5],
+);
+
+julia> onset = UniformOnset(; width = 20, offset = 4);
+
+julia> noise = PinkNoise(; noiselevel = 0.2);
+
+julia> simulation = simulate(MersenneTwister(1), design, component, onset, noise)
+([-0.045646938524459196, 0.15784406738265955, 0.012640319497460443, 0.026669512219327673, 0.15329144053662508, 0.06412654786607011, -0.16766777448918685, -0.08012027590515228, 0.0020515088981202137, -0.24874482217391175  …  0.24621397283439814, 0.1710771262918883, -0.01527736524528042, 0.7639978745937471, 1.5600315092771557, 1.624219837479329, 1.2889713838347956, 0.26819223928179, 0.16535758767503866, 0.21291936972924855], 20×2 DataFrame
+ Row │ cond_A   latency 
+     │ String   Int64   
+─────┼──────────────────
+   1 │ level_A       18
+   2 │ level_B       39
+   3 │ level_A       45
+   4 │ level_B       49
+  ⋮  │    ⋮        ⋮
+  18 │ level_B      258
+  19 │ level_A      281
+  20 │ level_B      303
+
+julia> responses = simulate_responses(MersenneTwister(1), component, simulation)
+
+julia> signal, latencies = create_continuous_signal(MersenneTwister(1), responses, simulation)
+```
 """
 function create_continuous_signal(rng, responses, simulation)
 
@@ -225,12 +269,27 @@ end
     add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
     add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)
     add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
-Helper function to add inplace the responses to the signal, but for both 2D (1 channel) and 3D (X channel case).
+
+Add (in-place) the given responses to the signal, for both 2D (1 channel) and 3D (X channel case). Helper function.
+
+# Arguments
+- `signal`: Continuous EEG signal to be modified in place. Has the dimensions `channels x continuous_time x subjects`.
+- `responses::Vector/Matrix/AbstractArray`: Responses to be added, has the dimensions `maxlength(components) x length(simulation.design)`. The data for all the subjects and their respective trials is concatenated.
+- `e`: Index of the channel (in `signal`) for which to add the response.
+- `s`: Index of the subject (in `signal`) for which to add the response.
+- `tvec`: Time points at which to add the response.
+- `erpvec`: Index of the particular trial where the response is to be added.
+
+# Returns
+- Nothing. `signal` is modified in-place.
+
+# Examples
+```
 """
 function add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
     @views signal[e, tvec, s] .+= responses[:, erpvec]
 end
-function add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)#
+function add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)
     @views signal[e, tvec, s] .+= responses[:, erpvec]
 end
 function add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
