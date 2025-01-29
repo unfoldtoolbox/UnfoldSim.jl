@@ -69,4 +69,3 @@ struct Simulation
     onset::AbstractOnset
     noisetype::AbstractNoise
 end
-
