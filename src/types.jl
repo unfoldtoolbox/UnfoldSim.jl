@@ -19,10 +19,10 @@ Can either be created by the user or will be created automatically when calling 
 Tip: Use the `subtypes` function to get an overview of the implemented "ingredients", e.g. `subtypes(AbstractDesign)`.
 
 # Fields
-- `design::AbstractDesign`: Experimental design. Use `subtypes(AbstractDesign)` to get an overview of the available designs.
-- `components::Vector{AbstractComponent}`: Response function(s) for the events (e.g. the ERP shape in EEG). Use `subtypes(AbstractComponent)` to get an overview of the available component types.
-- `onset::AbstractOnset`: Inter-onset distance distribution. Use `subtypes(AbstractOnset)` to get an overview of the available distributions.
-- `noisetype::AbstractNoise`: Noise type. Use `subtypes(AbstractNoise)` to get an overview of the available noise types.
+- `design::AbstractDesign`: Experimental design.
+- `components::Vector{AbstractComponent}`: Response function(s) for the events (e.g. the ERP shape in EEG).
+- `onset::AbstractOnset`: Inter-onset distance distribution.
+- `noisetype::AbstractNoise`: Noise type.
 
 # Examples
 ```julia-repl
