@@ -21,14 +21,15 @@ The most used keyword argument is: `return_epoched = true` which returns already
 
 ## Design
 - `n_repeats = 100`: Number of times the experimental design is repeated. Only used in the single-subject case.
+- `n_items = 100`: Number of items. Only used in the multi-subject case.
 - `event_order_function = shuffle`: Random trial order. Use `event_order_function = (rng, x) -> x` to deactivate.
 - `conditions = Dict(:condition => ["car", "face"], :continuous => range(-5, 5, length = 10))`: Conditions and covariates used in this predefined design.
 
 ## Component / Signal
 - `sfreq = 100`: Sampling frequency.
 - `p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict())`: P1 with amplitude 5; no effects.
-- `n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5,-3], Dict())`: N1 with amplitude 5, dummy-coded condition effect (levels "car", "face") of -3.
-- `p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5,1], Dict())`: P3 with amplitude 5, continuous effect range [-5,5] with slope 1.
+- `n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, 3], Dict())`: N1 with amplitude 5, dummy-coded condition effect (levels "car", "face") of 3.
+- `p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5, 1], Dict())`: P3 with amplitude 5, continuous effect range [-5,5] with slope 1.
 
 ## Onset
 - `overlap = (0.5,0.2)`, # convenient parameterization for the default `onset::UniformOnset`. (`offset`, `width`) in seconds. If you do not want any overlap, either use `onset=NoOnset()`, or put the offset to a value larger than the maximum used component length, e.g. `overlap=(1,0.2)`. Put the `width` to `0` to have no jitter between events.
@@ -90,7 +91,7 @@ function predef_eeg(
     # component / signal
     sfreq = 100,
     p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict()),
-    n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, -3], Dict()),
+    n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, 3], Dict()),
     p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5, 1], Dict()),
     kwargs...,
 )
