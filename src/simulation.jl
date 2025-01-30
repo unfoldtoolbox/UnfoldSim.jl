@@ -176,41 +176,22 @@ Simulate onset latencies and add together a continuous signal, based on the give
 - `latencies` : Array of onset latencies.
 
 # Examples
-Adapted from the [quickstart tutorial](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/generated/tutorials/quickstart/) in the UnfoldSim docs.
+Adapted from the example for [`simulate_responses`](@ref).
 ```julia-repl
-julia> using Random #to get an RNG
+julia> using StableRNGs # to get an RNG
 
-julia> design =
-    SingleSubjectDesign(; conditions = Dict(:cond_A => ["level_A", "level_B"])) |>
-    x -> RepeatDesign(x, 10);
+julia> design = SingleSubjectDesign(; conditions = Dict(:cond => ["natural", "artificial"]));
+  
+julia> c1 = LinearModelComponent(; basis = p100(), formula = @formula(0 ~ 1 + cond), β = [1, 0.5]);
 
-julia> component = LinearModelComponent(; 
-    basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
-    formula = @formula(0 ~ 1 + cond_A),
-    β = [1, 0.5],
-);
+julia> c2 = LinearModelComponent(; basis = p300(), formula = @formula(0 ~ 1), β = [2]);
 
-julia> onset = UniformOnset(; width = 20, offset = 4);
+julia> simulation = Simulation(design, [c1, c2], UniformOnset(; width = 0, offset = 30), PinkNoise());
 
-julia> noise = PinkNoise(; noiselevel = 0.2);
+julia> responses = simulate_responses(StableRNG(1), [c1, c2], simulation);
 
-julia> simulation = simulate(MersenneTwister(1), design, component, onset, noise)
-([-0.045646938524459196, 0.15784406738265955, 0.012640319497460443, 0.026669512219327673, 0.15329144053662508, 0.06412654786607011, -0.16766777448918685, -0.08012027590515228, 0.0020515088981202137, -0.24874482217391175  …  0.24621397283439814, 0.1710771262918883, -0.01527736524528042, 0.7639978745937471, 1.5600315092771557, 1.624219837479329, 1.2889713838347956, 0.26819223928179, 0.16535758767503866, 0.21291936972924855], 20×2 DataFrame
- Row │ cond_A   latency 
-     │ String   Int64   
-─────┼──────────────────
-   1 │ level_A       18
-   2 │ level_B       39
-   3 │ level_A       45
-   4 │ level_B       49
-  ⋮  │    ⋮        ⋮
-  18 │ level_B      258
-  19 │ level_A      281
-  20 │ level_B      303
-
-julia> responses = simulate_responses(MersenneTwister(1), component, simulation)
-
-julia> signal, latencies = create_continuous_signal(MersenneTwister(1), responses, simulation)
+julia> signal, latencies = UnfoldSim.create_continuous_signal(StableRNG(1), responses, simulation)
+([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  1.161781996552765, 0.9458610914145825, 0.7324716614707794, 0.53159155930021, 0.3526137152181723, 0.20390693429435625, 0.0924245803290431, 0.023379444289913343, 0.0, 0.0], [31, 61])
 ```
 """
 function create_continuous_signal(rng, responses, simulation)
@@ -278,12 +259,32 @@ Add (in-place) the given responses to the signal, for both 2D (1 channel) and 3D
 - `e`: Index of the channel (in `signal`) for which to add the response.
 - `s`: Index of the subject (in `signal`) for which to add the response.
 - `tvec`: Time points at which to add the response.
-- `erpvec`: Index of the particular trial where the response is to be added.
+- `erpvec`: Index of the particular trial (in `responses`) from where the response is to be added.
 
 # Returns
 - Nothing. `signal` is modified in-place.
 
 # Examples
+```julia-repl
+julia> signal, responses, tvec = zeros(5,15,2), ones(5,6), 1:5;
+
+julia> UnfoldSim.add_responses!(signal, responses, 1, 2, tvec, 5);
+
+julia> signal
+5×15×2 Array{Float64, 3}:
+[:, :, 1] =
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+
+[:, :, 2] =
+ 1.0  1.0  1.0  1.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
 ```
 """
 function add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
