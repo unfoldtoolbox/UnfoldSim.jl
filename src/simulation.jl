@@ -41,14 +41,15 @@ optional `noise` and `rng`. Main simulation function.
 - `noise::AbstractNoise = NoNoise()` (optional): Desired noise.
 
 # Keyword arguments
-- `return_epoched = false`: Skip the Onset-calculation and conversion to continuous data 
+- `return_epoched::Bool = false`: Skip the Onset-calculation and conversion to continuous data 
     and return the epoched data directly (see also Notes below).
 
 # Returns
-- `signal` : Generated signal. Depending on the design, on the components and on 
-    `return_epoched`, the output can be a 1-D, 2-D, 3-D or 4-D Array. 
-    For example, a 4-D Array would have the dimensions `channels x time x trials x subjects`.
-- `events`: Generated events dataframe with latencies.
+- `(signal, events)::Tuple{Array, DataFrame}`:
+    - `signal` : Generated signal. Depending on the design, on the components and on 
+        `return_epoched`, the output can be a 1-D, 2-D, 3-D or 4-D Array. 
+        For example, a 4-D Array would have the dimensions `channels x time x trials x subjects`.
+    - `events`: Generated events data frame with latencies.
 
 # Examples
 Adapted from the [quickstart tutorial](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/generated/tutorials/quickstart/) in the UnfoldSim docs.
@@ -101,12 +102,16 @@ julia> data1, events1 = simulate(design, signal, onset, noise);
 ```
 
 # Notes
-Some remarks to how the noise is added:
+Some remarks on how the noise is added:
 - If `return_epoched = true` and `onset = NoOnset()` the noise is added to the epoched data matrix.
 - If `onset` is not `NoOnset`, a continuous signal is created and the noise is added to this 
     i.e. this means that the noise won't be the same as in the `onset = NoOnset()` case even if `return_epoched = true`.
 - The case `return_epoched = false` and `onset = NoOnset()` is not possible and therefore 
     covered by an assert statement.
+
+Additional remarks on the overlap of adjacent signals when `return_epoched = true`:
+- If `onset = NoOnset()` there will not be any overlapping signals in the data because the onset calculation and conversion to a continuous signal is skipped.
+- If an inter-onset distance distribution is given, a continuous signal is constructed and partitioned into epochs afterwards.
 """
 simulate(
     rng::AbstractRNG,
@@ -185,8 +190,9 @@ Simulate onset latencies and add together a continuous signal, based on the give
 - `simulation`: Simulation parameters, including design, components, onsets, and noisetype.
 
 # Returns
-- `signal` : Array of signals generated. Has the dimensions `channels x continuous_time x subjects`.
-- `latencies` : Array of onset latencies.
+- `(signal, latencies)::Tuple{Array, Array}`:
+    - `signal` contains the generated signal. Has the dimensions `channels x continuous_time x subjects`.
+    - `latencies` contains the onset latencies.
 
 # Examples
 ```julia-repl
