@@ -30,15 +30,15 @@ end
     return_epoched = false,
     )
 
-Return continuous or epoched signal, given `Design`, [Array of] `Component`, `Onset` and 
-optional [`Noise`] and [`RNG`]. Main simulation function.
+Simulate continuous or epoched signal, given `design`, [Array of] `component`, `onset` and 
+optional `noise` and `rng`. Main simulation function.
 
 # Arguments
-- `design::AbstractDesign`: Desired experimental design.
-- `signal`: `Component` for the desired signal.
-- `onset::AbstractOnset`: Desired onset.
-- `noise::AbstractNoise = NoNoise()` (optional): Desired noise.
 - `rng::AbstractRNG` (optional): Random number generator, important to ensure reproducibility.
+- `design::AbstractDesign`: Desired experimental design.
+- `signal`: `Component`(s) for the desired signal.
+- `onset::AbstractOnset`: Desired inter-onset distance distribution.
+- `noise::AbstractNoise = NoNoise()` (optional): Desired noise.
 
 # Keyword arguments
 - `return_epoched = false`: Skip the Onset-calculation and conversion to continuous data 
@@ -69,21 +69,34 @@ julia> onset = UniformOnset(; width = 20, offset = 4);
 
 julia> noise = PinkNoise(; noiselevel = 0.2);
 
-julia> data, events = simulate(MersenneTwister(1), design, signal, onset, noise)
-([-0.045646938524459196, 0.15784406738265955, 0.012640319497460443, 0.026669512219327673, 0.15329144053662508, 0.06412654786607011, -0.16766777448918685, -0.08012027590515228, 0.0020515088981202137, -0.24874482217391175  …  0.24621397283439814, 0.1710771262918883, -0.01527736524528042, 0.7639978745937471, 1.5600315092771557, 1.624219837479329, 1.2889713838347956, 0.26819223928179, 0.16535758767503866, 0.21291936972924855], 20×2 DataFrame
+# Variant 1: Use a custom RNG.
+julia> data, events = simulate(MersenneTwister(2), design, signal, onset, noise);
+
+julia> data
+293-element Vector{Float64}:
+ -0.013583193323430123
+  0.09159433856866195
+  ⋮
+ -0.25190584567097907
+ -0.20179992275876316
+
+julia> events
+20×2 DataFrame
  Row │ cond_A   latency 
      │ String   Int64   
 ─────┼──────────────────
-   1 │ level_A       18
-   2 │ level_B       39
-   3 │ level_A       45
-   4 │ level_B       49
+   1 │ level_A        9
+   2 │ level_B       20
+   3 │ level_A       27
+   4 │ level_B       37
   ⋮  │    ⋮        ⋮
-  18 │ level_B      258
-  19 │ level_A      281
-  20 │ level_B      303
+  18 │ level_B      257
+  19 │ level_A      271
+  20 │ level_B      284
+         13 rows omitted
 
-julia> data1, events1 = simulate(design, signal, onset, noise)
+# Variant 2: Without specifying an RNG, MersenneTwister(1) will be used for the simulation.
+julia> data1, events1 = simulate(design, signal, onset, noise);
 ┌ Warning: No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!
 ```
 
@@ -164,7 +177,7 @@ end
 """
     create_continuous_signal(rng, responses, simulation)
 
-Simulate onset latencies and add together a continuous signal, based on the given responses and simulation parameters.
+Simulate onset latencies and add together a continuous signal, based on the given responses and simulation parameters. Helper function.
 
 # Arguments
 - `rng`: Random number generator, important to ensure reproducibility.
@@ -176,22 +189,41 @@ Simulate onset latencies and add together a continuous signal, based on the give
 - `latencies` : Array of onset latencies.
 
 # Examples
-Adapted from the example for [`simulate_responses`](@ref).
 ```julia-repl
 julia> using StableRNGs # to get an RNG
 
 julia> design = SingleSubjectDesign(; conditions = Dict(:cond => ["natural", "artificial"]));
-  
+
 julia> c1 = LinearModelComponent(; basis = p100(), formula = @formula(0 ~ 1 + cond), β = [1, 0.5]);
 
 julia> c2 = LinearModelComponent(; basis = p300(), formula = @formula(0 ~ 1), β = [2]);
 
 julia> simulation = Simulation(design, [c1, c2], UniformOnset(; width = 0, offset = 30), PinkNoise());
 
-julia> responses = simulate_responses(StableRNG(1), [c1, c2], simulation);
+julia> responses = simulate_responses(StableRNG(1), [c1, c2], simulation)
+45×2 Matrix{Float64}:
+ 0.0        0.0
+ 0.0        0.0
+ ⋮          
+ 0.0233794  0.0233794
+ 0.0        0.0
 
-julia> signal, latencies = UnfoldSim.create_continuous_signal(StableRNG(1), responses, simulation)
-([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  1.161781996552765, 0.9458610914145825, 0.7324716614707794, 0.53159155930021, 0.3526137152181723, 0.20390693429435625, 0.0924245803290431, 0.023379444289913343, 0.0, 0.0], [31, 61])
+julia> signal, latencies = UnfoldSim.create_continuous_signal(StableRNG(1), responses, simulation);
+
+julia> signal
+106-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ ⋮
+ 0.023379444289913343
+ 0.0
+ 0.0
+
+ julia> latencies
+2-element Vector{Int64}:
+ 31
+ 61
 ```
 """
 function create_continuous_signal(rng, responses, simulation)
@@ -251,18 +283,18 @@ end
     add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)
     add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
 
-Add (in-place) the given responses to the signal, for both 2D (1 channel) and 3D (X channel case). Helper function.
+Add (in-place) the given `responses` to the `signal`, for both 2D (1 channel) and 3D (X channel case). Helper function.
 
 # Arguments
 - `signal`: Continuous EEG signal to be modified in place. Has the dimensions `channels x continuous_time x subjects`.
 - `responses::Vector/Matrix/AbstractArray`: Responses to be added, has the dimensions `maxlength(components) x length(simulation.design)`. The data for all the subjects and their respective trials is concatenated.
 - `e`: Index of the channel (in `signal`) for which to add the response.
 - `s`: Index of the subject (in `signal`) for which to add the response.
-- `tvec`: Time points at which to add the response.
+- `tvec`: Time points (indices in `signal`) at which to add the response.
 - `erpvec`: Index of the particular trial (in `responses`) from where the response is to be added.
 
 # Returns
-- Nothing. `signal` is modified in-place.
+- `Nothing`: `signal` is modified in-place.
 
 # Examples
 ```julia-repl
