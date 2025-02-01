@@ -293,7 +293,7 @@ Add (in-place) the given `responses` to the `signal`, for both 2D (1 channel) an
 
 # Arguments
 - `signal`: Continuous EEG signal to be modified in place. Has the dimensions `channels x continuous_time x subjects`.
-- `responses::Vector/Matrix/AbstractArray`: Responses to be added, has the dimensions `maxlength(components) x length(simulation.design)`. The data for all the subjects and their respective trials is concatenated.
+- `responses::Union{Vector, Matrix, AbstractArray}`: Responses to be added. In the multi-channel case, the dimensions are `channels x maxlength(components) x length(simulation.design)`, else `maxlength(components) x length(simulation.design)`.  The data for all the subjects and their respective trials is concatenated.
 - `e`: Index of the channel (in `signal`) for which to add the response.
 - `s`: Index of the subject (in `signal`) for which to add the response.
 - `tvec`: Time points (indices in `signal`) at which to add the response.
