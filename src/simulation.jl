@@ -41,8 +41,7 @@ optional `noise` and `rng`. Main simulation function.
 - `noise::AbstractNoise = NoNoise()` (optional): Desired noise.
 
 # Keyword arguments
-- `return_epoched::Bool = false`: Skip the Onset-calculation and conversion to continuous data 
-    and return the epoched data directly (see also Notes below).
+- `return_epoched::Bool = false`: If set to `true` epoched data is returned, otherwise a continuous signal is returned (see also Notes below).
 
 # Returns
 - `(signal, events)::Tuple{Array, DataFrame}`:
