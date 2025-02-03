@@ -2,7 +2,9 @@ using UnfoldSim
 using Documenter
 using Glob
 using Literate
+using Revise
 
+Revise.revise()
 
 GENERATED = joinpath(@__DIR__, "src", "generated")
 SOURCE = joinpath(@__DIR__, "literate")
