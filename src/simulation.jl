@@ -7,16 +7,22 @@ Simulation(
 ) = Simulation(design, [component], onset, noisetype)
 
 
-function simulate(design::AbstractDesign, signal, onset::AbstractOnset, args...; kwargs...)
+function simulate(
+    design::AbstractDesign,
+    components,
+    onset::AbstractOnset,
+    args...;
+    kwargs...,
+)
     @warn "No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!"
-    simulate(MersenneTwister(1), design, signal, onset, args...; kwargs...)
+    simulate(MersenneTwister(1), design, components, onset, args...; kwargs...)
 end
 
 """
     simulate(
     rng::AbstractRNG,
     design::AbstractDesign,
-    signal,
+    components,
     onset::AbstractOnset,
     noise::AbstractNoise = NoNoise();
     return_epoched = false,
@@ -24,7 +30,7 @@ end
 
 	simulate(
     design::AbstractDesign,
-    signal,
+    components,
     onset::AbstractOnset,
     noise::AbstractNoise = NoNoise();
     return_epoched = false,
@@ -36,7 +42,7 @@ optional `noise` and `rng`. Main simulation function.
 # Arguments
 - `rng::AbstractRNG` (optional): Random number generator, important to ensure reproducibility.
 - `design::AbstractDesign`: Desired experimental design.
-- `signal`: `Component`(s) for the desired signal.
+- `components`: `Component`(s) for the desired signal.
 - `onset::AbstractOnset`: Desired inter-onset distance distribution.
 - `noise::AbstractNoise = NoNoise()` (optional): Desired noise.
 
@@ -59,7 +65,7 @@ julia> design =
     SingleSubjectDesign(; conditions = Dict(:cond_A => ["level_A", "level_B"])) |>
     x -> RepeatDesign(x, 10);
 
-julia> signal = LinearModelComponent(; 
+julia> component = LinearModelComponent(; 
     basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
     formula = @formula(0 ~ 1 + cond_A),
     β = [1, 0.5],
@@ -70,7 +76,7 @@ julia> onset = UniformOnset(; width = 20, offset = 4);
 julia> noise = PinkNoise(; noiselevel = 0.2);
 
 # Variant 1: Use a custom RNG.
-julia> data, events = simulate(MersenneTwister(2), design, signal, onset, noise);
+julia> data, events = simulate(MersenneTwister(2), design, component, onset, noise);
 
 julia> data
 293-element Vector{Float64}:
@@ -96,7 +102,7 @@ julia> events
          13 rows omitted
 
 # Variant 2: Without specifying an RNG, MersenneTwister(1) will be used for the simulation.
-julia> data1, events1 = simulate(design, signal, onset, noise);
+julia> data1, events1 = simulate(design, component, onset, noise);
 ┌ Warning: No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!
 ```
 
@@ -115,11 +121,11 @@ Additional remarks on the overlap of adjacent signals when `return_epoched = tru
 simulate(
     rng::AbstractRNG,
     design::AbstractDesign,
-    signal,
+    components,
     onset::AbstractOnset,
     noise::AbstractNoise = NoNoise();
     kwargs...,
-) = simulate(rng, Simulation(design, signal, onset, noise); kwargs...)
+) = simulate(rng, Simulation(design, components, onset, noise); kwargs...)
 
 
 function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool = false)
@@ -284,9 +290,9 @@ end
 
 
 """
-    add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
-    add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)
-    add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
+    add_responses!(signal, responses::Vector, e, s, tvec, trial_idx)
+    add_responses!(signal, responses::Matrix, e, s, tvec, trial_idx)
+    add_responses!(signal, responses::AbstractArray, e, s, tvec, trial_idx)
 
 Add (in-place) the given `responses` to the `signal`, for both 2D (1 channel) and 3D (X channel case). Helper function.
 
@@ -296,7 +302,7 @@ Add (in-place) the given `responses` to the `signal`, for both 2D (1 channel) an
 - `e`: Index of the channel (in `signal`) for which to add the response.
 - `s`: Index of the subject (in `signal`) for which to add the response.
 - `tvec`: Time points (indices in `signal`) at which to add the response.
-- `erpvec`: Index of the particular trial (in `responses`) from where the response is to be added.
+- `trial_idx`: Index of the particular trial (in `responses`) from where the response is to be added.
 
 # Returns
 - `Nothing`: `signal` is modified in-place.
@@ -324,12 +330,12 @@ julia> signal
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
 ```
 """
-function add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
-    @views signal[e, tvec, s] .+= responses[:, erpvec]
+function add_responses!(signal, responses::Vector, e, s, tvec, trial_idx)
+    @views signal[e, tvec, s] .+= responses[:, trial_idx]
 end
-function add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)
-    @views signal[e, tvec, s] .+= responses[:, erpvec]
+function add_responses!(signal, responses::Matrix, e, s, tvec, trial_idx)
+    @views signal[e, tvec, s] .+= responses[:, trial_idx]
 end
-function add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
-    @views signal[e, tvec, s] .+= responses[e, :, erpvec]
+function add_responses!(signal, responses::AbstractArray, e, s, tvec, trial_idx)
+    @views signal[e, tvec, s] .+= responses[e, :, trial_idx]
 end
