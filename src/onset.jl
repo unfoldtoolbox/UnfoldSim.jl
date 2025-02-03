@@ -35,6 +35,15 @@ In the case that the user directly wants no overlap to be simulated (=> epoched 
 """
 struct NoOnset <: AbstractOnset end
 
+
+"""
+    struct TRFOnset <: AbstractOnset end
+In the case that a TRF is simulated (via `TRFComponent`). This onset returns a vector of zero-latencies, indicating that the TRF starts at the beginning of the signal.
+"""
+struct TRFOnset <: AbstractOnset end
+
+
+
 """
     simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
@@ -56,6 +65,16 @@ function simulate_interonset_distances(rng, onset::LogNormalOnset, design::Abstr
         fun = truncated(fun; upper = onset.truncate_upper)
     end
     return Int.(round.(onset.offset .+ rand(deepcopy(rng), fun, s)))
+end
+
+
+"""
+    simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
+In the case that a TRF is simulated (via `TRFComponent`). This onset returns a vector of zero-latencies, indicating that the TRF starts at the beginning of the signal.
+"""
+function simulate_interonset_distances(rng, onset::TRFOnset, design)
+    sz = size(design)
+    return Int.(zeros(sz))
 end
 
 
@@ -135,10 +154,10 @@ end
 function simulate_interonset_distances(rng, o::UniformOnsetFormula, design::AbstractDesign)
     events = generate_events(design)
     widths =
-        UnfoldSim.generate_designmatrix(o.width_formula, events, o.width_contrasts) *
+        generate_designmatrix(o.width_formula, events, o.width_contrasts) *
         o.width_β
     offsets =
-        UnfoldSim.generate_designmatrix(o.offset_formula, events, o.offset_contrasts) *
+        generate_designmatrix(o.offset_formula, events, o.offset_contrasts) *
         o.offset_β
 
     return Int.(
@@ -193,10 +212,10 @@ function simulate_interonset_distances(
     events = generate_events(design)
 
 
-    μs = UnfoldSim.generate_designmatrix(o.μ_formula, events, o.μ_contrasts) * o.μ_β
-    σs = UnfoldSim.generate_designmatrix(o.σ_formula, events, o.σ_contrasts) * o.σ_β
+    μs = generate_designmatrix(o.μ_formula, events, o.μ_contrasts) * o.μ_β
+    σs = generate_designmatrix(o.σ_formula, events, o.σ_contrasts) * o.σ_β
     offsets =
-        UnfoldSim.generate_designmatrix(o.offset_formula, events, o.offset_contrasts) *
+        generate_designmatrix(o.offset_formula, events, o.offset_contrasts) *
         o.offset_β
 
 
