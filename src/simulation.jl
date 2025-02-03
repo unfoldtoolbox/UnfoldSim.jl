@@ -110,7 +110,7 @@ Some remarks on how the noise is added:
 
 Additional remarks on the overlap of adjacent signals when `return_epoched = true`:
 - If `onset = NoOnset()` there will not be any overlapping signals in the data because the onset calculation and conversion to a continuous signal is skipped.
-- If an inter-onset distance distribution is given, a continuous signal is constructed and partitioned into epochs afterwards.
+- If an inter-onset distance distribution is given, a continuous signal(potentially with overlap) is constructed and partitioned into epochs afterwards.
 """
 simulate(
     rng::AbstractRNG,
