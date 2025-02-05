@@ -61,7 +61,7 @@ export simulate,
     generate_events
 
 # utilities
-export pad_array, convert
+export pad_array
 
 # export Offsets
 export UniformOnset, LogNormalOnset, NoOnset
