@@ -34,6 +34,7 @@ makedocs(;
     ),
     pages = [
         "Home" => "index.md",
+        "Installing Julia & UnfoldSim.jl" => "installation.md",
         "Tutorials" => [
             "Quickstart" => "generated/tutorials/quickstart.md",
             "Simulate event-related potentials (ERPs)" => "generated/tutorials/simulateERP.md",
