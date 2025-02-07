@@ -25,6 +25,7 @@ The user provides four ingredients: 1) an experimental design, with both categor
 ```julia-repl
 julia> using Pkg; Pkg.add("UnfoldSim")
 ```
+For more detailed instructions please refer to [Installing Julia & UnfoldSim.jl](@ref).
 
 ## Usage example
 #### Start simulating time series data
