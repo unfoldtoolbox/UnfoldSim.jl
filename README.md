@@ -24,17 +24,11 @@ Many tutorials, guides, how-tos and references are available in the [documentati
 <summary>Click to expand</summary>
 
 The recommended way to install julia is [juliaup](https://github.com/JuliaLang/juliaup).
-It allows you to, e.g., easily update Julia at a later point, but also test out alpha/beta versions etc.
 
-TL:DR; If you dont want to read the explicit instructions, just copy the following command
+TL;DR: If you don't want to read the explicit instructions, just copy the following command:
 
-#### Windows
-
-AppStore -> JuliaUp,  or `winget install julia -s msstore` in CMD
-
-#### Mac & Linux
-
-`curl -fsSL https://install.julialang.org | sh` in any shell
+- Windows: `winget install julia -s msstore`
+- Mac/Linux: `curl -fsSL https://install.julialang.org | sh`
 </details>
 
 ### UnfoldSim.jl
@@ -81,11 +75,9 @@ All simulation ingredients (design, components, onsets, noise) can be easily mod
 ## Statement of need
 EEG researchers often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kinds of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
 
-```@raw html
-<!---
+<!--
 Note: The statement of need is also used in the `README.md`. Make sure that they are synchronized.
 -->
-```
 
 ## Contributions
 Contributions of any kind are very welcome. Please have a look at [CONTRIBUTING.md](https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/main/CONTRIBUTING.md) for guidance on contributing to UnfoldSim.jl.
