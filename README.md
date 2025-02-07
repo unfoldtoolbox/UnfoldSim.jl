@@ -17,7 +17,7 @@ Many tutorials, guides, how-tos and references are available in the [documentati
 
 ![readme_figure](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/22366977/b69d186c-fd3d-4449-9f2e-03d7e01b8cb3)
 
-## Install
+## Installation
 
 ### Julia
 <details>
@@ -44,7 +44,7 @@ using Pkg
 Pkg.add("UnfoldSim")
 ```
 
-# Quickstart
+## Quickstart
 ```julia
 using UnfoldSim
 data, events = UnfoldSim.predef_eeg(; n_repeats = 1, noiselevel = 0.8)
@@ -56,18 +56,18 @@ Produces continuous "EEG" with PinkNoise and some overlap between 20 events (2 c
 using UnfoldSim
 using Random
 
-# Start by defining the design / events data frame
+# Start by defining the design / events data frame.
 design =
     SingleSubjectDesign(; conditions = Dict(:condA => ["levelA", "levelB"])) |>
     d -> RepeatDesign(d, 10)
 
-# Next define a ground truth signal + relation to events/design with Wilkinson formulas
+# Next define a ground truth signal + relation to events/design with Wilkinson formulas.
 signal = LinearModelComponent(;
     basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
     formula = @formula(0 ~ 1 + condA),
     β = [1, 0.5],
 )
-# finally, define some inter-onset distribution and noise, and simulate data!
+# Finally, define some inter-onset distance distribution and noise, and simulate data!
 data, events = simulate(
     Random.MersenneTwister(1),
     design,
@@ -77,6 +77,15 @@ data, events = simulate(
 )    
 ```
 All simulation ingredients (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
+
+## Statement of need
+EEG researchers often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kinds of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
+
+```@raw html
+<!---
+Note: The statement of need is also used in the `README.md`. Make sure that they are synchronized.
+-->
+```
 
 ## Contributions
 Contributions of any kind are very welcome. Please have a look at [CONTRIBUTING.md](https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/main/CONTRIBUTING.md) for guidance on contributing to UnfoldSim.jl.
