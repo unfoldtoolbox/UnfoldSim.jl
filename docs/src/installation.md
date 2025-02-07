@@ -13,27 +13,6 @@ We further recommend to use [VSCode](https://code.visualstudio.com/download) and
 
 ## Installing UnfoldSim.jl
 
-You can enter the package manager (similar to conda) using `]` in the REPL ("julia-commandline").
-
-This should result in `(currentFolder) pkg>` (with `currentFolder` being the project you currently work in)
-
-!!! hint
-    If you see `(@v1.11) pkg>` instead, you still have to activate your environment. This can be done using:
-
-    `cd("/path/to/your/project")`
-     and `]activate .`
-
-     or alternatively `]activate /path/to/your/project/`
-
-Now you can do
-`pkg> add UnfoldSim`
-
-and after some installation:
-
-`julia> using UnfoldSim` in the REPL
-
-## Installing UnfoldSim.jl
-
 The following instructions are intended for Julia beginners. More advanced Julia users can jump ahead to step 3.
 
 #### 1. Start an interactive Julia session ("REPL")
