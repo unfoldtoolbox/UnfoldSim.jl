@@ -17,6 +17,8 @@ Many tutorials, guides, how-tos and references are available in the [documentati
 
 ![readme_figure](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/22366977/b69d186c-fd3d-4449-9f2e-03d7e01b8cb3)
 
+![unfoldsim_animation]("docs/assets/UnfoldSim_features_animation.gif")
+
 ## Installation
 
 ### Julia
@@ -76,7 +78,7 @@ All simulation ingredients (design, components, onsets, noise) can be easily mod
 EEG researchers often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kinds of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
 
 <!--
-Note: The statement of need is also used in the `README.md`. Make sure that they are synchronized.
+Note: The statement of need is also used on the documentation landing page (https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/). Make sure that they are synchronized.
 -->
 
 ## Contributions
