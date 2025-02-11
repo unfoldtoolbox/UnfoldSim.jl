@@ -39,6 +39,8 @@ Pkg.add("UnfoldSim")
 ```
 
 ## Quickstart
+We offer some predefined (EEG) signals to get started.
+
 ```julia
 using UnfoldSim
 data, events = UnfoldSim.predef_eeg(; n_repeats = 1, noiselevel = 0.8)
@@ -46,6 +48,8 @@ data, events = UnfoldSim.predef_eeg(; n_repeats = 1, noiselevel = 0.8)
 Produces continuous "EEG" with PinkNoise and some overlap between 20 events (2 conditions * 10 levels of the continuous variable).
 
 ## Slightly longer
+All simulation ingredients (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
+
 ```julia
 using UnfoldSim
 using Random
@@ -70,7 +74,6 @@ data, events = simulate(
     PinkNoise(),
 )    
 ```
-All simulation ingredients (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
 
 ## Statement of need
 EEG researchers often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kinds of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
