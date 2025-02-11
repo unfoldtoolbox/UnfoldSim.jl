@@ -10,7 +10,7 @@ The user provides four ingredients: 1) an experimental design, with both categor
 ```@raw html
 <div style="width:60%; margin: auto;">
 
-<img src="assets/UnfoldSim_features_animation.gif"/>
+<img src="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/assets/docs/src/assets/UnfoldSim_features_animation.gif?raw=true"/>
 </div>
 ```
 
