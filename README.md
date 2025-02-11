@@ -17,7 +17,7 @@ Many tutorials, guides, how-tos and references are available in the [documentati
 
 ![readme_figure](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/22366977/b69d186c-fd3d-4449-9f2e-03d7e01b8cb3)
 
-![unfoldsim_animation]("docs/assets/UnfoldSim_features_animation.gif")
+![unfoldsim_animation](docs/assets/UnfoldSim_features_animation.gif)
 
 ## Installation
 
