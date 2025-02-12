@@ -55,6 +55,7 @@ makedocs(;
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
             "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
         ],
+        "Developer documentation" => "developer_docs.md",
         "API / Docstrings" => "api.md",
     ],
 )
