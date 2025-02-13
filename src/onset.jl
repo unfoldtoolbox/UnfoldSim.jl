@@ -207,5 +207,164 @@ function simulate_interonset_distances(
     #@debug reduce(hcat, rand.(deepcopy(rng), funs, 1))
     return Int.(round.(offsets .+ reduce(vcat, rand.(deepcopy(rng), funs, 1))))
 end
+"""
+    SequenceOnset <: AbstractOnset
+A struct that defines as one argument the used Onsets for a [`SequenceDesign`](@ref).
 
+All fields are mandatory. Works best with [`SequenceDesign`](@ref).
 
+# Fields
+- `onset::Dict`: for each Sequence event a Onset is defined.
+
+# Examples
+```julia-repl
+sequence_onset = SequenceOnset(
+    Dict('S'=>UniformOnset(width=0,offset=85*fs/100),
+         'C'=>(DriftOnset(), UniformOnset(width=0, offset=150)),
+         'R'=>UniformOnset(width=0,offset=120*fs/100)))
+```
+"""
+struct SequenceOnset <: AbstractOnset
+    onset::Dict
+end
+
+"""
+    SequenceOnset <: AbstractOnset
+A struct that defines the used Onsets for a [`Drift_Component`](@ref).
+
+All fields are mandatory. Works best with [`Drift_Component`](@ref).
+
+# Fields
+- `onset::Dict`: onset for the Drift_Component.
+
+# Examples
+```julia-repl
+sequence_onset = SequenceOnset(
+    Dict('S'=>UniformOnset(width=0,offset=85*fs/100),
+         'C'=>(DriftOnset(), UniformOnset(width=0, offset=150)),
+         'R'=>UniformOnset(width=0,offset=120*fs/100)))
+```
+"""
+struct DriftOnset{T} <: AbstractOnset
+    onset::T
+end
+DriftOnset() = DriftOnset(UniformOnset(width=0,offset=0))
+
+"""
+    UnfoldSim.simulate_interonset_distances(rng, onset::AbstractOnset, design::AbstractDesign, components::AbstractComponent)
+
+Base function to simulate Abstract Onset between components in an [`SequenceDesign`](@ref).
+
+# Arguments
+- `rng::StableRNG`: Random seed to ensure reproducibility.
+- `onset::AbstractOnset`: Onset of type AbstractOnset which defines how the onset is created.
+- `design::AbstractDesign`: Design for which the onsets are simulated.
+- `components::AbstractComponent`: The Component for which the onset is simulated.
+
+# Returns
+- `simulate_interonset_distances`: function call.
+"""
+UnfoldSim.simulate_interonset_distances(rng, onset::AbstractOnset, design::AbstractDesign, components::AbstractComponent) = UnfoldSim.simulate_interonset_distances(rng,onset,design)
+
+"""
+    UnfoldSim.simulate_interonset_distances(rng, onset::DriftOnset, design::AbstractDesign, components::AbstractComponent)
+
+Generates list of onsets for multiple [`Drift_Component`](@ref) in an [`SequenceDesign`](@ref).
+
+# Arguments
+- `rng::StableRNG`: Random seed to ensure reproducibility.
+- `onset::DriftOnset`: DriftOnset defines to create onsets for a [`Drift_Component`](@ref).
+- `design::AbstractDesign`: Design for which the onsets are simulated.
+- `components::AbstractComponent`: The Component for which the onset is simulated.
+
+# Returns
+- `Vector{Float64}`: the generated onsets for the drift components in the SequenceDesign.
+"""
+function UnfoldSim.simulate_interonset_distances(rng, onset::DriftOnset, design::AbstractDesign, components::AbstractComponent)
+    rts = calculate_response_times_for_ssm(deepcopy(rng), components, design)
+    return Int.(round.(rts))
+end
+
+"""
+    UnfoldSim.simulate_interonset_distances(rng, onset::Tuple{DriftOnset, UniformOnset}, design::AbstractDesign, components::AbstractComponent)
+
+Generates list of onsets for multiple [`Drift_Component`](@ref) in an [`SequenceDesign`](@ref) and possibility to ad an [`UniformOnset`](@ref).
+
+# Arguments
+- `rng::StableRNG`: Random seed to ensure reproducibility.
+- `onset::Tuple{DriftOnset, UniformOnset}`: DriftOnset defines to create onsets for a [`Drift_Component`](@ref) on top with an [`UniformOnset`](@ref).
+- `design::AbstractDesign`: Design for which the onsets are simulated.
+- `components::AbstractComponent`: The Component for which the onset is simulated.
+
+# Returns
+- `Vector{Float64}`: the generated onsets for the drift components in the SequenceDesign.
+"""
+function UnfoldSim.simulate_interonset_distances(rng, onset::Tuple{DriftOnset, UniformOnset}, design::AbstractDesign, components::AbstractComponent)
+    rts = calculate_response_times_for_ssm(deepcopy(rng), components, design)
+    jitter = Int.(
+        round.(rand(deepcopy(rng), onset[2].offset:(onset[2].offset+onset[2].width), size(design)))
+    )
+    rts = Int.(round.(rts))
+    rts = rts .+ jitter
+    return rts
+end
+
+"""
+    UnfoldSim.simulate_interonset_distances(rng, onset::Char, design::AbstractDesign, components::AbstractComponent)
+
+Generates list of onsets for the end of a sequence in an [`SequenceDesign`](@ref).
+
+# Arguments
+- `rng::StableRNG`: Random seed to ensure reproducibility.
+- `onset::Char`: Defines to simulates onsets at the end of a sequence.
+- `design::AbstractDesign`: Design for which the onsets are simulated.
+- `components::AbstractComponent`: The Component for which the onset is simulated.
+
+# Returns
+- `Vector{Float64}`: the generated onsets for the end of a sequence in the SequenceDesign.
+"""
+function UnfoldSim.simulate_interonset_distances(rng, onset::Char, design::AbstractDesign, components::AbstractComponent)
+    @assert onset == '_'
+    df = generate_events(rng, design)
+    nrows_df = Int(size(df, 1))
+    onsets = repeat([UnfoldSim.maxlength([components])],nrows_df)
+    return onsets
+end
+
+"""
+    UnfoldSim.simulate_onsets(rng, onset::SequenceOnset, simulation::Simulation)
+
+Generates list of onsets for all events of an [`SequenceDesign`](@ref), how to simulate the onsets is defined in the [`SequenceOnset`](@ref).
+
+# Arguments
+- `rng::StableRNG`: Random seed to ensure reproducibility.
+- `onset::SequenceOnset`: onset definition for each event in the sequence design.
+- `simulation::Simulation`: Simulation which contains the design and other elements for the experiment.
+
+# Returns
+- `Vector{Float64}`: the generated onsets for all events in the SequenceDesign.
+"""
+function UnfoldSim.simulate_onsets(rng, onset::SequenceOnset, simulation::Simulation)
+    @assert isa(simulation.design.design, SequenceDesign)
+    events = generate_events(deepcopy(rng), simulation.design)
+    onset_map = Dict()
+    onset_counter = Dict()
+    for k in keys(onset.onset)
+        sub_design = UnfoldSim.SubselectDesign(simulation.design, k)
+        onsets_for_k = simulate_interonset_distances(deepcopy(rng), onset.onset[k], sub_design, simulation.components[k][1])
+        onset_map[k] = onsets_for_k
+        onset_counter[k] = 1
+    end
+    final_onsets = []
+    for (i, evt_k) in enumerate(events.event)
+        push!(final_onsets, onset_map[evt_k][onset_counter[evt_k]])
+        onset_counter[evt_k] += 1
+    end
+    final_onsets = vcat(final_onsets[end], final_onsets[1:end-1])
+    if maximum(final_onsets) > 10000
+        @warn "Maximum of inter-event-distances was $(maximum(final_onsets)) - are you sure this is what you want?"
+    end
+    onsets_accum = accumulate(+, final_onsets, dims = 1, init = 1)
+    return onsets_accum
+
+end

@@ -18,6 +18,8 @@ using Automa # for sequence
 
 using LinearAlgebra # headmodel
 
+using SequentialSamplingModels # for SequentialSamplingModels
+
 import DSP.hanning
 import Base.length
 import Base.size
@@ -33,6 +35,7 @@ include("headmodel.jl")
 include("helper.jl")
 include("sequence.jl")
 include("bases.jl")
+include("sequentialSamplingModelSimulation.jl")
 
 export size, length
 export AbstractComponent, AbstractNoise, AbstractOnset, AbstractDesign
@@ -79,4 +82,7 @@ export AbstractHeadmodel, Hartmut, headmodel, leadfield, orientation, magnitude
 
 # multichannel
 export MultichannelComponent
+
+# evidence accumulation
+export Drift_Component, DriftOnset, SequenceOnset, KellyModel
 end
