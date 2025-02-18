@@ -21,7 +21,7 @@ Please note that the following documentation is adapted from the [BestieTemplate
 If this is the first time you work with this repository, follow the instructions below to clone the repository and create a `dev` version. 
 
 !!! tip "`dev` version of a Julia package"
-    Having a `dev` (development) version of a package allows you to import a local version of the package with your changes instead of the registered package version (which is static).
+    Having a `dev` (development) version of a Julia package allows you to import a local version of the package with your changes instead of the registered package version (which is static).
 
 #### a) If you have writing access for the GitHub repository
 - Option 1: Clone this repository using `git clone`.
@@ -31,12 +31,12 @@ If this is the first time you work with this repository, follow the instructions
     3. Run `dev --local UnfoldSim` to clone the package to `./dev/UnfoldSim` and automatically add it to your Julia project environment.
 
 !!! important
-    If you have writing rights, whenever **upstream** is mentioned, use **origin** instead.
+    If you have writing rights, whenever **upstream** is mentioned below, use **origin** instead.
 
 #### b) If you don't have writing access for the GitHub repository
-1. Fork this repository.
+1. Fork the UnfoldSim.jl repository.
 2. Clone your repository (this will create a `git remote` called `origin`).
-3. Add this repository as a remote:
+3. Add the UnfoldSim.jl repository as a remote:
 
    ```bash
    git remote add upstream https://github.com/unfoldtoolbox/UnfoldSim.jl
@@ -60,7 +60,7 @@ pkg> add Revise
 
 ### Working on a new issue
 
-We try to keep a linear history in this repo, so it is important to keep your branches up-to-date.
+We try to keep a linear Git history in this repository, so it is important to keep your branches up-to-date.
 
 1. Fetch from the remote and fast-forward your local main
 
@@ -82,13 +82,13 @@ We try to keep a linear history in this repo, so it is important to keep your br
    git push -u origin 42-add-answer-universe
    ```
 
-4. Create a pull request to merge your remote branch into the org main.
+4. Create a pull request to merge your remote branch into the `main` branch of the original UnfoldSim.jl repository.
 
 #### Branch naming
 
 - If there is an associated issue, add the issue number.
 - If there is no associated issue, **and the changes are small**, add a prefix such as "typo", "hotfix", "small-refactor", according to the type of update.
-If the changes are not small and there is no associated issue, then either create an issue first, or discuss in another channel with the maintainers.
+- If the changes are not small and there is no associated issue, then either create an issue first, or discuss in another channel with the maintainers.
 - Use dash separated imperative wording related to the issue (e.g., `14-add-tests`, `15-fix-model`, `16-remove-obsolete-files`).
 
 #### Commit messages
@@ -100,7 +100,7 @@ If the changes are not small and there is no associated issue, then either creat
 
 ### Before creating a pull request
 
-- Ideally: Make sure the tests pass.
+- Ideally: Make sure the tests pass (see [Testing](@ref)).
 - Add appropriate documentation (ideally using the [Docstring templates](@ref)).
 - Ideally: Follow the formatting rules from `JuliaFormatter.jl` (see [Formatting](@ref)).
 - Fetch any `main` updates from upstream and rebase your branch, if necessary:
@@ -140,15 +140,17 @@ pkg> test
 ```
 
 !!! tip "Running single tests"
-    Instead fo running all tests, you can also run the `test/setup.jl` to load all required packages, and subsequently run single tests manually either by `include("test/my_test.jl")` or by opening the file and running the specific test block you want to run.
+    Instead of running all tests, you can also run the `test/setup.jl` to load all required packages, and subsequently run single tests manually either by `include("test/my_test.jl")` or by opening the file and running the specific test block you want to run.
 
 ## Documentation
 
-Documentation is key to maintaining a codebase that is easy to understand and extend. Whether it's comments in the code, docstrings, or tutorials, when writing documentation, think about your future self or the next person reading the code or using your functions.
+Documentation is key to maintaining a codebase that is easy to understand and extend.
+Whether it is comments in the code, docstrings, or tutorials, when writing documentation,
+ think about your future self or the next person reading the code or using your functions.
 
 ### Building and viewing the documentation locally
 
-We recommend using [LiveServer](https://github.com/JuliaDocs/LiveServer.jl) to build and preview the documentation locally.
+We recommend using [LiveServer.jl](https://github.com/JuliaDocs/LiveServer.jl) to build and preview the documentation locally.
 To simplify this process we created the `docs/run_liveserver.jl` script.
 
 Please follow these steps:
@@ -210,7 +212,7 @@ See also [`my_function2`](@ref), [`my_function3`](@ref).
 ````
 **Special cases:**
 - If a function accepts many keyword arguments, only include `<keyword arguments>` as a placeholder in the signature and give a keyword list with descriptions in the Keyword arguments section of the docstring.
-- If a function returns more than one variable, write the `Returns` section in the following way:
+- If a function returns more than one variable, write the Returns section in the following way:
   ```julia
   # Returns
   - (result1, result2)::Tuple{Type1, Type2}:
