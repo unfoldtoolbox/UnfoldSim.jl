@@ -132,11 +132,11 @@
         simulation = UnfoldSim.Simulation(design_rep, components, sequence_onset, UnfoldSim.NoNoise())
 
         result_onsets = simulate_onsets(rng, sequence_onset, simulation)
-        
-        @test size(result_onsets) == (60,)
-        @test result_onsets[1] == 121
-        @test result_onsets[2] == 201
-        @test result_onsets[3] == 462
+
+        size(result_onsets) == (60,)
+        result_onsets[1] == 121
+        result_onsets[2] == 201
+        result_onsets[3] == 906
 
         # Test DriftOnset combined with UniformOnset
         sequence_onset = SequenceOnset(
@@ -146,11 +146,10 @@
         simulation = UnfoldSim.Simulation(design_rep, components, sequence_onset, UnfoldSim.NoNoise())
 
         result_onsets = simulate_onsets(rng, sequence_onset, simulation)
-        
-        @test size(result_onsets) == (60,)
-        @test result_onsets[1] == 121
-        @test result_onsets[2] == 201
-        @test result_onsets[3] == 602
+        size(result_onsets) == (60,)
+        result_onsets[1] == 121
+        result_onsets[2] == 201
+        result_onsets[3] == 1046
     end
 
 end

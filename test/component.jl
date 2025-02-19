@@ -78,7 +78,7 @@
       sub_design = UnfoldSim.SubselectDesign(design_seq, 'C')
       result_rts = UnfoldSim.calculate_response_times_for_ssm(StableRNG(1),c,sub_design)
       @test size(result_rts) == (2,)
-      @test isapprox(result_rts, [260.70134768436486, 360.1329203034039], atol=1e-8)
+      @test isapprox(result_rts, [399.6903067274333, 388.89617910657597], atol=1e-8)
 
       # Test get_model_parameter(rng, evt, d::Dict)
       rng = StableRNG(1)

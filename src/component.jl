@@ -581,7 +581,7 @@ julia> simulate_component(StableRNG(1),c,design_seq)
 ```
 """
 function UnfoldSim.simulate_component(rng, c::Drift_Component, design::AbstractDesign)
-    traces, _ = trace_sequential_sampling_model(deepcopy(rng), c, design)
+    _, traces = trace_sequential_sampling_model(deepcopy(rng), c, design)
     return traces
 end
 """
@@ -616,7 +616,7 @@ julia> calculate_response_times_for_ssm(StableRNG(1),c,design_seq)
 ```
 """
 function calculate_response_times_for_ssm(rng, component::Drift_Component, design::UnfoldSim.SubselectDesign)
-    _, rts = trace_sequential_sampling_model(deepcopy(rng), component, design)
+    rts, _ = trace_sequential_sampling_model(deepcopy(rng), component, design)
     return rts
 end
 Base.length(c::Drift_Component) = length(c.time_vec)

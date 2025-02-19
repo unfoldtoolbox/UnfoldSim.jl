@@ -41,20 +41,49 @@ mutable struct KellyModel
     function KellyModel(;
         drift_rate = 6.0,
         event_onset = 0.2,
-        sensor_encoding_delay = 0.4,
+        sensor_encoding_delay = 0.1,
         accumulative_level_noise = 0.5,
         boundary = 1.0,
-        motor_onset = 0.1,
-        motor_delay = 0.4,
+        motor_onset = 0.4,
+        motor_delay = 0.1,
         post_accumulation_duration_mean = 0.1,
         post_accumulation_duration_variability = 0.2,
         CPPrampdownDur = 0.1
     )
-        return (drift_rate, event_onset, sensor_encoding_delay, accumulative_level_noise, boundary, motor_onset,
+        return new(drift_rate, event_onset, sensor_encoding_delay, accumulative_level_noise, boundary, motor_onset,
             motor_delay, post_accumulation_duration_mean, post_accumulation_duration_variability,
             CPPrampdownDur)
     end
 end
+
+"""
+    create_kelly_parameters_dict(model::KellyModel)
+
+Convert a `KellyModel` instance into a dictionary containing its parameters.
+
+# Arguments
+- `model::KellyModel`: The Kelly model instance whose parameters will be extracted.
+
+# Returns
+- `Dict{Symbol, Any}`: A dictionary where the keys are the parameter names as symbols, and the values are the corresponding parameter values.
+
+# Examples
+```julia-repl
+julia> model = KellyModel(drift_rate=5.5, boundary=1.2)
+KellyModel(5.5, 0.2, 0.4, 0.5, 1.2, 0.1, 0.4, 0.1, 0.2, 0.1)
+
+julia> create_kelly_parameters_dict(model)
+Dict{Symbol, Any}(:drift_rate => 5.5, :event_onset => 0.2, :sensor_encoding_delay => 0.4, 
+                  :accumulative_level_noise => 0.5, :boundary => 1.2, :motor_onset => 0.1, 
+                  :motor_delay => 0.4, :post_accumulation_duration_mean => 0.1, 
+                  :post_accumulation_duration_variability => 0.2, :CPPrampdownDur => 0.1)
+"""
+function create_kelly_parameters_dict(model::KellyModel)
+    return Dict(
+        name => getfield(model, name) for name in fieldnames(typeof(model))
+    )
+end
+
 
 """
     KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
@@ -94,7 +123,9 @@ function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
     # terminate the decision process on boundary crossing, record threshold-crossing samplepoint:
     cum_evidence = abs.(cum_evidence);
     dti = findfirst(cum_evidence .> model.boundary); # finding the sample point of threshold crossing of each, then will pick the earlier as the winner
-
+    if isnothing(dti)  # Check if no crossing was found
+        dti = length(time_vec)  # Set to the last time step
+    end
     # now record RT in sec after adding motor time, with variability
     rt = time_vec[dti] + model.motor_onset + (rand(rng)-.5) * model.motor_delay;  
     
@@ -145,7 +176,7 @@ Vector{Float64}, 501x6 Matrix{Float64}:
 ```
 """
 function trace_sequential_sampling_model(rng, component::Drift_Component, design::AbstractDesign)
-    events = generate_events(rng, design)
+    events = generate_events(deepcopy(rng), design)
     traces = Matrix{Float64}(undef, length(component.time_vec), size(events, 1))
     rts = Vector{Float64}(undef, size(events, 1))
     for (i, evt) in enumerate(eachrow(events))
@@ -221,14 +252,17 @@ Float64, Vector{Float64}:
 function SSM_Simulate(rng, model::LBA, Δt, time_vec)
     max_steps = length(time_vec)
     time_steps, evidence = SequentialSamplingModels.simulate(rng, model; Δt)
-
+    evidence = hcat(evidence...)
+    evidence = collect(vec(evidence))
     # Store results for this trial
     rt = (time_steps[end] + model.τ)/Δt
     if length(evidence) < max_steps
         final_value = 0
         append!(evidence, fill(final_value, max_steps - length(evidence)))
+    else
+        rt = (time_vec[end] + model.τ)/Δt
+        evidence = evidence[1:max_steps]
     end
-    evidence = evidence[1:max_steps]
     return rt, evidence
 end
 

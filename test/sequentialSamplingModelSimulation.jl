@@ -15,49 +15,49 @@
 
     @testset "KellyModel_simulate_cpp" begin
         boundary = 1.0
-        result_rt, result_trace = KellyModel_simulate_cpp(rng, KellyModel(boundary=boundary), time_vec, Δt)
+        result_rt, result_trace = UnfoldSim.KellyModel_simulate_cpp(rng, KellyModel(boundary=boundary), time_vec, Δt)
         @test size(result_rt) == ()
         @test size(result_trace) == (501,)
-        @test isapprox(result_rt, 260.70134768436486, atol=1e-8)
+        @test isapprox(result_rt, 399.6903067274333, atol=1e-8)
         @test any(result_trace .== 0)
         @test any(result_trace .>= boundary)
 
-        result_sim_rt, result_sim_trace = SSM_Simulate(rng, KellyModel(), Δt, time_vec)
+        result_sim_rt, result_sim_trace = UnfoldSim.SSM_Simulate(rng, KellyModel(), Δt, time_vec)
         @test result_rt == result_sim_rt
         @test result_trace == result_sim_trace
     end
 
     @testset "trace_sequential_sampling_model" begin
         boundary = 1.0
-        model_parameter = create_kelly_parameters_dict(KellyModel(boundary=boundary));
+        model_parameter = UnfoldSim.create_kelly_parameters_dict(KellyModel(boundary=boundary));
         c = UnfoldSim.Drift_Component(simulate_component, time_vec, Δt, KellyModel, model_parameter);
         design_single = UnfoldSim.SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
         design_seq = UnfoldSim.SequenceDesign(design_single,"SCR_");
 
-        result_rts, result_traces = trace_sequential_sampling_model(rng, c, design_seq)
+        result_rts, result_traces = UnfoldSim.trace_sequential_sampling_model(rng, c, design_seq)
         @test size(result_rts) == (6,)
         @test size(result_traces) == (501, 6)
         @test any(result_traces .>= 1.0)
     end
 
     @testset "SSM_Simulate" begin
-        result_rt, result_trace = SSM_Simulate(rng, KellyModel(), Δt, time_vec)
+        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), KellyModel(), Δt, time_vec)
         @test size(result_rt) == ()
         @test size(result_trace) == (501,)
-        @test isapprox(result_rt, 260.70134768436486, atol=1e-8)
+        @test isapprox(result_rt, 399.6903067274333, atol=1e-8)
         @test any(result_trace .== 0)
         @test any(result_trace .>= boundary)
 
-        result_rt, result_trace = SSM_Simulate(rng, DDM(), Δt, time_vec)
+        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), DDM(), Δt, time_vec)
         @test size(result_rt) == ()
         @test size(result_trace) == (501,)
-        @test isapprox(result_rt, 214.00000000000003, atol=1e-8)
+        @test isapprox(result_rt, 223.00000000000003, atol=1e-8)
         @test any(result_trace .== 0)
 
-        result_rt, result_trace = SSM_Simulate(rng, LBA(), Δt, time_vec)
+        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), LBA(), Δt, time_vec)
         @test size(result_rt) == ()
         @test size(result_trace) == (501,)
-        @test isapprox(result_rt, 214.00000000000003, atol=1e-8)
+        @test isapprox(result_rt, 397.0, atol=1e-8)
         @test any(result_trace .== 0)
     end
 end

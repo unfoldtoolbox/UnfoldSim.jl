@@ -11,8 +11,9 @@
 # ```
 using UnfoldSim
 using Unfold
-using Random
+using StableRNGs
 using CairoMakie, UnfoldMakie
+using SequentialSamplingModels
 
 fs = 500
 Δt = 1/fs; # time step
@@ -23,11 +24,9 @@ time_vec = 0:Δt:tEnd; # time base - let's make it a typical stimulus duration
 # ```
 
 # ## Design
-# Let's generate a single design with two different drift_rates as condition
+# Let's generate a single design
 design_single = SingleSubjectDesign(
-    conditions = Dict(
-        :drift_rate => [0.5, 0.8],
-        :condition => [1])
+    conditions = Dict(:condition => [1])
     )
 # Now we convert the SingleSubjectDesign to an SequenceDesign with a Sequence of S: stimulus, C: component, R: response, _: gap
 design_seq = SequenceDesign(
@@ -41,30 +40,30 @@ design_rep = RepeatDesign(
     )
 
 # ## Create the 3 components we want to use
-# First the stimulus component as simple p3
+# First the stimulus component as simple LinearModelComponent
 p3 = LinearModelComponent(;
     basis = UnfoldSim.hanning(Int(0.5 * fs)),
     formula = @formula(0 ~ 1 + condition),
-    β = [1.0, 0],
+    β = [0.4, 0],
 )
 # Second a response component
 resp = LinearModelComponent(;
     basis = UnfoldSim.hanning(Int(0.5 * fs)),
     formula = @formula(0 ~ 1 + condition),
-    β = [0.5, 0],
+    β = [0.6, 0],
 )
-# Third we create our Drift_Component which implies the evidence accumulation. For the Drift_Component we can choose between different Models which are used for the Simulation. As parameter for the models drift_rate we use the drift_rate specified in the design by directly naming the condition.
-v = "drift_rate" # Drift Rate
-a = 2.0 # The amount of information that is considered for a decision.
-t = 0.10 # The duration for a non-decisional processes (encoding and response execution).
-z = 0.50 # An indicator of an an initial bias towards a decision.
-ddm_parameter = Dict(:ν=>v, :α=>a, :z=>z, :τ=>t)
+# Third we create our Drift_Component which implies the evidence accumulation. For the Drift_Component we can choose between different Models which are used for the Simulation.
+v = [0.8] # Drift Rate
+A = 0.1 # The maximum start point, an indicator of an an initial bias towards a decision.
+k = 0.4 # A + k = b, where b is the decision threshold.
+t = 0.2 # The duration for a non-decisional processes (encoding and response execution).
+lba_parameter = Dict(:ν=>v, :A=>A, :k=>k, :τ=>t)
 drift = Drift_Component(
     simulate_component,
     time_vec,
     Δt,
-    DDM,
-    ddm_parameter)
+    LBA,
+    lba_parameter)
 # As last step we have to specify the components as a Dict connection the components with the events of the design.
 components = Dict('S' => [p3], 'C' => [drift], 'R' => [resp])
 
@@ -84,14 +83,15 @@ data, evts = UnfoldSim.simulate(
     seq_onset,
     NoNoise() # PinkNoise(noiselevel=1)
 )
+# ## Plot ERP of simulated EEG
+# First the simulated EEG
 lines(data)
 vlines!(evts.latency[evts.event.=='S'], color = (:green, 0.5))
 vlines!(evts.latency[evts.event.=='C'], color = (:blue, 0.5))
 vlines!(evts.latency[evts.event.=='R'], color = (:orange, 0.5))
 CairoMakie.xlims!(0, 2000)
 current_figure()
-
-# ## Plot ERP of simulated EEG
+# Second the ERP
 evts.event = string.(evts.event)
 data_epochs, times_epoch = Unfold.epoch(data = data, tbl = evts, τ = (0, 1.0), sfreq = fs);
 f = @formula(0 ~ 1)
