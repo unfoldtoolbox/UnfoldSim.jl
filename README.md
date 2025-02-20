@@ -1,6 +1,6 @@
 # [![logo_UnfoldSim jl_120px](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/57703446/139a06c7-55c6-4c2e-8935-627a3c3bf036)](https://github.com/unfoldtoolbox/UnfoldSim.jl/tree/main)
 
-
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)
 [![Build Status](https://github.com/unfoldtoolbox/UnfoldSim.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/unfoldtoolbox/UnfoldSim.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/v/UnfoldSim.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/unfoldtoolbox/UnfoldSim.jl)
@@ -13,38 +13,34 @@
 A Julia package to simulate multivariate time series, e.g. model-based ERPs, fMRI activity, pupil dilation etc.
 UnfoldSim.jl provides multi-channel support via EEG-forward models. Moreover, it is possible to simulate overlapping event-related activity and to add noise of a certain type e.g. Pink noise.
 
-Many tutorials, guides, how-tos and references are available in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)!
+Many tutorials, guides, how-tos and references are available in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/)!
 
-![readme_figure](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/22366977/b69d186c-fd3d-4449-9f2e-03d7e01b8cb3)
+![unfoldsim_animation](https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/assets/docs/src/assets/UnfoldSim_features_animation.gif)
 
-## Install
+## Installation
 
 ### Julia
 <details>
 <summary>Click to expand</summary>
 
 The recommended way to install julia is [juliaup](https://github.com/JuliaLang/juliaup).
-It allows you to, e.g., easily update Julia at a later point, but also test out alpha/beta versions etc.
 
-TL:DR; If you dont want to read the explicit instructions, just copy the following command
+TL;DR: If you don't want to read the explicit instructions, just copy the following command:
 
-#### Windows
-
-AppStore -> JuliaUp,  or `winget install julia -s msstore` in CMD
-
-#### Mac & Linux
-
-`curl -fsSL https://install.julialang.org | sh` in any shell
+- Windows: `winget install julia -s msstore`
+- Mac/Linux: `curl -fsSL https://install.julialang.org | sh`
 </details>
 
-### Unfold.jl
+### UnfoldSim.jl
 
 ```julia
 using Pkg
 Pkg.add("UnfoldSim")
 ```
 
-# Quickstart
+## Quickstart
+We offer some predefined (EEG) signals to get started.
+
 ```julia
 using UnfoldSim
 data, events = UnfoldSim.predef_eeg(; n_repeats = 1, noiselevel = 0.8)
@@ -52,31 +48,39 @@ data, events = UnfoldSim.predef_eeg(; n_repeats = 1, noiselevel = 0.8)
 Produces continuous "EEG" with PinkNoise and some overlap between 20 events (2 conditions * 10 levels of the continuous variable).
 
 ## Slightly longer
+All simulation ingredients (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
+
 ```julia
 using UnfoldSim
 using Random
 
-# Start by defining the design / events data frame
+# Start by defining the design / events data frame.
 design =
     SingleSubjectDesign(; conditions = Dict(:condA => ["levelA", "levelB"])) |>
-    d -> RepeatDesign(d, 10);
+    d -> RepeatDesign(d, 10)
 
-# Next define a ground truth signal + relation to events/design with Wilkinson formulas
+# Next define a ground truth signal + relation to events/design with Wilkinson formulas.
 signal = LinearModelComponent(;
     basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
     formula = @formula(0 ~ 1 + condA),
     β = [1, 0.5],
-);
-# finally, define some inter-onset distribution and noise, and simulate data!
+)
+# Finally, define some inter-onset distance distribution and noise, and simulate data!
 data, events = simulate(
     Random.MersenneTwister(1),
     design,
     signal,
     UniformOnset(; offset = 5, width = 4),
     PinkNoise(),
-);    
+)    
 ```
-All components (design, components, onsets, noise) can be easily modified and you can simply plugin your own!
+
+## Statement of need
+EEG researchers often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kinds of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
+
+<!--
+Note: The statement of need is also used on the documentation landing page (https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/). Make sure that they are synchronized.
+-->
 
 ## Contributions
 Contributions of any kind are very welcome. Please have a look at [CONTRIBUTING.md](https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/main/CONTRIBUTING.md) for guidance on contributing to UnfoldSim.jl.
@@ -94,7 +98,7 @@ Contributions of any kind are very welcome. Please have a look at [CONTRIBUTING.
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jschepers"><img src="https://avatars.githubusercontent.com/u/22366977?v=4?s=100" width="100px;" alt="Judith Schepers"/><br /><sub><b>Judith Schepers</b></sub></a><br /><a href="#ideas-jschepers" title="Ideas, Planning, & Feedback">🤔</a> <a href="#bug-jschepers" title="Bug reports">🐛</a> <a href="#doc-jschepers" title="Documentation">📖</a> <a href="#tutorial-jschepers" title="Tutorials">✅</a> <a href="#code-jschepers" title="Code">💻</a> <a href="#test-jschepers" title="Tests">⚠️</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/vladdez"><img src="https://avatars.githubusercontent.com/u/33777074?v=4?s=100" width="100px;" alt="Vladimir Mikheev"/><br /><sub><b>Vladimir Mikheev</b></sub></a><br /><a href="#bug-vladdez" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://reboreexplore.github.io/"><img src="https://avatars.githubusercontent.com/u/43548330?v=4?s=100" width="100px;" alt="Manpa Barman"/><br /><sub><b>Manpa Barman</b></sub></a><br /><a href="#infra-ReboreExplore" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://reneskukies.de/"><img src="https://avatars.githubusercontent.com/u/57703446?v=4?s=100" width="100px;" alt="René Skukies"/><br /><sub><b>René Skukies</b></sub></a><br /><a href="#doc-ReneSkukies" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://reneskukies.de/"><img src="https://avatars.githubusercontent.com/u/57703446?v=4?s=100" width="100px;" alt="René Skukies"/><br /><sub><b>René Skukies</b></sub></a><br /><a href="#doc-ReneSkukies" title="Documentation">📖</a> <a href="#code-ReneSkukies" title="Code">💻</a> <a href="#test-ReneSkukies" title="Tests">⚠️</a> <a href="#ideas-ReneSkukies" title="Ideas, Planning, & Feedback">🤔</a> <a href="#tutorial-ReneSkukies" title="Tutorials">✅</a></td>
     </tr>
   </tbody>
 </table>

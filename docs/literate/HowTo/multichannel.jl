@@ -1,15 +1,27 @@
+# # Generate multi channel data
 
+# Here you will learn how to simulate EEG data for multiple channels/electrodes.
+# The idea is to specify a signal on source level and then use a head model or a manual projection matrix to project the source signal to a number of electrodes.
+
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
 using UnfoldSim
 using UnfoldMakie
 using CairoMakie
 using DataFrames
 using Random
-
+# ```@raw html
+# </details >
+# ```
 
 # ## Specifying a design
 
 # We are using a one-level design for testing here.
-design = SingleSubjectDesign(conditions = Dict(:condA => ["levelA"]))
+design = SingleSubjectDesign(conditions = Dict(:condA => ["levelA"]));
 
 # Next we generate two simple components at two different times without any formula attached (we have a single condition anyway)
 c = LinearModelComponent(; basis = p100(), formula = @formula(0 ~ 1), β = [1]);
@@ -17,16 +29,16 @@ c2 = LinearModelComponent(; basis = p300(), formula = @formula(0 ~ 1), β = [1])
 
 
 # ## The multichannel component
-# next similar to the nested design above, we can nest the component in a `MultichannelComponent`. We could either provide the projection marix manually, e.g.:
+# Next, similar to the nested design above, we can nest the component in a `MultichannelComponent`. We could either provide the projection matrix manually, e.g.:
 mc = UnfoldSim.MultichannelComponent(c, [1, 2, -1, 3, 5, 2.3, 1])
 
 # or maybe more convenient: use the pair-syntax: Headmodel=>Label which makes use of a headmodel (HaRTmuT is currently easily available in UnfoldSim)
-hart = headmodel(type = "hartmut")
+hart = Hartmut()
 mc = UnfoldSim.MultichannelComponent(c, hart => "Left Postcentral Gyrus")
 mc2 = UnfoldSim.MultichannelComponent(c2, hart => "Right Occipital Pole")
 
 # !!! hint
-#     You could also specify a noise-specific component which is applied prior to projection & summing with other components
+#     You could also specify a noise-specific component which is applied prior to projection & summing with other components.
 # 
 # finally we need to define the onsets of the signal
 onset = UniformOnset(; width = 20, offset = 4);
@@ -35,7 +47,8 @@ onset = UniformOnset(; width = 20, offset = 4);
 
 # Now as usual we simulate data. Inspecting data shows our result is now indeed ~230 Electrodes large! Nice!
 data, events =
-    simulate(MersenneTwister(1), design, [mc, mc2], onset, PinkNoise(noiselevel = 0.05))
+    simulate(MersenneTwister(1), design, [mc, mc2], onset, PinkNoise(noiselevel = 0.05));
+
 size(data)
 
 
@@ -45,7 +58,7 @@ size(data)
 # ## Plotting
 # Let's plot using Butterfly & Topoplot
 # first we convert the electrodes to positions usable in TopoPlots.jl
-pos3d = hart.electrodes["pos"];
+pos3d = hart.electrodes["pos"]
 pos2d = to_positions(pos3d')
 pos2d = [Point2f(p[1] + 0.5, p[2] + 0.5) for p in pos2d];
 

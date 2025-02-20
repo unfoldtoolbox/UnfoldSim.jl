@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-    tags: ["*"]
+    tags: '*'
   pull_request:
     branches:
       - main
@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - "1.8"
+          - "1"
         os:
           - ubuntu-latest
         arch:
@@ -52,6 +52,7 @@ jobs:
       - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest

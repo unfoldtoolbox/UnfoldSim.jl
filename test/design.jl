@@ -12,9 +12,26 @@
         ) == 1
         des = SingleSubjectDesign(;
             conditions = Dict(:A => nlevels(5), :B => nlevels(2)),
+<<<<<<< HEAD
             event_order_function = x -> sort(x, order(:B, rev = true)),
         )
         @test generate_events(des).B[1] == "S2"
+=======
+            event_order_function = (rng, x) -> sort(x, order(:B, rev = true)),
+        )
+        @test generate_events(des).B[1] == "S2"
+
+        des = SingleSubjectDesign(;
+            conditions = Dict(:A => nlevels(5), :B => nlevels(2)),
+            event_order_function = (rng, x) -> shuffle(rng, x),
+        )
+        @test generate_events(MersenneTwister(3), des) ==
+              generate_events(MersenneTwister(3), des)
+
+        # different sortig seed results in different sorts
+        @test generate_events(MersenneTwister(3), des) !=
+              generate_events(MersenneTwister(4), des)
+>>>>>>> main
     end
 
     @testset "MultiSubjectDesign" begin
@@ -35,7 +52,11 @@
             n_subjects = 10,
             n_items = 100,
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
+<<<<<<< HEAD
             event_order_function = x -> sort(x, order(:item, rev = true)),
+=======
+            event_order_function = (rng, x) -> sort(x, order(:item, rev = true)),
+>>>>>>> main
         )
         @test generate_events(des).subject[1] == "S01"
 
@@ -44,9 +65,30 @@
             n_subjects = 10,
             n_items = 100,
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
+<<<<<<< HEAD
             event_order_function = x -> sort(x, order(:B, rev = true)),
         )
         @test generate_events(des).B[1] == "S2"
+=======
+            event_order_function = (rng, x) -> sort(x, order(:B, rev = true)),
+        )
+        @test generate_events(des).B[1] == "S2"
+
+        # check event_order_function
+        des = MultiSubjectDesign(;
+            n_subjects = 10,
+            n_items = 100,
+            both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
+            event_order_function = (rng, x) -> shuffle(rng, x),
+        )
+        # generating same events with same seed should result in same events
+        @test generate_events(MersenneTwister(3), des) ==
+              generate_events(MersenneTwister(3), des)
+
+        # different sortig seed results in different sorts
+        @test generate_events(MersenneTwister(3), des) !=
+              generate_events(MersenneTwister(4), des)
+>>>>>>> main
 
         # check that this throws an error because of `dv` as condition name
         des = MultiSubjectDesign(;
@@ -162,4 +204,8 @@
         @test length(unique(i1.cond)) == 1
     end
 
+<<<<<<< HEAD
 end
+=======
+end
+>>>>>>> main
