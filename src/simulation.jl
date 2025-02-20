@@ -6,45 +6,8 @@ Simulation(
     noisetype::AbstractNoise,
 ) = Simulation(design, [component], onset, noisetype)
 
-<<<<<<< HEAD
-"""
-    simulate(
-    rng,
-    design::AbstractDesign,
-    signal,
-    onset::AbstractOnset,
-    noise::AbstractNoise = NoNoise();
-    return_epoched=false,
-    )
-
-Main simulation function, given `Design`, [Array of] `Component`, `Onset` and optional [`Noise`], returns continuous or epoched signal.
-
-## optional
-- `return_epoched` (Bool, default: `false`):  Skip the Onset-calculation and conversion to continuous data and return the epoched data directly (see also remarks below).
-
-## Return 
-Depending on the design, the components and on `return_epoched`, the output can be a 1-D, 2-D, 3-D or 4-D Array. For example, a 4-D Array would have the dimensions `channels x time x trials x subjects`
-
-## Notes
-Some remarks to how the noise is added:
-  - If `return_epoched = true` and `onset =NoOnset()` the noise is added to the epoched data matrix
-  - If `onset` is not `NoOnset`, a continuous signal is created and the noise is added to this i.e. this means that the noise won't be the same as in the `onset = NoOnset()` case even if `return_epoched = true`.
-  - The case `return_epoched = false` and `onset = NoOnset()` is not possible and therefore covered by an assert statement
-
-"""
-
-
-function simulate(design::AbstractDesign, signal, onset::AbstractOnset, args...; kwargs...)
-    @warn "No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!"
-    simulate(MersenneTwister(1), design, signal, onset, args...; kwargs...)
-end
-
-simulate(
-    rng::AbstractRNG,
-=======
 
 function simulate(
->>>>>>> main
     design::AbstractDesign,
     components,
     onset::AbstractOnset,
@@ -175,11 +138,7 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
     responses = simulate_responses(deepcopy(rng), components, simulation)
 
     # create events data frame
-<<<<<<< HEAD
-    events = UnfoldSim.generate_events(design)
-=======
     events = UnfoldSim.generate_events(deepcopy(rng), design)
->>>>>>> main
 
     if isa(onset, NoOnset)
         # reshape the responses such that the last dimension is split in two dimensions (trials per subject and subject)
@@ -188,11 +147,7 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
         size_responses = size(responses)
         signal = reshape(responses, size_responses[1:end-1]..., size(design)...)
     else # if there is an onset distribution given the next step is to create a continuous signal
-<<<<<<< HEAD
-        signal, latencies = create_continuous_signal(rng, responses, simulation)
-=======
         signal, latencies = create_continuous_signal(deepcopy(rng), responses, simulation)
->>>>>>> main
         events.latency = latencies
     end
 
@@ -231,11 +186,6 @@ end
 
 """
     create_continuous_signal(rng, responses, simulation)
-<<<<<<< HEAD
-Based on the responses and simulation parameters, simulate onset latencies and add together a continuous signal.
-
-
-=======
 
 Simulate onset latencies and add together a continuous signal, based on the given responses and simulation parameters. Helper function.
 
@@ -286,7 +236,6 @@ julia> signal
  31
  61
 ```
->>>>>>> main
 """
 function create_continuous_signal(rng, responses, simulation)
 
@@ -341,21 +290,6 @@ end
 
 
 """
-<<<<<<< HEAD
-    add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
-    add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)
-    add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
-Helper function to add inplace the responses to the signal, but for both 2D (1 channel) and 3D (X channel case).
-"""
-function add_responses!(signal, responses::Vector, e, s, tvec, erpvec)
-    @views signal[e, tvec, s] .+= responses[:, erpvec]
-end
-function add_responses!(signal, responses::Matrix, e, s, tvec, erpvec)#
-    @views signal[e, tvec, s] .+= responses[:, erpvec]
-end
-function add_responses!(signal, responses::AbstractArray, e, s, tvec, erpvec)
-    @views signal[e, tvec, s] .+= responses[e, :, erpvec]
-=======
     add_responses!(signal, responses::Vector, e, s, tvec, trial_idx)
     add_responses!(signal, responses::Matrix, e, s, tvec, trial_idx)
     add_responses!(signal, responses::AbstractArray, e, s, tvec, trial_idx)
@@ -404,5 +338,4 @@ function add_responses!(signal, responses::Matrix, e, s, tvec, trial_idx)
 end
 function add_responses!(signal, responses::AbstractArray, e, s, tvec, trial_idx)
     @views signal[e, tvec, s] .+= responses[e, :, trial_idx]
->>>>>>> main
 end

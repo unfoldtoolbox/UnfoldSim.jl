@@ -11,34 +11,19 @@ predef_eeg(nsubjects::Int; kwargs...) = predef_eeg(MersenneTwister(1), nsubjects
     predef_eeg(rng; <keyword arguments>)
     predef_eeg(rng, n_subjects; <keyword arguments>)
 
-<<<<<<< HEAD
-Generate a P1/N1/P3 complex.
-In case `n_subjects` is defined - `MixedModelComponents` are generated, else `LinearModelComponents`.
-
-The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset=NoOnset()` and `return_epoched=true`
-
-
-=======
 Simulate data for a P1/N1/P3 component complex.
 
 Note that this function is mainly used for demonstration and internal testing purposes or whenever a quick simulation is needed. \n
 In case `n_subjects` is defined - `MixedModelComponents` are generated (multi-subject simulation), else `LinearModelComponents` (single-subject simulation). \n
 The most used keyword argument is: `return_epoched = true` which returns already epoched data. If you want epoched data without overlap, specify `onset = NoOnset()` and `return_epoched = true`.
->>>>>>> main
 
 # Keyword arguments
 
-<<<<<<< HEAD
-- n_repeats = 100
-- event_order_function = x->shuffle(deepcopy(rng),x # random trial order
-- conditions = Dict(...),
-=======
 ## Design
 - `n_repeats = 100`: Number of times the experimental design is repeated. Only used in the single-subject case.
 - `n_items = 100`: Number of items. Only used in the multi-subject case.
 - `event_order_function = shuffle`: Random trial order. Use `event_order_function = (rng, x) -> x` to deactivate.
 - `conditions = Dict(:condition => ["car", "face"], :continuous => range(-5, 5, length = 10))`: Conditions and covariates used in this predefined design.
->>>>>>> main
 
 ## Component / Signal
 - `sfreq = 100`: Sampling frequency.
@@ -101,11 +86,7 @@ function predef_eeg(
     rng;
     # design
     n_repeats = 100,
-<<<<<<< HEAD
-    event_order_function = x -> shuffle(deepcopy(rng), x),
-=======
     event_order_function = shuffle,
->>>>>>> main
 
     # component / signal
     sfreq = 100,
@@ -155,11 +136,7 @@ function predef_eeg(
     n_subjects;
     # design
     n_items = 100,
-<<<<<<< HEAD
-    event_order_function = x -> shuffle(deepcopy(rng), x),
-=======
     event_order_function = shuffle,
->>>>>>> main
     conditions = Dict(
         :condition => ["car", "face"],
         :continuous => range(-5, 5, length = 10),
@@ -209,19 +186,9 @@ end
 
     predef_2x2(rng::AbstractRNG; <keyword arguments>)
 
-<<<<<<< HEAD
-The most used `kwargs` is: `return_epoched=true` which returns already epoched data. If you want epoched data without overlap, specify `onset=NoOnset()` and `return_epoched=true`
-
-#### design
-- `n_items`=100,
-- `n_subjects`=1,
-- `conditions` = Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"]),
-- `event_order_function` = x->shuffle(deepcopy(rng),x),
-=======
 Simulate data for a 2x2 design i.e. a design with two conditions with two levels each.
 
 Note that this function is mainly used for demonstration and internal testing purposes or whenever a quick simulation is needed. \n
->>>>>>> main
 
 The most used keyword argument is: `return_epoched = true` which returns already epoched data. If you want epoched data without overlap, specify `onset = NoOnset()` and `return_epoched = true`. \n
 Be careful if you modify `n_items` with `n_subjects = 1`, `n_items` has to be a multiple of 4 (or your equivalent conditions factorial, e.g. all combinations length).
@@ -301,11 +268,7 @@ function predef_2x2(
     n_items = 100,
     n_subjects = 1,
     conditions = Dict(:A => ["a_small", "a_big"], :B => ["b_tiny", "b_large"]),
-<<<<<<< HEAD
-    event_order_function = x -> shuffle(deepcopy(rng), x),
-=======
     event_order_function = shuffle,
->>>>>>> main
 
     # component / signal
     signalsize = 100,

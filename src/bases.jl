@@ -2,10 +2,6 @@
 
 ## EEG
 """
-<<<<<<< HEAD
-    p100(;sfreq=100)
-Generator for Hanning window, peak at 100ms, width 100ms, at kwargs `sfreq` (default 100). Returns a vector.
-=======
     p100(; sfreq = 100)
 
 Generate a Hanning window mimicking a P100 EEG component with a peak at 100ms and a width of 100ms.
@@ -34,15 +30,10 @@ julia> p100(; sfreq = 200)
 ```
 
 See also [`p300`](@ref), [`n170`](@ref), [`n400`](@ref), [`hanning`](@ref).
->>>>>>> main
 """
 p100(; sfreq = 100) = hanning(0.1, 0.1, sfreq)
 
 """
-<<<<<<< HEAD
-    p300(;sfreq=100)
-Generator for Hanning window, peak at 300ms, width 300ms, at kwargs `sfreq` (default 100). Returns a vector.
-=======
     p300(; sfreq = 100)
 
 Generate a Hanning window mimicking a P300 EEG component with a peak at 300ms and a width of 300ms.
@@ -71,15 +62,10 @@ julia> p300(; sfreq = 150)
 ```
 
 See also [`p100`](@ref), [`n170`](@ref), [`n400`](@ref), [`hanning`](@ref).
->>>>>>> main
 """
 p300(; sfreq = 100) = hanning(0.3, 0.3, sfreq)
 
 """
-<<<<<<< HEAD
-    n170(;sfreq=100)
-Generator for Hanning window, negative (!) peak at 170ms, width 150ms, at kwargs `sfreq` (default 100). Returns a vector.
-=======
     n170(; sfreq = 100)
 
 Generate a Hanning window mimicking an N170 EEG component with a negative (!) peak at 170ms and a width of 150ms.
@@ -107,15 +93,10 @@ julia> n170(; sfreq = 120)
  -0.0
 ```
 See also [`p100`](@ref), [`p300`](@ref), [`n400`](@ref), [`hanning`](@ref).
->>>>>>> main
 """
 n170(; sfreq = 100) = -hanning(0.15, 0.17, sfreq)
 
 """
-<<<<<<< HEAD
-    n400(;sfreq=100)
-Generator for Hanning window, negative (!) peak at 400ms, width 400ms, at kwargs `sfreq` (default 100). Returns a vector.
-=======
     n400(; sfreq = 100)
 
 Generate a Hanning window mimicking an N400 EEG component with a negative (!) peak at 400ms and a width of 400ms.
@@ -143,7 +124,6 @@ julia> n400(; sfreq = 250)
  -0.0
 ```
 See also [`p100`](@ref), [`p300`](@ref), [`n170`](@ref), [`hanning`](@ref).
->>>>>>> main
 """
 n400(; sfreq = 100) = -hanning(0.4, 0.4, sfreq)
 
@@ -184,12 +164,6 @@ function DSP.hanning(duration, offset, sfreq)
     return pad_array(signal, -Int(round(offset * sfreq / 2)), 0)
 end
 
-<<<<<<< HEAD
-## pupil
-"""
-    PuRF()
-Default generator for PuRF Pupil Response Function.
-=======
 
 ## Pupil
 """
@@ -224,7 +198,6 @@ julia> PuRF(; n = 5)
  0.011434405338911133
  0.011032182932283816
 ```
->>>>>>> main
 """
 function PuRF(; n = 10.1, tmax = 0.93, sfreq = 100)
     t = (0:1/sfreq:3*tmax)

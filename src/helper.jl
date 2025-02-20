@@ -1,11 +1,4 @@
 """
-<<<<<<< HEAD
-Pads array with specified value, length
-pad_array(arr, len, val)
-"""
-pad_array(arr::Vector, len::Tuple, val) =
-    pad_array(pad_array(arr, len[1], val), len[2], val)
-=======
     pad_array(arr::Vector, len::Int, val)    
     pad_array(arr::Vector, len::Tuple, val)
 
@@ -59,7 +52,6 @@ julia> pad_array(my_array, (-2, 1), 5)
 pad_array(arr::Vector, len::Tuple, val) =
     pad_array(pad_array(arr, len[1], val), len[2], val)
 
->>>>>>> main
 function pad_array(arr::Vector, len::Int, val)
     pad = fill(val, abs(len))
     arr = len > 0 ? vcat(arr, pad) : vcat(pad, arr)
@@ -67,50 +59,6 @@ function pad_array(arr::Vector, len::Int, val)
 end
 
 
-<<<<<<< HEAD
-
-"""
-Obsolete - # TODO: Transfer function to Unfold.jl
-
-Function to convert output similar to unfold (data, events)
-"""
-function convert(eeg, onsets, design, n_chan; reshape = true)
-    events = UnfoldSim.generate_events(design)
-    @debug size(eeg)
-    if reshape
-        n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]
-
-        if n_chan == 1
-            data = eeg[:,]
-
-            events.latency = (onsets' .+ range(0, size(eeg, 2) - 1) .* size(eeg, 1))'[:,]
-        elseif n_subjects == 1
-            data = eeg
-            @debug size(onsets)
-            events.latency = onsets
-        else # multi subject + multi channel
-            data = eeg[:, :]
-            events.latency = (onsets' .+ range(0, size(eeg, 3) - 1) .* size(eeg, 2))'[:,]
-        end
-    else
-        data = eeg
-    end
-
-    return data, events
-
-end
-
-
-"""
-	closest_src(coords_list::AbstractVector{<:AbstractVector}, pos)
-	closest_src(coords::Vector{<:Real}, pos) 
-	
-Takes an array of 'm' target coordinate vector (size 3) (or vector of vectors) and a matrix (n-by-3) of all available positions, and returns an array of size 'm' containing the indices of the respective items in 'pos' that are nearest to each of the target coordinates.
-"""
-closest_src(coords_list::AbstractVector{<:AbstractVector}, pos) =
-    closest_src.(coords_list, Ref(pos))
-
-=======
 """
 	closest_src(coords::Vector{<:Real}, pos)
 
@@ -143,7 +91,6 @@ julia> target_coordinates = [0.5, 0, 0.5]
 1
 ```
 """
->>>>>>> main
 function closest_src(coords::Vector{<:Real}, pos)
     s = size(pos)
     dist = zeros(s[1])
@@ -218,31 +165,6 @@ function closest_src(head::Hartmut, label::String)
 end
 
 
-<<<<<<< HEAD
-
-
-# One channel case
-
-"""
-    epoch(data::AbstractVector, args...; kwargs...)
-    epoch(
-        data::AbstractArray{T,2},
-        events,
-        τ::Tuple{Number,Number},
-        sfreq;
-        eventtime::Symbol = :latency,
-    ) where {T<:Union{Missing,Number}}
-Helper function to epoch data.
-
-Adapted from Unfold.jl: https://github.com/unfoldtoolbox/Unfold.jl/blob/b3a21c2bb7e93d2f45ec64b0197f4663a6d7939a/src/utilities.jl#L40
-
-"""
-function epoch(data::AbstractVector, args...; kwargs...)
-    data_r = reshape(data, (1, :))
-    ep = epoch(data_r, args...; kwargs...)
-    return dropdims(ep; dims = 1)
-end
-=======
 """
     epoch(
         data::AbstractArray{T,2},
@@ -253,7 +175,6 @@ end
     ) where {T<:Union{Missing,Number}}
 
 Helper function to segment continuous `data` into epochs based on the given `events` and the time window `τ`.
->>>>>>> main
 
 Adapted from Unfold.jl: https://github.com/unfoldtoolbox/Unfold.jl/blob/b3  a21c2bb7e93d2f45ec64b0197f4663a6d7939a/src/utilities.jl#L40
 

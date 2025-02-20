@@ -3,12 +3,6 @@
 #----------------
 
 """
-<<<<<<< HEAD
-    struct UniformOnset <: AbstractOnset
-Provide a Uniform Distribution of the inter-event-distances.
-`width`  is the width of the uniform distribution (=> the jitter). Since the lower bound is 0, `width` is also the upper bound.
-`offset` is the minimal distance. The maximal distance is `offset + width`.
-=======
     UniformOnset <: AbstractOnset
 
 Provide a Uniform Distribution for the inter-event distances (in samples).
@@ -28,19 +22,12 @@ UniformOnset
 ```
 
 See also [`LogNormalOnset`](@ref), [`NoOnset`](@ref).
->>>>>>> main
 """
 @with_kw struct UniformOnset <: AbstractOnset
     width = 50 # how many samples jitter?
     offset = 0 # minimal offset?
 end
 """
-<<<<<<< HEAD
-    @with_kw struct LogNormalOnset <: AbstractOnset
-Log-normal inter-event distances using the `Distributions.jl` truncated LogNormal distribution.
-
-Be careful with large `μ` and `σ` values, as they are on logscale. σ>8 can quickly give you out-of-memory sized signals!
-=======
     LogNormalOnset <: AbstractOnset
 
 Log-normal inter-event distances (in samples) using the `Distributions.jl` truncated LogNormal distribution ([code and mathematical reference](https://juliastats.org/Distributions.jl/stable/univariate/#Distributions.LogNormal)).
@@ -65,7 +52,6 @@ LogNormalOnset
 ```
 
 See also [`UniformOnset`](@ref), [`NoOnset`](@ref).
->>>>>>> main
 """
 @with_kw struct LogNormalOnset <: AbstractOnset
     μ::Any  # mean
@@ -75,18 +61,6 @@ See also [`UniformOnset`](@ref), [`NoOnset`](@ref).
 end
 
 """
-<<<<<<< HEAD
-    struct NoOnset <: AbstractOnset end
-In the case that the user directly wants no overlap to be simulated (=> epoched data).
-"""
-struct NoOnset <: AbstractOnset end
-
-"""
-    simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
-    simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
-Generate the inter-event-onset vector in samples (returns Int).
-"""
-=======
     NoOnset <: AbstractOnset
 
 For cases where the user wants to simulate epoched data without any overlap between consecutive events.
@@ -148,7 +122,6 @@ See also [`simulate_onsets`](@ref).
 """
 function simulate_interonset_distances end
 
->>>>>>> main
 
 function simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     return Int.(
@@ -169,10 +142,6 @@ end
 
 """
     simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
-<<<<<<< HEAD
-Call `simulate_interonset_distances` to generate distances between events and then add them up to generate the actual latencies in samples.
-# main call from `simulation`
-=======
 
 Call `simulate_interonset_distances` to generate distances between events and then add them up to generate the actual latencies in samples.
 
@@ -214,7 +183,6 @@ julia> simulate_onsets(StableRNG(1), simulation.onset, simulation)
 ```
 
 See also [`simulate_interonset_distances`](@ref).
->>>>>>> main
 """
 function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
 
@@ -222,11 +190,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
     onsets = simulate_interonset_distances(rng, onset, simulation.design)
 
     if maximum(onsets) > 10000
-<<<<<<< HEAD
-        @warn "Maximum of inter-event-distances was $(maximum(onsets)) - are you sure this is what you want?"
-=======
         @warn "Maximum of inter-event distances was $(maximum(onsets)) - are you sure this is what you want?"
->>>>>>> main
     end
     # accumulate them
     onsets_accum = accumulate(+, onsets, dims = 1, init = 1)

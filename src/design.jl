@@ -1,23 +1,7 @@
-<<<<<<< HEAD
-""" 
-    MultiSubjectDesign
-
-- `n_subjects`::Int -> number of subjects
-- `n_items`::Int -> number of items (sometimes ≈trials)
-- `subjects_between` = Dict{Symbol,Vector} -> effects between subjects, e.g. young vs old 
-- `items_between` = Dict{Symbol,Vector} -> effects between items, e.g. natural vs artificial images, (but shown to all subjects if not specified also in `subjects_between`)
-- `both_within` = Dict{Symbol,Vector}	-> effects completly crossed
-- `event_order_function` = `x->x`; # can be used to sort, or e.g. `x->shuffle(MersenneTwister(42),x)` - be sure to fix/update the rng accordingly!!
-
-tipp: check the resulting dataframe using `generate_events(design)`
-
-
-=======
 # Design types
 
 """
     SingleSubjectDesign <: AbstractDesign
->>>>>>> main
 
 A type for specifying the experimental design for a single subject (based on the given conditions).
 
@@ -125,38 +109,18 @@ See also [`SingleSubjectDesign`](@ref), [`RepeatDesign`](@ref)
     subjects_between::Dict{Symbol,Vector} = Dict()
     items_between::Dict{Symbol,Vector} = Dict()
     both_within::Dict{Symbol,Vector} = Dict()
-<<<<<<< HEAD
-    event_order_function = x -> x # can be used to sort, or x->shuffle(rng,x)
-=======
     event_order_function = (rng, x) -> x
->>>>>>> main
 end
 
 """
-<<<<<<< HEAD
-- conditions = Dict{Symbol,Vector} of conditions, e.g. `Dict(:A=>["a_small","a_big"],:B=>["b_tiny","b_large"])`
-- `event_order_function` = x->x; # can be used to sort, or x->shuffle(MersenneTwister(42),x) - be sure to fix/update the rng accordingly!!
-
-Number of trials / rows in `generate_events(design)` depend on the full factorial of your `conditions`.
-=======
     RepeatDesign{T} <: AbstractDesign
 
 Repeat a design (and the corresponding events DataFrame) multiple times to mimick repeatedly recorded trials.
->>>>>>> main
 
 Tip: Check the resulting dataframe using the [`generate_events`](@ref) function.
 Please note that when using an `event_order_function`(e.g. `shuffle`) in a `RepeatDesign`, the corresponding RNG is shared across repetitions and not deep-copied for each repetition.
 As a result, the order of events will differ for each repetition.
 
-<<<<<<< HEAD
-If conditions are omitted (or set to `nothing`), a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
-
-tipp: check the resulting dataframe using `generate_events(design)`
-"""
-@with_kw struct SingleSubjectDesign <: AbstractDesign
-    conditions::Dict{Symbol,Vector} = Dict()
-    event_order_function = x -> x
-=======
 # Fields
 - `design::T`: The experimental design that should be repeated.
 - `repeat::Int = 1`: The number of repetitions.
@@ -209,31 +173,11 @@ See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref)
 @with_kw struct RepeatDesign{T} <: AbstractDesign
     design::T
     repeat::Int = 1
->>>>>>> main
 end
 
 #----
 # Design helper functions
 
-<<<<<<< HEAD
-""" Returns dimension of experiment design"""
-size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
-size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
-
-"""
-Generates full-factorial DataFrame of design.conditions
-
-
-Afterwards applies design.event_order_function.
-
-If conditions is `nothing`, a single trial is simulated with a column `:dummy` and content `:dummy` - this is for convenience.
-
-
-julia> d = SingleSubjectDesign(;conditions= Dict(:A=>nlevels(5),:B=>nlevels(2)))
-julia> generate_events(d)
-"""
-function generate_events(design::SingleSubjectDesign)
-=======
 "Return the dimensions of the experiment design."
 size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
 size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
@@ -328,7 +272,6 @@ julia> generate_events(StableRNG(1), design)
 ```
 """
 function generate_events(rng::AbstractRNG, design::SingleSubjectDesign)
->>>>>>> main
     if isempty(design.conditions)
         events = DataFrame(:dummy => [:dummy])
     else
@@ -339,36 +282,23 @@ function generate_events(rng::AbstractRNG, design::SingleSubjectDesign)
             DataFrame
     end
     # by default does nothing
-<<<<<<< HEAD
-    return design.event_order_function(events)
-=======
     return apply_event_order_function(design.event_order_function, rng, events)
 
->>>>>>> main
 end
 
 """
     generate_events(design::MultiSubjectDesign)
-<<<<<<< HEAD
-Generate full factorial Dataframe according to MixedModelsSim.jl 's `simdat_crossed` function.
-Note: n_items = you can think of it as `trials` or better, as `stimuli`.
-=======
     generate_events(rng::AbstractRNG, design::MultiSubjectDesign)
->>>>>>> main
 
 Generate the events Dataframe according to `MixedModelsSim.jl`'s `simdat_crossed` function.
 
 Afterwards apply `design.event_order_function` and finally sort by `:subject`. \\
 Note: No condition can be named `dv` which is used internally in MixedModelsSim / MixedModels as a dummy left-side
 
-<<<<<<< HEAD
-Afterwards applies `design.event_order_function``.  Could be used to duplicate trials, sort, subselect etc.
-=======
 # Examples
 ```julia-repl
 julia> using Random # for shuffling
 julia> using StableRNGs
->>>>>>> main
 
 julia> design = MultiSubjectDesign(;
                        n_items = 4,
@@ -377,12 +307,6 @@ julia> design = MultiSubjectDesign(;
                        event_order_function = shuffle,
                        );
 
-<<<<<<< HEAD
-julia> d = MultiSubjectDesign(;n_subjects = 10,n_items=20,both_within= Dict(:A=>nlevels(5),:B=>nlevels(2)))
-julia> generate_events(d)
-"""
-function generate_events(design::MultiSubjectDesign)
-=======
 julia> generate_events(StableRNG(1), design)
 40×3 DataFrame
  Row │ subject  item    condition 
@@ -399,7 +323,6 @@ julia> generate_events(StableRNG(1), design)
 ```
 """
 function generate_events(rng::AbstractRNG, design::MultiSubjectDesign)
->>>>>>> main
 
     # check that :dv is not in any condition
     allconditions = [design.subjects_between, design.items_between, design.both_within]
@@ -420,11 +343,7 @@ function generate_events(rng::AbstractRNG, design::MultiSubjectDesign)
     rename!(data, :subj => :subject)
     select!(data, Not(:dv)) # remove the default column from MixedModelsSim.jl - we don't need it in UnfoldSim.jl
     # by default does nothing
-<<<<<<< HEAD
-    data = design.event_order_function(data)
-=======
     data = apply_event_order_function(design.event_order_function, rng, data)
->>>>>>> main
 
     # sort by subject
     data = sort!(data, (order(:subject)))
@@ -433,22 +352,8 @@ function generate_events(rng::AbstractRNG, design::MultiSubjectDesign)
 
 end
 
-<<<<<<< HEAD
-
-# length is the same of all dimensions
-length(design::AbstractDesign) = *(size(design)...)
-
-
-
-# ----
-
-"""
-    RepeatDesign{T}
-Repeat a design DataFrame multiple times to mimick repeatedly recorded trials.
-=======
 """
     UnfoldSim.generate_events([rng::AbstractRNG, ]design::RepeatDesign{T})
->>>>>>> main
 
 For a `RepeatDesign`, iteratively call `generate_events` for the underlying {T} design and concatenate the results.
 
@@ -456,23 +361,8 @@ In case of `MultiSubjectDesign`, sort by subject. \\
 Please note that when using an `event_order_function`(e.g. `shuffle`) in a `RepeatDesign`, the corresponding RNG is shared across repetitions and not deep-copied for each repetition.
 As a result, the order of events will differ for each repetition.
 """
-<<<<<<< HEAD
-@with_kw struct RepeatDesign{T} <: AbstractDesign
-    design::T
-    repeat::Int = 1
-end
-
-"""
-    UnfoldSim.generate_events(design::RepeatDesign{T})
-
-In a repeated design, iteratively calls the underlying {T} Design and concatenates. In case of MultiSubjectDesign, sorts by subject.
-"""
-function UnfoldSim.generate_events(design::RepeatDesign)
-    df = map(x -> generate_events(design.design), 1:design.repeat) |> x -> vcat(x...)
-=======
 function UnfoldSim.generate_events(rng::AbstractRNG, design::RepeatDesign)
     df = map(x -> generate_events(rng, design.design), 1:design.repeat) |> x -> vcat(x...)
->>>>>>> main
     if isa(design.design, MultiSubjectDesign)
         sort!(df, [:subject])
     end

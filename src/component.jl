@@ -144,34 +144,22 @@ Base.length(c::MultichannelComponent) = length(c.component)
 
 """
     n_channels(c::AbstractComponent)
-<<<<<<< HEAD
-Return the number of channels. By default = 1.
-=======
 
 Return the number of channels for the given component `c`. By default = 1.
->>>>>>> main
 """
 n_channels(c::AbstractComponent) = 1
 
 """
     n_channels(c::MultichannelComponent)
-<<<<<<< HEAD
-=======
-
->>>>>>> main
 For `MultichannelComponent` return the length of the projection vector.
 
 """
 n_channels(c::MultichannelComponent) = length(c.projection)
 
 """
-<<<<<<< HEAD
-For a vector of `MultichannelComponent`s, return the first but asserts all are of equal length.
-=======
     n_channels(c::Vector{<:AbstractComponent})
 
 For a vector of `MultichannelComponent`s, return the number of channels for the first component but assert all are of equal length.
->>>>>>> main
 """
 function n_channels(c::Vector{<:AbstractComponent})
     all_channels = n_channels.(c)
@@ -180,49 +168,6 @@ function n_channels(c::Vector{<:AbstractComponent})
 end
 
 """
-<<<<<<< HEAD
-    simulate_component(rng,c::MultichannelComponent,design::AbstractDesign)
-Return the projection of a component from source to "sensor" space.
-"""
-function simulate_component(rng, c::MultichannelComponent, design::AbstractDesign)
-    y = simulate_component(rng, c.component, design)
-
-    for trial = 1:size(y, 2)
-        y[:, trial] .= y[:, trial] .+ simulate_noise(rng, c.noise, size(y, 1))
-    end
-
-    y_proj = kron(y, c.projection)
-    return reshape(y_proj, length(c.projection), size(y)...)
-end
-
-
-
-Base.length(c::AbstractComponent) = length(c.basis)
-
-"""
-    maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
-maximum of individual component lengths
-"""
-maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
-
-"""
-    simulate_component(rng, c::AbstractComponent, simulation::Simulation)
-By default call `simulate_component` with `(::Abstractcomponent,::AbstractDesign)` instead of the whole simulation. This allows users to provide a hook to do something completely different :)
-"""
-simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
-    simulate_component(rng, c, simulation.design)
-
-"""
-    simulate_component(rng, c::AbstractComponent, simulation::Simulation)
-Generate a linear model design matrix, weight it by c.β and multiply the result with the given basis vector.
-
-julia> c = UnfoldSim.LinearModelComponent([0,1,1,0],@formula(0~1+cond),[1,2],Dict())
-julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
-julia> simulate_component(StableRNG(1),c,design)
-"""
-function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
-    events = generate_events(design)
-=======
     maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 
 Return the maximum of the individual components' lengths.
@@ -263,7 +208,6 @@ julia> simulate_component(StableRNG(1), c, design)
 """
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
     events = generate_events(deepcopy(rng), design)
->>>>>>> main
 
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
@@ -280,23 +224,6 @@ function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign
     y = X * c.β
     return y' .* c.basis
 end
-<<<<<<< HEAD
-"""
-    simulate_component(rng, c::MixedModelComponent, design::AbstractDesign)
-Generates a MixedModel and simulates data according to c.β and c.σs.
-
-A trick is used to remove the Normal-Noise from the MixedModel which might lead to rare numerical instabilities. Practically, we upscale the σs by factor 10000, and provide a σ=0.0001. Internally this results in a normalization where the response scale is 10000 times larger than the noise.
-
-Currently, it is not possible to use a different basis for fixed and random effects, but a code-stub exists (it is slow though).
-
-- `return_parameters` (Bool,false) - can be used to return the per-event parameters used to weight the basis function. Sometimes useful to see what is simulated
-
-julia> design = MultiSubjectDesign(;n_subjects=2,n_items=50,items_between=(;:cond=>["A","B"]))
-julia> c = UnfoldSim.MixedModelComponent([0.,1,1,0],@formula(0~1+cond+(1|subject)),[1,2],Dict(:subject=>[2],),Dict())
-julia> simulate(StableRNG(1),c,design)
-
-"""
-=======
 
 """
     simulate_component(rng, c::MixedModelComponent, design::AbstractDesign, return_parameters = false)
@@ -341,18 +268,13 @@ julia> simulate_component(StableRNG(1), c, design, return_parameters = true)
  -2.70645  -0.706388  -2.70632  -0.706482  -2.7066  -0.706424  0.325722  2.32569  0.325627  2.32564  0.325468  2.32565
 ```
 """
->>>>>>> main
 function simulate_component(
     rng,
     c::MixedModelComponent,
     design::AbstractDesign;
     return_parameters = false,
 )
-<<<<<<< HEAD
-    events = generate_events(design)
-=======
     events = generate_events(deepcopy(rng), design)
->>>>>>> main
 
     # add the mixed models lefthandside
     lhs_column = :tmp_dv
@@ -520,9 +442,6 @@ end
         rng,
         components::Vector{<:AbstractComponent},
         simulation::Simulation)
-<<<<<<< HEAD
-Simulate multiple component responses and accumulates them on a per-event basis.
-=======
 
 Simulate multiple component responses and accumulate them on a per-event basis.
 
@@ -556,7 +475,6 @@ julia> simulate_responses(StableRNG(1), [c1, c2], simulation)
  0.0233794  0.0233794
  0.0        0.0
 ```
->>>>>>> main
 """
 function simulate_responses(
     rng,
@@ -571,11 +489,7 @@ function simulate_responses(
     end
 
     for c in components
-<<<<<<< HEAD
-        simulate_and_add!(epoch_data, c, simulation, rng)
-=======
         simulate_and_add!(epoch_data, c, simulation, deepcopy(rng)) # TODO: `deepcopy` necessary?
->>>>>>> main
     end
     return epoch_data
 end
@@ -584,12 +498,8 @@ end
 """
     simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
     simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
-<<<<<<< HEAD
-Helper function to call `simulate_component` and add it to a provided Array.
-=======
 
 Helper function to call `simulate_component` and add it to a provided Array `epoch_data`.
->>>>>>> main
 """
 function simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
     @debug "matrix"

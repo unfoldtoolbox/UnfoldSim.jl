@@ -2,14 +2,6 @@
 # Noise types
 #----------------
 
-<<<<<<< HEAD
-
-"""
-    PinkNoise <: AbstractNoise
-Generate Pink Noise using the SignalAnalysis.jl implementation.
-
-`noiselevel` is used to scale the noise
-=======
 """
     PinkNoise <: AbstractNoise
 
@@ -44,7 +36,6 @@ julia> simulate_noise(StableRNG(1), noise, 5)
 ```
 
 See also [`RedNoise`](@ref), [`WhiteNoise`](@ref), [`ExponentialNoise`](@ref), [`NoNoise`](@ref).
->>>>>>> main
 """
 @with_kw struct PinkNoise <: AbstractNoise
     noiselevel = 1
@@ -54,11 +45,6 @@ end
 
 """
     RedNoise <: AbstractNoise
-<<<<<<< HEAD
-Generate Red Noise using the SignalAnalysis.jl implementation.
-
-`noiselevel` is used to scale the noise
-=======
 
 A type for generating Red Noise using the `SignalAnalysis.jl` implementation.
 
@@ -89,7 +75,6 @@ julia> simulate_noise(StableRNG(2), noise, 3)
 ```
 
 See also [`PinkNoise`](@ref), [`WhiteNoise`](@ref), [`ExponentialNoise`](@ref), [`NoNoise`](@ref).
->>>>>>> main
 """
 @with_kw struct RedNoise <: AbstractNoise
     noiselevel = 1
@@ -98,15 +83,6 @@ end
 
 
 """
-<<<<<<< HEAD
-    WhiteNoise <: WhiteNoise
-    noiselevel = 1
-    imfilter = 0
-Generate White Noise using `randn` - thus Gaussian noise.
-`noiselevel` is used to scale the noise
-
-Using `imfilter` > 0 it is possible to smooth the noise using Image.imfilter.
-=======
     WhiteNoise <: AbstractNoise
 
 A type for generating White Noise using `randn` - thus Gaussian noise.
@@ -136,7 +112,6 @@ julia> simulate_noise(StableRNG(1), noise, 3)
 ```
 
 See also [`PinkNoise`](@ref), [`RedNoise`](@ref), [`ExponentialNoise`](@ref), [`NoNoise`](@ref).
->>>>>>> main
 """
 @with_kw struct WhiteNoise <: AbstractNoise
     noiselevel = 1
@@ -145,12 +120,8 @@ end
 
 """
     RealisticNoise <: AbstractNoise
-<<<<<<< HEAD
-Not implemented - planned to use Artefacts.jl to provide real EEG data to add.
-=======
 
 Not implemented - planned to use Artifacts.jl to provide real EEG data to add.
->>>>>>> main
 """
 @with_kw struct RealisticNoise <: AbstractNoise
     noiselevel = 1
@@ -159,9 +130,6 @@ end
 """
     NoNoise <: AbstractNoise
 
-<<<<<<< HEAD
-Return zeros instead of noise.
-=======
 A type for simulations without noise; return zeros instead of noise.
 
 Tip: To manually create noise samples use the [`simulate_noise`](@ref) function.
@@ -180,32 +148,19 @@ julia> simulate_noise(StableRNG(1), noise, 3)
  0.0
 ```
 See also [`PinkNoise`](@ref), [`RedNoise`](@ref), [`ExponentialNoise`](@ref), [`WhiteNoise`](@ref).
->>>>>>> main
 """
 struct NoNoise <: AbstractNoise end
 
 """
     AutoRegressiveNoise <: AbstractNoise
-<<<<<<< HEAD
-Not implemented
-=======
 
 Not implemented.
->>>>>>> main
 """
 struct AutoRegressiveNoise <: AbstractNoise end
 
 """ 
     ExponentialNoise <: AbstractNoise
 
-<<<<<<< HEAD
-Noise with exponential decay in AR spectrum.
-
-`noiselevel` is used to scale the noise
-
-!!! warning
-    Current implementation: Cholesky of NxN matrix needs to be calculated, which might need lots of RAM.
-=======
 Type for generating noise with exponential decay in AR spectrum.
 
 Tip: To manually create noise samples use the [`simulate_noise`](@ref) function.
@@ -235,7 +190,6 @@ julia> simulate_noise(StableRNG(1), noise, 5)
  -14.818799857226612
 ```
 See also [`PinkNoise`](@ref), [`RedNoise`](@ref), [`NoNoise`](@ref), [`WhiteNoise`](@ref).
->>>>>>> main
 """
 @with_kw struct ExponentialNoise <: AbstractNoise
     noiselevel = 1
@@ -247,12 +201,6 @@ end
 #-----------------------------
 
 """
-<<<<<<< HEAD
-    simulate_noise(rng, t::Union{PinkNoise,RedNoise}, n::Int)
-
-Generate Pink or Red Noise using the `SignalAnalysis.jl` implementation.
-"""
-=======
     simulate_noise(rng, t::AbstractNoise, n::Int)
 
 Generate noise samples of the given type `t`.
@@ -288,19 +236,10 @@ julia> simulate_noise(StableRNG(1), noise, 3)
 function simulate_noise end
 
 
->>>>>>> main
 function simulate_noise(rng, t::Union{PinkNoise,RedNoise}, n::Int)
     return t.noiselevel .* rand(rng, t.func(n, 1.0))
 end
 
-<<<<<<< HEAD
-"""
-    simulate_noise(rng, t::NoNoise, n::Int)
-Return zeros instead of noise.
-"""
-=======
-
->>>>>>> main
 function simulate_noise(rng, t::NoNoise, n::Int)
     return zeros(n)
 end
@@ -315,10 +254,6 @@ function simulate_noise(rng, t::WhiteNoise, n::Int)
 end
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> main
 function simulate_noise(rng, t::RealisticNoise, n::Int)
     error("not implemented")
     return 0
@@ -341,22 +276,12 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
 end
 
 
-<<<<<<< HEAD
-
-
-"""
-    add_noise!(rng, noisetype::AbstractNoise, signal)
-
-Generate and add noise to a data matrix.
-Assumes that the signal can be linearized, that is, that the noise is stationary
-=======
 """
     add_noise!(rng, noisetype::AbstractNoise, signal)
 
 Generate and add noise to a signal.
 
 Assumes that the signal can be linearized, that is, that the noise is stationary.
->>>>>>> main
 """
 function add_noise!(rng, noisetype::AbstractNoise, signal)
 

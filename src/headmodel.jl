@@ -200,20 +200,6 @@ magnitude(headmodel::AbstractHeadmodel) =
     magnitude(leadfield(headmodel), orientation(headmodel))
 
 """
-<<<<<<< HEAD
-magnitude(headmodel::Hartmut; type = "perpendicular") =
-Extract magnitude of 3-orientation-leadfield, 
-`type` (default: "perpendicular") => uses the provided source-point orientations - otherwise falls back to `norm`.
-"""
-magnitude(headmodel::Hartmut; type = "perpendicular") =
-    type == "perpendicular" ? magnitude(leadfield(headmodel), orientation(headmodel)) :
-    magnitude(leadfield(headmodel))
-
-"""
-    magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) where {T<:Real}
-Return the magnitude along an orientation of the leadfield.
-"""
-=======
     magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) where {T<:Real}
 
 Return the magnitude of the leadfield `lf` along the given `orientation`.
@@ -238,7 +224,6 @@ julia> magnitude(lf, ori)
  0.0  0.5
 ```
 """
->>>>>>> main
 function magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) where {T<:Real}
     si = size(lf)
 
@@ -254,21 +239,3 @@ function magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) wher
     end
     return magnitude
 end
-<<<<<<< HEAD
-
-"""
-    magnitude(lf::AbstractArray{T,3}) where {T<:Real}
-If orientation is not specified, returns the maximal magnitude (norm of leadfield).
-"""
-function magnitude(lf::AbstractArray{T,3}) where {T<:Real}
-    si = size(lf)
-    magnitude = fill(NaN, si[1:2])
-    for e = 1:si[1]
-        for s = 1:si[2]
-            magnitude[e, s] = norm(lf[e, s, :])
-        end
-    end
-    return magnitude
-end
-=======
->>>>>>> main
