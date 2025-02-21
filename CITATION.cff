@@ -2,12 +2,13 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: UnfoldSim.jl
+title: UnfoldSim.jl: Simulating continuous event-based time series data for EEG and beyond
 message: 'If you use this page, please cite it as below.'
 type: software
 authors:
   - given-names: Judith
     family-names: Schepers
+    orcid: 'https://orcid.org/0009-0000-9270-730X'
   - given-names: Luis
     family-names: Lips
   - given-names: Maanik
