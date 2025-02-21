@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: UnfoldSim.jl
+title: UnfoldSim.jl: Simulating continuous event-based time series data for EEG and beyond
 message: 'If you use this page, please cite it as below.'
 type: software
 authors:
