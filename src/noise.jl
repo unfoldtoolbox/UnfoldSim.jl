@@ -240,6 +240,7 @@ function simulate_noise(rng, t::Union{PinkNoise,RedNoise}, n::Int)
     return t.noiselevel .* rand(rng, t.func(n, 1.0))
 end
 
+
 function simulate_noise(rng, t::NoNoise, n::Int)
     return zeros(n)
 end

@@ -151,6 +151,7 @@ n_channels(c::AbstractComponent) = 1
 
 """
     n_channels(c::MultichannelComponent)
+    
 For `MultichannelComponent` return the length of the projection vector.
 
 """
