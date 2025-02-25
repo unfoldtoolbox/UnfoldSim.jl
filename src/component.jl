@@ -482,11 +482,16 @@ function simulate_responses(
     components::Vector{<:AbstractComponent},
     simulation::Simulation,
 )
+    datatype = eltype(components[1].basis)
     if n_channels(components) > 1
-        epoch_data =
-            zeros(n_channels(components), maxlength(components), length(simulation.design))
+        epoch_data = zeros(
+            datatype,
+            n_channels(components),
+            maxlength(components),
+            length(simulation.design),
+        )
     else
-        epoch_data = zeros(maxlength(components), length(simulation.design))
+        epoch_data = zeros(datatype, maxlength(components), length(simulation.design))
     end
 
     for c in components
