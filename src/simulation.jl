@@ -257,7 +257,7 @@ function create_continuous_signal(rng, responses, simulation)
     max_length_continuoustime = Int(ceil(maximum(onsets))) .+ max_length_component
 
 
-    signal = zeros(n_chan, max_length_continuoustime, n_subjects)
+    signal = zeros(eltype(responses), n_chan, max_length_continuoustime, n_subjects)
 
     for e = 1:n_chan
         for s = 1:n_subjects
