@@ -560,7 +560,7 @@ end
 Generate evidence accumulation traces by using the model and its parameters specified in the component c.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(c.time_vec) x size(events, 1)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(c) x size(events, 1)`.
 
 # Examples
 ```julia-repl
