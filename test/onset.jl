@@ -106,7 +106,7 @@
 
     @testset "Sequence/Drift Onset" begin
         rng = StableRNG(1)
-        fs=500
+        fs = 500
         p3 = LinearModelComponent(;
             basis = UnfoldSim.hanning(Int(0.5 * fs)),
             formula = @formula(0 ~ 1 + condition),
@@ -120,16 +120,34 @@
             offset = -10,
         )
         sequence_onset = SequenceOnset(
-            Dict('S'=>UniformOnset(width=0,offset=80),
-                'C'=>DriftOnset(),
-                'R'=>UniformOnset(width=0,offset=120)))
-        model_parameter = UnfoldSim.create_kelly_parameters_dict(UnfoldSim.KellyModel(drift_rate="drift_rate"));
-        c = UnfoldSim.Drift_Component(simulate_component, 0:1/500:1.0, 1/500, KellyModel, model_parameter);
+            Dict(
+                'S' => UniformOnset(width = 0, offset = 80),
+                'C' => DriftOnset(),
+                'R' => UniformOnset(width = 0, offset = 120),
+            ),
+        )
+        model_parameter = UnfoldSim.create_kelly_parameters_dict(
+            UnfoldSim.KellyModel(drift_rate = "drift_rate"),
+        )
+        c = UnfoldSim.Drift_Component(
+            simulate_component,
+            0:1/500:1.0,
+            1 / 500,
+            KellyModel,
+            model_parameter,
+        )
         components = Dict('S' => [p3], 'C' => [drift], 'R' => [resp])
-        design_single = UnfoldSim.SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
-        design_seq = UnfoldSim.SequenceDesign(design_single,"SCR_");
+        design_single = UnfoldSim.SingleSubjectDesign(
+            conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]),
+        )
+        design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
         design_rep = UnfoldSim.RepeatDesign(design_seq, 10)
-        simulation = UnfoldSim.Simulation(design_rep, components, sequence_onset, UnfoldSim.NoNoise())
+        simulation = UnfoldSim.Simulation(
+            design_rep,
+            components,
+            sequence_onset,
+            UnfoldSim.NoNoise(),
+        )
 
         result_onsets = simulate_onsets(rng, sequence_onset, simulation)
 
@@ -140,10 +158,18 @@
 
         # Test DriftOnset combined with UniformOnset
         sequence_onset = SequenceOnset(
-            Dict('S'=>UniformOnset(width=0,offset=80),
-                'C'=>(DriftOnset(), UniformOnset(width=0, offset=140)),
-                'R'=>UniformOnset(width=0,offset=120)))
-        simulation = UnfoldSim.Simulation(design_rep, components, sequence_onset, UnfoldSim.NoNoise())
+            Dict(
+                'S' => UniformOnset(width = 0, offset = 80),
+                'C' => (DriftOnset(), UniformOnset(width = 0, offset = 140)),
+                'R' => UniformOnset(width = 0, offset = 120),
+            ),
+        )
+        simulation = UnfoldSim.Simulation(
+            design_rep,
+            components,
+            sequence_onset,
+            UnfoldSim.NoNoise(),
+        )
 
         result_onsets = simulate_onsets(rng, sequence_onset, simulation)
         size(result_onsets) == (60,)

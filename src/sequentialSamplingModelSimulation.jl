@@ -26,16 +26,16 @@ KellyModel{Float64}(6.0, 0.2, 0.4, 0.5, 1.0, 0.1, 0.4, 0.1, 0.2, 0.1)
 See also [`LinearModelComponent`](@ref), [`MultichannelComponent`](@ref).
 """
 mutable struct KellyModel
-    drift_rate::Union{Real, String} # drift rate
-    event_onset::Union{Real, String} # onset(sensory evidence)
-    sensor_encoding_delay::Union{Real, String} # var(sensory encoding delay)
-    accumulative_level_noise::Union{Real, String} # accum level noise
-    boundary::Union{Real, String} # boundaryary height
-    motor_onset::Union{Real, String} # onset(motor)
-    motor_delay::Union{Real, String} # var(motor)
-    post_accumulation_duration_mean::Union{Real, String} # mean(post decision)
-    post_accumulation_duration_variability::Union{Real, String} # var(post decision)
-    CPPrampdownDur::Union{Real, String} # CPPrampdown duration
+    drift_rate::Union{Real,String} # drift rate
+    event_onset::Union{Real,String} # onset(sensory evidence)
+    sensor_encoding_delay::Union{Real,String} # var(sensory encoding delay)
+    accumulative_level_noise::Union{Real,String} # accum level noise
+    boundary::Union{Real,String} # boundaryary height
+    motor_onset::Union{Real,String} # onset(motor)
+    motor_delay::Union{Real,String} # var(motor)
+    post_accumulation_duration_mean::Union{Real,String} # mean(post decision)
+    post_accumulation_duration_variability::Union{Real,String} # var(post decision)
+    CPPrampdownDur::Union{Real,String} # CPPrampdown duration
 
     # Constructor with default values
     function KellyModel(;
@@ -48,7 +48,7 @@ mutable struct KellyModel
         motor_delay = 0.1,
         post_accumulation_duration_mean = 0.1,
         post_accumulation_duration_variability = 0.2,
-        CPPrampdownDur = 0.1
+        CPPrampdownDur = 0.1,
     )
         return new(drift_rate, event_onset, sensor_encoding_delay, accumulative_level_noise, boundary, motor_onset,
             motor_delay, post_accumulation_duration_mean, post_accumulation_duration_variability,
@@ -79,9 +79,7 @@ Dict{Symbol, Any}(:drift_rate => 5.5, :event_onset => 0.2, :sensor_encoding_dela
                   :post_accumulation_duration_variability => 0.2, :CPPrampdownDur => 0.1)
 """
 function create_kelly_parameters_dict(model::KellyModel)
-    return Dict(
-        name => getfield(model, name) for name in fieldnames(typeof(model))
-    )
+    return Dict(name => getfield(model, name) for name in fieldnames(typeof(model)))
 end
 
 
@@ -127,8 +125,8 @@ function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
         dti = length(time_vec)  # Set to the last time step
     end
     # now record RT in sec after adding motor time, with variability
-    rt = time_vec[dti] + model.motor_onset + (rand(rng)-.5) * model.motor_delay;  
-    
+    rt = time_vec[dti] + model.motor_onset + (rand(rng) - 0.5) * model.motor_delay
+
     # now make the CPP peak and go down linearly after a certain amount of post-dec accum time for this trial:
     post_acc_duration = model.post_accumulation_duration_mean .+ model.post_accumulation_duration_variability .* rand(rng);
     # so post_acc_duration is the post accumulation duration time, where the accumulation spikes over the threshold
@@ -136,13 +134,13 @@ function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
     # acc_stop_index is the accumulation Stop index which is the index from the time Vector where the accumulation really stops
     acc_stop_index = dti + (post_acc_duration÷Δt)|>Int;
     # Take the absolute value of the accumulations
-    cum_evidence = abs.(cum_evidence);
-    if acc_stop_index<length(time_vec)
+    cum_evidence = abs.(cum_evidence)
+    if acc_stop_index < length(time_vec)
         nT = length(time_vec)
         tmp = cum_evidence[acc_stop_index] .- (1:(nT-acc_stop_index)) .*cum_evidence[acc_stop_index] .* (Δt ./ model.CPPrampdownDur)
         cum_evidence[(acc_stop_index+1):end] .= max.(Ref(0), tmp);
     end
-    return rt/Δt, cum_evidence[1:end]
+    return rt / Δt, cum_evidence[1:end]
 end
 
 
@@ -255,12 +253,12 @@ function SSM_Simulate(rng, model::LBA, Δt, time_vec)
     evidence = hcat(evidence...)
     evidence = collect(vec(evidence))
     # Store results for this trial
-    rt = (time_steps[end] + model.τ)/Δt
+    rt = (time_steps[end] + model.τ) / Δt
     if length(evidence) < max_steps
         final_value = 0
         append!(evidence, fill(final_value, max_steps - length(evidence)))
     else
-        rt = (time_vec[end] + model.τ)/Δt
+        rt = (time_vec[end] + model.τ) / Δt
         evidence = evidence[1:max_steps]
     end
     return rt, evidence
@@ -296,7 +294,7 @@ function SSM_Simulate(rng, model::DDM, Δt, time_vec)
     evidence = evidence .- model.α * model.z
 
     # Store results for this trial
-    rt = (time_steps[end] + model.τ)/Δt
+    rt = (time_steps[end] + model.τ) / Δt
     if length(evidence) < max_steps
         final_value = 0
         append!(evidence, fill(final_value, max_steps - length(evidence)))
