@@ -248,7 +248,7 @@ sequence_onset = SequenceOnset(
 struct DriftOnset{T} <: AbstractOnset
     onset::T
 end
-DriftOnset() = DriftOnset(UniformOnset(width=0,offset=0))
+DriftOnset() = DriftOnset(UniformOnset(width = 0, offset = 0))
 
 """
     UnfoldSim.simulate_interonset_distances(rng, onset::AbstractOnset, design::AbstractDesign, components::AbstractComponent)
@@ -327,7 +327,7 @@ function UnfoldSim.simulate_interonset_distances(rng, onset::Char, design::Abstr
     @assert onset == '_'
     df = generate_events(rng, design)
     nrows_df = Int(size(df, 1))
-    onsets = repeat([UnfoldSim.maxlength([components])],nrows_df)
+    onsets = repeat([UnfoldSim.maxlength([components])], nrows_df)
     return onsets
 end
 
