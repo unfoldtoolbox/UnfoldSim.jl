@@ -3,7 +3,7 @@
 
 A advanced drift diffusion Model which can be used to simulate evidence accumulation.
 
-All fields can be named. Is used with [`Drift_Component`](@ref).
+All fields can be named. Is used with [`DriftComponent`](@ref).
 
 # Fields T::Real
 - `drift_rate::T`: defines the amount of evidence accumulated per time step. (steepness of the trace)
@@ -145,13 +145,13 @@ end
 
 
 """
-    trace_sequential_sampling_model(rng, component::Drift_Component, design::AbstractDesign)
+    trace_sequential_sampling_model(rng, component::DriftComponent, design::AbstractDesign)
 
-Generate response times and evidence Vectors of an given [`AbstractDesign`](@ref) with a [`Drift_Component`](@ref) which contains the model used for the simulation.
+Generate response times and evidence Vectors of an given [`AbstractDesign`](@ref) with a [`DriftComponent`](@ref) which contains the model used for the simulation.
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
-- `component::Drift_Component`: Component to specify the model and its parameters to simulate the evidence accumulation.
+- `component::DriftComponent`: Component to specify the model and its parameters to simulate the evidence accumulation.
 - `design::AbstractDesign`: design of the experiment preferable SequenceDesign.
 
 # Returns
@@ -160,9 +160,9 @@ Generate response times and evidence Vectors of an given [`AbstractDesign`](@ref
 
 # Examples
 ```julia-repl
-julia> model_parameter = create_kelly_parameters_dict(KellyModel());
+julia> model_parameter = Dict(:motor_onset => 0.4, :event_onset => 0.2);
 
-julia> c = Drift_Component(simulate_component, 0:1/500:1.0, 1/500, KellyModel, model_parameter);
+julia> c = DriftComponent(0:1/500:1.0, 1/500, KellyModel, model_parameter);
 
 julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
 
@@ -173,7 +173,7 @@ Vector{Float64}, 501x6 Matrix{Float64}:
 ([96.65745162948949, 273.7368235451535, 271.86040880709123, 128.41057786118193, 342.35208862144276, 237.14773586760617], [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0])
 ```
 """
-function trace_sequential_sampling_model(rng, component::Drift_Component, design::AbstractDesign)
+function trace_sequential_sampling_model(rng, component::DriftComponent, design::AbstractDesign)
     events = generate_events(deepcopy(rng), design)
     traces = Matrix{Float64}(undef, length(component.time_vec), size(events, 1))
     rts = Vector{Float64}(undef, size(events, 1))

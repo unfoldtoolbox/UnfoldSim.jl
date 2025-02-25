@@ -44,18 +44,18 @@ resp = LinearModelComponent(;
     formula = @formula(0 ~ 1 + condition),
     β = [0.6, 0],
 )
-# Third we create our Drift_Component which implies the evidence accumulation. For the Drift_Component we can choose between different Models which are used for the Simulation.
+# Third we create our DriftComponent which implies the evidence accumulation. For the DriftComponent we can choose between different Models which are used for the Simulation.
 v = [0.8] # Drift Rate
 A = 0.1 # The maximum start point, an indicator of an an initial bias towards a decision.
 k = 0.4 # A + k = b, where b is the decision threshold.
 t = 0.2 # The duration for a non-decisional processes (encoding and response execution).
 lba_parameter = Dict(:ν => v, :A => A, :k => k, :τ => t)
-drift = Drift_Component(simulate_component, time_vec, Δt, LBA, lba_parameter)
+drift = DriftComponent(time_vec, Δt, LBA, lba_parameter)
 # As last step we have to specify the components as a Dict connection the components with the events of the design.
 components = Dict('S' => [p3], 'C' => [drift], 'R' => [resp])
 
 # ## Create the Onset Component for the design
-# For the stimulus and response we use a simple Uniform onset with a distance of 250 and 300. The Drift_Component uses the special DriftOnset in combination with an UniformOnset. The DriftOnset returns the response time after the model reaches the decision threshold.
+# For the stimulus and response we use a simple Uniform onset with a distance of 250 and 300. The DriftComponent uses the special DriftOnset in combination with an UniformOnset. The DriftOnset returns the response time after the model reaches the decision threshold.
 # Important is to know that, the onset for each component defines the onset for the next. So in this case: S->C, C->R, R->S.
 seq_onset = SequenceOnset(
     Dict(

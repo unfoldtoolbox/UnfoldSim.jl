@@ -230,12 +230,12 @@ end
 
 """
     SequenceOnset <: AbstractOnset
-A struct that defines the used Onsets for a [`Drift_Component`](@ref).
+A struct that defines the used Onsets for a [`DriftComponent`](@ref).
 
-All fields are mandatory. Works best with [`Drift_Component`](@ref).
+All fields are mandatory. Works best with [`DriftComponent`](@ref).
 
 # Fields
-- `onset::Dict`: onset for the Drift_Component.
+- `onset::Dict`: onset for the DriftComponent.
 
 # Examples
 ```julia-repl
@@ -269,11 +269,11 @@ UnfoldSim.simulate_interonset_distances(rng, onset::AbstractOnset, design::Abstr
 """
     UnfoldSim.simulate_interonset_distances(rng, onset::DriftOnset, design::AbstractDesign, components::AbstractComponent)
 
-Generates list of onsets for multiple [`Drift_Component`](@ref) in an [`SequenceDesign`](@ref).
+Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceDesign`](@ref).
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure reproducibility.
-- `onset::DriftOnset`: DriftOnset defines to create onsets for a [`Drift_Component`](@ref).
+- `onset::DriftOnset`: DriftOnset defines to create onsets for a [`DriftComponent`](@ref).
 - `design::AbstractDesign`: Design for which the onsets are simulated.
 - `components::AbstractComponent`: The Component for which the onset is simulated.
 
@@ -288,11 +288,11 @@ end
 """
     UnfoldSim.simulate_interonset_distances(rng, onset::Tuple{DriftOnset, UniformOnset}, design::AbstractDesign, components::AbstractComponent)
 
-Generates list of onsets for multiple [`Drift_Component`](@ref) in an [`SequenceDesign`](@ref) and possibility to ad an [`UniformOnset`](@ref).
+Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceDesign`](@ref) and possibility to ad an [`UniformOnset`](@ref).
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure reproducibility.
-- `onset::Tuple{DriftOnset, UniformOnset}`: DriftOnset defines to create onsets for a [`Drift_Component`](@ref) on top with an [`UniformOnset`](@ref).
+- `onset::Tuple{DriftOnset, UniformOnset}`: DriftOnset defines to create onsets for a [`DriftComponent`](@ref) on top with an [`UniformOnset`](@ref).
 - `design::AbstractDesign`: Design for which the onsets are simulated.
 - `components::AbstractComponent`: The Component for which the onset is simulated.
 

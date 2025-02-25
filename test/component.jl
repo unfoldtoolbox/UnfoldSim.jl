@@ -45,11 +45,11 @@
               create_re(1, 2; corrmat = [1 0.5; 0.5 1]) ./ 2
     end
 
-    @testset "Drift_Component" begin
-      # Test UnfoldSim.simulate_component(rng, c::Drift_Component, design::AbstractDesign)
+    @testset "DriftComponent" begin
+      # Test UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
       boundary = 1.0
-      model_parameter = UnfoldSim.create_kelly_parameters_dict(UnfoldSim.KellyModel(boundary=boundary));
-      c = Drift_Component(simulate_component, 0:1/500:1.0, 1/500, KellyModel, model_parameter);
+      model_parameter = Dict(:boundary => boundary);
+      c = DriftComponent(0:1/500:1.0, 1/500, KellyModel, model_parameter);
       design_single = UnfoldSim.SingleSubjectDesign(conditions = Dict(:condition => [1]));
       design_seq = UnfoldSim.SequenceDesign(design_single,"SCR_");
       result_traces = UnfoldSim.simulate_component(StableRNG(1),c,design_seq)
@@ -58,10 +58,10 @@
       @test any(result_traces .== 0)
       @test any(result_traces .>= boundary)
 
-      # Test UnfoldSim.simulate_component(rng, c::Drift_Component, design::AbstractDesign)
+      # Test UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
       boundary = 1.0
-      model_parameter = UnfoldSim.create_kelly_parameters_dict(UnfoldSim.KellyModel(boundary=boundary));
-      c = Drift_Component(simulate_component, 0:1/500:1.0, 1/500, KellyModel, model_parameter);
+      model_parameter = Dict(:boundary => boundary);
+      c = DriftComponent(0:1/500:1.0, 1/500, KellyModel, model_parameter);
       design_single = UnfoldSim.SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
       design_seq = UnfoldSim.SequenceDesign(design_single,"SCR_");
       result_traces = UnfoldSim.simulate_component(StableRNG(1),c,design_seq)
@@ -70,9 +70,9 @@
       @test any(result_traces .== 0)
       @test any(result_traces .>= boundary)
 
-      # Test calculate_response_times_for_ssm(rng, component::Drift_Component, design::AbstractDesign)
-      model_parameter = UnfoldSim.create_kelly_parameters_dict(UnfoldSim.KellyModel());
-      c = Drift_Component(simulate_component, 0:1/500:1.0, 1/500, KellyModel, model_parameter);
+      # Test calculate_response_times_for_ssm(rng, component::DriftComponent, design::AbstractDesign)
+      model_parameter = Dict();
+      c = DriftComponent(0:1/500:1.0, 1/500, KellyModel, model_parameter);
       design_single = UnfoldSim.SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
       design_seq = UnfoldSim.SequenceDesign(design_single,"SCR_");
       sub_design = UnfoldSim.SubselectDesign(design_seq, 'C')
@@ -82,8 +82,8 @@
 
       # Test get_model_parameter(rng, evt, d::Dict)
       rng = StableRNG(1)
-      model_parameter = UnfoldSim.create_kelly_parameters_dict(UnfoldSim.KellyModel(drift_rate="drift_rate"));
-      c = Drift_Component(simulate_component, 0:1/500:1.0, 1/500, KellyModel, model_parameter);
+      model_parameter = Dict(:drift_rate => "drift_rate");
+      c = DriftComponent(0:1/500:1.0, 1/500, KellyModel, model_parameter);
       drift_rates = [0.5, 0.8]
       design_single = UnfoldSim.SingleSubjectDesign(conditions = Dict(:drift_rate => drift_rates, :condition => [1]));
       events = UnfoldSim.generate_events(rng, design_single)

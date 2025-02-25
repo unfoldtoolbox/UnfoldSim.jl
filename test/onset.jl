@@ -126,10 +126,8 @@
                 'R' => UniformOnset(width = 0, offset = 120),
             ),
         )
-        model_parameter = UnfoldSim.create_kelly_parameters_dict(
-            UnfoldSim.KellyModel(drift_rate = "drift_rate"),
-        )
-        c = UnfoldSim.Drift_Component(
+        model_parameter = Dict(:drift_rate => "drift_rate")
+        c = UnfoldSim.DriftComponent(
             simulate_component,
             0:1/500:1.0,
             1 / 500,

@@ -34,9 +34,8 @@
 
     @testset "trace_sequential_sampling_model" begin
         boundary = 1.0
-        model_parameter =
-            UnfoldSim.create_kelly_parameters_dict(KellyModel(boundary = boundary))
-        c = UnfoldSim.Drift_Component(
+        model_parameter = Dict(:boundary => boundary);
+        c = UnfoldSim.DriftComponent(
             simulate_component,
             time_vec,
             Δt,
