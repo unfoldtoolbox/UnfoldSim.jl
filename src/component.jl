@@ -518,7 +518,7 @@ end
 
 """
     Drift_Component <: AbstractComponent
-A component that adds an evidence accumulation according to a sequential sampling model selected in the field model_type.
+A component that adds an evidence accumulation signal according to a sequential sampling model selected in the field model_type.
 
 All fields are mandatory. Works best with [`SequenceDesign`](@ref).
 
