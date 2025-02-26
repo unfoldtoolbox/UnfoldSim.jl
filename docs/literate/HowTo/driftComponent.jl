@@ -19,6 +19,7 @@ fs = 500
 Δt = 1 / fs; # time step
 tEnd = 1.0 # trial Duration
 time_vec = 0:Δt:tEnd; # time base - let's make it a typical stimulus duration
+max_length = tEnd / Δt
 # ```@raw html
 # </details >
 # ```
@@ -50,7 +51,7 @@ A = 0.1 # The maximum start point, an indicator of an an initial bias towards a 
 k = 0.4 # A + k = b, where b is the decision threshold.
 t = 0.2 # The duration for a non-decisional processes (encoding and response execution).
 lba_parameter = Dict(:ν => v, :A => A, :k => k, :τ => t)
-drift = DriftComponent(time_vec, Δt, LBA, lba_parameter)
+drift = DriftComponent(max_length, fs, LBA, lba_parameter)
 # As last step we have to specify the components as a Dict connection the components with the events of the design.
 components = Dict('S' => [p3], 'C' => [drift], 'R' => [resp])
 

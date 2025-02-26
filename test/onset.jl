@@ -128,9 +128,8 @@
         )
         model_parameter = Dict(:drift_rate => "drift_rate")
         c = UnfoldSim.DriftComponent(
-            simulate_component,
-            0:1/500:1.0,
-            1 / 500,
+            500,
+            500,
             KellyModel,
             model_parameter,
         )

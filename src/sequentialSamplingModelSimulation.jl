@@ -156,13 +156,13 @@ Generate response times and evidence Vectors of an given [`AbstractDesign`](@ref
 
 # Returns
 - `Vector{Float64}`: Simulated response times for the trials.
-- `Matrix{Float64}`: evidence values over time for each trial. The output dimensions are `length(c.time_vec) x size(events, 1)`.
+- `Matrix{Float64}`: evidence values over time for each trial. The output dimensions are `c.max_length x size(events, 1)`.
 
 # Examples
 ```julia-repl
 julia> model_parameter = Dict(:motor_onset => 0.4, :event_onset => 0.2);
 
-julia> c = DriftComponent(0:1/500:1.0, 1/500, KellyModel, model_parameter);
+julia> c = DriftComponent(500, 500, KellyModel, model_parameter);
 
 julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
 
@@ -175,130 +175,133 @@ Vector{Float64}, 501x6 Matrix{Float64}:
 """
 function trace_sequential_sampling_model(rng, component::DriftComponent, design::AbstractDesign)
     events = generate_events(deepcopy(rng), design)
-    traces = Matrix{Float64}(undef, length(component.time_vec), size(events, 1))
+    traces = Matrix{Float64}(undef, component.max_length, size(events, 1))
     rts = Vector{Float64}(undef, size(events, 1))
     for (i, evt) in enumerate(eachrow(events))
         parameters = get_model_parameter(rng, evt, component.model_parameters)
         model = component.model_type(; (key => parameters[key] for key in keys(parameters))...)
-        rt, evidence = SSM_Simulate(rng, model, component.Δt, component.time_vec)
+        rt, evidence = SSM_Simulate(rng, model, component.sfreq, component.max_length)
 
         rts[i] = rt
-        traces[:, i] = evidence[1:length(component.time_vec)]
+        traces[:, i] = evidence[1:component.max_length]
     end
     return rts, traces
 end
 
 """
-    SSM_Simulate(rng, model::KellyModel, Δt, time_vec)
+    SSM_Simulate(rng, model::KellyModel, sfreq, max_length)
 
-Generate response time and evidence Vector of length(time_vec) by using the Kelly Model for the simulation.
+Generate response time and evidence Vector of max_length by using the Kelly Model for the simulation.
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
 - `model::KellyModel`: SequentialSamplingModel to simulate the evidence and response time.
-- `time_vec::StepRangeLen`: range of time steps for which the evidence is accumulated.
-- `Δt::Float64`: size of the time steps.
+- `sfreq::Real`: sample frequency used to simulate the signal.
+- `max_length::Int`: maximum length of the simulated signal.
 
 # Returns
 - `Float64`: Simulated response time for the trial.
-- `Vector{Float64}`: evidence values over time. The output dimension is `length(c.time_vec)`.
+- `Vector{Float64}`: evidence values over time. The output dimension is `c.max_length`.
 
 # Examples
 ```julia-repl
 julia> model = KellyModel()
 
-julia> SSM_Simulate(StableRNG(1), model, 1/500, 0:1/500:1.0)
+julia> SSM_Simulate(StableRNG(1), model, 500, 500)
 Float64, Vector{Float64}:
 (96.65745162948949, [0.0 0.0 … 0.0 0.0])
 ```
 """
-function SSM_Simulate(rng, model::KellyModel, Δt, time_vec)
-    max_steps = length(time_vec)
+function SSM_Simulate(rng, model::KellyModel, sfreq, max_length)
+    Δt = 1/sfreq
+    time_vec = 0:Δt:max_length*Δt
     rt, evidence = KellyModel_simulate_cpp(rng, model, time_vec, Δt)
-    if length(evidence) < max_steps
+    if length(evidence) < max_length
         final_value = 0
-        append!(evidence, fill(final_value, max_steps - length(evidence)))
+        append!(evidence, fill(final_value, max_length - length(evidence)))
     end
-    evidence = evidence[1:max_steps]
+    evidence = evidence[1:max_length]
     return rt, evidence
 end
 
 """
-    SSM_Simulate(rng, model::LBA, Δt, time_vec)
+    SSM_Simulate(rng, model::LBA, sfreq, max_length)
 
-Generate response time and evidence Vector of length(time_vec) by using the LBA for the simulation.
+Generate response time and evidence Vector of c.max_length by using the LBA for the simulation.
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
 - `model::LBA`: SequentialSamplingModel to simulate the evidence and response time.
-- `time_vec::StepRangeLen`: range of time steps for which the evidence is accumulated.
-- `Δt::Float64`: size of the time steps.
+- `sfreq::Real`: sample frequency used to simulate the signal.
+- `max_length::Int`: maximum length of the simulated signal.
 
 # Returns
 - `Float64`: Simulated response time for the trial.
-- `Vector{Float64}`: evidence values over time. The output dimension is `length(c.time_vec)`.
+- `Vector{Float64}`: evidence values over time. The output dimension is `c.max_length`.
 
 # Examples
 ```julia-repl
 julia> model = LBA()
 
-julia> SSM_Simulate(StableRNG(1), model, 1/500, 0:1/500:1.0)
+julia> SSM_Simulate(StableRNG(1), model, 500, 500)
 Float64, Vector{Float64}:
 (96.65745162948949, [0.0 0.0 … 0.0 0.0])
 ```
 """
-function SSM_Simulate(rng, model::LBA, Δt, time_vec)
-    max_steps = length(time_vec)
+function SSM_Simulate(rng, model::LBA, sfreq, max_length)
+    Δt = 1 / sfreq
     time_steps, evidence = SequentialSamplingModels.simulate(rng, model; Δt)
     evidence = hcat(evidence...)
     evidence = collect(vec(evidence))
     # Store results for this trial
     rt = (time_steps[end] + model.τ) / Δt
-    if length(evidence) < max_steps
+    if length(evidence) < max_length
         final_value = 0
-        append!(evidence, fill(final_value, max_steps - length(evidence)))
+        append!(evidence, fill(final_value, max_length - length(evidence)))
     else
-        rt = (time_vec[end] + model.τ) / Δt
-        evidence = evidence[1:max_steps]
+        rt = max_length + (model.τ / Δt)
+        evidence = evidence[1:max_length]
     end
     return rt, evidence
 end
 
 """
-    SSM_Simulate(rng, model::DDM, Δt, time_vec)
+    SSM_Simulate(rng, model::DDM, sfreq, max_length)
 
-Generate response time and evidence Vector of length(time_vec) by using the DDM for the simulation.
+Generate response time and evidence Vector of c.max_length by using the DDM for the simulation.
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
 - `model::DDM`: SequentialSamplingModel to simulate the evidence and response time.
-- `time_vec::StepRangeLen`: range of time steps for which the evidence is accumulated.
-- `Δt::Float64`: size of the time steps.
+- `sfreq::Real`: sample frequency used to simulate the signal.
+- `max_length::Int`: maximum length of the simulated signal.
 
 # Returns
 - `Float64`: Simulated response time for the trial.
-- `Vector{Float64}`: evidence values over time. The output dimension is `length(c.time_vec)`.
+- `Vector{Float64}`: evidence values over time. The output dimension is `c.max_length`.
 
 # Examples
 ```julia-repl
 julia> model = DDM()
 
-julia> SSM_Simulate(StableRNG(1), model, 1/500, 0:1/500:1.0)
+julia> SSM_Simulate(StableRNG(1), model, 500, 500)
 Float64, Vector{Float64}:
 (96.65745162948949, [0.0 0.0 … 0.0 0.0])
 ```
 """
-function SSM_Simulate(rng, model::DDM, Δt, time_vec)
-    max_steps = length(time_vec)
+function SSM_Simulate(rng, model::DDM, sfreq, max_length)
+    Δt = 1 / sfreq
     time_steps, evidence = SequentialSamplingModels.simulate(rng, model; Δt)
     evidence = evidence .- model.α * model.z
 
     # Store results for this trial
     rt = (time_steps[end] + model.τ) / Δt
-    if length(evidence) < max_steps
+    if length(evidence) < max_length
         final_value = 0
-        append!(evidence, fill(final_value, max_steps - length(evidence)))
+        append!(evidence, fill(final_value, max_length - length(evidence)))
+    else
+        rt = max_length + (model.τ / Δt)
+        evidence = evidence[1:max_length]
     end
-    evidence = evidence[1:max_steps]
     return rt, evidence
 end

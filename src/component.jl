@@ -523,30 +523,30 @@ A component that adds an evidence accumulation according to a sequential samplin
 All fields are mandatory. Works best with [`SequenceDesign`](@ref).
 
 # Fields
-- `time_vec`: Vector which defines the length of the signal
-- `Δt`: Float that indicates the timesteps used to generate the time_vec
+- `max_length::Int`: maximum length of the simulated signal.
+- `sfreq::Real`: sample frequency used to simulate the signal.
 - `model_type`: Model struct which defines the model to use to generate the traces, e.g. `KellyModel`
 - `model_parameters`: Dict. Containing the parameters for the simulation model specified in model_type.
 
 # Examples
 ```julia-repl
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
-fs=500
-Δt = 1/fs;
+sfreq=500
+Δt = 1/sfreq;
 tEnd = 1.0
-time_vec = 0:Δt:tEnd;
+max_length = tEnd/Δt;
 model_parameter = Dict()
 DriftComponent(
-    time_vec,
-    Δt,
+    max_length,
+    sfreq,
     KellyModel,
     model_parameter)
 ```
 
 """
 struct DriftComponent <: AbstractComponent
-    time_vec::Any
-    Δt::Any
+    max_length::Int
+    sfreq::Real
     model_type::Any
     model_parameters::Dict
 end
@@ -563,7 +563,7 @@ Generate evidence accumulation traces by using the model and its parameters spec
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
 julia> model_parameter = Dict();
 
-julia> c = DriftComponent(0:1/500:1.0, 1/500, KellyModel, model_parameter);
+julia> c = DriftComponent(500, 500, KellyModel, model_parameter);
 
 julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
 
@@ -599,7 +599,7 @@ Using same rng as in simulate_component(rng, component::DriftComponent, design::
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
 julia> model_parameter = Dict();
 
-julia> c = DriftComponent(0:1/500:1.0, 1/500, KellyModel, model_parameter);
+julia> c = DriftComponent(500, 500, KellyModel, model_parameter);
 
 julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
 
@@ -615,7 +615,7 @@ function calculate_response_times_for_ssm(rng, component::DriftComponent, design
     rts, _ = trace_sequential_sampling_model(deepcopy(rng), component, design)
     return rts
 end
-Base.length(c::DriftComponent) = length(c.time_vec)
+Base.length(c::DriftComponent) = c.max_length
 """
     get_model_parameter(rng, evt, d::Dict)
 

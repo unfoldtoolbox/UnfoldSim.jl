@@ -3,6 +3,7 @@
     Δt = 1 / fs # time step
     tEnd = 1.0 # trial Duration
     time_vec = 0:Δt:tEnd # time base
+    max_length = tEnd / Δt
     rng = StableRNG(1)
     @testset "KellyModel" begin
         assert_event_onset = 0.663
@@ -27,7 +28,7 @@
         @test any(result_trace .== 0)
         @test any(result_trace .>= boundary)
 
-        result_sim_rt, result_sim_trace = UnfoldSim.SSM_Simulate(rng, KellyModel(), Δt, time_vec)
+        result_sim_rt, result_sim_trace = UnfoldSim.SSM_Simulate(rng, KellyModel(), fs, max_length)
         @test result_rt == result_sim_rt
         @test result_trace == result_sim_trace
     end
@@ -36,9 +37,8 @@
         boundary = 1.0
         model_parameter = Dict(:boundary => boundary);
         c = UnfoldSim.DriftComponent(
-            simulate_component,
-            time_vec,
-            Δt,
+            max_length,
+            fs,
             KellyModel,
             model_parameter,
         )
@@ -54,20 +54,20 @@
     end
 
     @testset "SSM_Simulate" begin
-        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), KellyModel(), Δt, time_vec)
+        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), KellyModel(), fs, max_length)
         @test size(result_rt) == ()
         @test size(result_trace) == (501,)
         @test isapprox(result_rt, 399.6903067274333, atol = 1e-8)
         @test any(result_trace .== 0)
         @test any(result_trace .>= boundary)
 
-        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), DDM(), Δt, time_vec)
+        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), DDM(), fs, max_length)
         @test size(result_rt) == ()
         @test size(result_trace) == (501,)
         @test isapprox(result_rt, 223.00000000000003, atol = 1e-8)
         @test any(result_trace .== 0)
 
-        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), LBA(), Δt, time_vec)
+        result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(rng), LBA(), fs, max_length)
         @test size(result_rt) == ()
         @test size(result_trace) == (501,)
         @test isapprox(result_rt, 397.0, atol = 1e-8)
