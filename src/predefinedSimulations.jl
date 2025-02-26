@@ -1,5 +1,6 @@
 # here we can define some predefined Simulations. Convenient if you just want to have a quick simulation :)
 
+using Distributions: multinom_rand!
 
 
 predef_2x2(; kwargs...) = predef_2x2(MersenneTwister(1); kwargs...) # without rng always call same one
@@ -37,6 +38,9 @@ The most used `kwargs` is: `return_epoched=true` which returns already epoched d
 #### Noise
 - `noiselevel = 0.2`,
 - `noise = PinkNoise(; noiselevel = noiselevel)`,
+
+#### multichannel
+- `multichannel = false` # if true, returns a projection of the three components to 227 channels. a list of strings is possible as well, following hartmut.cortical["label"], by default uses: `["Right Occipital Pole", "Left Postcentral Gyrus", "Left Superior Frontal Gyrus",]`
 """
 function predef_eeg(
     rng;
@@ -60,6 +64,8 @@ function predef_eeg(
             ),
             event_order_function = event_order_function,
         ) |> x -> RepeatDesign(x, n_repeats)
+
+
     return predef_eeg(rng, design, LinearModelComponent, [p1, n1, p3]; sfreq, kwargs...)
 end
 
@@ -76,12 +82,31 @@ function predef_eeg(
     # onset
     overlap = (0.5, 0.2),
     onset = UniformOnset(; offset = sfreq * overlap[1], width = sfreq * overlap[2]), #put offset to 1 for no overlap. put width to 0 for no jitter
+
+    # multichannel
+    multichannel = nothing,
     kwargs...,
 )
 
     components = AbstractComponent[]
     for c in comps
         append!(components, [T(c...)])
+    end
+
+    if !isnothing(multichannel)
+        if isa(multichannel, Bool)
+            multichannel = [
+                "Right Occipital Pole",
+                "Left Postcentral Gyrus",
+                "Left Superior Frontal Gyrus",
+            ]
+        end
+        hart = headmodel(type = "hartmut")
+        @assert length(components) == length(multichannel)
+
+        components =
+            MultichannelComponent.(components, [hart => label for label in multichannel])
+
     end
     return simulate(rng, design, components, onset, noise; kwargs...)
 end
