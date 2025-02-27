@@ -94,18 +94,20 @@ end
 LinearModelComponent(basis, formula, β, contrasts) =
     LinearModelComponent(basis, formula, β, contrasts, 0)
 """
-    offset(AbstractComponent)
+    get_offset(AbstractComponent)
 
 Should the `basis` be shifted? Returns c.offset for most components, if not implemented for a type, returns 0. Can be positive or negative, but has to be Integer
 """
-offset(c::AbstractComponent)::Int = 0
-offset(c::LinearModelComponent)::Int = c.offset
-offset(c::MixedModelComponent)::Int = c.offset
+get_offset(c::AbstractComponent)::Int = 0
+get_offset(c::LinearModelComponent)::Int = c.offset
+get_offset(c::MixedModelComponent)::Int = c.offset
 
-maxoffset(c::Vector{<:AbstractComponent}) = maximum(offset.(c))
-maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(maxoffset.(values(d)))
-minoffset(c::Vector{<:AbstractComponent}) = minimum(offset.(c))
-minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = minimum(minoffset.(values(d)))
+maxoffset(c::Vector{<:AbstractComponent}) = maximum(get_offset.(c))
+maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) =
+    maximum(maxget_offset.(values(d)))
+minoffset(c::Vector{<:AbstractComponent}) = minimum(get_offset.(c))
+minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) =
+    minimum(minget_offset.(values(d)))
 
 
 
@@ -209,21 +211,21 @@ end
 
 
 """
-    basis(c::AbstractComponent)
+    get_basis(c::AbstractComponent)
 
 returns the basis of the component (typically `c.basis`)
 """
-basis(c::AbstractComponent) = c.basis
+get_basis(c::AbstractComponent) = c.basis
 
 """
-    basis(c::AbstractComponent,design)
+    get_basis(c::AbstractComponent,design)
 evaluates the basis, if basis is a vector, directly returns it. if basis is a tuple `(f::Function,maxlength::Int)`, evaluates the function with input `design`. Cuts the resulting vector or Matrix at `maxlength`
 """
-basis(c::AbstractComponent, design) = basis(basis(c), design)
-basis(b::AbstractVector, design) = b
+get_basis(c::AbstractComponent, design) = get_basis(get_basis(c), design)
+get_basis(b::AbstractVector, design) = b
 
 
-function basis(basis::Tuple{Function,Int}, design)
+function get_basis(basis::Tuple{Function,Int}, design)
     f = basis[1]
     maxlength = basis[2]
     basis_out = f(design)
@@ -255,7 +257,8 @@ end
 limit_basis(b::AbstractVector{<:Number}, maxlength) = b[1:min(length(b), maxlength)]
 limit_basis(b::AbstractMatrix, maxlength) = b[1:min(length(b), maxlength), :]
 
-Base.length(c::AbstractComponent) = isa(basis(c), Tuple) ? basis(c)[2] : length(basis(c))
+Base.length(c::AbstractComponent) =
+    isa(get_basis(c), Tuple) ? get_basis(c)[2] : length(get_basis(c))
 
 
 
@@ -282,7 +285,7 @@ simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
 Generate a linear model design matrix, weight it by the coefficients `c.β` and multiply the result with the given basis vector.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(basis(basis)) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(get_basis(c.basis)) x length(design)`.
 
 # Examples
 ```julia-repl
@@ -305,7 +308,7 @@ function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign
     X = generate_designmatrix(c.formula, events, c.contrasts)
     y = X * c.β
 
-    return y' .* basis(c, design)
+    return y' .* get_basis(c, design)
 end
 
 
@@ -338,7 +341,7 @@ Generate a MixedModel and simulate data according to the given parameters `c.β`
 - `return_parameters::Bool = false`: Can be used to return the per-event parameters used to weight the basis function. Sometimes useful to inspect what is simulated.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(basis(basis)) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(get_basis(basis)) x length(design)`.
 
 # Notes
 1) MixedModels/Sim does not allow simulation of data without white noise of the residuals. Because we want our own noise, we use the following trick to remove the MixedModels-Noise:
@@ -413,9 +416,9 @@ function simulate_component(
         rethrow(e)
     end
 
-    @debug size(basis(c, design))
+    @debug size(get_basis(c, design))
     # in case the parameters are of interest, we will return those, not them weighted by basis
-    b = return_parameters ? [1.0] : basis(c, design)
+    b = return_parameters ? [1.0] : get_basis(c, design)
     @debug :b, typeof(b), size(b), :m, size(m.y')
     if isa(b, AbstractMatrix)
         epoch_data_component = ((m.y' .* b))
@@ -457,7 +460,7 @@ end
 Return the projection of a `MultichannelComponent c` from "source" to "sensor" space.
 
 # Returns
-- `Array{Float64,3}`: Projected simulated component for each event in the events data frame. The output dimensions are `length(c.projection) x length(basis(c)) x length(design)`.
+- `Array{Float64,3}`: Projected simulated component for each event in the events data frame. The output dimensions are `length(c.projection) x length(get_basis(c)) x length(design)`.
 
 # Examples
 ```julia-repl
@@ -676,7 +679,7 @@ function simulate_and_add!(
 )
     @debug "matrix"
 
-    off = offset(component) - minoffset(simulation.components)
+    off = get_offset(component) - minoffset(simulation.components)
 
 
     @views epoch_data[1+off:length(component)+off, :] .+=
@@ -689,7 +692,7 @@ function simulate_and_add!(
     rng,
 )
     @debug "3D Array"
-    off = offset(component) - minoffset(simulation.components)
+    off = get_offset(component) - minoffset(simulation.components)
     @views epoch_data[:, 1+off:length(component)+off, :] .+=
         simulate_component(rng, component, simulation)
 end

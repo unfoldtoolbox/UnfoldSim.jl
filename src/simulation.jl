@@ -128,7 +128,10 @@ function simulate(
     onset::AbstractOnset,
     noise::AbstractNoise = NoNoise();
     kwargs...,
-) = simulate(rng, Simulation(design, components, onset, noise); kwargs...)
+)
+    simulate(rng, Simulation(design, components, onset, noise); kwargs...)
+end
+
 
 
 function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool = false)

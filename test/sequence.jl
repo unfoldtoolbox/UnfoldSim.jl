@@ -16,12 +16,12 @@ end
 
     design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
     design = SequenceDesign(design, "SCR_")
-    evt = generate_events(StableRNG(1),design)
+    evt = generate_events(StableRNG(1), design)
     @test size(evt, 1) == 6
     @test evt.event == ['S', 'C', 'R', 'S', 'C', 'R']
 
     design = RepeatDesign(design, 2)
-    evt = generate_events(StableRNG(1),design)
+    evt = generate_events(StableRNG(1), design)
     @test size(evt, 1) == 12
     @test evt.event == ['S', 'C', 'R', 'S', 'C', 'R', 'S', 'C', 'R', 'S', 'C', 'R']
 
@@ -30,7 +30,7 @@ end
     design = SingleSubjectDesign(conditions = Dict(:condition => ["A", "B"]))
     design = RepeatDesign(design, 2)
     design = SequenceDesign(design, "S[ABCD]")
-    evt = generate_events(StableRNG(2),design)
+    evt = generate_events(StableRNG(2), design)
 
     @test all(evt.event[2:2:end] .== 'B')
 
@@ -39,19 +39,19 @@ end
     design = SingleSubjectDesign(conditions = Dict(:condition => ["A", "B"]))
     design = SequenceDesign(design, "S[ABCD]")
     design = RepeatDesign(design, 2)
-    evt = generate_events(StableRNG(2),design)
+    evt = generate_events(StableRNG(2), design)
     @test !all(evt.event[2:2:end] .== 'B')
 end
 
-@testset  "simulate_sequence" 
-design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
-design = SequenceDesign(design, "SCR_")
-c = LinearModelComponent(;
-    basis=UnfoldSim.hanning(40),
-    formula=@formula(0~1+condition),
-    β = [1.,2.],
-    contrasts=Dict(:cond=>EffectsCoding())
-)
-s,e = simulate(design,c,NoOnset();return_epoched=true)
-@test size(s) == (40,6)
+@testset "simulate_sequence" begin
+    design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
+    design = SequenceDesign(design, "SCR_")
+    c = LinearModelComponent(;
+        basis = UnfoldSim.hanning(40),
+        formula = @formula(0 ~ 1 + condition),
+        β = [1.0, 2.0],
+        contrasts = Dict(:cond => EffectsCoding()),
+    )
+    s, e = simulate(design, c, NoOnset(); return_epoched = true)
+    @test size(s) == (40, 6)
 end
