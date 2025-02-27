@@ -2,7 +2,9 @@ using UnfoldSim
 using Documenter
 using Glob
 using Literate
+using Revise
 
+Revise.revise()
 
 GENERATED = joinpath(@__DIR__, "src", "generated")
 SOURCE = joinpath(@__DIR__, "literate")
@@ -32,6 +34,7 @@ makedocs(;
     ),
     pages = [
         "Home" => "index.md",
+        "Installing Julia & UnfoldSim.jl" => "installation.md",
         "Tutorials" => [
             "Quickstart" => "generated/tutorials/quickstart.md",
             "Simulate event-related potentials (ERPs)" => "generated/tutorials/simulateERP.md",
@@ -56,6 +59,7 @@ makedocs(;
             "Simulated marginal effects" => "./generated/HowTo/getGroundTruth.md",
             "Produce specific sequences of events" => "./generated/HowTo/sequence.md",
         ],
+        "Developer documentation" => "developer_docs.md",
         "API / Docstrings" => "api.md",
     ],
 )
