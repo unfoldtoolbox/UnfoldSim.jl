@@ -440,11 +440,8 @@ See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref), [`RepeatDe
 @with_kw struct SequenceDesign{T} <: AbstractDesign
     design::T
     sequence::String = ""
-    sequencelength::Int = 0
-    SequenceDesign{T}(d, s, sl) where {T<:AbstractDesign} = new(d, check_sequence(s), sl)
+    SequenceDesign{T}(d, s) where {T<:AbstractDesign} = new(d, check_sequence(s))
 end
-
-SequenceDesign(design, sequence) = SequenceDesign(design = design, sequence = sequence)
 
 generate_events(rng, design::SequenceDesign{MultiSubjectDesign}) =
     error("not yet implemented")
