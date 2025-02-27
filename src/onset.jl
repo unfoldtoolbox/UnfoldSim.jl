@@ -202,7 +202,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
         if !isnothing(findfirst("_", currentsequence))
 
             @assert currentsequence[end] == '_' "the blank-indicator '_' has to be the last sequence element"
-            df = generate_events(simulation.design)
+            df = generate_events(deepcopy(rng), simulation.design)
             nrows_df = size(df, 1)
             stepsize = length(currentsequence) - 1
             # add to every stepsize onset the maxlength of the response
@@ -252,7 +252,7 @@ end
 
 
 function simulate_interonset_distances(rng, o::UniformOnsetFormula, design::AbstractDesign)
-    events = generate_events(design)
+    events = generate_events(deepcopy(rng), design)
     widths =
         UnfoldSim.generate_designmatrix(o.width_formula, events, o.width_contrasts) *
         o.width_β
@@ -309,7 +309,7 @@ function simulate_interonset_distances(
     o::LogNormalOnsetFormula,
     design::AbstractDesign,
 )
-    events = generate_events(design)
+    events = generate_events(deepcopy(rng), design)
 
 
     μs = UnfoldSim.generate_designmatrix(o.μ_formula, events, o.μ_contrasts) * o.μ_β

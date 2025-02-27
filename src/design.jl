@@ -453,7 +453,7 @@ generate_events(rng, design::SequenceDesign{MultiSubjectDesign}) =
 generate_events(rng, design::AbstractDesign) = generate_events(design)
 
 function generate_events(rng, design::SequenceDesign)
-    df = generate_events(design.design)
+    df = generate_events(deepcopy(rng), design.design)
     nrows_df = size(df, 1)
 
     #   @debug design.sequence
@@ -499,8 +499,8 @@ struct SubselectDesign{T} <: AbstractDesign
     key::Char
 end
 
-function generate_events(design::SubselectDesign)
-    return subset(generate_events(design.design), :event => x -> x .== design.key)
+function generate_events(rng, design::SubselectDesign)
+    return subset(generate_events(rng, design.design), :event => x -> x .== design.key)
 end
 
 
@@ -541,7 +541,7 @@ typical_value(v::Vector{<:Number}) = [mean(v)]
 typical_value(v) = unique(v)
 
 """
-    UnfoldSim.generate_events(design::EffectsDesign)
+    UnfoldSim.generate_events(rng,design::EffectsDesign)
 
 Generates events to simulate marginalized effects using an Effects.jl reference-grid dictionary. Every covariate that is in the `EffectsDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
 
@@ -552,10 +552,10 @@ effects_dict = Dict{Symbol,Union{<:Number,<:String}}(:conditionA=>[0,1])
 SingleSubjectDesign(...) |> x-> EffectsDesign(x,effects_dict)
 ```
 """
-function UnfoldSim.generate_events(t::EffectsDesign)
+function UnfoldSim.generate_events(rng, t::EffectsDesign)
     effects_dict = Dict{Any,Any}(t.effects_dict)
     #effects_dict = t.effects_dict
-    current_design = generate_events(t.design)
+    current_design = generate_events(deepcopy(rng), t.design)
     to_be_added = setdiff(names(current_design), string.(keys(effects_dict)))
     for tba in to_be_added
         effects_dict[tba] = typical_value(current_design[:, tba])

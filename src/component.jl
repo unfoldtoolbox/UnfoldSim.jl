@@ -236,7 +236,7 @@ function get_basis(basis::Tuple{Function,Int}, design)
     basis_out = f(design)
     l = _get_basis_length(basis_out)
 
-    @assert l == size(generate_events(design))[1] "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == size(design,1) [$l / $(size(design,1))], or a Vector of Vectors with length(b) == size(design,1) [$l / $(size(design,1))]. "
+    @assert l == length(design) "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == length(design) [$l / $(length(design))], or a Vector of Vectors with length(b) == length(design) [$l / $(length(design))]. "
     limit_basis(basis_out, maxlength)
 end
 
@@ -251,7 +251,6 @@ function limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
     b = pad_array.(b, Δlengths, 0)
     basis_out = reduce(hcat, b)
 
-
     return basis_out
 end
 limit_basis(b::AbstractVector{<:Number}, maxlength) = b[1:min(length(b), maxlength)]
@@ -260,17 +259,15 @@ limit_basis(b::AbstractMatrix, maxlength) = b[1:min(length(b), maxlength), :]
 Base.length(c::AbstractComponent) =
     isa(get_basis(c), Tuple) ? get_basis(c)[2] : length(get_basis(c))
 
-
-
 """
     maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
     maxlength(components::Dict) 
-maximum of individual component lengths
+
+Maximum of individual component lengths
 """
 maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
-
-
 maxlength(components::Dict) = maximum([maximum(length.(c)) for c in values(components)])
+
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
 
@@ -610,6 +607,12 @@ function simulate_responses!(
     end
     return epoch_data
 end
+
+
+""" 
+Initializes an Array with zeros. Returns either a 2-dimensional for component-length  x length(design), or a 3-D for channels x component-length x length(design)
+
+"""
 function init_epoch_data(components, design)
     max_offset = maxoffset(components)
     min_offset = minoffset(components)
@@ -630,7 +633,7 @@ function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
     #@debug rng.state
     epoch_data = init_epoch_data(event_component_dict, s.design)
     #@debug rng.state
-    evts = generate_events(s.design)
+    evts = generate_events(deepcopy(rng), s.design)
     #@debug rng.state
     @debug size(epoch_data), size(evts)
     multichannel = n_channels(event_component_dict) > 1
