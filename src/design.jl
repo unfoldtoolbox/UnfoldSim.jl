@@ -354,27 +354,6 @@ end
 
 # ----
 
-"""
-    RepeatDesign{T} <: AbstractDesign
-Repeat a design DataFrame multiple times to mimick repeatedly recorded trials.
-
-```julia
-designOnce = MultiSubjectDesign(;
-		n_items=2,
-		n_subjects = 2,
-		subjects_between =Dict(:cond=>["levelA","levelB"]),
-		items_between =Dict(:cond=>["levelA","levelB"]),
-		);
-
-design = RepeatDesign(designOnce,4);
-```
-See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref)
-"""
-@with_kw struct RepeatDesign{T} <: AbstractDesign
-    design::T
-    repeat::Int = 1
-end
-
 
 function check_sequence(s::String)
     blankfind = findall('_', s)
@@ -524,10 +503,6 @@ function generate_events(design::SubselectDesign)
     return subset(generate_events(design.design), :event => x -> x .== design.key)
 end
 
-
-Base.size(design::RepeatDesign{MultiSubjectDesign}) =
-    size(design.design) .* (design.repeat, 1)
-Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
 
 
 # --- 
