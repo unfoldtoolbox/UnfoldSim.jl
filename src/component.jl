@@ -6,7 +6,7 @@ A component that adds a hierarchical relation between parameters according to a 
 All fields can be named. Works best with [`MultiSubjectDesign`](@ref).
 
 # Fields
-- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is possible to also provide a function that evaluates to an `Vector`, with the `design` as input to the function, in that case, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples.
+- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is also possible to provide a function that evaluates to an `Vector` of `Vectors`, with the `design` as input to the function, the outer vector has to have `nrows(design)`, one for each event. The inner vector represents the basis functions which can be of different size (a ragged array). Alternatively, one can also return a Matrix with the second dimension representing `nrows(design)`. In the case of providing a function, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples.
 - `formula::Any`: Formula-object in the style of MixedModels.jl e.g. `@formula 0 ~ 1 + cond + (1|subject)`. The left-hand side is ignored.
 - `β::Vector` Vector of betas (fixed effects), must fit the formula.
 - `σs::Dict` Dict of random effect variances, e.g. `Dict(:subject => [0.5, 0.4])` or to specify correlation matrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to the MixedModels.jl `create_re` function, which creates the θ matrices.
@@ -225,18 +225,18 @@ get_basis(c::AbstractComponent, design) = get_basis(get_basis(c), design)
 get_basis(b::AbstractVector, design) = b
 
 
+_get_basis_length(basis_out::AbstractMatrix) = size(basis_out, 2)
+_get_basis_length(basis_out::AbstractVector{<:AbstractVector}) = length(basis_out)
+_get_basis_length(basis_out) = error(
+    "Component basis function needs to either return a Vector of vectors or a Matrix ",
+)
 function get_basis(basis::Tuple{Function,Int}, design)
     f = basis[1]
     maxlength = basis[2]
     basis_out = f(design)
-    if isa(basis_out, AbstractVector{<:AbstractVector}) || isa(basis_out, AbstractMatrix)
-        if isa(basis_out, AbstractMatrix)
-            l = size(basis_out, 2)
-        else
-            l = length(basis_out) # vector of vector case
-        end
-        @assert l == size(generate_events(design))[1] "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == size(design,1) [l / $(size(design,1))], or a Vector of Vectors with length(b) == size(design,1) [$l / $(size(design,1))]. "
-    end
+    l = _get_basis_length(basis_out)
+
+    @assert l == size(generate_events(design))[1] "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == size(design,1) [$l / $(size(design,1))], or a Vector of Vectors with length(b) == size(design,1) [$l / $(size(design,1))]. "
     limit_basis(basis_out, maxlength)
 end
 
