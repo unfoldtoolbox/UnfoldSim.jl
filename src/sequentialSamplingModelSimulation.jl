@@ -13,9 +13,9 @@ All fields can be named. Is used with [`DriftComponent`](@ref).
 - `boundary::T`: the threshold of evidence needed to make a decision.
 - `motor_onset::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
 - `motor_delay::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
-- `post_accumulation_duration_mean::T`: fixed time the accumulation process resumes after boundary reached in seconds. (mimics evidence overshoot)
+- `post_accumulation_duration::T`: fixed time the accumulation process resumes after boundary reached in seconds. (mimics evidence overshoot)
 - `post_accumulation_duration_variability::T`: variability in time the accumulation process resumes after boundary reached in seconds. (mimics diff of participants)
-- `CPPrampdownDur::T`: duration post accumulation process ramp down.
+- `ramp_down_duration::T`: duration post accumulation process ramp down.
 
 # Examples
 ```julia-repl
@@ -33,9 +33,9 @@ mutable struct KellyModel
     boundary::Union{Real,String} # boundaryary height
     motor_onset::Union{Real,String} # onset(motor)
     motor_delay::Union{Real,String} # var(motor)
-    post_accumulation_duration_mean::Union{Real,String} # mean(post decision)
+    post_accumulation_duration::Union{Real,String} # mean(post decision)
     post_accumulation_duration_variability::Union{Real,String} # var(post decision)
-    CPPrampdownDur::Union{Real,String} # CPPrampdown duration
+    ramp_down_duration::Union{Real,String} # CPPrampdown duration
 
     # Constructor with default values
     function KellyModel(;
@@ -46,13 +46,13 @@ mutable struct KellyModel
         boundary = 1.0,
         motor_onset = 0.4,
         motor_delay = 0.1,
-        post_accumulation_duration_mean = 0.1,
+        post_accumulation_duration = 0.1,
         post_accumulation_duration_variability = 0.2,
-        CPPrampdownDur = 0.1,
+        ramp_down_duration = 0.1,
     )
         return new(drift_rate, event_onset, sensor_encoding_delay, accumulative_level_noise, boundary, motor_onset,
-            motor_delay, post_accumulation_duration_mean, post_accumulation_duration_variability,
-            CPPrampdownDur)
+            motor_delay, post_accumulation_duration, post_accumulation_duration_variability,
+            ramp_down_duration)
     end
 end
 
@@ -75,8 +75,8 @@ KellyModel(5.5, 0.2, 0.4, 0.5, 1.2, 0.1, 0.4, 0.1, 0.2, 0.1)
 julia> create_kelly_parameters_dict(model)
 Dict{Symbol, Any}(:drift_rate => 5.5, :event_onset => 0.2, :sensor_encoding_delay => 0.4, 
                   :accumulative_level_noise => 0.5, :boundary => 1.2, :motor_onset => 0.1, 
-                  :motor_delay => 0.4, :post_accumulation_duration_mean => 0.1, 
-                  :post_accumulation_duration_variability => 0.2, :CPPrampdownDur => 0.1)
+                  :motor_delay => 0.4, :post_accumulation_duration => 0.1, 
+                  :post_accumulation_duration_variability => 0.2, :ramp_down_duration => 0.1)
 """
 function create_kelly_parameters_dict(model::KellyModel)
     return Dict(name => getfield(model, name) for name in fieldnames(typeof(model)))
@@ -128,7 +128,7 @@ function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
     rt = time_vec[dti] + model.motor_onset + (rand(rng) - 0.5) * model.motor_delay
 
     # now make the CPP peak and go down linearly after a certain amount of post-dec accum time for this trial:
-    post_acc_duration = model.post_accumulation_duration_mean .+ model.post_accumulation_duration_variability .* rand(rng);
+    post_acc_duration = model.post_accumulation_duration .+ model.post_accumulation_duration_variability .* rand(rng);
     # so post_acc_duration is the post accumulation duration time, where the accumulation spikes over the threshold
 
     # acc_stop_index is the accumulation Stop index which is the index from the time Vector where the accumulation really stops
@@ -137,7 +137,7 @@ function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
     cum_evidence = abs.(cum_evidence)
     if acc_stop_index < length(time_vec)
         nT = length(time_vec)
-        tmp = cum_evidence[acc_stop_index] .- (1:(nT-acc_stop_index)) .*cum_evidence[acc_stop_index] .* (Δt ./ model.CPPrampdownDur)
+        tmp = cum_evidence[acc_stop_index] .- (1:(nT-acc_stop_index)) .*cum_evidence[acc_stop_index] .* (Δt ./ model.ramp_down_duration)
         cum_evidence[(acc_stop_index+1):end] .= max.(Ref(0), tmp);
     end
     return rt / Δt, cum_evidence[1:end]
