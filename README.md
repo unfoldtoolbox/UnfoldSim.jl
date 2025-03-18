@@ -117,10 +117,12 @@ Please reach out, if you have contributed to UnfoldSim.jl but we have not listed
 ## Citation
 
 If you use UnfoldSim.jl, please acknowledge and support our work by citing
-1\. Our [JOSS paper](https://doi.org/10.21105/joss.06641): 
+
+**1\. Our [JOSS paper](https://doi.org/10.21105/joss.06641):**
 
 ```
-Schepers et al., (2025). UnfoldSim.jl: Simulating continuous event-based time series data for EEG and beyond. Journal of Open Source Software, 10(107), 6641, https://doi.org/10.21105/joss.06641
+Schepers et al., (2025). UnfoldSim.jl: Simulating continuous event-based time series data for EEG and beyond. 
+Journal of Open Source Software, 10(107), 6641, https://doi.org/10.21105/joss.06641
 ```
 
 <details>
@@ -144,7 +146,7 @@ Schepers et al., (2025). UnfoldSim.jl: Simulating continuous event-based time se
 
 and
 
-2\. The corresponding [Zenodo DOI](https://doi.org/10.5281/zenodo.7738651) for the specific UnfoldSim.jl version that you are using in your work.
+**2\. The corresponding [Zenodo DOI](https://doi.org/10.5281/zenodo.7738651)** for the specific UnfoldSim.jl version that you are using in your work.
 
 ## Acknowledgements
 
