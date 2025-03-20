@@ -244,7 +244,7 @@ _get_basis_length(basis_out) = error(
 function get_basis(rng::AbstractRNG, basis::Tuple{Function,Int}, design)
     f = basis[1]
     maxlength = basis[2]
-    basis_out = applicable(f, 2) ? f(rng, design) : f(design)
+    basis_out = applicable(f, rng, design) ? f(rng, design) : f(design)
     l = _get_basis_length(basis_out)
 
     @assert l == length(design) "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == length(design) [$l / $(length(design))], or a Vector of Vectors with length(b) == length(design) [$l / $(length(design))]. "

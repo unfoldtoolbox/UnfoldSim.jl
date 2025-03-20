@@ -44,5 +44,29 @@
         @test UnfoldSim.weight_σs(Dict(:subj => [1, 2, [1 0.5; 0.5 1]]), 1.0, 2.0).subj ==
               create_re(1, 2; corrmat = [1 0.5; 0.5 1]) ./ 2
     end
+    @testset "get_basis" begin
 
+        rng = StableRNG(1)
+        design = UnfoldSim.SingleSubjectDesign(; conditions = Dict(:duration => 10:-1:5))
+        mybasisfun =
+            (rng, design) -> (collect.(range.(1, generate_events(rng, design).duration)))
+        signal = LinearModelComponent(;
+            basis = (mybasisfun, 15),
+            formula = @formula(0 ~ 1),
+            β = [1],
+        )
+        @test UnfoldSim.get_basis(deepcopy(rng), signal, design) ==
+              UnfoldSim.get_basis(signal, design)
+
+        shuffle_design = UnfoldSim.SingleSubjectDesign(;
+            conditions = Dict(:duration => 10:-1:5),
+            event_order_function = shuffle,
+        )
+        # with same seed => equal result
+        @test UnfoldSim.get_basis(StableRNG(1), signal, shuffle_design) ==
+              UnfoldSim.get_basis(StableRNG(1), signal, shuffle_design)
+        # with different seed => unequal result
+        @test UnfoldSim.get_basis(StableRNG(1), signal, shuffle_design) !=
+              UnfoldSim.get_basis(StableRNG(2), signal, shuffle_design)
+    end
 end
