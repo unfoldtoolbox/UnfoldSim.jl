@@ -103,9 +103,9 @@ get_offset(c::LinearModelComponent)::Int = c.offset
 get_offset(c::MixedModelComponent)::Int = c.offset
 
 maxoffset(c::Vector{<:AbstractComponent}) = maximum(get_offset.(c))
-maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(max_offset.(values(d)))
+maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(maxoffset.(values(d)))
 minoffset(c::Vector{<:AbstractComponent}) = minimum(get_offset.(c))
-minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = minimum(min_offset.(values(d)))
+minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = minimum(minoffset.(values(d)))
 
 
 
@@ -209,18 +209,11 @@ end
 
 
 """
-    get_basis(c::AbstractComponent)
+    get_basis([rng],c::AbstractComponent)
 
-returns the basis of the component (typically `c.basis`)
+returns the basis of the component (typically `c.basis`). rng is optional and ignored, but exists to have the same interface as `get_basis(c,design)`
 """
 get_basis(c::AbstractComponent) = c.basis
-
-
-"""
-    get_basis(c::AbstractComponent)
-
-returns the basis of the component (typically `c.basis`)
-"""
 get_basis(rng::AbstractRNG, c::AbstractComponent) = get_basis(c)
 
 
