@@ -5,6 +5,7 @@
 [![Build Status](https://github.com/unfoldtoolbox/UnfoldSim.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/unfoldtoolbox/UnfoldSim.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/v/UnfoldSim.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/unfoldtoolbox/UnfoldSim.jl)
 [![DOI](https://zenodo.org/badge/413455526.svg)](https://zenodo.org/badge/latestdoi/413455526)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.06641/status.svg)](https://doi.org/10.21105/joss.06641)
 
 |rERP|EEG visualisation|EEG Simulations|BIDS pipeline|Decode EEG data|Statistical testing|
 |---|---|---|---|---|---|
@@ -115,8 +116,38 @@ Please reach out, if you have contributed to UnfoldSim.jl but we have not listed
 
 ## Citation
 
-TBA
+If you use UnfoldSim.jl, please acknowledge and support our work by citing
+
+**1\. Our [JOSS paper](https://doi.org/10.21105/joss.06641):**
+
+```
+Schepers et al., (2025). UnfoldSim.jl: Simulating continuous event-based time series data for EEG and beyond. 
+Journal of Open Source Software, 10(107), 6641, https://doi.org/10.21105/joss.06641
+```
+
+<details>
+  <summary>BibTeX entry:</summary>
+
+```bib
+@article{Schepers2025,
+ doi = {10.21105/joss.06641},
+ url = {https://doi.org/10.21105/joss.06641},
+ year = {2025},
+ publisher = {The Open Journal},
+ volume = {10},
+ number = {107},
+ pages = {6641},
+ author = {Judith Schepers and Luis Lips and Maanik Marathe and Benedikt V. Ehinger},
+ title = {UnfoldSim.jl: Simulating continuous event-based time series data for EEG and beyond},
+ journal = {Journal of Open Source Software}
+ } 
+```
+</details>
+
+and
+
+**2\. The corresponding [Zenodo DOI](https://doi.org/10.5281/zenodo.7738651)** for the specific UnfoldSim.jl version that you are using in your work.
 
 ## Acknowledgements
 
-Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany´s Excellence Strategy – EXC 2075 – 390740016. Furthermore, the authors thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers.
+Funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany's Excellence Strategy – EXC 2075 – 390740016. Furthermore, the authors thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for supporting Judith Schepers.
