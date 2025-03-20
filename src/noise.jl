@@ -278,13 +278,17 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
 end
 
 """
-    add_noise!(rng, noisetype::AbstractNoise, signal)
+    add_noise!(rng::AbstractRNG, noisetype::AbstractNoise, signal,[simulation::Simulation])
 
 Generate and add noise to a signal.
 
 Assumes that the signal can be linearized, that is, that the noise is stationary.
+
+`simulation` is  used to provide a future interface to make the noise dependent on e.g. `simulation.design`. It is currently not used and just dropped
 """
-function add_noise!(rng, noisetype::AbstractNoise, signal)
+add_noise!(rng::AbstractRNG, noisetype::AbstractNoise, signal, simulation::Simulation) =
+    add_noise!(rng, noisetype, signal)
+function add_noise!(rng::AbstractRNG, noisetype::AbstractNoise, signal)
 
     # generate noise
     noise = simulate_noise(deepcopy(rng), noisetype, length(signal))
