@@ -6,7 +6,7 @@ A component that adds a hierarchical relation between parameters according to a 
 All fields can be named. Works best with [`MultiSubjectDesign`](@ref).
 
 # Fields
-- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is also possible to provide a function that evaluates to an `Vector` of `Vectors`, with the `design` as input to the function, the outer vector has to have `nrows(design)`, one for each event. The inner vector represents the basis functions which can be of different size (a ragged array). Alternatively, one can also return a Matrix with the second dimension representing `nrows(design)`. In the case of providing a function, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples.
+- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is also possible to provide a function that evaluates to an `Vector` of `Vectors`, with the `design` as input to the function, the outer vector has to have `nrows(design)`, one for each event. The inner vector represents the basis functions which can be of different size (a ragged array). Alternatively, one can also return a Matrix with the second dimension representing `nrows(design)`. In the case of providing a function, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples. If your design depends on `rng`, e.g. because of `event_order_function=shuffle` or some special `SequenceDesign`, then you can provide a two-arguments function `(rng,design)->...`
 - `formula::Any`: Formula-object in the style of MixedModels.jl e.g. `@formula 0 ~ 1 + cond + (1|subject)`. The left-hand side is ignored.
 - `β::Vector` Vector of betas (fixed effects), must fit the formula.
 - `σs::Dict` Dict of random effect variances, e.g. `Dict(:subject => [0.5, 0.4])` or to specify correlation matrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to the MixedModels.jl `create_re` function, which creates the θ matrices.
@@ -31,7 +31,6 @@ MixedModelComponent
 
 See also [`LinearModelComponent`](@ref), [`MultichannelComponent`](@ref).
 """
-# backwards compatability after introducing the `offset` field`
 @with_kw struct MixedModelComponent <: AbstractComponent
     basis::Any
     formula::Any # e.g. 0~1+cond 
@@ -50,13 +49,14 @@ A multiple regression component for one subject.
 All fields can be named. Works best with [`SingleSubjectDesign`](@ref).
 
 # Fields
-- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. Future versions will allow for functions, as of v0.3 this is restricted to array-like objects
+- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is also possible to provide a function that evaluates to an `Vector` of `Vectors`, with the `design` as input to the function, the outer vector has to have `nrows(design)`, one for each event. The inner vector represents the basis functions which can be of different size (a ragged array). Alternatively, one can also return a Matrix with the second dimension representing `nrows(design)`. In the case of providing a function, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples. If your design depends on `rng`, e.g. because of `event_order_function=shuffle` or some special `SequenceDesign`, then you can provide a two-arguments function `(rng,design)->...`
 - `formula::Any`: StatsModels `formula` object, e.g.  `@formula 0 ~ 1 + cond` (left-hand side must be 0).
 - `β::Vector` Vector of betas/coefficients, must fit the formula.
 - `contrasts::Dict` (optional): Determines which coding scheme to use for which categorical variables. Default is empty which corresponds to dummy coding.
 - `offset::Int`: Default is 0. Can be used to shift the basis function in time.
 
      For more information see <https://juliastats.org/StatsModels.jl/stable/contrasts>.
+
 
 # Examples
 ```julia-repl
