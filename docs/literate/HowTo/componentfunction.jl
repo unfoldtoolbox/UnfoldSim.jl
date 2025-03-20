@@ -21,10 +21,10 @@ design = UnfoldSim.SingleSubjectDesign(;
 
 # Instead of defining a boring vector basis function e.g. `[0,0,1,2,3,3,2,1,0,0,0]`, let's use function, modulating a hanning windows by the experimental design's duration.
 # !!! important
-#     because any function depending on `design` can be used, two things have to be taken care of:
-#     
-#     1. in case a random component exist in the function, specify a `<:AbstractRNG` within the function call , the basis might be evaluated multiple times inside `simulate`
+#     Two things have to be taken care of:
+#     1. in case a rng is required to e.g. generate the design, or your absisfunction depends on it, you have to specify a two-argument basis-function: `(rng,design)->...`
 #     2. a `maxlength` has to be specified via a tuple `(function,maxlength)``
+
 mybasisfun = design -> hanning.(generate_events(design).duration)
 signal = LinearModelComponent(;
     basis = (mybasisfun, 100),
