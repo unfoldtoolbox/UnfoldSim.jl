@@ -103,11 +103,9 @@ get_offset(c::LinearModelComponent)::Int = c.offset
 get_offset(c::MixedModelComponent)::Int = c.offset
 
 maxoffset(c::Vector{<:AbstractComponent}) = maximum(get_offset.(c))
-maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) =
-    maximum(maxget_offset.(values(d)))
+maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(max_offset.(values(d)))
 minoffset(c::Vector{<:AbstractComponent}) = minimum(get_offset.(c))
-minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) =
-    minimum(minget_offset.(values(d)))
+minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = minimum(min_offset.(values(d)))
 
 
 
@@ -217,12 +215,24 @@ returns the basis of the component (typically `c.basis`)
 """
 get_basis(c::AbstractComponent) = c.basis
 
+
 """
-    get_basis(c::AbstractComponent,design)
+    get_basis(c::AbstractComponent)
+
+returns the basis of the component (typically `c.basis`)
+"""
+get_basis(rng::AbstractRNG, c::AbstractComponent) = get_basis(c)
+
+
+"""
+    get_basis([rng],c::AbstractComponent,design)
 evaluates the basis, if basis is a vector, directly returns it. if basis is a tuple `(f::Function,maxlength::Int)`, evaluates the function with input `design`. Cuts the resulting vector or Matrix at `maxlength`
+
+To ensure the same design can be generated, rng should be the global simulation rng. If not specified, we use `MersenneTwister(1)`
 """
-get_basis(c::AbstractComponent, design) = get_basis(get_basis(c), design)
-get_basis(b::AbstractVector, design) = b
+get_basis(basis, design) = get_basis(MersenneTwister(1), basis, design)
+get_basis(rng, c::AbstractComponent, design) = get_basis(rng, get_basis(c), design)
+get_basis(rng, b::AbstractVector, design) = b
 
 
 _get_basis_length(basis_out::AbstractMatrix) = size(basis_out, 2)
@@ -230,10 +240,11 @@ _get_basis_length(basis_out::AbstractVector{<:AbstractVector}) = length(basis_ou
 _get_basis_length(basis_out) = error(
     "Component basis function needs to either return a Vector of vectors or a Matrix ",
 )
-function get_basis(basis::Tuple{Function,Int}, design)
+
+function get_basis(rng::AbstractRNG, basis::Tuple{Function,Int}, design)
     f = basis[1]
     maxlength = basis[2]
-    basis_out = f(design)
+    basis_out = applicable(f, 2) ? f(rng, design) : f(design)
     l = _get_basis_length(basis_out)
 
     @assert l == length(design) "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == length(design) [$l / $(length(design))], or a Vector of Vectors with length(b) == length(design) [$l / $(length(design))]. "
@@ -305,7 +316,7 @@ function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign
     X = generate_designmatrix(c.formula, events, c.contrasts)
     y = X * c.β
 
-    return y' .* get_basis(c, design)
+    return y' .* get_basis(deepcopy(rng), c, design)
 end
 
 
@@ -413,9 +424,9 @@ function simulate_component(
         rethrow(e)
     end
 
-    @debug size(get_basis(c, design))
+    @debug size(get_basis(deepcopy(rng), c, design))
     # in case the parameters are of interest, we will return those, not them weighted by basis
-    b = return_parameters ? [1.0] : get_basis(c, design)
+    b = return_parameters ? [1.0] : get_basis(deepcopy(rng), c, design)
     @debug :b, typeof(b), size(b), :m, size(m.y')
     if isa(b, AbstractMatrix)
         epoch_data_component = ((m.y' .* b))
