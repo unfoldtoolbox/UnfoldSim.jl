@@ -151,7 +151,7 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
         events.latency = latencies
     end
 
-    add_noise!(deepcopy(rng), noisetype, signal)
+    add_noise!(deepcopy(rng), noisetype, signal, simulation)
 
     # In case the data should be epoched & onset distribution is given i.e. the signals might be overlapping
     if return_epoched && !isa(onset, NoOnset)
