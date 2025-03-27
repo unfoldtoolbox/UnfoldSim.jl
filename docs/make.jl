@@ -50,7 +50,7 @@ makedocs(;
         ],
         "HowTo" => [
             "Define a new (imbalanced) design" => "./generated/HowTo/newDesign.md",
-            "Use a component basisfunction (duration)" => "./generated/HowTo/componentfunction.md",
+            "Component basisfunction (duration-dependent)" => "./generated/HowTo/componentfunction.md",
             "Get multiple trials with identical subject/item combinations" => "./generated/HowTo/repeatTrials.md",
             "Define a new component (with variable duration and shift)" => "./generated/HowTo/newComponent.md",
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
