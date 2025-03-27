@@ -1,13 +1,22 @@
-using Base: add_sum
+# # Sequence of events (e.g. SCR)
+
+# In this HoWTo we learn to simulate a "SR"-Sequence, a stimulus response, followed by a button press response. 
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
 using UnfoldSim
 using CairoMakie
 using StableRNGs
+# ```@raw html
+# </details >
+# ```
 
-# ## Stimulus - Response design
 
-# Let's say we want to simulate a stimulus response, followed by a button press response. 
 # 
-# First we generate the minimal design of the experiment by specifying our conditins (a one-condition-two-levels design in our case)
+# First we generate the minimal design of the experiment by specifying our conditions (a one-condition-two-levels design in our case)
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 generate_events(design)
 # Next we use the `SequenceDesign` and nest our initial design in it. "`SR_`" is code for an "`S`" (stimulus) event and an "`R`" (response) event - only single letter events are supported! The "`_`" is a signal for the onset generator to generate a bigger pause - no overlap between adjacent "`SR`" pairs.
@@ -68,10 +77,15 @@ data, evts = simulate(
 nothing ## hide
 
 # Finally we can plot the results
-lines(data)
-vlines!(evts.latency[evts.event.=='S'], color = (:darkblue, 0.5))
-vlines!(evts.latency[evts.event.=='R'], color = (:darkred, 0.5))
-xlims!(0, 500)
-current_figure()
+f, ax, h = lines(data)
+vlines!(ax, evts.latency[evts.event.=='S'], color = (:darkblue, 0.5))
+vlines!(ax, evts.latency[evts.event.=='R'], color = (:darkred, 0.5))
+ax.xlabel = "Time [samples]"
+ax.ylabel = "EEG [a.u]"
+xlims!(ax, 0, 500)
+f
 
 # As visible, the `R` response always follows the `S` response. Due to the "`_`" we have large breaks between the individual sequences.
+
+
+
