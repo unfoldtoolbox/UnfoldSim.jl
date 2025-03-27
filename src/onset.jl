@@ -139,6 +139,13 @@ function simulate_interonset_distances(rng, onset::LogNormalOnset, design::Abstr
 end
 
 
+#function simulate_interonset_distances(rng, onset::AbstractOnset,design::)
+
+
+contains_design(d::AbstractDesign, target::Type) = false
+contains_design(d::Union{RepeatDesign,SequenceDesign,SubselectDesign}, target::Type) =
+    d.design isa target ? true : contains_design(d.design, target)
+
 
 """
     simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
@@ -189,11 +196,183 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
     # sample different onsets
     onsets = simulate_interonset_distances(rng, onset, simulation.design)
 
+
+    if contains_design(simulation.design, SequenceDesign)
+        currentsequence = sequencestring(deepcopy(rng), simulation.design)
+        if !isnothing(findfirst("_", currentsequence))
+
+            @assert currentsequence[end] == '_' "the blank-indicator '_' has to be the last sequence element"
+            df = generate_events(deepcopy(rng), simulation.design)
+            nrows_df = size(df, 1)
+            stepsize = length(currentsequence) - 1
+            # add to every stepsize onset the maxlength of the response
+            #@debug onsets[stepsize:stepsize:end]
+            @debug stepsize
+            onsets[stepsize+1:stepsize:end] .+= 2 .* maxlength(simulation.components)
+            #@debug onsets[stepsize:stepsize:end]
+        end
+    end
+
     if maximum(onsets) > 10000
         @warn "Maximum of inter-event distances was $(maximum(onsets)) - are you sure this is what you want?"
     end
     # accumulate them
     onsets_accum = accumulate(+, onsets, dims = 1, init = 1)
+    onsets_accum = onsets_accum .- minoffset(simulation.components)
 
     return onsets_accum
 end
+
+"""
+    UniformOnsetFormula <: AbstractOnset
+
+Provides a Uniform Distribution of the inter-event-distances, but with regression formulas.
+
+This is helpful if your overlap/event-distribution should be dependent on some condition, e.g. more overlap in cond='A' than cond='B'.
+**Offset** affects the minimal distance. The maximal distance is `offset + width`.
+
+# Fields
+
+-`offset_formula= `@formula(0~1)`: choose a formula depending on your `design`, default `@formula(0~1)``
+-`offset_β=[0] (optional)`: Choose a `Vector` of betas, number needs to fit the formula chosen, default `[0]`
+-`offset_contrasts` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications, default `Dict()`
+-`width_formula = `@formula(0~1)`: choose a formula depending on your `Design`,
+-`width_β=[0] (optional)`: Choose a `Vector` of betas, number needs to fit the formula chosen. 
+-`width_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications
+
+# Combined with ShiftOnsetByOne
+Sometimes one wants to bias not the inter-onset-distance prior to the current event, but after the current event.
+This is possible by using `ShiftOnsetByOne(UniformOnset(...))`, effectively shifting the inter-onset-distance vector by one. See `?ShiftOnsetByOne` for a visualization.
+
+
+
+# Examples
+```julia-repl
+julia> o = UnfoldSim.UniformOnsetFormula(
+    width_formula = @formula(0 ~ 1 + cond),
+    width_β = [50, 20],
+)
+
+```
+
+See also [`UniformOnset`](@ref) for a simplified version without linear regression specifications
+"""
+@with_kw struct UniformOnsetFormula <: AbstractOnset
+    width_formula = @formula(0 ~ 1)
+    width_β::Vector = [0]
+    width_contrasts::Dict = Dict()
+    offset_formula = @formula(0 ~ 1)
+    offset_β::Vector = [0]
+    offset_contrasts::Dict = Dict()
+end
+
+
+function simulate_interonset_distances(rng, o::UniformOnsetFormula, design::AbstractDesign)
+    events = generate_events(deepcopy(rng), design)
+    widths =
+        UnfoldSim.generate_designmatrix(o.width_formula, events, o.width_contrasts) *
+        o.width_β
+    offsets =
+        UnfoldSim.generate_designmatrix(o.offset_formula, events, o.offset_contrasts) *
+        o.offset_β
+
+    return Int.(
+        round.(reduce(vcat, rand.(deepcopy(rng), range.(offsets, offsets .+ widths), 1)))
+    )
+end
+
+
+"""
+
+    LogNormalOnsetFormula <: AbstractOnset
+
+provide a LogNormal Distribution of the inter-event-distances, but with regression formulas.
+This is helpful if your overlap/event-distribution should be dependent on some condition, e.g. more overlap in cond='A' than cond='B'.
+
+# Fields
+
+-`μ_formula= `@formula(0~1)`: choose a formula depending on your `design`
+-`μ_β`: Choose a `Vector` of betas, number needs to fit the formula chosen. No reasonable default is available.
+-`μ_contrasts` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
+-`σ_formula = `@formula(0~1)`: choose a formula depending on your `Design`,
+-`σ_β`: Choose a `Vector` of betas, number needs to fit the formula chosen. No reasonable default is available here 
+-`σ_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications
+
+# Combined with ShiftOnsetByOne
+
+Sometimes one wants to bias not the inter-onset-distance prior to the current event, but after the current event.
+This is possible by using `ShiftOnsetByOne(LogNormalOnset(...))`, effectively shifting the inter-onset-distance vector by one. See `?ShiftOnsetByOne` for a visualization.
+
+
+# Examples
+```julia-repl
+julia> o = UnfoldSim.LogNormalOnsetFormula(
+    σ_formula = @formula(0 ~ 1 + cond),
+    σ_β = [0.25, 0.5],
+    μ_β = [2],
+)
+
+```
+
+See also [`LogNormalOnset`](@ref) for a simplified version without linear regression specifications
+
+    
+"""
+@with_kw struct LogNormalOnsetFormula <: AbstractOnset
+    μ_formula = @formula(0 ~ 1)
+    μ_β::Vector
+    μ_contrasts::Dict = Dict()
+    σ_formula = @formula(0 ~ 1)
+    σ_β::Vector
+    σ_contrasts::Dict = Dict()
+    offset_formula = @formula(0 ~ 1)
+    offset_β::Vector = [0]
+    offset_contrasts::Dict = Dict()
+    truncate_upper = nothing # truncate at some sample?
+end
+
+function simulate_interonset_distances(
+    rng,
+    o::LogNormalOnsetFormula,
+    design::AbstractDesign,
+)
+    events = generate_events(deepcopy(rng), design)
+
+
+    μs = UnfoldSim.generate_designmatrix(o.μ_formula, events, o.μ_contrasts) * o.μ_β
+    σs = UnfoldSim.generate_designmatrix(o.σ_formula, events, o.σ_contrasts) * o.σ_β
+    offsets =
+        UnfoldSim.generate_designmatrix(o.offset_formula, events, o.offset_contrasts) *
+        o.offset_β
+
+
+    funs = LogNormal.(μs, σs)
+    if !isnothing(o.truncate_upper)
+        funs = truncated.(funs; upper = o.truncate_upper)
+    end
+    #@debug reduce(hcat, rand.(deepcopy(rng), funs, 1))
+    return Int.(round.(offsets .+ reduce(vcat, rand.(deepcopy(rng), funs, 1))))
+end
+
+
+"""
+    ShiftOnsetByOne <:AbstractOnset
+This container AbstractOnset shifts the ShiftOnsetByOne.onset::AbstractOnset inter-onset-distance vector by one, adding a `0` to the front and removing the last `inter-onset-distance`.
+
+This is helpful in combination with `LogNormalOnsetFormula` or `UniformOnsetFormula`, to generate biased distances not of the previous, but of the next Event.
+
+Visualized:
+
+|__1__| A |__2__| B |__3__| C
+Right now, the interonset-distances are assigned in the order 1,2,3 inbetween the events A,B,C. After ShiftOnsetByOne we would have
+
+|__0__| A |__1__| B |__2__| C
+
+with 0 being a new distance of `0`, and the 3 removed (it would describe the distance after C, because there is nothing coming, the signal is not further prolonged)
+
+"""
+struct ShiftOnsetByOne <: AbstractOnset
+    onset::AbstractOnset
+end
+UnfoldSim.simulate_interonset_distances(rng, onsets::ShiftOnsetByOne, design) =
+    vcat(0, UnfoldSim.simulate_interonset_distances(rng, onsets.onset, design)[1:end-1])
