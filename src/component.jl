@@ -222,7 +222,7 @@ get_basis(rng::AbstractRNG, c::AbstractComponent) = get_basis(c)
     get_basis([rng],c::AbstractComponent,design)
 evaluates the basis, if basis is a vector, directly returns it. if basis is a tuple `(f::Function,maxlength::Int)`, evaluates the function with input `design`. Cuts the resulting vector or Matrix at `maxlength`
 
-To ensure the same design can be generated, rng should be the global simulation rng. If not specified, we use `MersenneTwister(1)`
+To ensure the same design can be generated, `rng` should be the global simulation `rng`. If not specified, `MersenneTwister(1)` is used.
 """
 get_basis(basis, design) = get_basis(MersenneTwister(1), basis, design)
 get_basis(rng, c::AbstractComponent, design) = get_basis(rng, get_basis(c), design)
