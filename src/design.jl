@@ -450,8 +450,6 @@ generate_events(rng, design::SequenceDesign{MultiSubjectDesign}) =
     error("not yet implemented")
 
 
-generate_events(rng, design::AbstractDesign) = generate_events(design)
-
 function generate_events(rng, design::SequenceDesign)
     df = generate_events(deepcopy(rng), design.design)
     nrows_df = size(df, 1)
