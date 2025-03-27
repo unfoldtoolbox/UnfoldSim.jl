@@ -11,6 +11,7 @@
 
 # Here we will learn how to simulate a typical ERP complex with P100, N170, P300.
 
+
 # ### Setup
 # ```@raw html
 # <details>
@@ -32,6 +33,7 @@ using UnfoldMakie # For plotting
 # ### 1. Experimental design
 # We specify an experimental design with one subject in two experimental conditions including a continuous variable with 10 values.
 # To mimic randomization in an experiment, we shuffle the trials using the `event_order_function` argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.
+
 design =
     SingleSubjectDesign(;
         conditions = Dict(

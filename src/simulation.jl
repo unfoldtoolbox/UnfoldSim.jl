@@ -18,6 +18,7 @@ function simulate(
     simulate(MersenneTwister(1), design, components, onset, args...; kwargs...)
 end
 
+
 """
     simulate(
     rng::AbstractRNG,
@@ -126,7 +127,6 @@ simulate(
     noise::AbstractNoise = NoNoise();
     kwargs...,
 ) = simulate(rng, Simulation(design, components, onset, noise); kwargs...)
-
 
 function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool = false)
     (; design, components, onset, noisetype) = simulation
@@ -241,8 +241,9 @@ function create_continuous_signal(rng, responses, simulation)
 
     (; design, components, onset, noisetype) = simulation
 
-    n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]
-    n_trials = size(design)[1]
+    n_subjects =
+        length(size(deepcopy(rng), design)) == 1 ? 1 : size(deepcopy(rng), design)[2]
+    n_trials = size(deepcopy(rng), design)[1]
     n_chan = n_channels(components)
 
     # we only need to simulate onsets & pull everything together, if we 
@@ -254,11 +255,13 @@ function create_continuous_signal(rng, responses, simulation)
 
     # combine responses with onsets
     max_length_component = maxlength(components)
-    max_length_continuoustime = Int(ceil(maximum(onsets))) .+ max_length_component
+    offset_range = maxoffset(simulation.components) - minoffset(simulation.components)
+    max_length_continuoustime =
+        Int(ceil(maximum(onsets))) .+ max_length_component .+ offset_range
 
 
     signal = zeros(n_chan, max_length_continuoustime, n_subjects)
-
+    @debug size(signal), offset_range
     for e = 1:n_chan
         for s = 1:n_subjects
             for i = 1:n_trials
@@ -268,7 +271,9 @@ function create_continuous_signal(rng, responses, simulation)
                     responses,
                     e,
                     s,
-                    one_onset:one_onset+max_length_component-1,
+                    one_onset+minoffset(simulation.components):one_onset+max_length_component-1+maxoffset(
+                        simulation.components,
+                    ),
                     (s - 1) * n_trials + i,
                 )
             end
