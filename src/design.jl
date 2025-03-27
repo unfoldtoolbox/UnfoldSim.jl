@@ -357,7 +357,7 @@ end
 
 function check_sequence(s::String)
     blankfind = findall('_', s)
-    @assert length(blankfind) <= 1 && (length(blankfind) == 0 || length(s) == blankfind[1]) "the blank-indicator '_' has to be the last sequence element"
+    @assert length(blankfind) <= 1 && (length(blankfind) == 0 || length(s) == blankfind[1]) "the blank-indicator '_' has to be the last sequence element, and only one can exist"
     return s
 end
 
