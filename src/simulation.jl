@@ -119,20 +119,14 @@ Additional remarks on the overlap of adjacent signals when `return_epoched = tru
 - If `onset = NoOnset()` there will not be any overlapping signals in the data because the onset calculation and conversion to a continuous signal is skipped.
 - If an inter-onset distance distribution is given, a continuous signal(potentially with overlap) is constructed and partitioned into epochs afterwards.
 """
-
-
-function simulate(
+simulate(
     rng::AbstractRNG,
     design::AbstractDesign,
     components,
     onset::AbstractOnset,
     noise::AbstractNoise = NoNoise();
     kwargs...,
-)
-    simulate(rng, Simulation(design, components, onset, noise); kwargs...)
-end
-
-
+) = simulate(rng, Simulation(design, components, onset, noise); kwargs...)
 
 function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool = false)
     (; design, components, onset, noisetype) = simulation
