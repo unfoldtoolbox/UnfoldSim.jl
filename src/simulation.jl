@@ -241,8 +241,9 @@ function create_continuous_signal(rng, responses, simulation)
 
     (; design, components, onset, noisetype) = simulation
 
-    n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]
-    n_trials = size(design)[1]
+    n_subjects =
+        length(size(deepcopy(rng), design)) == 1 ? 1 : size(deepcopy(rng), design)[2]
+    n_trials = size(deepcopy(rng), design)[1]
     n_chan = n_channels(components)
 
     # we only need to simulate onsets & pull everything together, if we 
