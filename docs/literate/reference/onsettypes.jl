@@ -303,4 +303,4 @@ hist!(ax, onsets[events.cond.=="B"], bins = range(0, 100, step = 1), label = "co
 axislegend(ax)
 f
 
-# Voila - the inter-onset intervals are `20` samples longer for condition `B`, exactly as specified.`
+# Voila - the inter-onset intervals are `20` samples longer for condition `B`, exactly as specified.

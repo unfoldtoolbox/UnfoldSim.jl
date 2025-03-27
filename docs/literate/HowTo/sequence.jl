@@ -10,12 +10,12 @@ using StableRNGs
 # First we generate the minimal design of the experiment by specifying our conditins (a one-condition-two-levels design in our case)
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 generate_events(design)
-# Next we use the `SequenceDesign` and nest our initial design in it. "`SR_`" is code for an "`S`" event and an "`R`" event - only single letter events are supported! The "`_`" is a signal for the Onset generator to generate a bigger pause - no overlap between adjacend "`SR`" pairs
+# Next we use the `SequenceDesign` and nest our initial design in it. "`SR_`" is code for an "`S`" (stimulus) event and an "`R`" (response) event - only single letter events are supported! The "`_`" is a signal for the onset generator to generate a bigger pause - no overlap between adjacent "`SR`" pairs.
 design = SequenceDesign(design, "SR_")
 generate_events(StableRNG(1), design)
 # The main thing that happened is that the design was repeated for every event (each 'letter') of the sequence, and an `eventtype` column was added.
 # !!! hint
-#     more advaned sequences are possible as well, like "SR{1,3}", or "A[BC]". Infinite sequences are **not** possible like "AB*". 
+#     More advanced sequences are possible as well, like "SR{1,3}", or "A[BC]". Infinite sequences are **not** possible like "AB*". 
 
 # Finally, let's repeat the current design 4 times
 design = RepeatDesign(design, 4)
