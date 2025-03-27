@@ -191,8 +191,9 @@ n_channels(c::MultichannelComponent) = length(c.projection)
 
 """
     n_channels(c::Vector{<:AbstractComponent})
+    n_channels(c::Dict)
 
-For a vector of `MultichannelComponent`s, return the number of channels for the first component but assert all are of equal length.
+For a vector of `MultichannelComponent`s or a Dict of components, return the number of channels for the first component but assert all are of equal length.
 """
 function n_channels(c::Vector{<:AbstractComponent})
     all_channels = n_channels.(c)
