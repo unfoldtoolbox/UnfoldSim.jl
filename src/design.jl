@@ -178,16 +178,30 @@ end
 #----
 # Design helper functions
 
-"Return the dimensions of the experiment design."
-size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
-size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
+"""
+    Base.size([rng],design::AbstractDesign)
+
+Return the dimensions of the experiment design. For some designs (SequenceDesign), rng is required, as the size is only determined by the design, which in turn can be probabilistic.
+"""
+Base.size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
+Base.size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
 
 Base.size(design::RepeatDesign{MultiSubjectDesign}) =
     size(design.design) .* (design.repeat, 1)
 Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
 
+Base.size(rng::AbstractRNG, design::AbstractDesign) = size(design) # by default we drop the RNG
+
+Base.size(
+    rng::AbstractRNG,
+    design::Union{<:SequenceDesign,<:SubselectDesign,<:RepeatDesign{<:SequenceDesign}},
+) = size(generate_events(rng, design), 1)
+
+
 "Length is the product of all dimensions and equals the number of events in the corresponding events dataframe."
 length(design::AbstractDesign) = *(size(design)...)
+length(rng, design::AbstractDesign) = *(size(rng, design)...)
+
 
 """
     apply_event_order_function(fun, rng, events)
@@ -477,7 +491,6 @@ In case of `MultiSubjectDesign`, sort by subject. \\
 Please note that when using an `event_order_function`(e.g. `shuffle`) in a `RepeatDesign`, the corresponding RNG is shared across repetitions and not deep-copied for each repetition.
 As a result, the order of events will differ for each repetition.
 """
-
 function UnfoldSim.generate_events(rng::AbstractRNG, design::RepeatDesign)
     df = map(x -> generate_events(rng, design.design), 1:design.repeat) |> x -> vcat(x...)
 
@@ -521,7 +534,7 @@ struct EffectsDesign <: AbstractDesign
     effects_dict::Dict
 end
 EffectsDesign(design::MultiSubjectDesign, effects_dict::Dict) = error("not yet implemented")
-UnfoldSim.size(t::EffectsDesign) = size(generate_events(t), 1)
+UnfoldSim.size(rng, t::EffectsDesign) = size(generate_events(rng, t), 1)
 
 """
     expand_grid(design)
@@ -561,15 +574,3 @@ function UnfoldSim.generate_events(rng, t::EffectsDesign)
     return expand_grid(effects_dict)
 end
 
-
-#Base.size(design::SequenceDesign) =
-#size(design.design) .* length(replace(design.sequence, "_" => "",r"\{.*\}"=>""))
-
-#Base.size(design::) = size(design.design) .* design.repeat
-
-# ---  
-# Size for Sequence design
-# No way to find out what size it is without actually generating first...
-Base.size(
-    design::Union{<:SequenceDesign,<:SubselectDesign,<:RepeatDesign{<:SequenceDesign}},
-) = size(generate_events(design), 1)

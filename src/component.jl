@@ -620,7 +620,7 @@ end
 Initializes an Array with zeros. Returns either a 2-dimensional for component-length  x length(design), or a 3-D for channels x component-length x length(design)
 
 """
-function init_epoch_data(components, design)
+function init_epoch_data(rng, components, design)
     max_offset = maxoffset(components)
     min_offset = minoffset(components)
     range_offset = (max_offset - min_offset)
@@ -631,14 +631,14 @@ function init_epoch_data(components, design)
             length(design),
         )
     else
-        epoch_data = zeros(maxlength(components) + range_offset, length(design))
+        epoch_data = zeros(maxlength(components) + range_offset, length(rng, design))
     end
     return epoch_data
 end
 
 function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
     #@debug rng.state
-    epoch_data = init_epoch_data(event_component_dict, s.design)
+    epoch_data = init_epoch_data(deepcopy(rng), event_component_dict, s.design)
     #@debug rng.state
     evts = generate_events(deepcopy(rng), s.design)
     #@debug rng.state
