@@ -628,7 +628,7 @@ function init_epoch_data(rng, components, design)
         epoch_data = zeros(
             n_channels(components),
             maxlength(components) + range_offset,
-            length(design),
+            length(deepcopy(rng), design),
         )
     else
         epoch_data = zeros(maxlength(components) + range_offset, length(rng, design))
