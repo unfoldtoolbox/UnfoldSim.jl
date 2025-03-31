@@ -365,7 +365,7 @@ end
 """
     SequenceDesign{T} <: AbstractDesign
 Enforce a sequence of events for each entry of a provided `AbstractDesign`.
-The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap.
+The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap and has to be at the end of the sequence string. There can only be one `_` character in a sequence string.
 
 
 Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the `ImbalancedDesign` tutorial
