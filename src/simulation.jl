@@ -254,9 +254,15 @@ function create_continuous_signal(rng, responses, simulation)
 
     # combine responses with onsets
     max_length_component = maxlength(components)
-    offset_range = maxoffset(simulation.components) - minoffset(simulation.components)
+
+
+    offset_range = max(maxoffset(components), 0) - min(minoffset(components), 0)
+
+    # because the maximum(onset) is already shifted by minoffset in onsets.jl / simulate_onsets, we have to undo it here, if not, we'd get signals that are too long
+
     max_length_continuoustime =
-        Int(ceil(maximum(onsets))) .+ max_length_component .+ offset_range
+        Int(ceil(maximum(onsets) + minoffset(components))) .+ max_length_component .+
+        offset_range
 
 
     signal = zeros(n_chan, max_length_continuoustime, n_subjects)

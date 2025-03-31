@@ -218,7 +218,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
     end
     # accumulate them
     onsets_accum = accumulate(+, onsets, dims = 1, init = 1)
-    onsets_accum = onsets_accum .- minoffset(simulation.components)
+    onsets_accum = onsets_accum .- min(minoffset(simulation.components), 0)
 
     return onsets_accum
 end
