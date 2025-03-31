@@ -368,13 +368,17 @@ Enforce a sequence of events for each entry of a provided `AbstractDesign`.
 The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap.
 
 
-
-Another variable sequence is defined using `[]`. For example, `S[ABC]` would result in any one sequence `SA`, `SB`, `SC`.
-
 Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the `ImbalancedDesign` tutorial
 
 
-Experimental: It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`'s. Because the number of trials is not defined before actually executing the design, this can lead to problems down the road, if functions require to know the number of trials before generation of the design.
+
+# Fields
+- `design::AbstractDesign`: The design that is generated for every sequence-event
+- `sequence::String = ""` (optional): A string of characters depicting sequences.
+            A variable sequence is defined using `[]`. For example, `S[ABC]` could result in any one sequence `SA`, `SB`, `SC`.
+            Experimental: It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`'s.
+
+# Examples
 
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
@@ -543,11 +547,19 @@ typical_value(v) = unique(v)
 
 Generates events to simulate marginalized effects using an Effects.jl reference-grid dictionary. Every covariate that is in the `EffectsDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
 
-```julia
 # Example
+```julia
+effects_dict = Dict(:conditionA=>[0,1])
+design = SingleSubjectDesign(; conditions = Dict(:conditionA => [0,1,2])) 
+eff_design = EffectsDesign(design,effects_dict) 
+generate_events(MersenneTwister(1),eff_design)
 
-effects_dict = Dict{Symbol,Union{<:Number,<:String}}(:conditionA=>[0,1])
-SingleSubjectDesign(...) |> x-> EffectsDesign(x,effects_dict)
+2×1 DataFrame
+ Row │ conditionA 
+     │ Int64      
+─────┼────────────
+   1 │          0
+   2 │          1
 ```
 """
 function UnfoldSim.generate_events(rng, t::EffectsDesign)
