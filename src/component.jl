@@ -212,7 +212,7 @@ end
 """
     get_basis([rng],c::AbstractComponent)
 
-returns the basis of the component (typically `c.basis`). rng is optional and ignored, but exists to have the same interface as `get_basis(c,design)`
+Return the basis of the component (typically `c.basis`). rng is optional and ignored, but exists to have the same interface as `get_basis(c,design)`.
 """
 get_basis(c::AbstractComponent) = c.basis
 get_basis(rng::AbstractRNG, c::AbstractComponent) = get_basis(c)
