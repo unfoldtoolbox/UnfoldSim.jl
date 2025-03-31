@@ -1,3 +1,21 @@
+"""
+    rand_re(rng::AbstractRNG, machine::Automa.Machine)
+
+Mimicks a reverse-regex, generating strings from regex instead of matching. Based on Automata.jl
+
+# Arguments 
+- `machine::Automa.Machine`: A Automa.Machine, typically output of `Automa.Compile(RE("mystring"))`
+
+# Returns
+- `result::String` : A string following the rules in `Automa.Machine`. `{}` are not supported, but e.g. `+`, `*`
+
+# Examples
+```julia-repl
+julia> using Automa
+julia> machine = Automa.Compile(Automa.RegExp.RE("b+l+a+))
+julia> rand_re(MersenneTwister(2),machine)
+"bbbbblllaaa"
+"""
 function rand_re(rng::AbstractRNG, machine::Automa.Machine)
     out = IOBuffer()
     node = machine.start
@@ -17,6 +35,31 @@ end
 
 sequencestring(rng, d::SequenceDesign) = sequencestring(rng, d.sequence)
 
+
+"""
+    sequencestring(rng, str::String)
+    sequencestring(rng, dS::SequenceDesign)
+    sequencestring(rng, dR::RepeatDesign)
+
+Generates a sequence based on the reverse regex style string in `str`, `dS.sequence` or `dR.design.sequence`.
+
+Directly converting to Automa.Compileis not possible, as we first need to match & evaluate the curly brackets. We simply detect and expand them.
+
+# Arguments
+- `str::String`: a string mimicking a regex, e.g. "b+l*a{3,4}" should evaluate to "bbbbaaa" or "bllllllllllllaaaa" - but right now we disallow `+` and `*` - we should revisit why exactly though.
+
+# Returns
+- `result::String` : a simulated string
+
+# Examples
+```julia-repl
+julia> sequencestring(MersenneTwister(1),"bla{3,4}")
+"blaaaa"
+
+```
+
+See also [`rand_re`](@ref)
+"""
 function sequencestring(rng, str::String)
     #match curly brackets and replace them
     @assert isnothing(findfirst("*", str)) && isnothing(findfirst("+", str)) "'infinite' sequences currently not supported"
