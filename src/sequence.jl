@@ -46,7 +46,7 @@ Generates a sequence based on the reverse regex style string in `str`, `dS.seque
 Directly converting to Automa.Compileis not possible, as we first need to match & evaluate the curly brackets. We simply detect and expand them.
 
 # Arguments
-- `str::String`: a string mimicking a regex, e.g. "b+l*a{3,4}" should evaluate to "bbbbaaa" or "bllllllllllllaaaa" - but right now we disallow `+` and `*` - we should revisit why exactly though.
+- `str::String`: a string mimicking a regex, e.g. "b[lL]{3,4}a" should evaluate to e.g. "bLlLLa". E.g. "b+l*a{3,4}" should in principle evaluate to "bbbbaaa" or "bllllllllllllaaaa" - but right now we disallow `+` and `*` - we should revisit why exactly though.
 
 # Returns
 - `result::String` : a simulated string
