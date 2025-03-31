@@ -139,9 +139,6 @@ function simulate_interonset_distances(rng, onset::LogNormalOnset, design::Abstr
 end
 
 
-#function simulate_interonset_distances(rng, onset::AbstractOnset,design::)
-
-
 contains_design(d::AbstractDesign, target::Type) = false
 contains_design(d::Union{RepeatDesign,SequenceDesign,SubselectDesign}, target::Type) =
     d.design isa target ? true : contains_design(d.design, target)
@@ -154,6 +151,8 @@ Call `simulate_interonset_distances` to generate distances between events and th
 
 Please note that this function is mainly for internal use in the context of `simulate` function calls. \n
 Also note that the accumulation of onsets starts at 1 to avoid indexing problems in the case that the first sampled onset is 0.
+
+In case of a SequenceDesign with a '_' no-overlap indicator, we use twice the `maxlength(components)` as the distance following that sequence character.
 
 # Arguments
 - `rng`: Random number generator (RNG) to make the process reproducible.
