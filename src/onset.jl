@@ -209,7 +209,7 @@ function simulate_interonset_distances(
 end
 """
     SequenceOnset <: AbstractOnset
-A struct that defines as one argument the used Onsets for a [`SequenceDesign`](@ref).
+Allows to specify inter-onset-distance functions per event.
 
 All fields are mandatory. Works best with [`SequenceDesign`](@ref).
 
@@ -229,10 +229,10 @@ struct SequenceOnset <: AbstractOnset
 end
 
 """
-    SequenceOnset <: AbstractOnset
-A struct that defines the used Onsets for a [`DriftComponent`](@ref).
+    DriftOnset<: AbstractOnset
+A type that defines the onsets for a [`DriftComponent`](@ref).
 
-All fields are mandatory. Works best with [`DriftComponent`](@ref).
+Works best with [`DriftComponent`](@ref).
 
 # Fields
 - `onset::Dict`: onset for the DriftComponent.
@@ -269,7 +269,7 @@ UnfoldSim.simulate_interonset_distances(rng, onset::AbstractOnset, design::Abstr
 """
     UnfoldSim.simulate_interonset_distances(rng, onset::DriftOnset, design::AbstractDesign, components::AbstractComponent)
 
-Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceDesign`](@ref).
+Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceDesign`](@ref), one for each sequence. Onsets are rounded, returned as `Int`
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure reproducibility.
@@ -278,7 +278,7 @@ Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceD
 - `components::AbstractComponent`: The Component for which the onset is simulated.
 
 # Returns
-- `Vector{Float64}`: the generated onsets for the drift components in the SequenceDesign.
+- `Vector{Int}`: the generated onsets for the drift components in the SequenceDesign.
 """
 function UnfoldSim.simulate_interonset_distances(rng, onset::DriftOnset, design::AbstractDesign, components::AbstractComponent)
     rts = calculate_response_times_for_ssm(deepcopy(rng), components, design)
@@ -345,7 +345,7 @@ Generates list of onsets for all events of an [`SequenceDesign`](@ref), how to s
 - `Vector{Float64}`: the generated onsets for all events in the SequenceDesign.
 """
 function UnfoldSim.simulate_onsets(rng, onset::SequenceOnset, simulation::Simulation)
-    @assert isa(simulation.design.design, SequenceDesign)
+    @assert isa(simulation.design.design, SequenceDesign) "`SequenceOnset`is currently only compatible with a `SequenceDesign`"
     events = generate_events(deepcopy(rng), simulation.design)
     onset_map = Dict()
     onset_counter = Dict()
@@ -362,7 +362,7 @@ function UnfoldSim.simulate_onsets(rng, onset::SequenceOnset, simulation::Simula
     end
     final_onsets = vcat(final_onsets[end], final_onsets[1:end-1])
     if maximum(final_onsets) > 10000
-        @warn "Maximum of inter-event-distances was $(maximum(final_onsets)) - are you sure this is what you want?"
+        @warn "Number of simulated inter-event-distances was $(maximum(final_onsets)) - are you sure this is what you want?"
     end
     onsets_accum = accumulate(+, final_onsets, dims = 1, init = 1)
     return onsets_accum

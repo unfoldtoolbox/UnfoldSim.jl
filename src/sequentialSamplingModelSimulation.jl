@@ -6,16 +6,16 @@ A advanced drift diffusion Model which can be used to simulate evidence accumula
 All fields can be named. Is used with [`DriftComponent`](@ref).
 
 # Fields T::Real
-- `drift_rate::T`: defines the amount of evidence accumulated per time step. (steepness of the trace)
-- `event_onset::T`: event onset delay in seconds. (mimics sensory evidence)
-- `sensor_encoding_delay::T`: variability in the delay of the event onset in seconds. (mimics sensory encoding delay)
-- `accumulative_level_noise::T`: some noise added to the accumulation process.
+- `drift_rate::T`: defines the amount of evidence accumulated per time step. (roughly the steepness of the trace)
+- `event_onset::T`: constant event onset delay in seconds. (mimics sensory evidence)
+- `sensor_encoding_delay::T`: uniform variability in the delay of the event onset in seconds, added ontop of `event_onset`. (mimics sensory encoding delay)
+- `accumulative_level_noise::T`: \sigma of the normal-distributed noise added to the accumulation process.
 - `boundary::T`: the threshold of evidence needed to make a decision.
 - `motor_onset::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
 - `motor_delay::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
 - `post_accumulation_duration::T`: fixed time the accumulation process resumes after boundary reached in seconds. (mimics evidence overshoot)
 - `post_accumulation_duration_variability::T`: variability in time the accumulation process resumes after boundary reached in seconds. (mimics diff of participants)
-- `ramp_down_duration::T`: duration post accumulation process ramp down.
+- `ramp_down_duration::T`: duration (in s) of the post accumulation ramp down process.
 
 # Examples
 ```julia-repl
@@ -86,7 +86,7 @@ end
 """
     KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
 
-Generate response time and evidence of an evidence accumulation process using the Kelly model.
+Generate a single response time, and evidence trace of an evidence accumulation process using the Kelly model.
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.

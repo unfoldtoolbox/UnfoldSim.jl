@@ -518,23 +518,22 @@ end
 
 """
     DriftComponent <: AbstractComponent
-A component that adds an evidence accumulation according to a sequential sampling model selected in the field model_type.
+A component that adds an evidence accumulation signal, following a specified sequential sampling model.
 
-All fields are mandatory. Works best with [`SequenceDesign`](@ref).
+Works best with [`SequenceDesign`](@ref).
 
 # Fields
 - `max_length::Int`: maximum length of the simulated signal.
 - `sfreq::Real`: sample frequency used to simulate the signal.
-- `model_type`: Model struct which defines the model to use to generate the traces, e.g. `KellyModel`
-- `model_parameters`: Dict. Containing the parameters for the simulation model specified in model_type.
+- `model_type`: Model struct which defines the model to use to generate the signal, e.g. `KellyModel`
+- `model_parameters`: Dict. Containing the parameters for the sequential sampling simulation model specified in `model_type`.
 
 # Examples
 ```julia-repl
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
 sfreq=500
-Δt = 1/sfreq;
 tEnd = 1.0
-max_length = tEnd/Δt;
+max_length = tEnd*sfreq;
 model_parameter = Dict()
 DriftComponent(
     max_length,
@@ -553,7 +552,7 @@ end
 """
     simulate_component(rng, c::DriftComponent, design::AbstractDesign)
 
-Generate evidence accumulation traces by using the model and its parameters specified in the component c.
+Generate evidence accumulation traces based on the model specified in `c::DriftComponent` and (optionally) parameters from `design::AbtractDesign`
 
 # Returns
 - `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(c.time_vec) x size(events, 1)`.
@@ -585,15 +584,15 @@ end
 
 Generate response times of the evidence accumulation by using the model and its parameters specified in the component.
 
-Using same rng as in simulate_component(rng, component::DriftComponent, design::AbstractDesign) to ensure that the response times match the generated traces. 
+Important: specify the same rng as in `simulate_component(rng, component::DriftComponent, design::AbstractDesign)` to ensure that the response times match the generated traces. 
 
 # Arguments
-- `rng::StableRNG`: Random seed to ensure the same traces are created as in the use of the [`simulate_component`](@ref) function.
+- `rng::AbstractRNG`: Random seed to ensure the same traces are created as in the use of the [`simulate_component`](@ref) function.
 - `component::DriftComponent`: Component to specify the model and its parameters to simulate the evidence accumulation.
 - `design::UnfoldSim.SubselectDesign`: Subselection of the Sequence Design to ensure we only generate rt for the drift component events.
 
 # Returns
-- `Vector{Float64}`: Simulated response time for each event in the events data frame. The output dimension is `size(events, 1)`.
+- `Vector{Float64}`: Simulated response times for each event in the events data frame. The output dimension is `size(events, 1)`.
 
 ```julia-repl
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
