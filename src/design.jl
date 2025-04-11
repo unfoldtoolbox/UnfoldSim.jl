@@ -573,4 +573,3 @@ function UnfoldSim.generate_events(rng, t::EffectsDesign)
     end
     return expand_grid(effects_dict)
 end
-
