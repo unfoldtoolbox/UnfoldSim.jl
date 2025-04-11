@@ -326,5 +326,3 @@ function simulate_interonset_distances(
     #@debug reduce(hcat, rand.(deepcopy(rng), funs, 1))
     return Int.(round.(offsets .+ reduce(vcat, rand.(deepcopy(rng), funs, 1))))
 end
-
-
