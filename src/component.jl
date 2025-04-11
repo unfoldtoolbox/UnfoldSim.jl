@@ -598,7 +598,7 @@ function simulate_responses(
     components::Vector{<:AbstractComponent},
     simulation::Simulation,
 )
-    epoch_data = init_epoch_data(components, simulation.design)
+    epoch_data = init_epoch_data(deepcopy(rng), components, simulation.design)
     simulate_responses!(rng, epoch_data, components, simulation)
     return epoch_data
 end
