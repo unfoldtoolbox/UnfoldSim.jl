@@ -54,7 +54,7 @@ df.category = repeat(generate_events(design).category, inner = size(erp, 1))
 plot_erp!(
     f[1, 1],
     df,
-    mapping = (; group = :group => nonnumeric, color = :duration, col = :category),
+    mapping = (; group = :group => nonnumeric, col = :category), #  color = :duration, fails right nowUnfoldMakie#353
     layout = (; legend_position = :left),
     colorbar = (; label = "Duration"),
 )

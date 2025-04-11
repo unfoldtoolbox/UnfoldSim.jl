@@ -3,13 +3,20 @@
 # Often when testing some algorithm, we want to compare our results to a known ground truth. In the case of marginalized effects via the `Unfold.effects`/ `Effects.jl` interface, we can do this using an `EffectsDesign`.
 # You can find more on what marginalized effects are here in the [Unfold.jl documentation](https://unfoldtoolbox.github.io/Unfold.jl/dev/generated/HowTo/effects/)
 
-# ## Setup
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
 using UnfoldSim
 using Unfold
 using CairoMakie
 using UnfoldMakie
 using Random
-
+# ```@raw html
+# </details >
+# ```
 # ## Simulation
 # First let's make up a SingleSubject simulation
 
