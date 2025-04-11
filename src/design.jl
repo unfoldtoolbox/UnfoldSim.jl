@@ -178,30 +178,6 @@ end
 #----
 # Design helper functions
 
-"""
-    Base.size([rng],design::AbstractDesign)
-
-Return the dimensions of the experiment design. For some designs (SequenceDesign), rng is required, as the size is only determined by the design, which in turn can be probabilistic.
-"""
-Base.size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
-Base.size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
-
-Base.size(design::RepeatDesign{MultiSubjectDesign}) =
-    size(design.design) .* (design.repeat, 1)
-Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
-
-Base.size(rng::AbstractRNG, design::AbstractDesign) = size(design) # by default we drop the RNG
-
-Base.size(
-    rng::AbstractRNG,
-    design::Union{<:SequenceDesign,<:SubselectDesign,<:RepeatDesign{<:SequenceDesign}},
-) = size(generate_events(rng, design), 1)
-
-
-"Length is the product of all dimensions and equals the number of events in the corresponding events dataframe."
-length(design::AbstractDesign) = *(size(design)...)
-length(rng, design::AbstractDesign) = *(size(rng, design)...)
-
 
 """
     apply_event_order_function(fun, rng, events)
@@ -585,3 +561,28 @@ function UnfoldSim.generate_events(rng, t::EffectsDesign)
     end
     return expand_grid(effects_dict)
 end
+
+
+"""
+    Base.size([rng],design::AbstractDesign)
+
+Return the dimensions of the experiment design. For some designs (SequenceDesign), rng is required, as the size is only determined by the design, which in turn can be probabilistic.
+"""
+Base.size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
+Base.size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
+
+Base.size(design::RepeatDesign{MultiSubjectDesign}) =
+    size(design.design) .* (design.repeat, 1)
+Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
+
+Base.size(rng::AbstractRNG, design::AbstractDesign) = size(design) # by default we drop the RNG
+
+Base.size(
+    rng::AbstractRNG,
+    design::Union{<:SequenceDesign,<:SubselectDesign,<:RepeatDesign{<:SequenceDesign}},
+) = size(generate_events(rng, design), 1)
+
+
+"Length is the product of all dimensions and equals the number of events in the corresponding events dataframe."
+length(design::AbstractDesign) = *(size(design)...)
+length(rng, design::AbstractDesign) = *(size(rng, design)...)
