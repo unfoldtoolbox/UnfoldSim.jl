@@ -10,6 +10,7 @@
 ## Load required packages
 using UnfoldSim
 using Unfold
+using UnfoldMixedModels
 using CairoMakie
 using UnfoldMakie
 using DataFrames
