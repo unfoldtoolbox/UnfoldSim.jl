@@ -1,12 +1,13 @@
-# # Get ground truth via EffectsDesign
+# # Simulate ground truth marginalized Effects
 
-# Usually, to test a method, you want to compare your results to a known ground truth. In UnfoldSim you can obtain your ground truth via the `EffectsDesign`.
-# Doing it this way let's you marginalize any effects/ variables of your original design. You can find more on what marginalized effects are here in the [Unfold.jl documentation](https://unfoldtoolbox.github.io/Unfold.jl/dev/generated/HowTo/effects/)
+# Often when testing some algorithm, we want to compare our results to a known ground truth. In the case of marginalized effects via the `Unfold.effects`/ `Effects.jl` interface, we can do this using an `EffectsDesign`.
+# You can find more on what marginalized effects are here in the [Unfold.jl documentation](https://unfoldtoolbox.github.io/Unfold.jl/dev/generated/HowTo/effects/)
 
 # ## Setup
 using UnfoldSim
 using Unfold
 using CairoMakie
+using UnfoldMakie
 using Random
 
 # ## Simulation
@@ -46,7 +47,7 @@ data, evts = simulate(
     PinkNoise(),
 );
 
-# ## GroundTruthDesign
+# ## Simulate marginalized effects directly
 # To marginalize effects we first have to specify an effects dictionary and subsequently hand this dict plus the original design to `EffectsDesign()`
 
 effects_dict = Dict(:condition => ["bike", "face"])
@@ -56,13 +57,13 @@ effects_design = EffectsDesign(design, effects_dict)
 # !!! note
 #     We only specified the condition levels here, by default every unspecified variable will be set to a "typical" (i.e. the mean) value.
 
-# And finally we can simulate our ground truth ERP with marginalized effects
+# And finally we can simulate our ground truth marginal effects
 
 gt_data, gt_events = simulate(
     MersenneTwister(1),
     effects_design,
     components,
-    UniformOnset(; width = 0, offset = 1000),
+    NoOnset(),
     NoNoise(),
     return_epoched = true,
 );
@@ -93,8 +94,11 @@ m = fit(
 
 ef = effects(effects_dict, m);
 
-# Display ground truth and effects, note that the ground truth will be shorter because of the missing baseline.
-# If you want to actually compare results with the ground truth, you could either us `UnfoldSim.pad_array()` or forgo the baseline of your estimates.
+# !!! note
+#      The ground truth is shorter because the ground truth typically returns values between `[0 maxlength(components)]`, whereas in our unfold-model we included a baseline period of 0.1s.
+#      If you want to actually compare results with the ground truth, you could either us `UnfoldSim.pad_array()` or set the Unfold modelling window to `τ=[0,1]`
+
+plot_erp(ef)
 lines(ef.yhat)
-lines!(gt_effects.yhat)
+lines!(UnfoldSim.pad_array(gt_effects.yhat, (Int(-0.1 * 100), 65), 0))
 current_figure()
