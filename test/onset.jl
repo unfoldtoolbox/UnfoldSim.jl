@@ -103,4 +103,21 @@
 
 
     end
+
+    @testset "ShiftOnset" begin
+        o = UniformOnset(width = 50, offset = 10)
+        events = generate_events(design)
+        without = UnfoldSim.simulate_interonset_distances(StableRNG(1), o, design)
+        with = UnfoldSim.simulate_interonset_distances(
+            StableRNG(1),
+            ShiftOnsetByOne(o),
+            design,
+        )
+        # ShiftOnsetByOne adds the first onset to the interonset-distances, thereby not startin
+        @test with[1] == 0
+
+        @test without[1:end-1] == with[2:end]
+
+
+    end
 end
