@@ -212,7 +212,7 @@
         # SingleSubject tests
         @test size(ef_events_1, 1) == 2 # Test correct length of events df
         @test unique(ef_events_1[!, :continuous])[1] ≈ mean(range(0, 5, length = 10)) # Test that average is calculated correctly and only one value is present in df
-        @test size(ef_events_2, 1) == 6 # Test correct length of events df when continuous variable is marginalizes
+        @test size(ef_events_2, 1) == 6 # Test correct length of events df when one inputs values for continuous variable
 
         # MultiSubjectDesign -> not implemented yet, so should error
         design = MultiSubjectDesign(
