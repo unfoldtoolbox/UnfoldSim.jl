@@ -125,12 +125,18 @@ function simulate_interonset_distances end
 
 function simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     return Int.(
-        round.(rand(deepcopy(rng), onset.offset:(onset.offset+onset.width), size(design)))
+        round.(
+            rand(
+                deepcopy(rng),
+                onset.offset:(onset.offset+onset.width),
+                size(deepcopy(rng), design),
+            )
+        )
     )
 end
 
 function simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
-    s = size(design)
+    s = size(deepcopy(rng), design)
     fun = LogNormal(onset.μ, onset.σ)
     if !isnothing(onset.truncate_upper)
         fun = truncated(fun; upper = onset.truncate_upper)
