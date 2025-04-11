@@ -22,7 +22,7 @@ design =
             :condition => ["bike", "face"],
             :continuous => range(0, 5, length = 10),
         ),
-    ) |> x -> RepeatDesign(x, 100);
+    ) |> x -> RepeatDesign(x, 5);
 
 # **n170** has a condition effect, faces are more negative than bikes
 n1 = LinearModelComponent(;
@@ -98,7 +98,12 @@ ef = effects(effects_dict, m);
 #      The ground truth is shorter because the ground truth typically returns values between `[0 maxlength(components)]`, whereas in our unfold-model we included a baseline period of 0.1s.
 #      If you want to actually compare results with the ground truth, you could either us `UnfoldSim.pad_array()` or set the Unfold modelling window to `τ=[0,1]`
 
-plot_erp(ef)
-lines(ef.yhat)
-lines!(UnfoldSim.pad_array(gt_effects.yhat, (Int(-0.1 * 100), 65), 0))
-current_figure()
+gt_effects.type .= "UnfoldSim effects"
+ef.type .= "Unfold effects"
+
+gt_effects.time = gt_effects.time ./ 100 .- 1 / 100
+ef.continuous .= 2.5 # needed to be able to easily merge the two dataframes
+comb = vcat(gt_effects, ef)
+plot_erp(comb; mapping = (; color = :type, col = :condition))
+
+# The simulated ground truth marginal effects, and the fitted marginal effects look similar as expected, but the fitted has some additional noise because of finite data (also as expected).
