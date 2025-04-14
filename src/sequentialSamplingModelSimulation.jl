@@ -5,16 +5,19 @@ A advanced drift diffusion Model which can be used to simulate evidence accumula
 
 All fields can be named. Is used with [`DriftComponent`](@ref).
 
-# Fields T::Real
+# Fields T::Union{Real,String}
 - `drift_rate::T`: defines the amount of evidence accumulated per time step. (roughly the steepness of the trace)
-- `event_onset::T`: constant event onset delay in seconds. (mimics sensory evidence)
-- `sensor_encoding_delay::T`: uniform variability in the delay of the event onset in seconds, added ontop of `event_onset`. (mimics sensory encoding delay)
-- `accumulative_level_noise::T`: \sigma of the normal-distributed noise added to the accumulation process.
+- `sensor_encoding_delay::T`: constant event onset delay in seconds. (mimics sensory evidence)
+- `sensor_encoding_delay_variability::T`: Normal variability in the delay of the event onset in seconds, added ontop of `event_onset`. (mimics sensory encoding delay)
+- `event_onset_distribution::Normal`: Normal distribution for sensor encoding delay
+- `accumulative_level_noise::T`: sigma of the normal-distributed noise added to the accumulation process.
 - `boundary::T`: the threshold of evidence needed to make a decision.
-- `motor_onset::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
-- `motor_delay::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
+- `motor_delay::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
+- `motor_delay_variability::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
+- `motor_onset_distribution::Normal`: Normal distribution for motor delay
 - `post_accumulation_duration::T`: fixed time the accumulation process resumes after boundary reached in seconds. (mimics evidence overshoot)
-- `post_accumulation_duration_variability::T`: variability in time the accumulation process resumes after boundary reached in seconds. (mimics diff of participants)
+- `post_accumulation_duration_variability::T`: variability in time the accumulation process resumes after boundary reached in seconds.
+- `post_accumulation_distribution::Normal`: Normal distribution for post accumulation duration
 - `ramp_down_duration::T`: duration (in s) of the post accumulation ramp down process.
 
 # Examples
@@ -25,35 +28,20 @@ KellyModel{Float64}(6.0, 0.2, 0.4, 0.5, 1.0, 0.1, 0.4, 0.1, 0.2, 0.1)
 
 See also [`LinearModelComponent`](@ref), [`MultichannelComponent`](@ref).
 """
-mutable struct KellyModel
-    drift_rate::Union{Real,String} # drift rate
-    event_onset::Union{Real,String} # onset(sensory evidence)
-    sensor_encoding_delay::Union{Real,String} # var(sensory encoding delay)
-    accumulative_level_noise::Union{Real,String} # accum level noise
-    boundary::Union{Real,String} # boundaryary height
-    motor_onset::Union{Real,String} # onset(motor)
-    motor_delay::Union{Real,String} # var(motor)
-    post_accumulation_duration::Union{Real,String} # mean(post decision)
-    post_accumulation_duration_variability::Union{Real,String} # var(post decision)
-    ramp_down_duration::Union{Real,String} # CPPrampdown duration
-
-    # Constructor with default values
-    function KellyModel(;
-        drift_rate = 6.0,
-        event_onset = 0.2,
-        sensor_encoding_delay = 0.1,
-        accumulative_level_noise = 0.5,
-        boundary = 1.0,
-        motor_onset = 0.4,
-        motor_delay = 0.1,
-        post_accumulation_duration = 0.1,
-        post_accumulation_duration_variability = 0.2,
-        ramp_down_duration = 0.1,
-    )
-        return new(drift_rate, event_onset, sensor_encoding_delay, accumulative_level_noise, boundary, motor_onset,
-            motor_delay, post_accumulation_duration, post_accumulation_duration_variability,
-            ramp_down_duration)
-    end
+Base.@kwdef mutable struct KellyModel <: SequentialSamplingModels.SSM2D
+    drift_rate::Union{Real,String} = 6.0                    # drift rate
+    sensor_encoding_delay::Union{Real,String} = 0.2                   # onset (sensory evidence)
+    sensor_encoding_delay_variability::Union{Real,String} = 0.1         # sensory encoding delay
+    event_onset_distribution::Normal = Normal(sensor_encoding_delay, sensor_encoding_delay_variability) # Normal distribution for sensor encoding delay
+    accumulative_level_noise::Union{Real,String} = 0.5      # accumulation level noise
+    boundary::Union{Real,String} = 1.0                      # boundary height
+    motor_delay::Union{Real,String} = 0.4                   # motor onset
+    motor_delay_variability::Union{Real,String} = 0.1                   # motor delay
+    motor_onset_distribution::Normal = Normal(motor_delay, motor_delay_variability) # Normal distribution for motor delay
+    post_accumulation_duration::Union{Real,String} = 0.1    # mean post-decision duration
+    post_accumulation_duration_variability::Union{Real,String} = 0.001  # variability post-decision
+    post_accumulation_distribution::Normal = Normal(post_accumulation_duration, post_accumulation_duration_variability) # Normal distribution for post accumulation duration
+    ramp_down_duration::Union{Real,String} = 0.1            # CPPrampdown duration
 end
 
 """
@@ -107,15 +95,14 @@ julia> KellyModel_simulate_cpp(StableRNG(1), KellyModel(), 0:1/500:1.0, 1/500)
 """
 function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
     evidence = zeros(length(time_vec));
-    evidence[time_vec .>= (model.event_onset+(rand(rng) -.5)*model.sensor_encoding_delay)] .= 1; 
+    evidence[time_vec .>= rand(rng,model.event_onset_distribution)] .= 1; 
     startAccT = time_vec[findfirst(evidence .== 1)];
 
     noise = vcat(zeros(
         sum(time_vec .< startAccT)),
         randn(rng,sum(time_vec .>=  startAccT)) .*  model.accumulative_level_noise .*sqrt(Δt));
-    ev=evidence;
-    ev[time_vec .< startAccT] .= 0; # set to zero all of the evidence before accT
-    cum_evidence = cumsum(ev .* model.drift_rate .* Δt .+ noise,dims=1); # This is the cumulative differential evidence, just as in a 1d DDM. 
+
+    cum_evidence = cumsum(evidence .* model.drift_rate .* Δt .+ noise); # This is the cumulative differential evidence, just as in a 1d DDM. 
     
     
     # terminate the decision process on boundary crossing, record threshold-crossing samplepoint:
@@ -125,10 +112,10 @@ function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
         dti = length(time_vec)  # Set to the last time step
     end
     # now record RT in sec after adding motor time, with variability
-    rt = time_vec[dti] + model.motor_onset + (rand(rng) - 0.5) * model.motor_delay
+    rt = time_vec[dti] + rand(rng,model.motor_onset_distribution)
 
     # now make the CPP peak and go down linearly after a certain amount of post-dec accum time for this trial:
-    post_acc_duration = model.post_accumulation_duration .+ model.post_accumulation_duration_variability .* rand(rng);
+    post_acc_duration = rand(rng,model.post_accumulation_distribution)
     # so post_acc_duration is the post accumulation duration time, where the accumulation spikes over the threshold
 
     # acc_stop_index is the accumulation Stop index which is the index from the time Vector where the accumulation really stops
@@ -145,7 +132,7 @@ end
 
 
 """
-    trace_sequential_sampling_model(rng, component::DriftComponent, design::AbstractDesign)
+    simulate_drift_component(rng, component::DriftComponent, design::AbstractDesign)
 
 Generate response times and evidence Vectors of an given [`AbstractDesign`](@ref) with a [`DriftComponent`](@ref) which contains the model used for the simulation.
 
@@ -173,7 +160,7 @@ Vector{Float64}, 501x6 Matrix{Float64}:
 ([96.65745162948949, 273.7368235451535, 271.86040880709123, 128.41057786118193, 342.35208862144276, 237.14773586760617], [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0])
 ```
 """
-function trace_sequential_sampling_model(rng, component::DriftComponent, design::AbstractDesign)
+function simulate_drift_component(rng, component::DriftComponent, design::AbstractDesign)
     events = generate_events(deepcopy(rng), design)
     traces = Matrix{Float64}(undef, component.max_length, size(events, 1))
     rts = Vector{Float64}(undef, size(events, 1))
@@ -189,6 +176,48 @@ function trace_sequential_sampling_model(rng, component::DriftComponent, design:
 end
 
 """
+    SSM_Simulate(rng, model::SequentialSamplingModels.SSM2D, sfreq, max_length)
+
+Generate response time and evidence Vector of component.max_length by using a SequentialSamplingModels.SSM2D as DDM or LBA for the simulation.
+
+# Arguments
+- `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
+- `model::SequentialSamplingModels.SSM2D`: SequentialSamplingModel to simulate the evidence and response time.
+- `sfreq::Real`: sample frequency used to simulate the signal.
+- `max_length::Int`: maximum length of the simulated signal.
+
+# Returns
+- `Float64`: Simulated response time for the trial.
+- `Vector{Float64}`: evidence values over time. The output dimension is `component.max_length`.
+
+# Examples
+```julia-repl
+julia> model = DDM()
+julia> SSM_Simulate(StableRNG(1), model, 500, 500)
+Float64, Vector{Float64}:
+(96.65745162948949, [0.0 0.0 … 0.0 0.0])
+```
+"""
+function SSM_Simulate(rng, model::SequentialSamplingModels.SSM2D, sfreq, max_length)
+    Δt = 1 / sfreq
+    time_steps, evidence = SequentialSamplingModels.simulate(rng, model; Δt)
+    if !(evidence isa Vector{Float64})
+        evidence = hcat(evidence...)
+        evidence = collect(vec(evidence))
+    end
+    # Store results for this trial
+    rt = (time_steps[end] + model.τ) / Δt
+    if length(evidence) < max_length
+        final_value = 0
+        append!(evidence, fill(final_value, max_length - length(evidence)))
+    else
+        rt = max_length + (model.τ / Δt)
+        evidence = evidence[1:max_length]
+    end
+    return rt, evidence
+end
+
+"""
     SSM_Simulate(rng, model::KellyModel, sfreq, max_length)
 
 Generate response time and evidence Vector of max_length by using the Kelly Model for the simulation.
@@ -196,8 +225,8 @@ Generate response time and evidence Vector of max_length by using the Kelly Mode
 # Arguments
 - `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
 - `model::KellyModel`: SequentialSamplingModel to simulate the evidence and response time.
-- `sfreq::Real`: sample frequency used to simulate the signal.
-- `max_length::Int`: maximum length of the simulated signal.
+- `sfreq::Real`: sample frequency used to simulate the trace.
+- `max_length::Int`: maximum length of the simulated trace.
 
 # Returns
 - `Float64`: Simulated response time for the trial.
@@ -221,87 +250,5 @@ function SSM_Simulate(rng, model::KellyModel, sfreq, max_length)
         append!(evidence, fill(final_value, max_length - length(evidence)))
     end
     evidence = evidence[1:max_length]
-    return rt, evidence
-end
-
-"""
-    SSM_Simulate(rng, model::LBA, sfreq, max_length)
-
-Generate response time and evidence Vector of c.max_length by using the LBA for the simulation.
-
-# Arguments
-- `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
-- `model::LBA`: SequentialSamplingModel to simulate the evidence and response time.
-- `sfreq::Real`: sample frequency used to simulate the signal.
-- `max_length::Int`: maximum length of the simulated signal.
-
-# Returns
-- `Float64`: Simulated response time for the trial.
-- `Vector{Float64}`: evidence values over time. The output dimension is `c.max_length`.
-
-# Examples
-```julia-repl
-julia> model = LBA()
-
-julia> SSM_Simulate(StableRNG(1), model, 500, 500)
-Float64, Vector{Float64}:
-(96.65745162948949, [0.0 0.0 … 0.0 0.0])
-```
-"""
-function SSM_Simulate(rng, model::LBA, sfreq, max_length)
-    Δt = 1 / sfreq
-    time_steps, evidence = SequentialSamplingModels.simulate(rng, model; Δt)
-    evidence = hcat(evidence...)
-    evidence = collect(vec(evidence))
-    # Store results for this trial
-    rt = (time_steps[end] + model.τ) / Δt
-    if length(evidence) < max_length
-        final_value = 0
-        append!(evidence, fill(final_value, max_length - length(evidence)))
-    else
-        rt = max_length + (model.τ / Δt)
-        evidence = evidence[1:max_length]
-    end
-    return rt, evidence
-end
-
-"""
-    SSM_Simulate(rng, model::DDM, sfreq, max_length)
-
-Generate response time and evidence Vector of c.max_length by using the DDM for the simulation.
-
-# Arguments
-- `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
-- `model::DDM`: SequentialSamplingModel to simulate the evidence and response time.
-- `sfreq::Real`: sample frequency used to simulate the signal.
-- `max_length::Int`: maximum length of the simulated signal.
-
-# Returns
-- `Float64`: Simulated response time for the trial.
-- `Vector{Float64}`: evidence values over time. The output dimension is `c.max_length`.
-
-# Examples
-```julia-repl
-julia> model = DDM()
-
-julia> SSM_Simulate(StableRNG(1), model, 500, 500)
-Float64, Vector{Float64}:
-(96.65745162948949, [0.0 0.0 … 0.0 0.0])
-```
-"""
-function SSM_Simulate(rng, model::DDM, sfreq, max_length)
-    Δt = 1 / sfreq
-    time_steps, evidence = SequentialSamplingModels.simulate(rng, model; Δt)
-    evidence = evidence .- model.α * model.z
-
-    # Store results for this trial
-    rt = (time_steps[end] + model.τ) / Δt
-    if length(evidence) < max_length
-        final_value = 0
-        append!(evidence, fill(final_value, max_length - length(evidence)))
-    else
-        rt = max_length + (model.τ / Δt)
-        evidence = evidence[1:max_length]
-    end
     return rt, evidence
 end

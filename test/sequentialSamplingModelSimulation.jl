@@ -33,7 +33,7 @@
         @test result_trace == result_sim_trace
     end
 
-    @testset "trace_sequential_sampling_model" begin
+    @testset "simulate_drift_component" begin
         boundary = 1.0
         model_parameter = Dict(:boundary => boundary);
         c = UnfoldSim.DriftComponent(
@@ -47,7 +47,7 @@
         )
         design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
 
-        result_rts, result_traces = UnfoldSim.trace_sequential_sampling_model(rng, c, design_seq)
+        result_rts, result_traces = UnfoldSim.simulate_drift_component(rng, c, design_seq)
         @test size(result_rts) == (6,)
         @test size(result_traces) == (501, 6)
         @test any(result_traces .>= 1.0)

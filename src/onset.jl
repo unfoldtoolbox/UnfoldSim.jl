@@ -227,7 +227,7 @@ sequence_onset = SequenceOnset(
 struct SequenceOnset <: AbstractOnset
     onset::Dict
 end
-
+SequenceOnset(args::Pair...) = SequenceOnset(Dict(args...))
 """
     DriftOnset<: AbstractOnset
 A type that defines the onsets for a [`DriftComponent`](@ref).
@@ -239,10 +239,7 @@ Works best with [`DriftComponent`](@ref).
 
 # Examples
 ```julia-repl
-sequence_onset = SequenceOnset(
-    Dict('S'=>UniformOnset(width=0,offset=85*fs/100),
-         'C'=>(DriftOnset(), UniformOnset(width=0, offset=150)),
-         'R'=>UniformOnset(width=0,offset=120*fs/100)))
+drift_onset = DriftOnset()
 ```
 """
 struct DriftOnset{T} <: AbstractOnset
@@ -299,14 +296,8 @@ Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceD
 # Returns
 - `Vector{Float64}`: the generated onsets for the drift components in the SequenceDesign.
 """
-function UnfoldSim.simulate_interonset_distances(rng, onset::Tuple{DriftOnset, UniformOnset}, design::AbstractDesign, components::AbstractComponent)
-    rts = calculate_response_times_for_ssm(deepcopy(rng), components, design)
-    jitter = Int.(
-        round.(rand(deepcopy(rng), onset[2].offset:(onset[2].offset+onset[2].width), size(design)))
-    )
-    rts = Int.(round.(rts))
-    rts = rts .+ jitter
-    return rts
+function UnfoldSim.simulate_interonset_distances(rng, onset::Tuple, design::AbstractDesign, components::AbstractComponent)
+    return reduce(.+, simulate_interonset_distances.(deepcopy(rng), onset, Ref(design), Ref(components)))
 end
 
 """

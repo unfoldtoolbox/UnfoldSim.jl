@@ -518,14 +518,14 @@ end
 
 """
     DriftComponent <: AbstractComponent
-A component that adds an evidence accumulation signal, following a specified sequential sampling model.
+A component that adds an evidence accumulation trace, following a specified sequential sampling model.
 
 Works best with [`SequenceDesign`](@ref).
 
 # Fields
-- `max_length::Int`: maximum length of the simulated signal.
-- `sfreq::Real`: sample frequency used to simulate the signal.
-- `model_type`: Model struct which defines the model to use to generate the signal, e.g. `KellyModel`
+- `max_length::Int`: maximum length of the simulated trace.
+- `sfreq::Real`: sample frequency used to simulate the trace, used to evaluate the parameters in the model_type.
+- `model_type`: Model struct which defines the model to use to generate the trace, e.g. `KellyModel`
 - `model_parameters`: Dict. Containing the parameters for the sequential sampling simulation model specified in `model_type`.
 
 # Examples
@@ -576,7 +576,7 @@ julia> simulate_component(StableRNG(1),c,design_seq)
 ```
 """
 function UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
-    _, traces = trace_sequential_sampling_model(deepcopy(rng), c, design)
+    _, traces = simulate_drift_component(deepcopy(rng), c, design)
     return traces
 end
 """
@@ -611,7 +611,7 @@ julia> calculate_response_times_for_ssm(StableRNG(1),c,design_seq)
 ```
 """
 function calculate_response_times_for_ssm(rng, component::DriftComponent, design::UnfoldSim.SubselectDesign)
-    rts, _ = trace_sequential_sampling_model(deepcopy(rng), component, design)
+    rts, _ = simulate_drift_component(deepcopy(rng), component, design)
     return rts
 end
 Base.length(c::DriftComponent) = c.max_length
