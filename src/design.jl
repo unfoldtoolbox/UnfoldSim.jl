@@ -514,7 +514,7 @@ struct EffectsDesign <: AbstractDesign
     effects_dict::Dict
 end
 EffectsDesign(design::MultiSubjectDesign, effects_dict::Dict) = error("not yet implemented")
-UnfoldSim.size(rng, t::EffectsDesign) = size(generate_events(rng, t), 1)
+UnfoldSim.size(rng::AbstractRNG, t::EffectsDesign) = size(generate_events(rng, t), 1)
 
 """
     expand_grid(design)
