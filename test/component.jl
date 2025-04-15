@@ -103,6 +103,61 @@
         d, e = simulate(design, smin10000, UniformOnset(50, 0))
         @test length(d) > 10_000
         @test e.latency[1] > 10_000
+        @test d[e.latency[1]-10_000] == 1
 
+        smax10000 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = +10_000,
+        )
+        d, e = simulate(design, smax10000, UniformOnset(50, 0))
+        @test length(d) > 10_000
+        @test e.latency[1] < 100
+        @test d[e.latency[1]+10_000] == 1
+
+
+        # if we go back -10_000 and front +10_000, we should get a signal measuring 20_000
+        d, e = simulate(design, [smax10000, smin10000], UniformOnset(50, 0))
+        @test length(d) > 20_000
+        @test length(d) < 25_000 # earlier tests had the signal at 30_000, a bti too long
+        @test d[e.latency[1]+10_000] == 1
+        @test d[e.latency[1]-10_000] == 1
+
+
+
+        smax10 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = +1000,
+        )
+        smax20 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = +2000,
+        )
+
+        d, e = simulate(design, [smax10, smax20], UniformOnset(50, 0))
+        @test d[e.latency[1]+1000] == 1
+        @test d[e.latency[1]+2000] == 1
+
+        smin10 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = -1000,
+        )
+        smin20 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = -2000,
+        )
+
+        d, e = simulate(design, [smin10, smin20], UniformOnset(50, 0))
+        @test d[e.latency[1]-1000] == 1
+        @test d[e.latency[1]-2000] == 1
     end
 end
