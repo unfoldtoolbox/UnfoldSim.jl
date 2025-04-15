@@ -10,10 +10,11 @@
 ## Load required packages
 using UnfoldSim
 using Unfold
-using UnfoldMixedModels
+import UnfoldMixedModels
 using CairoMakie
 using UnfoldMakie
 using DataFrames
+using StableRNGs
 # ```@raw html
 # </details >
 # <br />
@@ -64,7 +65,8 @@ signal = MixedModelComponent(;
 )
 
 # and simulate!
-data, evts = simulate(design, signal, NoOnset(), NoNoise(), return_epoched = true);
+data, evts =
+    simulate(StableRNG(1), design, signal, NoOnset(), NoNoise(), return_epoched = true);
 
 # We get data with 50 samples (our `basis` from above), with `4` items and 20 subjects. We get items and subjects separately because we chose no-overlap (via `NoOnset`) and `return_epoched = true``.
 size(data)
@@ -95,7 +97,8 @@ f
 # Let's continue our tutorial and simulate overlapping signals instead.
 #
 # We replace the `NoOnset` with an `UniformOnset` with 20 to 70 samples between subsequent events.  We further remove the `return_epoched`, because we want to have continuous data for now.
-data, evts = simulate(design, signal, UniformOnset(offset = 20, width = 50), NoNoise());
+data, evts =
+    simulate(StableRNG(1), design, signal, UniformOnset(offset = 20, width = 50), NoNoise());
 size(data)
 
 # with the first dimension being continuous data, and the latter still the subjects.
@@ -109,6 +112,7 @@ series(data', solid_color = :black)
 # # Analyzing these data with Unfold.jl
 # We will analyze these data using the `Unfold.jl` toolbox. While preliminary support for deconvolution (overlap correction) for mixed models is available, here we will not make use of it, but rather apply a MixedModel to each timepoint, following the Mass-univariate approach.
 data, evts = simulate(
+    StableRNG(1),
     design,
     signal,
     UniformOnset(offset = 20, width = 50),
