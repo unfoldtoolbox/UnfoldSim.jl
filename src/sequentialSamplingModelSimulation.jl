@@ -178,7 +178,7 @@ end
 """
     SSM_Simulate(rng, model::SequentialSamplingModels.SSM2D, sfreq, max_length)
 
-Generate response time and evidence Vector of component.max_length by using a SequentialSamplingModels.SSM2D as DDM or LBA for the simulation.
+Generate response time and evidence Vector of component.max_length by using a SequentialSamplingModels.SSM2D model (tested with DDM and LBA) for simulation.
 
 # Arguments
 - `rng::StableRNG`: Random seed to ensure the same traces are created for reconstruction.
