@@ -4,8 +4,9 @@
 A advanced drift diffusion Model which can be used to simulate evidence accumulation.
 
 All fields can be named. Is used with [`DriftComponent`](@ref).
-
-# Fields T::Union{Real,String}
+The fields can be specified as a string, as this allows a reference to be made for selecting values from the design as parameters for the model used in the simulation.
+For example, different drift_rate values can be used depending on the design specification, which enables a kind of subject difference in the hole process.
+# Fields T::Union{Real,String} 
 - `drift_rate::T`: defines the amount of evidence accumulated per time step. (roughly the steepness of the trace)
 - `sensor_encoding_delay::T`: constant event onset delay in seconds. (mimics sensory evidence)
 - `sensor_encoding_delay_variability::T`: Normal variability in the delay of the event onset in seconds, added ontop of `event_onset`. (mimics sensory encoding delay)

@@ -297,7 +297,7 @@ Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceD
 - `Vector{Float64}`: the generated onsets for the drift components in the SequenceDesign.
 """
 function UnfoldSim.simulate_interonset_distances(rng, onset::Tuple, design::AbstractDesign, components::AbstractComponent)
-    return reduce(.+, simulate_interonset_distances.(deepcopy(rng), onset, Ref(design), Ref(components)))
+    return Int.(round.(reduce(.+, simulate_interonset_distances.(deepcopy(rng), onset, Ref(design), Ref(components)))))
 end
 
 """
