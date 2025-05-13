@@ -74,6 +74,12 @@ struct Simulation{T}
         onset::AbstractOnset,
         noisetype::AbstractNoise,
     ) = new{T}(design, [component], onset, noisetype)
+    Simulation(
+        design::AbstractDesign,
+        component::Vector{AbstractComponent},
+        onset::AbstractOnset,
+        noisetype::AbstractNoise,
+    ) = new{T}(design, component, onset, noisetype)
 end
 Simulation(args...) = Simulation{Float64}(args...) # by default we want Float64 :)
 
