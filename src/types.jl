@@ -63,9 +63,27 @@ julia> data
  -0.11672523788068771
 ```
 """
-struct Simulation
+struct Simulation{T}
     design::AbstractDesign
     components::Vector{AbstractComponent}
     onset::AbstractOnset
     noisetype::AbstractNoise
+    Simulation(
+        design::AbstractDesign,
+        component::AbstractComponent,
+        onset::AbstractOnset,
+        noisetype::AbstractNoise,
+    ) = new{T}(design, [component], onset, noisetype)
 end
+Simulation(args...) = Simulation{Float64}(args...) # by default we want Float64 :)
+
+# helper to move input ::Component to ::Vector{Component}
+Simulation(
+    design::AbstractDesign,
+    component::AbstractComponent,
+    onset::AbstractOnset,
+    noisetype::AbstractNoise,
+) = Simulation(design, [component], onset, noisetype)
+
+
+
