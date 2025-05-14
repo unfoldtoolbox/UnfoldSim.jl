@@ -480,13 +480,17 @@ julia> simulate_responses(StableRNG(1), [c1, c2], simulation)
 function simulate_responses(
     rng,
     components::Vector{<:AbstractComponent},
-    simulation::Simulation,
-)
+    simulation::Simulation{SimDataType},
+) where {SimDataType}
     if n_channels(components) > 1
-        epoch_data =
-            zeros(n_channels(components), maxlength(components), length(simulation.design))
+        epoch_data = zeros(
+            SimDataType,
+            n_channels(components),
+            maxlength(components),
+            length(simulation.design),
+        )
     else
-        epoch_data = zeros(maxlength(components), length(simulation.design))
+        epoch_data = zeros(SimDataType, maxlength(components), length(simulation.design))
     end
 
     for c in components

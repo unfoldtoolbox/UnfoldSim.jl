@@ -11,12 +11,14 @@ abstract type AbstractComponent end
 abstract type AbstractHeadmodel end
 
 """
-    Simulation
+    Simulation{T<:Numeric}
 
 A type to store all "ingredients" for a simulation including their parameters.
 
 Can either be created by the user or will be created automatically when calling the [`simulate`](@ref) function with the required "ingredients".
 Tip: Use the `subtypes` function to get an overview of the implemented "ingredients", e.g. `subtypes(AbstractDesign)`.
+
+The parametric type `T` (default `Float64`), defines the element type of the data in the `simulate` function. `AbstractComponent` needs to produce a compatible data-type, e.g. `Simulation{Int}` and `AbstractComponent` returning `Float64` would not work, but e.g. `Complex` and `Float64` would work.
 
 # Fields
 - `design::AbstractDesign`: Experimental design.
@@ -63,9 +65,21 @@ julia> data
  -0.11672523788068771
 ```
 """
-struct Simulation
+struct Simulation{T}
     design::AbstractDesign
     components::Vector{AbstractComponent}
     onset::AbstractOnset
     noisetype::AbstractNoise
+
 end
+Simulation(args...) = Simulation{Float64}(args...) # by default we want Float64 :)
+
+# put the AbstractComponent in [ ]  if it didnt exist.
+Simulation{T}(
+    design::AbstractDesign,
+    component::AbstractComponent,
+    onset::AbstractOnset,
+    noisetype::AbstractNoise,
+) where {T} = Simulation{T}(design, [component], onset, noisetype)
+
+
