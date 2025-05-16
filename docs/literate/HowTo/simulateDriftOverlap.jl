@@ -46,9 +46,10 @@ design_rep = RepeatDesign(design_seq, 500)
 # As parameter for the models drift_rate we use the drift_rate specified in the design by directly naming the condition as string.
 v = "drift_rate" # Drift Rate from the design
 # Now we retrieve the models default parameters, but we change the drift_rate and
-kelly_model = KellyModel(drift_rate = v, motor_onset = 0.4, event_onset = 0.2)
+kelly_model =
+    UnfoldSim.KellyModel(drift_rate = v, motor_delay = 0.4, sensor_encoding_delay = 0.2)
 kelly_model_parameter = UnfoldSim.create_kelly_parameters_dict(kelly_model)
-drift = DriftComponent(max_length, fs, KellyModel, kelly_model_parameter)
+drift = DriftComponent(max_length, fs, UnfoldSim.KellyModel, kelly_model_parameter)
 components = Dict('S' => [p3], 'C' => [drift], 'R' => [resp])
 # ## Create the Onset Component to simulate the overlap
 # To simulate an overlap between the drift_component in 'C' and the response component in 'R'. We have to specify the UniformOnset of the 'C' Component therefore with an negative offset to produce the overlap.
