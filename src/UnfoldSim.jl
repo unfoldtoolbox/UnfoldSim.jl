@@ -15,7 +15,6 @@ using ToeplitzMatrices # for AR Expo. Noise "Circulant"
 using StatsModels
 using HDF5, Artifacts, FileIO
 using Automa # for sequence
-
 using LinearAlgebra # headmodel
 
 using SequentialSamplingModels # for SequentialSamplingModels
@@ -51,7 +50,7 @@ export Simulation
 export MixedModelComponent, LinearModelComponent
 
 # export designs
-export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign, SequenceDesign
+export MultiSubjectDesign, SingleSubjectDesign, RepeatDesign, SequenceDesign, EffectsDesign
 
 # noise functions
 export PinkNoise, RedNoise, WhiteNoise, NoNoise, ExponentialNoise #,RealNoise (not implemented yet)
@@ -66,7 +65,7 @@ export simulate,
     generate_events
 
 # utilities
-export pad_array, convert
+export pad_array
 
 # export Offsets
 export UniformOnset, LogNormalOnset, NoOnset, UniformOnsetFormula, LogNormalOnsetFormula

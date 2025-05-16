@@ -1,6 +1,6 @@
 # # Overview: Onset types
 # The onset types determine the distances between event onsets in the continuous EEG signal. The distances are sampled from a certain probability distribution.
-# Currently, there are two types of onset distributions implemented: `UniformOnset` and `LogNormalOnset`.
+# Currently, there are two types of onset distributions implemented: `UniformOnset` and `LogNormalOnset`. Both are accompanied by their `UniformOnsetFormula` and `LogNormalOnsetFormula` conterparts, which allows to modify the overlap based on the design.
 
 # ### Setup
 # ```@raw html
@@ -298,9 +298,9 @@ onsets = UnfoldSim.simulate_interonset_distances(MersenneTwister(42), o, design)
 
 f = Figure()
 ax = f[1, 1] = Axis(f)
-hist!(ax, onsets[events.cond.=="A"], bins = range(0, 100, step = 1), label = "cond: A")
-hist!(ax, onsets[events.cond.=="B"], bins = range(0, 100, step = 1), label = "cond: B")
+hist!(ax, onsets[events.cond .== "A"], bins = range(0, 100, step = 1), label = "cond: A")
+hist!(ax, onsets[events.cond .== "B"], bins = range(0, 100, step = 1), label = "cond: B")
 axislegend(ax)
 f
 
-# Voila - the inter-onset intervals are `20` samples longer for condition `B`, exactly as specified.`
+# Voila - the inter-onset intervals are `20` samples longer for condition `B`, exactly as specified.
