@@ -68,7 +68,6 @@ end
 
 # ## Simulate data with the new component type
 erp = UnfoldSim.simulate_component(
-
     MersenneTwister(1),
     TimeVaryingComponent(basis_shiftduration, 50),
     design,

@@ -1,4 +1,4 @@
-hart = UnfoldSim.headmodel()
+hart = UnfoldSim.Hartmut()
 @testset "hartmut" begin
     @test length(hart.electrodes["label"]) == 231 - 4
     @test length(hart.cortical["label"]) == 2004

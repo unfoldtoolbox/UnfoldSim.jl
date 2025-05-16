@@ -21,7 +21,7 @@ using Random
 # ## Specifying a design
 
 # We are using a one-level design for testing here.
-design = SingleSubjectDesign(conditions = Dict(:condA => ["levelA"]))
+design = SingleSubjectDesign(conditions = Dict(:condA => ["levelA"]));
 
 # Next we generate two simple components at two different times without any formula attached (we have a single condition anyway)
 c = LinearModelComponent(; basis = p100(), formula = @formula(0 ~ 1), β = [1]);
@@ -33,7 +33,7 @@ c2 = LinearModelComponent(; basis = p300(), formula = @formula(0 ~ 1), β = [1])
 mc = UnfoldSim.MultichannelComponent(c, [1, 2, -1, 3, 5, 2.3, 1])
 
 # or maybe more convenient: use the pair-syntax: Headmodel=>Label which makes use of a headmodel (HaRTmuT is currently easily available in UnfoldSim)
-hart = headmodel(type = "hartmut")
+hart = Hartmut()
 mc = UnfoldSim.MultichannelComponent(c, hart => "Left Postcentral Gyrus")
 mc2 = UnfoldSim.MultichannelComponent(c2, hart => "Right Occipital Pole")
 
@@ -58,7 +58,7 @@ size(data)
 # ## Plotting
 # Let's plot using Butterfly & Topoplot
 # first we convert the electrodes to positions usable in TopoPlots.jl
-pos3d = hart.electrodes["pos"];
+pos3d = hart.electrodes["pos"]
 pos2d = to_positions(pos3d')
 pos2d = [Point2f(p[1] + 0.5, p[2] + 0.5) for p in pos2d];
 

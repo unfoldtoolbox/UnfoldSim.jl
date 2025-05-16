@@ -38,7 +38,7 @@ using Base: AbstractCartesianIndex
         )
 
         # Define headmodel and MultichannelComponent for multi-channel cases
-        hartmut_model = headmodel(type = "hartmut")
+        hartmut_model = Hartmut()
         signal_linear_multichannel = MultichannelComponent(
             signal_linear,
             hartmut_model => "Left Central Opercular Cortex",

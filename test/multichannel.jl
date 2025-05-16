@@ -2,7 +2,7 @@ using UnfoldSim
 using StableRNGs
 using Test
 #---
-hart = UnfoldSim.headmodel()
+hart = UnfoldSim.Hartmut()
 mg = magnitude(hart)
 
 
