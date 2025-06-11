@@ -105,8 +105,12 @@
     end
 
     @testset "ShiftOnset" begin
+        design =
+            SingleSubjectDesign(conditions = Dict(:cond => ["A", "B"])) |>
+            x -> RepeatDesign(x, 100)
+
         o = UniformOnset(width = 50, offset = 10)
-        events = generate_events(design)
+
         without = UnfoldSim.simulate_interonset_distances(StableRNG(1), o, design)
         with = UnfoldSim.simulate_interonset_distances(
             StableRNG(1),
