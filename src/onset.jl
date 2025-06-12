@@ -21,7 +21,7 @@ UniformOnset
   offset: Int64 5
 ```
 
-See also [`LogNormalOnset`](@ref), [`NoOnset`](@ref).
+See also [`LogNormalOnset`](@ref UnfoldSim.LogNormalOnset), [`NoOnset`](@ref).
 """
 @with_kw struct UniformOnset <: AbstractOnset
     width = 50 # how many samples jitter?
@@ -51,7 +51,7 @@ LogNormalOnset
   truncate_upper: Int64 25
 ```
 
-See also [`UniformOnset`](@ref), [`NoOnset`](@ref).
+See also [`UniformOnset`](@ref UnfoldSim.UniformOnset), [`NoOnset`](@ref).
 """
 @with_kw struct LogNormalOnset <: AbstractOnset
     μ::Any  # mean
@@ -71,7 +71,7 @@ julia> onset_distribution = NoOnset()
 NoOnset()
 ```
 
-See also [`UniformOnset`](@ref), [`LogNormalOnset`](@ref).
+See also [`UniformOnset`](@ref UnfoldSim.UniformOnset), [`LogNormalOnset`](@ref UnfoldSim.LogNormalOnset).
 """
 struct NoOnset <: AbstractOnset end
 
@@ -234,10 +234,10 @@ This is helpful if your overlap/event-distribution should be dependent on some c
 # Fields
 
 - `offset_formula = @formula(0~1)`: Choose a formula depending on your `design`.
-- `offset_β = [0] `(optional): Choose a `Vector` of betas. The number of betas needs to fit the formula chosen.
-- `offset_contrasts = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
+- `offset_β::Vector = [0] `(optional): Choose a `Vector` of betas. The number of betas needs to fit the formula chosen.
+- `offset_contrasts::Dict = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
 - `width_formula = `@formula(0~1)`: Choose a formula depending on your `Design`.
-- `width_β = [0] (optional)`: Choose a `Vector` of betas, number needs to fit the formula chosen. 
+- `width_β::Vector = [0] (optional)`: Choose a `Vector` of betas, number needs to fit the formula chosen. 
 - `width_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
 
 # Combined with [ShiftOnsetByOne](@ref)
@@ -253,7 +253,7 @@ julia> o = UnfoldSim.UniformOnsetFormula(
 )
 ```
 
-See also [`UniformOnset`](@ref) for a simplified version without linear regression specifications.
+See also [`UniformOnset`](@ref UnfoldSim.UniformOnset) for a simplified version without linear regression specifications.
 """
 @with_kw struct UniformOnsetFormula <: AbstractOnset
     width_formula = @formula(0 ~ 1)
@@ -284,21 +284,21 @@ end
 
     LogNormalOnsetFormula <: AbstractOnset
 
-provide a LogNormal Distribution of the inter-event-distances, but with regression formulas.
-This is helpful if your overlap/event-distribution should be dependent on some condition, e.g. more overlap in cond='A' than cond='B'.
+Provide a Log-normal Distribution of the inter-event distances, but with regression formulas.
+This is helpful if your overlap/event-distribution should be dependent on some condition, e.g. more overlap in cond = 'A' than cond = 'B'.
 
 # Fields
 
--`μ_formula= `@formula(0~1)`: choose a formula depending on your `design`
--`μ_β`: Choose a `Vector` of betas, number needs to fit the formula chosen. No reasonable default is available.
--`μ_contrasts` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
--`σ_formula = `@formula(0~1)`: choose a formula depending on your `Design`,
--`σ_β`: Choose a `Vector` of betas, number needs to fit the formula chosen. No reasonable default is available here 
--`σ_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications
+- `μ_formula = @formula(0~1)` (optional): Choose a formula depending on your `design`
+- `μ_β::Vector`: Choose a `Vector` of betas, number needs to fit the formula chosen.
+- `μ_contrasts::Dict = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
+- `σ_formula = @formula(0~1)` (optional): Choose a formula depending on your `Design`.
+- `σ_β::Vector`: Choose a `Vector` of betas, number needs to fit the formula chosen.
+- `σ_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
 
-# Combined with ShiftOnsetByOne
+# Combined with [ShiftOnsetByOne](@ref)
 
-Sometimes one wants to bias not the inter-onset-distance prior to the current event, but after the current event.
+Sometimes one wants to bias not the inter-onset distance prior to the current event, but after the current event.
 This is possible by using `ShiftOnsetByOne(LogNormalOnset(...))`, effectively shifting the inter-onset-distance vector by one. See `?ShiftOnsetByOne` for a visualization.
 
 
@@ -311,9 +311,7 @@ julia> o = LogNormalOnsetFormula(
 )
 ```
 
-See also [`LogNormalOnset`](@ref) for a simplified version without linear regression specifications.
-
-    
+See also [`LogNormalOnset`](@ref UnfoldSim.LogNormalOnset) for a simplified version without linear regression specifications.    
 """
 @with_kw struct LogNormalOnsetFormula <: AbstractOnset
     μ_formula = @formula(0 ~ 1)
@@ -357,14 +355,14 @@ end
 
 This container AbstractOnset shifts the ShiftOnsetByOne.onset::AbstractOnset inter-onset-distance vector by one, adding a `0` to the front and removing the last `inter-onset distance`.
 
-This is helpful in combination with `LogNormalOnsetFormula` or `UniformOnsetFormula`, to generate biased distances not of the previous, but of the next event.
+This is helpful in combination with [`LogNormalOnsetFormula`](@ref) or [`UniformOnsetFormula`](@ref), to generate biased distances not of the previous, but of the next event.
 
 Visualized:
 
-|__1__| A |__2__| B |__3__| C
+|\\_\\_1\\_\\_| A |\\_\\_2\\_\\_| B |\\_\\_3\\_\\_| C \n
 Right now, the inter-onset distances are assigned in the order 1,2,3 inbetween the events A,B,C. After ShiftOnsetByOne we would have
 
-|__0__| A |__1__| B |__2__| C
+|\\_\\_0\\_\\_| A |\\_\\_1\\_\\_| B |\\_\\_2\\_\\_| C
 
 with 0 being a new distance of `0`, and the 3 removed (it would describe the distance after C, because there is nothing coming, the signal is not further prolonged).
 
