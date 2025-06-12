@@ -53,7 +53,7 @@ All fields can be named. Works best with [`SingleSubjectDesign`](@ref).
 - `formula::Any`: StatsModels `formula` object, e.g.  `@formula 0 ~ 1 + cond` (left-hand side must be 0).
 - `β::Vector` Vector of betas/coefficients, must fit the formula.
 - `contrasts::Dict` (optional): Determines which coding scheme to use for which categorical variables. Default is empty which corresponds to dummy coding.
-- `offset::Int`: Default is 0. Can be used to shift the basis function in time.
+- `offset::Int = 0`: Can be used to shift the basis function in time.
 
      For more information see <https://juliastats.org/StatsModels.jl/stable/contrasts>.
 
