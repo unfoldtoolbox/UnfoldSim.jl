@@ -34,7 +34,7 @@ include("headmodel.jl")
 include("helper.jl")
 include("sequence.jl")
 include("bases.jl")
-include("sequentialSamplingModelSimulation.jl")
+include("sequentialSamplingModels.jl")
 
 export size, length
 export AbstractComponent, AbstractNoise, AbstractOnset, AbstractDesign

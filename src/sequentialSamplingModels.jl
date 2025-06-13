@@ -9,17 +9,22 @@ For example, different drift_rate values can be used depending on the design spe
 # Fields T::Union{Real,String} 
 - `drift_rate::T`: defines the amount of evidence accumulated per time step. (roughly the steepness of the trace)
 - `sensor_encoding_delay::T`: constant event onset delay in seconds. (mimics sensory evidence)
-- `sensor_encoding_delay_variability::T`: Normal variability in the delay of the event onset in seconds, added ontop of `event_onset`. (mimics sensory encoding delay)
-- `event_onset_distribution::Normal`: Normal distribution for sensor encoding delay
+- `sensor_encoding_delay_variability::T`: variability (σ) in the delay of the event onset in seconds, added ontop of `event_onset`. (mimics sensory encoding delay)
+- `event_onset_distribution::Distribution{Univariate, Continuous}`: By default: Normal distribution using `sensor_encoding_delay` and `sensor_encoding_delay_variability` as μ and σ for sensor encoding delay. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
 - `accumulative_level_noise::T`: sigma of the normal-distributed noise added to the accumulation process.
-- `boundary::T`: the threshold of evidence needed to make a decision.
+- `boundary::T`: the threshold of evidence needed to make a decision. See also `urgency` for collapsing bounds
 - `motor_delay::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
 - `motor_delay_variability::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
-- `motor_onset_distribution::Normal`: Normal distribution for motor delay
+- `motor_onset_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `motor_delay` and `motor_delay_variability` as μ and σ to add a motor delay. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
+- `urgency::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
+- `urgency_variability::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
+- `urgency_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `urgency` and `urgency_variability` as μ and σ for an urgency signal, truncated to be positive at 0 (see `post_accumulation_distribution`). Effectively one value is sampled per trial and used as a slope value times the time-vector. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
 - `post_accumulation_duration::T`: fixed time the accumulation process resumes after boundary reached in seconds. (mimics evidence overshoot)
 - `post_accumulation_duration_variability::T`: variability in time the accumulation process resumes after boundary reached in seconds.
-- `post_accumulation_distribution::Normal`: Normal distribution for post accumulation duration
+- `post_accumulation_distribution::Distribution{Univariate, Continuous}`: By default: Normal distribution, trunacted to be positive at 0, using `post_accumulation_duration` and `post_accumulation_duration_variability` as μ (untruncated, effectively the mean is therefore higher and a function of both μ and σ, use e.g. `mean(truncated(Normal(100,10),lower=0))` to calculate the mean) and σ to sample a time per trial for how long the post-decision accumulation should take time. Effectively one value is sampled per trial and used as a slope value times the time-vector. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
 - `ramp_down_duration::T`: duration (in s) of the post accumulation ramp down process.
+
+Notes: If a `..._distribution` is specified, then the other parameters for that distribution are no longer used.
 
 # Examples
 ```julia-repl
@@ -31,17 +36,26 @@ See also [`LinearModelComponent`](@ref), [`MultichannelComponent`](@ref).
 """
 Base.@kwdef mutable struct KellyModel <: SequentialSamplingModels.SSM2D
     drift_rate::Union{Real,String} = 6.0                    # drift rate
-    sensor_encoding_delay::Union{Real,String} = 0.2                   # onset (sensory evidence)
+    sensor_encoding_delay::Union{Real,String} = 0.2                   # mean onset (sensory evidence)
     sensor_encoding_delay_variability::Union{Real,String} = 0.1         # sensory encoding delay
-    event_onset_distribution::Normal = Normal(sensor_encoding_delay, sensor_encoding_delay_variability) # Normal distribution for sensor encoding delay
+    event_onset_distribution::Distribution{Univariate,Continuous} =
+        Normal(sensor_encoding_delay, sensor_encoding_delay_variability) # Normal distribution for sensor encoding delay
     accumulative_level_noise::Union{Real,String} = 0.5      # accumulation level noise
     boundary::Union{Real,String} = 1.0                      # boundary height
-    motor_delay::Union{Real,String} = 0.4                   # motor onset
+    motor_delay::Union{Real,String} = 0.4                   # mean motor onset
     motor_delay_variability::Union{Real,String} = 0.1                   # motor delay
-    motor_onset_distribution::Normal = Normal(motor_delay, motor_delay_variability) # Normal distribution for motor delay
+    motor_onset_distribution::Distribution{Univariate,Continuous} =
+        Normal(motor_delay, motor_delay_variability) # Normal distribution for motor delay
+    urgency::Union{Real,String} = 1.0                   # mean slope of urgency signal
+    urgency_variability::Union{Real,String} = 0.17                   # σ of urgency rate between trials
+    urgency_distribution::Distribution{Univariate,Continuous} =
+        truncated(Normal(urgency, urgency_variability), lower = 0) # Normal distribution for motor delay
     post_accumulation_duration::Union{Real,String} = 0.1    # mean post-decision duration
     post_accumulation_duration_variability::Union{Real,String} = 0.001  # variability post-decision
-    post_accumulation_distribution::Normal = Normal(post_accumulation_duration, post_accumulation_duration_variability) # Normal distribution for post accumulation duration
+    post_accumulation_distribution::Distribution{Univariate,Continuous} = truncated(
+        Normal(post_accumulation_duration, post_accumulation_duration_variability),
+        lower = 0,
+    ) # Normal distribution for post accumulation duration
     ramp_down_duration::Union{Real,String} = 0.1            # CPPrampdown duration
 end
 
@@ -95,38 +109,48 @@ julia> KellyModel_simulate_cpp(StableRNG(1), KellyModel(), 0:1/500:1.0, 1/500)
 ```
 """
 function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
-    evidence = zeros(length(time_vec));
-    evidence[time_vec .>= rand(rng,model.event_onset_distribution)] .= 1; 
-    startAccT = time_vec[findfirst(evidence .== 1)];
+    evidence = zeros(length(time_vec))
+    evidence[time_vec.>=rand(rng, model.event_onset_distribution)] .= 1
+    startAccT = time_vec[findfirst(evidence .== 1)]
 
-    noise = vcat(zeros(
-        sum(time_vec .< startAccT)),
-        randn(rng,sum(time_vec .>=  startAccT)) .*  model.accumulative_level_noise .*sqrt(Δt));
+    noise = vcat(
+        zeros(sum(time_vec .< startAccT)),
+        randn(rng, sum(time_vec .>= startAccT)) .* model.accumulative_level_noise .*
+        sqrt(Δt),
+    )
 
-    cum_evidence = cumsum(evidence .* model.drift_rate .* Δt .+ noise); # This is the cumulative differential evidence, just as in a 1d DDM. 
-    
-    
+    cum_evidence = cumsum(evidence .* model.drift_rate .* Δt .+ noise) # This is the cumulative differential evidence, just as in a 1d DDM. 
+
+
     # terminate the decision process on boundary crossing, record threshold-crossing samplepoint:
-    cum_evidence = abs.(cum_evidence);
-    dti = findfirst(cum_evidence .> model.boundary); # finding the sample point of threshold crossing of each, then will pick the earlier as the winner
+    clamp!(cum_evidence, 0, Inf)
+
+
+    urgency_slope = rand(rng, model.urgency_distribution)
+    urgency_slope > 0 ? "" :
+    @warn "urgency slope random sample was $urgency_slope, that is, smaller than 0, this is theoretically not possible. Maybe you forgot a `truncate(...,lower=0)`?"
+    dti = findfirst(cum_evidence .> model.boundary .- urgency_slope .* time_vec) # finding the sample point of threshold crossing of each, then will pick the earlier as the winner
     if isnothing(dti)  # Check if no crossing was found
         dti = length(time_vec)  # Set to the last time step
     end
     # now record RT in sec after adding motor time, with variability
-    rt = time_vec[dti] + rand(rng,model.motor_onset_distribution)
+    rt = time_vec[dti] + rand(rng, model.motor_onset_distribution)
 
     # now make the CPP peak and go down linearly after a certain amount of post-dec accum time for this trial:
-    post_acc_duration = rand(rng,model.post_accumulation_distribution)
+    post_acc_duration = rand(rng, model.post_accumulation_distribution)
     # so post_acc_duration is the post accumulation duration time, where the accumulation spikes over the threshold
 
     # acc_stop_index is the accumulation Stop index which is the index from the time Vector where the accumulation really stops
-    acc_stop_index = dti + (post_acc_duration÷Δt)|>Int;
+    acc_stop_index = dti + (post_acc_duration ÷ Δt) |> Int
     # Take the absolute value of the accumulations
     cum_evidence = abs.(cum_evidence)
     if acc_stop_index < length(time_vec)
         nT = length(time_vec)
-        tmp = cum_evidence[acc_stop_index] .- (1:(nT-acc_stop_index)) .*cum_evidence[acc_stop_index] .* (Δt ./ model.ramp_down_duration)
-        cum_evidence[(acc_stop_index+1):end] .= max.(Ref(0), tmp);
+        tmp =
+            cum_evidence[acc_stop_index] .-
+            (1:(nT-acc_stop_index)) .* cum_evidence[acc_stop_index] .*
+            (Δt ./ model.ramp_down_duration)
+        cum_evidence[(acc_stop_index+1):end] .= max.(Ref(0), tmp)
     end
     return rt / Δt, cum_evidence[1:end]
 end
@@ -167,7 +191,8 @@ function simulate_drift_component(rng, component::DriftComponent, design::Abstra
     rts = Vector{Float64}(undef, size(events, 1))
     for (i, evt) in enumerate(eachrow(events))
         parameters = get_model_parameter(rng, evt, component.model_parameters)
-        model = component.model_type(; (key => parameters[key] for key in keys(parameters))...)
+        model =
+            component.model_type(; (key => parameters[key] for key in keys(parameters))...)
         rt, evidence = SSM_Simulate(rng, model, component.sfreq, component.max_length)
 
         rts[i] = rt
@@ -243,7 +268,7 @@ Float64, Vector{Float64}:
 ```
 """
 function SSM_Simulate(rng, model::KellyModel, sfreq, max_length)
-    Δt = 1/sfreq
+    Δt = 1 / sfreq
     time_vec = 0:Δt:max_length*Δt
     rt, evidence = KellyModel_simulate_cpp(rng, model, time_vec, Δt)
     if length(evidence) < max_length

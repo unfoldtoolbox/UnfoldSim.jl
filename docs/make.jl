@@ -40,6 +40,7 @@ makedocs(;
             "Simulate event-related potentials (ERPs)" => "generated/tutorials/simulateERP.md",
             "Power analysis" => "generated/tutorials/poweranalysis.md",
             "Multi-subject simulation" => "generated/tutorials/multisubject.md",
+            "S-C-R & Evidence accumulation models" => "./generated/tutorials/simulateDriftOverlap.md",
         ],
         "Reference" => [
             "Overview of functionality" => "./generated/reference/overview.md",
@@ -57,6 +58,7 @@ makedocs(;
             "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
             "Simulated marginal effects" => "./generated/HowTo/getGroundTruth.md",
             "Sequence of events (e.g. SCR)" => "./generated/HowTo/sequence.md",
+            #"Simulate LBA evidence accumulation models" => "./generated/HowTo/driftComponent.md",
         ],
         "Developer documentation" => "developer_docs.md",
         "API / Docstrings" => "api.md",
