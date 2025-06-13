@@ -5,8 +5,6 @@ on:
       - main
     tags: '*'
   pull_request:
-    branches:
-      - main
 concurrency:
   # Skip intermediate builds: always.
   # Cancel intermediate builds: only if it is a pull request build.
@@ -59,3 +57,10 @@ jobs:
             using UnfoldSim
             DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive=true)
             doctest(UnfoldSim)'
+      - name: Update UnfoldDocs
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+            token: ${{ secrets.UNFOLDDOCSPAT }}
+            repository: unfoldtoolbox/UnfoldDocs
+            event-type: individual-docs-updated
