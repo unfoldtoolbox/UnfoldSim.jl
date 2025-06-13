@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>S-C-R &amp; Evidence accumulation models · UnfoldSim.jl</title><meta name="title" content="S-C-R &amp; Evidence accumulation models · UnfoldSim.jl"/><meta property="og:title" content="S-C-R &amp; Evidence accumulation models · UnfoldSim.jl"/><meta property="twitter:title" content="S-C-R &amp; Evidence accumulation models · UnfoldSim.jl"/><meta name="description" content="Documentation for UnfoldSim.jl."/><meta property="og:description" content="Documentation for UnfoldSim.jl."/><meta property="twitter:description" content="Documentation for UnfoldSim.jl."/><meta property="og:url" content="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/simulateDriftOverlap/"/><meta property="twitter:url" content="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/simulateDriftOverlap/"/><link rel="canonical" href="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/simulateDriftOverlap/"/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../../"><img src="../../../assets/logo.png" alt="UnfoldSim.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><a class="tocitem" href="../../../installation/">Installing Julia &amp; UnfoldSim.jl</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../quickstart/">Quickstart</a></li><li><a class="tocitem" href="../simulateERP/">Simulate event-related potentials (ERPs)</a></li><li><a class="tocitem" href="../poweranalysis/">Power analysis</a></li><li><a class="tocitem" href="../multisubject/">Multi-subject simulation</a></li><li class="is-active"><a class="tocitem" href>S-C-R &amp; Evidence accumulation models</a><ul class="internal"><li><a class="tocitem" href="#Design"><span>Design</span></a></li><li class="toplevel"><a class="tocitem" href="#Simplified-S-C-R-drift-model-with-LBA"><span>Simplified S-C-R drift-model with LBA</span></a></li><li><a class="tocitem" href="#LBA"><span>LBA</span></a></li><li><a class="tocitem" href="#Simulate-data-with-the-created-design,-components-and-onsets"><span>Simulate data with the created design, components and onsets</span></a></li><li><a class="tocitem" href="#Plot-EEG-to-see-the-overlap-as-it-appears"><span>Plot EEG to see the overlap as it appears</span></a></li><li class="toplevel"><a class="tocitem" href="#Complex-S-C-R-drift-model-ala-Kelly-et-al."><span>Complex  S-C-R drift-model ala <code>Kelly et al.</code></span></a></li><li><a class="tocitem" href="#Plot-EEG-to-see-the-overlap-as-it-appears-2"><span>Plot EEG to see the overlap as it appears</span></a></li><li class="toplevel"><a class="tocitem" href="#ERP-and-Deconvolution"><span>ERP &amp; Deconvolution</span></a></li><li><a class="tocitem" href="#Deconvolution-of-the-overlap"><span>Deconvolution of the overlap</span></a></li></ul></li></ul></li><li><span class="tocitem">Reference</span><ul><li><a class="tocitem" href="../../reference/overview/">Overview of functionality</a></li><li><a class="tocitem" href="../../reference/designtypes/">Overview: Experimental design types</a></li><li><a class="tocitem" href="../../reference/basistypes/">Overview: Basis function (component) types</a></li><li><a class="tocitem" href="../../reference/onsettypes/">Overview: Onset types</a></li><li><a class="tocitem" href="../../reference/noisetypes/">Overview: Noise types</a></li></ul></li><li><span class="tocitem">HowTo</span><ul><li><a class="tocitem" href="../../HowTo/newDesign/">Define a new (imbalanced) design</a></li><li><a class="tocitem" href="../../HowTo/componentfunction/">Component basisfunction (duration-dependent)</a></li><li><a class="tocitem" href="../../HowTo/repeatTrials/">Get multiple trials with identical subject/item combinations</a></li><li><a class="tocitem" href="../../HowTo/newComponent/">Define a new component (with variable duration and shift)</a></li><li><a class="tocitem" href="../../HowTo/multichannel/">Generate multi channel data</a></li><li><a class="tocitem" href="../../HowTo/predefinedData/">Use existing experimental designs &amp; onsets in the simulation</a></li><li><a class="tocitem" href="../../HowTo/getGroundTruth/">Simulated marginal effects</a></li><li><a class="tocitem" href="../../HowTo/sequence/">Sequence of events (e.g. SCR)</a></li></ul></li><li><a class="tocitem" href="../../../developer_docs/">Developer documentation</a></li><li><a class="tocitem" href="../../../api/">API / Docstrings</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>S-C-R &amp; Evidence accumulation models</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>S-C-R &amp; Evidence accumulation models</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/unfoldtoolbox/UnfoldSim.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/main/docs/literate/tutorials/simulateDriftOverlap.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Simulate-an-Evidence-Accumulation-Overlap-and-Deconvolution"><a class="docs-heading-anchor" href="#Simulate-an-Evidence-Accumulation-Overlap-and-Deconvolution">Simulate an Evidence Accumulation Overlap and Deconvolution</a><a id="Simulate-an-Evidence-Accumulation-Overlap-and-Deconvolution-1"></a><a class="docs-heading-anchor-permalink" href="#Simulate-an-Evidence-Accumulation-Overlap-and-Deconvolution" title="Permalink"></a></h1><p>We want to use the SequenceDesign with three components to simulate an full evidence accumulation process with a Overlap between the evidence accumulation and the response signal. Afterwards we use the Deconvolution Method from Unfold to unfold the signals again.</p><h3 id="Setup"><a class="docs-heading-anchor" href="#Setup">Setup</a><a id="Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Setup" title="Permalink"></a></h3><details>
+<summary>Click to expand</summary><pre><code class="language-julia hljs">using UnfoldSim
+using Unfold
+using StableRNGs
+using CairoMakie, UnfoldMakie
+using SequentialSamplingModels
+
+fs = 500
+Δt = 1 / fs; # time step
+tEnd = 1.0 # trial Duration
+time_vec = 0:Δt:tEnd; # time base - let&#39;s make it a typical stimulus duration
+max_length = tEnd / Δt
+
+c_stimulus = LinearModelComponent(;
+    basis = ones(Int(0.1 * fs)),
+    formula = @formula(0 ~ 1 + condition),
+    β = [1, 0],
+)
+c_response = LinearModelComponent(;
+    basis = ones(Int(0.2 * fs)),
+    formula = @formula(0 ~ 1 + condition),
+    β = [-0.5, 0],
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">LinearModelComponent
+  basis: Array{Float64}((100,)) [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0  …  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+  formula: StatsModels.FormulaTerm{StatsModels.ConstantTerm{Int64}, Tuple{StatsModels.ConstantTerm{Int64}, StatsModels.Term}}
+  β: Array{Float64}((2,)) [-0.5, 0.0]
+  contrasts: Dict{Any, Any}
+  offset: Int64 0
+</code></pre></details ><h2 id="Design"><a class="docs-heading-anchor" href="#Design">Design</a><a id="Design-1"></a><a class="docs-heading-anchor-permalink" href="#Design" title="Permalink"></a></h2><p>Let&#39;s generate a single design with two drift_rates</p><pre><code class="language-julia hljs">design_single =
+    SingleSubjectDesign(conditions = Dict(:drift_rate =&gt; [2, 3], :condition =&gt; [1]))
+design_seq = SequenceDesign(design_single, &quot;SCR_&quot;)
+design_rep = RepeatDesign(design_seq, 100) # 100 SCR-repeats</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">RepeatDesign{SequenceDesign{SingleSubjectDesign}}
+  design: SequenceDesign{SingleSubjectDesign}
+  repeat: Int64 100
+</code></pre><h1 id="Simplified-S-C-R-drift-model-with-LBA"><a class="docs-heading-anchor" href="#Simplified-S-C-R-drift-model-with-LBA">Simplified S-C-R drift-model with LBA</a><a id="Simplified-S-C-R-drift-model-with-LBA-1"></a><a class="docs-heading-anchor-permalink" href="#Simplified-S-C-R-drift-model-with-LBA" title="Permalink"></a></h1><h2 id="LBA"><a class="docs-heading-anchor" href="#LBA">LBA</a><a id="LBA-1"></a><a class="docs-heading-anchor-permalink" href="#LBA" title="Permalink"></a></h2><p>The following parameters are described in the <a href="https://itsdfish.github.io/SequentialSamplingModels.jl/dev/lba/">SequentialSamplingModels.LBA model documentation</a></p><pre><code class="language-julia hljs">v = [0.8] ## Drift Rate, needs to be in [ ] for compatability with `SequentialSamplingModels.jl``
+A = 0.2 ## The starting point is sampled uniformly between `[0, A]`
+k = 0.4 ## Difference of A with the bound/threshold ($A + k = b$), where b is the decision threshold.
+
+lba_parameter = Dict(:ν =&gt; v, :A =&gt; A, :k =&gt; k, :τ =&gt; 0.0) # we didnt specify σ thus it is 1 by default,</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Symbol, Any} with 4 entries:
+  :ν =&gt; [0.8]
+  :A =&gt; 0.2
+  :k =&gt; 0.4
+  :τ =&gt; 0.0</code></pre><div class="admonition is-category-important" id="Important-80b15c40ca7e7e9d"><header class="admonition-header">Important<a class="admonition-anchor" href="#Important-80b15c40ca7e7e9d" title="Permalink"></a></header><div class="admonition-body"></div></div><p>The non-decision time has to be specified here as &quot;τ=&gt;0.&quot; because it is not defined whether non-decision time applies to stimulus encoding or response execution. If you have a non-0 value here, the events following the DriftComponent will be shifted by τ.</p><pre><code class="language-julia hljs">drift = DriftComponent(max_length, fs, LBA, lba_parameter)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">DriftComponent(500, 500, SequentialSamplingModels.LBA, Dict{Symbol, Any}(:ν =&gt; [0.8], :A =&gt; 0.2, :k =&gt; 0.4, :τ =&gt; 0.0))</code></pre><p>Let&#39;s have a quick look at the simulation</p><pre><code class="language-julia hljs">series(
+    hcat(simulate_component.(StableRNG.(1:10), Ref(drift), Ref(design_single))...)&#39;,
+    solid_color = (:black, 0.5),
+)</code></pre><img src="b8d1242a.png" alt="Example block output"/><p>Super! Our start values are sampled between [0, 0.2] as indicated, and the boundary is at A+k = 0.2 + 0.4 = 0.6</p><h3 id="Simulate-EEG-data"><a class="docs-heading-anchor" href="#Simulate-EEG-data">Simulate EEG data</a><a id="Simulate-EEG-data-1"></a><a class="docs-heading-anchor-permalink" href="#Simulate-EEG-data" title="Permalink"></a></h3><pre><code class="language-julia hljs">components = Dict(&#39;S&#39; =&gt; [c_stimulus], &#39;C&#39; =&gt; [drift], &#39;R&#39; =&gt; [c_response])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Char, Vector} with 3 entries:
+  &#39;R&#39; =&gt; LinearModelComponent[LinearModelComponent([1.0, 1.0, 1.0, 1.0, 1.0, 1.…
+  &#39;S&#39; =&gt; LinearModelComponent[LinearModelComponent([1.0, 1.0, 1.0, 1.0, 1.0, 1.…
+  &#39;C&#39; =&gt; DriftComponent[DriftComponent(500, 500, LBA, Dict{Symbol, Any}(:ν=&gt;[0.…</code></pre><p>Next we define a SequenceOnset ingredient, this allows us fine-grained control on when events should happen.</p><pre><code class="language-julia hljs">seq_onset = SequenceOnset(
+    Dict(
+        &#39;S&#39; =&gt; UniformOnset(width = 0, offset = 0.2 * fs), # distance S&lt;-&gt;C - we could choose 0.1*fs to immediately start after the stimulus component
+        &#39;C&#39; =&gt; DriftOnset(), ## automatically determines which is the respective DriftComponent
+        &#39;R&#39; =&gt; UniformOnset(width = 0, offset = 2 * fs), # distance R&lt;-&gt;S
+    ),
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">SequenceOnset(Dict{Char, AbstractOnset}(&#39;R&#39; =&gt; UniformOnset
+  width: Int64 0
+  offset: Int64 1000
+, &#39;S&#39; =&gt; UniformOnset
+  width: Int64 0
+  offset: Float64 100.0
+, &#39;C&#39; =&gt; DriftOnset{UniformOnset}(UniformOnset
+  width: Int64 0
+  offset: Int64 0
+)))</code></pre><h2 id="Simulate-data-with-the-created-design,-components-and-onsets"><a class="docs-heading-anchor" href="#Simulate-data-with-the-created-design,-components-and-onsets">Simulate data with the created design, components and onsets</a><a id="Simulate-data-with-the-created-design,-components-and-onsets-1"></a><a class="docs-heading-anchor-permalink" href="#Simulate-data-with-the-created-design,-components-and-onsets" title="Permalink"></a></h2><pre><code class="language-julia hljs">data, evts = UnfoldSim.simulate(
+    StableRNG(12),
+    design_rep,
+    components,
+    seq_onset,
+    NoNoise(), # PinkNoise(noiselevel=1)
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], <span class="sgr1">600×4 DataFrame</span>
+<span class="sgr1"> Row </span>│<span class="sgr1"> drift_rate  condition  event  latency </span>
+     │<span class="sgr90"> Int64       Int64      Char   Any     </span>
+─────┼───────────────────────────────────────
+   1 │          2          1  S      1001
+   2 │          2          1  C      1101
+   3 │          2          1  R      1300
+   4 │          3          1  S      2300
+   5 │          3          1  C      2400
+   6 │          3          1  R      2512
+   7 │          2          1  S      3512
+   8 │          2          1  C      3612
+  ⋮  │     ⋮           ⋮        ⋮       ⋮
+ 594 │          3          1  R      275842
+ 595 │          2          1  S      276842
+ 596 │          2          1  C      276942
+ 597 │          2          1  R      277442
+ 598 │          3          1  S      278442
+ 599 │          3          1  C      278542
+ 600 │          3          1  R      278706
+<span class="sgr36">                             585 rows omitted</span>)</code></pre><h2 id="Plot-EEG-to-see-the-overlap-as-it-appears"><a class="docs-heading-anchor" href="#Plot-EEG-to-see-the-overlap-as-it-appears">Plot EEG to see the overlap as it appears</a><a id="Plot-EEG-to-see-the-overlap-as-it-appears-1"></a><a class="docs-heading-anchor-permalink" href="#Plot-EEG-to-see-the-overlap-as-it-appears" title="Permalink"></a></h2><pre><code class="language-julia hljs">f_data, _ax, _h = lines(data[1:5000])
+vlines!(evts.latency, color = Int.(evts.event), alpha = 0.3)
+xlims!(700, 3500)
+f_data</code></pre><img src="8c137bd6.png" alt="Example block output"/><h1 id="Complex-S-C-R-drift-model-ala-Kelly-et-al."><a class="docs-heading-anchor" href="#Complex-S-C-R-drift-model-ala-Kelly-et-al.">Complex  S-C-R drift-model ala <code>Kelly et al.</code></a><a id="Complex-S-C-R-drift-model-ala-Kelly-et-al.-1"></a><a class="docs-heading-anchor-permalink" href="#Complex-S-C-R-drift-model-ala-Kelly-et-al." title="Permalink"></a></h1><p>In addition to changing the model to a more realistic version, we will also make use of the <code>drift_rate</code> specification in our <code>design</code>`</p><pre><code class="language-julia hljs">v = &quot;drift_rate&quot; ## take the drift rate directly from the design</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;drift_rate&quot;</code></pre><p>The KellyModel has <em>many</em> default parameters, let&#39;s grab them and immediately change a few</p><pre><code class="language-julia hljs">kelly_model =
+    UnfoldSim.KellyModel(drift_rate = v, motor_delay = 0.4, sensor_encoding_delay = 0.2)
+kelly_model_parameter = UnfoldSim.create_kelly_parameters_dict(kelly_model)
+drift = DriftComponent(max_length, fs, UnfoldSim.KellyModel, kelly_model_parameter)
+components = Dict(&#39;S&#39; =&gt; [c_stimulus], &#39;C&#39; =&gt; [drift], &#39;R&#39; =&gt; [c_response])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Char, Vector} with 3 entries:
+  &#39;R&#39; =&gt; LinearModelComponent[LinearModelComponent([1.0, 1.0, 1.0, 1.0, 1.0, 1.…
+  &#39;S&#39; =&gt; LinearModelComponent[LinearModelComponent([1.0, 1.0, 1.0, 1.0, 1.0, 1.…
+  &#39;C&#39; =&gt; DriftComponent[DriftComponent(500, 500, KellyModel, Dict{Symbol, Any}(…</code></pre><p>We are ready to simulate!</p><pre><code class="language-julia hljs">data, evts = UnfoldSim.simulate(
+    StableRNG(12),
+    design_rep,
+    components,
+    seq_onset,
+    NoNoise(), # PinkNoise(noiselevel=1)
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], <span class="sgr1">600×4 DataFrame</span>
+<span class="sgr1"> Row </span>│<span class="sgr1"> drift_rate  condition  event  latency </span>
+     │<span class="sgr90"> Int64       Int64      Char   Any     </span>
+─────┼───────────────────────────────────────
+   1 │          2          1  S      1001
+   2 │          2          1  C      1101
+   3 │          2          1  R      1529
+   4 │          3          1  S      2529
+   5 │          3          1  C      2629
+   6 │          3          1  R      3079
+   7 │          2          1  S      4079
+   8 │          2          1  C      4179
+  ⋮  │     ⋮           ⋮        ⋮       ⋮
+ 594 │          3          1  R      300601
+ 595 │          2          1  S      301601
+ 596 │          2          1  C      301701
+ 597 │          2          1  R      302059
+ 598 │          3          1  S      303059
+ 599 │          3          1  C      303159
+ 600 │          3          1  R      303539
+<span class="sgr36">                             585 rows omitted</span>)</code></pre><h2 id="Plot-EEG-to-see-the-overlap-as-it-appears-2"><a class="docs-heading-anchor" href="#Plot-EEG-to-see-the-overlap-as-it-appears-2">Plot EEG to see the overlap as it appears</a><a class="docs-heading-anchor-permalink" href="#Plot-EEG-to-see-the-overlap-as-it-appears-2" title="Permalink"></a></h2><pre><code class="language-julia hljs">f_data, _ax, _h = lines(data[1:5000])
+vlines!(evts.latency, color = Int.(evts.event), alpha = 0.3)
+xlims!(700, 3500)
+f_data</code></pre><img src="858540e7.png" alt="Example block output"/><div class="admonition is-info" id="Note-d580e91f1d7518fc"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-d580e91f1d7518fc" title="Permalink"></a></header><div class="admonition-body"></div></div><p>There are varying gaps between the stimulus offset &lt;-&gt; driftstart and driftend &lt;-&gt; response start. This is because the <code>KellyModel</code> by default has a <code>sensor_encoding_delay</code> and a  <code>motor_delay</code> (including a <code>motor_delay_variability</code> etc.)</p><h1 id="ERP-and-Deconvolution"><a class="docs-heading-anchor" href="#ERP-and-Deconvolution">ERP &amp; Deconvolution</a><a id="ERP-and-Deconvolution-1"></a><a class="docs-heading-anchor-permalink" href="#ERP-and-Deconvolution" title="Permalink"></a></h1><p>Let&#39;s calculate traditional ERPs and deconvolved ones!</p><pre><code class="language-julia hljs">evts.event = string.(evts.event) # due to a Unfold-bug we have to convert :S
+data_epochs, times_epoch =
+    Unfold.epoch(data = data, tbl = evts, τ = (-1.3, 1.3), sfreq = fs);
+f = @formula(0 ~ 1 + drift_rate)
+m = fit(UnfoldModel, [&quot;S&quot; =&gt; (f, times_epoch), &quot;R&quot; =&gt; (f, times_epoch)], evts, data_epochs);
+plot_erp(
+    effects(Dict(:drift_rate =&gt; [2, 3]), m);
+    mapping = (;
+        color = :drift_rate =&gt; nonnumeric,
+        col = :eventname =&gt; UnfoldMakie.sorter([&quot;S&quot;, &quot;R&quot;]),
+    ),
+)</code></pre><img src="d183991f.png" alt="Example block output"/><h2 id="Deconvolution-of-the-overlap"><a class="docs-heading-anchor" href="#Deconvolution-of-the-overlap">Deconvolution of the overlap</a><a id="Deconvolution-of-the-overlap-1"></a><a class="docs-heading-anchor-permalink" href="#Deconvolution-of-the-overlap" title="Permalink"></a></h2><pre><code class="language-julia hljs">fir_stim = firbasis(τ = (-0.1, 1.3), sfreq = fs)
+fir_resp = firbasis(τ = (-1, 0.3), sfreq = fs)
+
+m = fit(UnfoldModel, [&quot;S&quot; =&gt; (f, fir_stim), &quot;R&quot; =&gt; (f, fir_resp)], evts, data);
+plot_erp(
+    effects(Dict(:drift_rate =&gt; [2, 3]), m);
+    mapping = (;
+        color = :drift_rate =&gt; nonnumeric,
+        col = :eventname =&gt; UnfoldMakie.sorter([&quot;S&quot;, &quot;R&quot;]),
+    ),
+)</code></pre><img src="c5d104b4.png" alt="Example block output"/><p>Deconvolution sucessfully removed the stimulus and response overlaps from our estimates, but it kept the drift-diffusion aspect nearly untouched. It is important to stress the &quot;nearly&quot;, because depending on the <code>delay</code> parameters, this can potentially lead to problematic situation where it is unclear whether the drift activity should be assigned to S or R. In most realistic situations we found to be safe. Further note that the drift-diffusion amplitude can be reduced because it is split up between <code>S</code> and <code>R</code> events.`</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../multisubject/">« Multi-subject simulation</a><a class="docs-footer-nextpage" href="../../reference/overview/">Overview of functionality »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.12.0 on <span class="colophon-date" title="Friday 13 June 2025 14:43">Friday 13 June 2025</span>. Using Julia version 1.11.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
