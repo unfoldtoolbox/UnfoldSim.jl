@@ -13,6 +13,9 @@ For example, different drift_rate values can be used depending on the design spe
 - `event_onset_distribution::Distribution{Univariate, Continuous}`: By default: Normal distribution using `sensor_encoding_delay` and `sensor_encoding_delay_variability` as μ and σ for sensor encoding delay. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
 - `accumulative_level_noise::T`: sigma of the normal-distributed noise added to the accumulation process.
 - `boundary::T`: the threshold of evidence needed to make a decision. See also `urgency` for collapsing bounds
+- `start_point::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
+- `start_point_variability::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
+- `start_point_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `start_point` and `start_point_variability` as μ and σ to add noise to the start-point. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here. The default Normal distribution is truncated at the `boundary`
 - `motor_delay::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
 - `motor_delay_variability::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
 - `motor_onset_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `motor_delay` and `motor_delay_variability` as μ and σ to add a motor delay. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
@@ -42,6 +45,10 @@ Base.@kwdef mutable struct KellyModel <: SequentialSamplingModels.SSM2D
         Normal(sensor_encoding_delay, sensor_encoding_delay_variability) # Normal distribution for sensor encoding delay
     accumulative_level_noise::Union{Real,String} = 0.5      # accumulation level noise
     boundary::Union{Real,String} = 1.0                      # boundary height
+    start_point::Union{Real,String} = 0
+    start_point_variability::Union{Real,String} = 0.2
+    start_point_distribution::Distribution{Univariate,Continuous} =
+        truncated(Normal(start_point, start_point_variability), upper = boundary)
     motor_delay::Union{Real,String} = 0.4                   # mean motor onset
     motor_delay_variability::Union{Real,String} = 0.1                   # motor delay
     motor_onset_distribution::Distribution{Univariate,Continuous} =
@@ -225,7 +232,14 @@ Float64, Vector{Float64}:
 ```
 """
 function SSM_Simulate(rng, model::SequentialSamplingModels.SSM2D, sfreq, max_length)
+    if isa(model, LBA) && !(model.τ ≈ 0.0)
+        @warn(
+            "LBA Model with non-0 non-decision. Given we do not know if non-decision time is encoding or response generation, we put everyhing to response generation. We recommend to use τ=0"
+        )
+    end
     Δt = 1 / sfreq
+
+
     time_steps, evidence = SequentialSamplingModels.simulate(rng, model; Δt)
     if !(evidence isa Vector{Float64})
         evidence = hcat(evidence...)

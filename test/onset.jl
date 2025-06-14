@@ -127,12 +127,7 @@
             ),
         )
         model_parameter = Dict(:drift_rate => "drift_rate")
-        c = UnfoldSim.DriftComponent(
-            500,
-            500,
-            KellyModel,
-            model_parameter,
-        )
+        drift = UnfoldSim.DriftComponent(500, 500, KellyModel, model_parameter)
         components = Dict('S' => [p3], 'C' => [drift], 'R' => [resp])
         design_single = UnfoldSim.SingleSubjectDesign(
             conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]),

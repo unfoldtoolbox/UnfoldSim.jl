@@ -83,5 +83,5 @@ export AbstractHeadmodel, Hartmut, headmodel, leadfield, orientation, magnitude
 export MultichannelComponent
 
 # evidence accumulation
-export DriftComponent, DriftOnset, SequenceOnset
+export DriftComponent, DriftOnset, SequenceOnset, KellyModel, LBA, DDM
 end

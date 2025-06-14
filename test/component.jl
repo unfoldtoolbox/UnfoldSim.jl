@@ -54,7 +54,7 @@
         design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
         result_traces = UnfoldSim.simulate_component(StableRNG(1), c, design_seq)
 
-        @test size(result_traces) == (501, 3)
+        @test size(result_traces) == (500, 3)
         @test any(result_traces .== 0)
         @test any(result_traces .>= boundary)
 
@@ -68,7 +68,7 @@
         design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
         result_traces = UnfoldSim.simulate_component(StableRNG(1), c, design_seq)
 
-        @test size(result_traces) == (501, 6)
+        @test size(result_traces) == (500, 6)
         @test any(result_traces .== 0)
         @test any(result_traces .>= boundary)
 
@@ -82,7 +82,7 @@
         sub_design = UnfoldSim.SubselectDesign(design_seq, 'C')
         result_rts = UnfoldSim.calculate_response_times_for_ssm(StableRNG(1), c, sub_design)
         @test size(result_rts) == (2,)
-        @test isapprox(result_rts, [399.6903067274333, 388.89617910657597], atol = 1e-8)
+        @test isapprox(result_rts, [393.3925219909412, 361.18737039119077], atol = 1e-8)
 
         # Test get_model_parameter(rng, evt, d::Dict)
         rng = StableRNG(1)
