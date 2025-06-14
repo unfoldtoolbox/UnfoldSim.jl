@@ -103,4 +103,71 @@
 
 
     end
+
+    @testset "Sequence/Drift Onset" begin
+        rng = StableRNG(1)
+        fs = 500
+        p3 = LinearModelComponent(;
+            basis = UnfoldSim.hanning(Int(0.5 * fs)),
+            formula = @formula(0 ~ 1 + condition),
+            β = [1.0, 0],
+        )
+
+        resp = LinearModelComponent(;
+            basis = UnfoldSim.hanning(Int(0.5 * fs)),
+            formula = @formula(0 ~ 1 + condition),
+            β = [0.5, 0],
+            offset = -10,
+        )
+        sequence_onset = SequenceOnset(
+            Dict(
+                'S' => UniformOnset(width = 0, offset = 80),
+                'C' => DriftOnset(),
+                'R' => UniformOnset(width = 0, offset = 120),
+            ),
+        )
+        model_parameter = Dict(:drift_rate => "drift_rate")
+        drift = UnfoldSim.DriftComponent(500, 500, KellyModel, model_parameter)
+        components = Dict('S' => [p3], 'C' => [drift], 'R' => [resp])
+        design_single = UnfoldSim.SingleSubjectDesign(
+            conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]),
+        )
+        design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
+        design_rep = UnfoldSim.RepeatDesign(design_seq, 10)
+        simulation = UnfoldSim.Simulation(
+            design_rep,
+            components,
+            sequence_onset,
+            UnfoldSim.NoNoise(),
+        )
+
+        result_onsets = simulate_onsets(rng, sequence_onset, simulation)
+
+        size(result_onsets) == (60,)
+        result_onsets[1] == 121
+        result_onsets[2] == 201
+        result_onsets[3] == 906
+
+        # Test DriftOnset combined with UniformOnset
+        sequence_onset = SequenceOnset(
+            Dict(
+                'S' => UniformOnset(width = 0, offset = 80),
+                'C' => (DriftOnset(), UniformOnset(width = 0, offset = 140)),
+                'R' => UniformOnset(width = 0, offset = 120),
+            ),
+        )
+        simulation = UnfoldSim.Simulation(
+            design_rep,
+            components,
+            sequence_onset,
+            UnfoldSim.NoNoise(),
+        )
+
+        result_onsets = simulate_onsets(rng, sequence_onset, simulation)
+        size(result_onsets) == (60,)
+        result_onsets[1] == 121
+        result_onsets[2] == 201
+        result_onsets[3] == 1046
+    end
+
 end

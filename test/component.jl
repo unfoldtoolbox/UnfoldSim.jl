@@ -44,7 +44,62 @@
         @test UnfoldSim.weight_σs(Dict(:subj => [1, 2, [1 0.5; 0.5 1]]), 1.0, 2.0).subj ==
               create_re(1, 2; corrmat = [1 0.5; 0.5 1]) ./ 2
     end
+
+    @testset "DriftComponent" begin
+        # Test UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
+        boundary = 1.0
+        model_parameter = Dict(:boundary => boundary)
+        c = DriftComponent(500, 500, KellyModel, model_parameter)
+        design_single = UnfoldSim.SingleSubjectDesign(conditions = Dict(:condition => [1]))
+        design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
+        result_traces = UnfoldSim.simulate_component(StableRNG(1), c, design_seq)
+
+        @test size(result_traces) == (500, 3)
+        @test any(result_traces .== 0)
+        @test any(result_traces .>= boundary)
+
+        # Test UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
+        boundary = 1.0
+        model_parameter = Dict(:boundary => boundary)
+        c = DriftComponent(500, 500, KellyModel, model_parameter)
+        design_single = UnfoldSim.SingleSubjectDesign(
+            conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]),
+        )
+        design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
+        result_traces = UnfoldSim.simulate_component(StableRNG(1), c, design_seq)
+
+        @test size(result_traces) == (500, 6)
+        @test any(result_traces .== 0)
+        @test any(result_traces .>= boundary)
+
+        # Test calculate_response_times_for_ssm(rng, component::DriftComponent, design::AbstractDesign)
+        model_parameter = Dict()
+        c = DriftComponent(500, 500, KellyModel, model_parameter)
+        design_single = UnfoldSim.SingleSubjectDesign(
+            conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]),
+        )
+        design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
+        sub_design = UnfoldSim.SubselectDesign(design_seq, 'C')
+        result_rts = UnfoldSim.calculate_response_times_for_ssm(StableRNG(1), c, sub_design)
+        @test size(result_rts) == (2,)
+        @test isapprox(result_rts, [393.3925219909412, 361.18737039119077], atol = 1e-8)
+
+        # Test get_model_parameter(rng, evt, d::Dict)
+        rng = StableRNG(1)
+        model_parameter = Dict(:drift_rate => "drift_rate")
+        c = DriftComponent(500, 500, KellyModel, model_parameter)
+        drift_rates = [0.5, 0.8]
+        design_single = UnfoldSim.SingleSubjectDesign(
+            conditions = Dict(:drift_rate => drift_rates, :condition => [1]),
+        )
+        events = UnfoldSim.generate_events(rng, design_single)
+        for (i, evt) in enumerate(eachrow(events))
+            parameters = UnfoldSim.get_model_parameter(rng, evt, c.model_parameters)
+            @test parameters[:drift_rate] == drift_rates[i]
+        end
+    end
     @testset "get_basis" begin
+
 
         rng = StableRNG(1)
         design = UnfoldSim.SingleSubjectDesign(; conditions = Dict(:duration => 10:-1:5))
@@ -103,6 +158,8 @@
         d, e = simulate(design, smin10000, UniformOnset(50, 0))
         @test length(d) > 10_000
         @test e.latency[1] > 10_000
+
+
 
     end
 end
