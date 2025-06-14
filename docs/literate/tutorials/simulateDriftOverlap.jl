@@ -100,43 +100,6 @@ v = "drift_rate" ## take the drift rate directly from the design
 kelly_model =
     UnfoldSim.KellyModel(drift_rate = v, motor_delay = 0.4, sensor_encoding_delay = 0.2)
 
-
-
-% parameters:
-% Urgency:
-Z = 0.3; % starting level at evidence onset 
-U = 1; % slope (buildup rate) of dynamic urgency at the motor level (prop. to bound /sec)
-Sz = 0.4; % start point variability at the motor level applied independently to both sides - full width of uniform distribution
-Su = 0.17 % between-trial var in urgency rate
-
-d = [1 2]; % drift rate 
-s = 0.5; % gaussian noise /sec at accumulator level
-evonT = 0.2; % time at which sensory evidence starts impacting on the sensory accumulator
-%accT = 0.2; %  Accumulation onset time. Let's say same as evidence encoding onset.
-mT = 0.1; %  motor time
-st = 0.1; %  motor time variability
-Terz = 0.1; % variability applied to sensory encoding delays
-
-postAccDurM = 0.1; % mean duration of post decision accumulation
-postAccDurS = 0.2; % range of uniform dist of post-decision accumulation duration
-
-CPPrampdownDur = 0.1; % in Sec; CPP will linearly ramp back down after the accumulation stops
-
-
-kelly_model = UnfoldSim.KellyModel(
-    drift_rate = v,
-    motor_delay = 0.1,
-    motor_delay_varibility = 0.1,
-    sensor_encoding_delay_variability = 0.1,
-    sensor_encoding_delay = 0.1,
-    accumulative_level_noise=0.5,
-    urgency = 1,
-    urgency_variability = 0.17,
-    post_accumulation_duration = 0.1,
-    post_accumulation_duration_variability = 0.2,
-    boundary = 0.7,
-    ramp_down_duration = 0.1
-)
 kelly_model_parameter = UnfoldSim.create_kelly_parameters_dict(kelly_model)
 drift = DriftComponent(max_length, fs, UnfoldSim.KellyModel, kelly_model_parameter)
 components = Dict('S' => [c_stimulus], 'C' => [drift], 'R' => [c_response])
