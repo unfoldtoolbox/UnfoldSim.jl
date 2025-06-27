@@ -178,16 +178,6 @@ end
 #----
 # Design helper functions
 
-"Return the dimensions of the experiment design."
-size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
-size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
-
-Base.size(design::RepeatDesign{MultiSubjectDesign}) =
-    size(design.design) .* (design.repeat, 1)
-Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
-
-"Length is the product of all dimensions and equals the number of events in the corresponding events dataframe."
-length(design::AbstractDesign) = *(size(design)...)
 
 """
     apply_event_order_function(fun, rng, events)
@@ -365,16 +355,20 @@ end
 """
     SequenceDesign{T} <: AbstractDesign
 Enforce a sequence of events for each entry of a provided `AbstractDesign`.
-The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap.
+The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap and has to be at the end of the sequence string. There can only be one `_` character in a sequence string.
 
-
-
-Another variable sequence is defined using `[]`. For example, `S[ABC]` would result in any one sequence `SA`, `SB`, `SC`.
 
 Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the `ImbalancedDesign` tutorial
 
 
-Experimental: It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`'s. Because the number of trials is not defined before actually executing the design, this can lead to problems down the road, if functions require to know the number of trials before generation of the design.
+
+# Fields
+- `design::AbstractDesign`: The design that is generated for every sequence-event
+- `sequence::String = ""` (optional): A string of characters depicting sequences.
+            A variable sequence is defined using `[]`. For example, `S[ABC]` could result in any one sequence `SA`, `SB`, `SC`.
+            Experimental: It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`'s.
+
+# Examples
 
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
@@ -477,7 +471,6 @@ In case of `MultiSubjectDesign`, sort by subject. \\
 Please note that when using an `event_order_function`(e.g. `shuffle`) in a `RepeatDesign`, the corresponding RNG is shared across repetitions and not deep-copied for each repetition.
 As a result, the order of events will differ for each repetition.
 """
-
 function UnfoldSim.generate_events(rng::AbstractRNG, design::RepeatDesign)
     df = map(x -> generate_events(rng, design.design), 1:design.repeat) |> x -> vcat(x...)
 
@@ -521,7 +514,7 @@ struct EffectsDesign <: AbstractDesign
     effects_dict::Dict
 end
 EffectsDesign(design::MultiSubjectDesign, effects_dict::Dict) = error("not yet implemented")
-UnfoldSim.size(t::EffectsDesign) = size(generate_events(t), 1)
+UnfoldSim.size(rng::AbstractRNG, t::EffectsDesign) = size(generate_events(rng, t), 1)
 
 """
     expand_grid(design)
@@ -543,11 +536,19 @@ typical_value(v) = unique(v)
 
 Generates events to simulate marginalized effects using an Effects.jl reference-grid dictionary. Every covariate that is in the `EffectsDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
 
-```julia
 # Example
+```julia
+effects_dict = Dict(:conditionA=>[0,1])
+design = SingleSubjectDesign(; conditions = Dict(:conditionA => [0,1,2])) 
+eff_design = EffectsDesign(design,effects_dict) 
+generate_events(MersenneTwister(1),eff_design)
 
-effects_dict = Dict{Symbol,Union{<:Number,<:String}}(:conditionA=>[0,1])
-SingleSubjectDesign(...) |> x-> EffectsDesign(x,effects_dict)
+2×1 DataFrame
+ Row │ conditionA 
+     │ Int64      
+─────┼────────────
+   1 │          0
+   2 │          1
 ```
 """
 function UnfoldSim.generate_events(rng, t::EffectsDesign)
@@ -562,14 +563,26 @@ function UnfoldSim.generate_events(rng, t::EffectsDesign)
 end
 
 
-#Base.size(design::SequenceDesign) =
-#size(design.design) .* length(replace(design.sequence, "_" => "",r"\{.*\}"=>""))
+"""
+    Base.size([rng],design::AbstractDesign)
 
-#Base.size(design::) = size(design.design) .* design.repeat
+Return the dimensions of the experiment design. For some designs (SequenceDesign), rng is required, as the size is only determined by the design, which in turn can be probabilistic.
+"""
+Base.size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
+Base.size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
 
-# ---  
-# Size for Sequence design
-# No way to find out what size it is without actually generating first...
+Base.size(design::RepeatDesign{MultiSubjectDesign}) =
+    size(design.design) .* (design.repeat, 1)
+Base.size(design::RepeatDesign{SingleSubjectDesign}) = size(design.design) .* design.repeat
+
+Base.size(rng::AbstractRNG, design::AbstractDesign) = size(design) # by default we drop the RNG
+
 Base.size(
+    rng::AbstractRNG,
     design::Union{<:SequenceDesign,<:SubselectDesign,<:RepeatDesign{<:SequenceDesign}},
-) = size(generate_events(design), 1)
+) = size(generate_events(rng, design), 1)
+
+
+"Length is the product of all dimensions and equals the number of events in the corresponding events dataframe."
+length(design::AbstractDesign) = *(size(design)...)
+length(rng::AbstractRNG, design::AbstractDesign) = *(size(rng, design)...)

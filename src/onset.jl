@@ -76,6 +76,38 @@ See also [`UniformOnset`](@ref UnfoldSim.UniformOnset), [`LogNormalOnset`](@ref 
 struct NoOnset <: AbstractOnset end
 
 
+"""
+    ShiftOnsetByOne <:AbstractOnset
+
+This container AbstractOnset shifts the ShiftOnsetByOne.onset::AbstractOnset inter-onset-distance vector by one, adding a `0` to the front and removing the last `inter-onset distance`.
+
+This is helpful in combination with [`LogNormalOnsetFormula`](@ref) or [`UniformOnsetFormula`](@ref), to generate biased distances not of the previous, but of the next event.
+
+Visualized:
+
+|__1__| A |__2__| B |__3__| C 
+Right now, the inter-onset distances are assigned in the order 1,2,3 inbetween the events A,B,C. After ShiftOnsetByOne we would have
+
+|__0__| A |__1__| B |__2__| C
+
+with 0 being a new distance of `0`, and the 3 removed (it would describe the distance after C, because there is nothing coming, the signal is not further prolonged).
+
+
+# Examples
+```julia-repl
+julia> o = UniformOnset(10,20)
+julia> d = SingleSubjectDesign(conditions=Dict(:trial=>[1,2,3]))
+julia> simulate_interonset_distances(MersenneTwister(1),o,d)'
+> 26 30 27
+julia> simulate_interonset_distances(MersenneTwister(1),ShiftOnsetByOne(o),d)'
+> 0  26 30
+```
+
+"""
+struct ShiftOnsetByOne <: AbstractOnset
+    onset::AbstractOnset
+end
+
 #-----------------------------
 # Onset simulation functions
 #-----------------------------
@@ -125,21 +157,24 @@ function simulate_interonset_distances end
 
 function simulate_interonset_distances(rng, onset::UniformOnset, design::AbstractDesign)
     return Int.(
-        round.(rand(deepcopy(rng), onset.offset:(onset.offset+onset.width), size(design)))
+        round.(
+            rand(
+                deepcopy(rng),
+                onset.offset:(onset.offset+onset.width),
+                size(deepcopy(rng), design),
+            )
+        )
     )
 end
 
 function simulate_interonset_distances(rng, onset::LogNormalOnset, design::AbstractDesign)
-    s = size(design)
+    s = size(deepcopy(rng), design)
     fun = LogNormal(onset.μ, onset.σ)
     if !isnothing(onset.truncate_upper)
         fun = truncated(fun; upper = onset.truncate_upper)
     end
     return Int.(round.(onset.offset .+ rand(deepcopy(rng), fun, s)))
 end
-
-
-#function simulate_interonset_distances(rng, onset::AbstractOnset,design::)
 
 
 contains_design(d::AbstractDesign, target::Type) = false
@@ -154,6 +189,8 @@ Call `simulate_interonset_distances` to generate distances between events and th
 
 Please note that this function is mainly for internal use in the context of `simulate` function calls. \n
 Also note that the accumulation of onsets starts at 1 to avoid indexing problems in the case that the first sampled onset is 0.
+
+In case of a SequenceDesign with a '_' no-overlap indicator, we use twice the `maxlength(components)` as the distance following that sequence character.
 
 # Arguments
 - `rng`: Random number generator (RNG) to make the process reproducible.
@@ -222,6 +259,14 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
 
     return onsets_accum
 end
+
+"""
+    simulate_interonset_distances(rng, onsets::ShiftOnsetByOne, design)
+Same functionality as `simulate_interonset_distances(rng,onsets::AbstractOnset)` except that it shifts the resulting vector by one, adding a `0` to the front and removing the last simuluated distance.
+"""
+UnfoldSim.simulate_interonset_distances(rng, onsets::ShiftOnsetByOne, design) =
+    vcat(0, UnfoldSim.simulate_interonset_distances(rng, onsets.onset, design)[1:end-1])
+
 
 """
     UniformOnsetFormula <: AbstractOnset
@@ -350,26 +395,4 @@ function simulate_interonset_distances(
 end
 
 
-"""
-    ShiftOnsetByOne <:AbstractOnset
 
-This container AbstractOnset shifts the ShiftOnsetByOne.onset::AbstractOnset inter-onset-distance vector by one, adding a `0` to the front and removing the last `inter-onset distance`.
-
-This is helpful in combination with [`LogNormalOnsetFormula`](@ref) or [`UniformOnsetFormula`](@ref), to generate biased distances not of the previous, but of the next event.
-
-Visualized:
-
-|\\_\\_1\\_\\_| A |\\_\\_2\\_\\_| B |\\_\\_3\\_\\_| C \n
-Right now, the inter-onset distances are assigned in the order 1,2,3 inbetween the events A,B,C. After ShiftOnsetByOne we would have
-
-|\\_\\_0\\_\\_| A |\\_\\_1\\_\\_| B |\\_\\_2\\_\\_| C
-
-with 0 being a new distance of `0`, and the 3 removed (it would describe the distance after C, because there is nothing coming, the signal is not further prolonged).
-
-"""
-struct ShiftOnsetByOne <: AbstractOnset
-    onset::AbstractOnset
-end
-
-UnfoldSim.simulate_interonset_distances(rng, onsets::ShiftOnsetByOne, design) =
-    vcat(0, UnfoldSim.simulate_interonset_distances(rng, onsets.onset, design)[1:end-1])

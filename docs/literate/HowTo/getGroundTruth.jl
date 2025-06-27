@@ -1,14 +1,22 @@
-# # Get ground truth via EffectsDesign
+# # Simulate ground truth marginalized Effects
 
-# Usually, to test a method, you want to compare your results to a known ground truth. In UnfoldSim you can obtain your ground truth via the `EffectsDesign`.
-# Doing it this way let's you marginalize any effects/ variables of your original design. You can find more on what marginalized effects are here in the [Unfold.jl documentation](https://unfoldtoolbox.github.io/Unfold.jl/dev/generated/HowTo/effects/)
+# Often when testing some algorithm, we want to compare our results to a known ground truth. In the case of marginalized effects via the `Unfold.effects`/ `Effects.jl` interface, we can do this using an `EffectsDesign`.
+# You can find more on what marginalized effects are here in the [Unfold.jl documentation](https://unfoldtoolbox.github.io/Unfold.jl/dev/generated/HowTo/effects/)
 
-# ## Setup
+# ### Setup
+# ```@raw html
+# <details>
+# <summary>Click to expand</summary>
+# ```
+## Load required packages
 using UnfoldSim
 using Unfold
 using CairoMakie
+using UnfoldMakie
 using Random
-
+# ```@raw html
+# </details >
+# ```
 # ## Simulation
 # First let's make up a SingleSubject simulation
 
@@ -21,7 +29,7 @@ design =
             :condition => ["bike", "face"],
             :continuous => range(0, 5, length = 10),
         ),
-    ) |> x -> RepeatDesign(x, 100);
+    ) |> x -> RepeatDesign(x, 5);
 
 # **n170** has a condition effect, faces are more negative than bikes
 n1 = LinearModelComponent(;
@@ -46,7 +54,7 @@ data, evts = simulate(
     PinkNoise(),
 );
 
-# ## GroundTruthDesign
+# ## Simulate marginalized effects directly
 # To marginalize effects we first have to specify an effects dictionary and subsequently hand this dict plus the original design to `EffectsDesign()`
 
 effects_dict = Dict(:condition => ["bike", "face"])
@@ -56,13 +64,13 @@ effects_design = EffectsDesign(design, effects_dict)
 # !!! note
 #     We only specified the condition levels here, by default every unspecified variable will be set to a "typical" (i.e. the mean) value.
 
-# And finally we can simulate our ground truth ERP with marginalized effects
+# And finally we can simulate our ground truth marginal effects
 
 gt_data, gt_events = simulate(
     MersenneTwister(1),
     effects_design,
     components,
-    UniformOnset(; width = 0, offset = 1000),
+    NoOnset(),
     NoNoise(),
     return_epoched = true,
 );
@@ -93,8 +101,16 @@ m = fit(
 
 ef = effects(effects_dict, m);
 
-# Display ground truth and effects, note that the ground truth will be shorter because of the missing baseline.
-# If you want to actually compare results with the ground truth, you could either us `UnfoldSim.pad_array()` or forgo the baseline of your estimates.
-lines(ef.yhat)
-lines!(gt_effects.yhat)
-current_figure()
+# !!! note
+#      The ground truth is shorter because the ground truth typically returns values between `[0 maxlength(components)]`, whereas in our unfold-model we included a baseline period of 0.1s.
+#      If you want to actually compare results with the ground truth, you could either us `UnfoldSim.pad_array()` or set the Unfold modelling window to `τ=[0,1]`
+
+gt_effects.type .= "UnfoldSim effects"
+ef.type .= "Unfold effects"
+
+gt_effects.time = gt_effects.time ./ 100 .- 1 / 100
+ef.continuous .= 2.5 # needed to be able to easily merge the two dataframes
+comb = vcat(gt_effects, ef)
+plot_erp(comb; mapping = (; color = :type, col = :condition))
+
+# The simulated ground truth marginal effects, and the fitted marginal effects look similar as expected, but the fitted has some additional noise because of finite data (also as expected).
