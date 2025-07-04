@@ -265,7 +265,7 @@ end
 Same functionality as `simulate_interonset_distances(rng,onsets::AbstractOnset)` except that it shifts the resulting vector by one, adding a `0` to the front and removing the last simuluated distance.
 """
 UnfoldSim.simulate_interonset_distances(rng, onsets::ShiftOnsetByOne, design) =
-    vcat(0, UnfoldSim.simulate_interonset_distances(rng, onsets.onset, design)[1:end-1])
+    vcat(0, UnfoldSim.simulate_interonset_distances(rng, onsets.onset, design)[1:(end-1)])
 
 
 """
@@ -302,7 +302,7 @@ See also [`UniformOnset`](@ref UnfoldSim.UniformOnset) for a simplified version 
 """
 @with_kw struct UniformOnsetFormula <: AbstractOnset
     width_formula = @formula(0 ~ 1)
-    width_β::Vector = [0]
+    width_β::Vector
     width_contrasts::Dict = Dict()
     offset_formula = @formula(0 ~ 1)
     offset_β::Vector = [0]
@@ -393,6 +393,3 @@ function simulate_interonset_distances(
     #@debug reduce(hcat, rand.(deepcopy(rng), funs, 1))
     return Int.(round.(offsets .+ reduce(vcat, rand.(deepcopy(rng), funs, 1))))
 end
-
-
-

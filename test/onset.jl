@@ -120,7 +120,7 @@
         # ShiftOnsetByOne adds a 0 to the front, thereby the first "non-0" "real" simulated inter onset distance is used for the second event
         @test with[1] == 0
 
-        @test without[1:end-1] == with[2:end]
+        @test without[1:(end-1)] == with[2:end]
 
 
     end
