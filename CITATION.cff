@@ -8,6 +8,7 @@ type: software
 authors:
   - given-names: Judith
     family-names: Schepers
+    orcid: 'test-orcid'
   - given-names: Luis
     family-names: Lips
   - given-names: Maanik
