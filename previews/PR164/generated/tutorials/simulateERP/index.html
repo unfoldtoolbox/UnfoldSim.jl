@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Simulate event-related potentials (ERPs) · UnfoldSim.jl</title><meta name="title" content="Simulate event-related potentials (ERPs) · UnfoldSim.jl"/><meta property="og:title" content="Simulate event-related potentials (ERPs) · UnfoldSim.jl"/><meta property="twitter:title" content="Simulate event-related potentials (ERPs) · UnfoldSim.jl"/><meta name="description" content="Documentation for UnfoldSim.jl."/><meta property="og:description" content="Documentation for UnfoldSim.jl."/><meta property="twitter:description" content="Documentation for UnfoldSim.jl."/><meta property="og:url" content="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/simulateERP/"/><meta property="twitter:url" content="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/simulateERP/"/><link rel="canonical" href="https://unfoldtoolbox.github.io/UnfoldSim.jl/generated/tutorials/simulateERP/"/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../../"><img src="../../../assets/logo.png" alt="UnfoldSim.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><a class="tocitem" href="../../../installation/">Installing Julia &amp; UnfoldSim.jl</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../quickstart/">Quickstart</a></li><li class="is-active"><a class="tocitem" href>Simulate event-related potentials (ERPs)</a><ul class="internal"><li><a class="tocitem" href="#Specify-the-simulation-&quot;ingredients&quot;"><span>Specify the simulation &quot;ingredients&quot;</span></a></li><li><a class="tocitem" href="#Simulate-data"><span>Simulate data</span></a></li><li><a class="tocitem" href="#Validate-the-simulation-results"><span>Validate the simulation results</span></a></li></ul></li><li><a class="tocitem" href="../poweranalysis/">Power analysis</a></li><li><a class="tocitem" href="../multisubject/">Multi-subject simulation</a></li></ul></li><li><span class="tocitem">Reference</span><ul><li><a class="tocitem" href="../../reference/overview/">Overview of functionality</a></li><li><a class="tocitem" href="../../reference/designtypes/">Overview: Experimental design types</a></li><li><a class="tocitem" href="../../reference/basistypes/">Overview: Basis function (component) types</a></li><li><a class="tocitem" href="../../reference/onsettypes/">Overview: Onset types</a></li><li><a class="tocitem" href="../../reference/noisetypes/">Overview: Noise types</a></li></ul></li><li><span class="tocitem">HowTo</span><ul><li><a class="tocitem" href="../../HowTo/newDesign/">Define a new (imbalanced) design</a></li><li><a class="tocitem" href="../../HowTo/repeatTrials/">Get multiple trials with identical subject/item combinations</a></li><li><a class="tocitem" href="../../HowTo/newComponent/">Define a new component (with variable duration and shift)</a></li><li><a class="tocitem" href="../../HowTo/multichannel/">Generate multi channel data</a></li><li><a class="tocitem" href="../../HowTo/predefinedData/">Use existing experimental designs &amp; onsets in the simulation</a></li></ul></li><li><a class="tocitem" href="../../../developer_docs/">Developer documentation</a></li><li><a class="tocitem" href="../../../api/">API / Docstrings</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Simulate event-related potentials (ERPs)</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Simulate event-related potentials (ERPs)</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/unfoldtoolbox/UnfoldSim.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/main/docs/literate/tutorials/simulateERP.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Simulate-event-related-potentials-(ERPs)"><a class="docs-heading-anchor" href="#Simulate-event-related-potentials-(ERPs)">Simulate event-related potentials (ERPs)</a><a id="Simulate-event-related-potentials-(ERPs)-1"></a><a class="docs-heading-anchor-permalink" href="#Simulate-event-related-potentials-(ERPs)" title="Permalink"></a></h1><p>One subfield of EEG research focuses on so-called event-related potentials (ERPs) which are defined as brain responses time-locked to a certain event e.g. stimulus onset. The waveform of an ERP usually consists of multiple ERP components which denote the peaks and troughs of the waveform.</p><p>ERP components are characterized (and named) by their timing relative to the event, their polarity (positive or negative) and their scalp topography. For example, the N170 describes a negative deflection which occurrs roughly 170 ms after the onset of (certain) visual stimuli. Often, researchers are interested how a component (e.g. its amplitude or timing) changes depending on certain experimental factors. For example, N170 has been shown to be related to face processing and its amplitude is modulated by whether the stimulus is a face or an object e.g. a car. (<a href="https://neuraldatascience.io/7-eeg/components.html">Source</a>)</p><p>Here we will learn how to simulate a typical ERP complex with P100, N170, P300.</p><h3 id="Setup"><a class="docs-heading-anchor" href="#Setup">Setup</a><a id="Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Setup" title="Permalink"></a></h3><details>
+<summary>Click to expand</summary><pre><code class="language-julia hljs"># Load required packages
+using UnfoldSim # For simulation
+using Random # For randomization
+using StableRNGs # To get an RNG
+using Unfold # For analysis
+using CairoMakie # For plotting
+using UnfoldMakie # For plotting</code></pre></details ><h2 id="Specify-the-simulation-&quot;ingredients&quot;"><a class="docs-heading-anchor" href="#Specify-the-simulation-&quot;ingredients&quot;">Specify the simulation &quot;ingredients&quot;</a><a id="Specify-the-simulation-&quot;ingredients&quot;-1"></a><a class="docs-heading-anchor-permalink" href="#Specify-the-simulation-&quot;ingredients&quot;" title="Permalink"></a></h2><h3 id="1.-Experimental-design"><a class="docs-heading-anchor" href="#1.-Experimental-design">1. Experimental design</a><a id="1.-Experimental-design-1"></a><a class="docs-heading-anchor-permalink" href="#1.-Experimental-design" title="Permalink"></a></h3><p>We specify an experimental design with one subject in two experimental conditions including a continuous variable with 10 values. To mimic randomization in an experiment, we shuffle the trials using the <code>event_order_function</code> argument. To generate more trials we repeat the design 100 times which results in 2000 trials in total.</p><pre><code class="language-julia hljs">design =
+    SingleSubjectDesign(;
+        conditions = Dict(
+            :condition =&gt; [&quot;car&quot;, &quot;face&quot;],
+            :continuous =&gt; range(0, 5, length = 10),
+        ),
+        event_order_function = shuffle,
+    ) |&gt; x -&gt; RepeatDesign(x, 100);</code></pre><p>The <code>generate_events</code> function can be used to create an events data frame from the specified experimental design.</p><pre><code class="language-julia hljs">events_df = generate_events(StableRNG(1), design);
+first(events_df, 5)</code></pre><div><div style = "float: left;"><span>5×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "header"><th class = "rowNumber" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">continuous</th><th style = "text-align: left;">condition</th></tr><tr class = "subheader headerLastRow"><th class = "rowNumber" style = "font-weight: bold; text-align: right;"></th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">2.22222</td><td style = "text-align: left;">face</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">4.44444</td><td style = "text-align: left;">car</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">3.88889</td><td style = "text-align: left;">car</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">1.11111</td><td style = "text-align: left;">car</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">0.555556</td><td style = "text-align: left;">car</td></tr></tbody></table></div><p>Above you can see the first five rows extracted from the events data frame representing the experimental design. Each row corresponds to one event. The columns <em>continuous</em> and <em>condition</em> display the levels of the predictor variables for the specific event.</p><h3 id="2.-Event-basis-functions-(Components)"><a class="docs-heading-anchor" href="#2.-Event-basis-functions-(Components)">2. Event basis functions (Components)</a><a id="2.-Event-basis-functions-(Components)-1"></a><a class="docs-heading-anchor-permalink" href="#2.-Event-basis-functions-(Components)" title="Permalink"></a></h3><p>Next, we create a signal consisting of three different components.</p><p>For the first component, we use the prespecified <strong>P100</strong> base which will be unaffected by our design and has an amplitude of 5 µV.</p><pre><code class="language-julia hljs">p1 = LinearModelComponent(; basis = p100(), formula = @formula(0 ~ 1), β = [5]);</code></pre><p>For the second component, we use the prespecified <strong>N170</strong> base with an intercept of 5 µV and a condition effect of 3 µV for the “face/car” condition i.e. faces will have a more negative signal than cars.</p><pre><code class="language-julia hljs">n1 = LinearModelComponent(;
+    basis = n170(),
+    formula = @formula(0 ~ 1 + condition),
+    β = [5, 3],
+);</code></pre><p>For the third component, we use the prespecified <strong>P300</strong> base and include a linear and a quadratic effect of the continuous variable: the larger the value of the continuous variable, the larger the simulated potential.</p><pre><code class="language-julia hljs">p3 = LinearModelComponent(;
+    basis = p300(),
+    formula = @formula(0 ~ 1 + continuous + continuous^2),
+    β = [5, 1, 0.2],
+);</code></pre><h3 id="3.-Inter-onset-distribution"><a class="docs-heading-anchor" href="#3.-Inter-onset-distribution">3. Inter-onset distribution</a><a id="3.-Inter-onset-distribution-1"></a><a class="docs-heading-anchor-permalink" href="#3.-Inter-onset-distribution" title="Permalink"></a></h3><p>In the next step, we specify an inter-onset distribution, in this case, a uniform distribution with an inter-event distance of exactly 200 samples.</p><pre><code class="language-julia hljs">onset = UniformOnset(; width = 0, offset = 200);</code></pre><h3 id="4.-Noise-specification"><a class="docs-heading-anchor" href="#4.-Noise-specification">4. Noise specification</a><a id="4.-Noise-specification-1"></a><a class="docs-heading-anchor-permalink" href="#4.-Noise-specification" title="Permalink"></a></h3><p>As the last ingredient, we specify the <strong>noise</strong>, in this case, Pink noise.</p><pre><code class="language-julia hljs">noise = PinkNoise(; noiselevel = 2);</code></pre><h2 id="Simulate-data"><a class="docs-heading-anchor" href="#Simulate-data">Simulate data</a><a id="Simulate-data-1"></a><a class="docs-heading-anchor-permalink" href="#Simulate-data" title="Permalink"></a></h2><p>Finally, we combine all the ingredients and simulate data. To make the simulation reproducible, one can specify a random generator.</p><pre><code class="language-julia hljs"># Combine the components in a vector
+components = [p1, n1, p3]
+
+# Simulate data
+eeg_data, events_df = simulate(StableRNG(1), design, components, onset, noise);</code></pre><p>To inspect the simulated data we will visualize the first 1400 samples.</p><details>
+<summary>Click to show the code for the figure below</summary><pre><code class="language-julia hljs">f = Figure(size = (1000, 400))
+ax = Axis(
+    f[1, 1],
+    title = &quot;Simulated EEG data&quot;,
+    titlesize = 18,
+    xlabel = &quot;Time [samples]&quot;,
+    ylabel = &quot;Amplitude [µV]&quot;,
+    xlabelsize = 16,
+    ylabelsize = 16,
+    xgridvisible = false,
+    ygridvisible = false,
+)
+
+n_samples = 1400
+lines!(eeg_data[1:n_samples]; color = &quot;black&quot;)
+v_lines = [
+    vlines!(
+        [r[&quot;latency&quot;]];
+        color = [&quot;orange&quot;, &quot;teal&quot;][1+(r[&quot;condition&quot;]==&quot;car&quot;)],
+        label = r[&quot;condition&quot;],
+    ) for r in
+    filter(:latency =&gt; x -&gt; x &lt; n_samples, events_df)[:, [&quot;latency&quot;, &quot;condition&quot;]] |&gt;
+    eachrow
+]
+xlims!(ax, 0, n_samples)
+axislegend(&quot;Event onset&quot;; unique = true);</code></pre></details ><pre><code class="language-julia hljs">current_figure()</code></pre><img src="4c3f9380.png" alt="Example block output"/><p>The vertical lines denote the event onsets and their colour represents the respective condition i.e. car or face.</p><h2 id="Validate-the-simulation-results"><a class="docs-heading-anchor" href="#Validate-the-simulation-results">Validate the simulation results</a><a id="Validate-the-simulation-results-1"></a><a class="docs-heading-anchor-permalink" href="#Validate-the-simulation-results" title="Permalink"></a></h2><p>To validate the simulation results, we use the <a href="https://github.com/unfoldtoolbox/Unfold.jl/"><code>Unfold.jl</code> package</a> to fit an Unfold regression model to the simulated data and examine the estimated regression parameters and marginal effects. For the formula, we include a categorical predictor for <em>condition</em> and a non-linear predictor (based on splines) for <em>continuous</em>.</p><pre><code class="language-julia hljs">m = fit(
+    UnfoldModel,
+    [
+        Any =&gt; (
+            @formula(0 ~ 1 + condition + spl(continuous, 4)),
+            firbasis(τ = [-0.1, 1], sfreq = 100, name = &quot;basis&quot;),
+        ),
+    ],
+    events_df,
+    eeg_data,
+);</code></pre><p>To inspect the modelling results we will visualize the model coefficient estimates together with the estimated marginal effects i.e. the predicted ERPs.</p><details>
+<summary>Click to show the code for the figure below</summary><pre><code class="language-julia hljs"># Create a data frame with the model coefficients and extract the coefficient names
+coefs = coeftable(m)
+coefnames = unique(coefs.coefname)
+
+f2 = Figure(size = (1000, 400))
+ga = f2[1, 1] = GridLayout()
+gb = f2[1, 2] = GridLayout()
+
+# Plot A: Estimated regression parameters
+ax_A = Axis(
+    ga[1, 1],
+    title = &quot;Estimated regression parameters&quot;,
+    titlegap = 12,
+    xlabel = &quot;Time [s]&quot;,
+    ylabel = &quot;Amplitude [μV]&quot;,
+    xlabelsize = 16,
+    ylabelsize = 16,
+    xgridvisible = false,
+    ygridvisible = false,
+)
+
+for coef in coefnames
+    estimate = filter(:coefname =&gt; ==(coef), coefs)
+
+    lines!(ax_A, estimate.time, estimate.estimate, label = coef)
+end
+axislegend(&quot;Coefficient&quot;, framevisible = false)
+hidespines!(ax_A, :t, :r)
+
+# Plot B: Marginal effects
+plot_B = plot_erp!(
+    gb,
+    effects(Dict(:condition =&gt; [&quot;car&quot;, &quot;face&quot;], :continuous =&gt; 0:0.5:5), m);
+    mapping = (; color = :continuous, linestyle = :condition, group = :continuous),
+    legend = (; valign = :top, halign = :right),
+    axis = (
+        title = &quot;Marginal effects&quot;,
+        titlegap = 12,
+        xlabel = &quot;Time [s]&quot;,
+        ylabel = &quot;Amplitude [μV]&quot;,
+        xlabelsize = 16,
+        ylabelsize = 16,
+        xgridvisible = false,
+        ygridvisible = false,
+    ),
+)
+
+# Add letter labels to the plots
+# Adapted from: https://docs.makie.org/stable/tutorials/layout-tutorial/
+for (label, layout) in zip([&quot;A&quot;, &quot;B&quot;], [ga, gb])
+    Label(
+        layout[1, 1, TopLeft()],
+        label,
+        fontsize = 26,
+        font = :bold,
+        padding = (0, 5, 5, 0),
+        halign = :right,
+    )
+end</code></pre></details ><pre><code class="language-julia hljs">current_figure()</code></pre><img src="eae03c7e.png" alt="Example block output"/><p>In subplot A, one can see the model coefficient estimates and as intended the first component is unaffected by the experimental design, there is a condition effect in the second component and an effect of the continuous variable on the third component. The relation between the levels of the continuous variable and the scaling of the third component is even clearer visible in subplot B which depicts the estimated marginal effects of the predictors which are obtained by evaluating the estimated function at specific values of the continuous variable.</p><p>As shown in this example, <code>UnfoldSim.jl</code> and <code>Unfold.jl</code> can be easily combined to investigate the effects of certain features, e.g. the type of noise or its intensity on the analysis result and thereby assess the robustness of the analysis.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../quickstart/">« Quickstart</a><a class="docs-footer-nextpage" href="../poweranalysis/">Power analysis »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 10 July 2025 10:58">Thursday 10 July 2025</span>. Using Julia version 1.11.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
