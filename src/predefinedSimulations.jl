@@ -1,3 +1,5 @@
+using Distributions: multinom_rand!
+
 # Here we define some predefined simulations. Convenient if you just want to have a quick simulation :)
 
 # If no RNG is given, create one.
@@ -38,6 +40,10 @@ The most used keyword argument is: `return_epoched = true` which returns already
 ## Noise
 - `noiselevel = 0.2`.
 - `noise = PinkNoise(; noiselevel = noiselevel)`.
+
+
+## multichannel
+- `multichannel = nothing` # to receive 227 channels multichannel data, provide a list of `hartmut.cortical["label"]`. If set to `true` uses: `["Right Occipital Pole", "Left Postcentral Gyrus", "Left Superior Frontal Gyrus",]`.
 
 ## Other parameters
 - `return_epoched = false`: If true, already epoched data is returned. Otherwise, continuous data is returned.
@@ -121,6 +127,7 @@ function predef_eeg(
     # onset
     overlap = (0.5, 0.2),
     onset = UniformOnset(; offset = sfreq * overlap[1], width = sfreq * overlap[2]), #put offset to 1 for no overlap. put width to 0 for no jitter
+    multichannel = nothing,
     kwargs...,
 )
 
@@ -128,6 +135,22 @@ function predef_eeg(
     for c in comps
         append!(components, [T(c...)])
     end
+    if !isnothing(multichannel)
+        if isa(multichannel, Bool)
+            multichannel = [
+                "Right Occipital Pole",
+                "Left Postcentral Gyrus",
+                "Left Superior Frontal Gyrus",
+            ]
+        end
+        hart = headmodel()
+        @assert length(components) == length(multichannel)
+
+        components =
+            MultichannelComponent.(components, [hart => label for label in multichannel])
+
+    end
+
     return simulate(rng, design, components, onset, noise; kwargs...)
 end
 
