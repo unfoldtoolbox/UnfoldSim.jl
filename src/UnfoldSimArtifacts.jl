@@ -81,10 +81,10 @@ end
 
 """
 TODO docstring
-Calculate orientations from the given positions with respect to the reference. `direction` is by default "towards" the reference point; if a different value is given, orientations are calculated away from the reference point.
+Calculate orientations from the given positions with respect to the reference. `direction` is by default "away" from the reference point; set `towards` to calculate orientations away from the reference point.
 """
-function calc_orientations(reference, positions; direction="towards")
-    if direction == "towards"
+function calc_orientations(reference, positions; towards=false, away=true)
+    if towards
         orientation_vecs = reference .- positions
     else
         orientation_vecs = positions .- reference
@@ -223,7 +223,7 @@ function simulate_eyemovement(eyemodel, gazevectors::Vector{Vector{Float64}}; ti
     
     eyemodel, lsi_eyemodel = import_eyemodel()
 
-    # leadfields: matrix of dimensions [electrodes x n_gazepoints] 
+    # leadfields: matrix with dimensions [electrodes x n_gazepoints] 
     leadfields = zeros(size(eyemodel["pos"])[1],length(gazevectors))
 
     if crd
@@ -240,10 +240,9 @@ function simulate_eyemovement(eyemodel, gazevectors::Vector{Vector{Float64}}; ti
         sim_srcs_idx = [eyemodel["eyeleft_idx"]; eyemodel["eyeright_idx"]] # indices in eyemodel, of the points which we want to use to simulate data, i.e. retina & cornea. used for ensemble simulation. 
 
         # calculate eyeball source orientations away from center, later use negative weightage for the points where the source dipole points towards the center (i.e. the retina points).
-        eyemodel["orientation"][eyemodel["eyeleft_idx"],:] = calc_orientations(eyemodel["eyecenter_left_pos"], eyemodel["pos"][eyemodel["eyeleft_idx"],:]; direction="away")
-        eyemodel["orientation"][eyemodel["eyeright_idx"],:] = calc_orientations(eyemodel["eyecenter_right_pos"], eyemodel["pos"][eyemodel["eyeright_idx"],:]; direction="away") 
+        eyemodel["orientation"][eyemodel["eyeleft_idx"],:] = calc_orientations(eyemodel["eyecenter_left_pos"], eyemodel["pos"][eyemodel["eyeleft_idx"],:]; towards=true)
+        eyemodel["orientation"][eyemodel["eyeright_idx"],:] = calc_orientations(eyemodel["eyecenter_right_pos"], eyemodel["pos"][eyemodel["eyeright_idx"],:]; towards=true) 
 
-        # leadfields: matrix with dimensions [electrodes x n_gazepoints]
         for ix in eachindex((gazevectors))
             # for each gazepoint, calculate the leadfield and store it in the corresponding column
             leadfields[:,ix] = ensemble_leadfield(eyemodel, sim_srcs_idx, gazevectors[ix], 54.0384)
