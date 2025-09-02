@@ -20,7 +20,8 @@ TODO docstring
 Calculate the gaze vector in 3-D world coordinates, given the horizontal and vertical angles (in degrees) from center gaze direction i.e. looking straight ahead.
 """
 function gazevec_from_angle_3d(angle_H, angle_V)
-	# angles measured from center gaze position => use complementary angle for θ 
+	# angles measured from center gaze position => use complementary angle for θ; 
+    # ϕ is already measured upwards from the x-y plane, according to the conventions of CoordinateTransformations.jl
 	return Array{Float32}(CartesianFromSpherical()(Spherical(1, deg2rad(90-angle_H), deg2rad(angle_V))))
 end
 
@@ -68,12 +69,13 @@ end
 
 """
 TODO docstring
-Calculate orientations from the given positions with respect to the reference. `direction` is by default "away" from the reference point; set `towards=true` to calculate orientations away from the reference point.
+Calculate orientation vectors from the given positions with respect to the reference. The vectors are normalized to have length 1. 
+`direction` is by default "away" from the reference point; set `direction="towards"` to calculate orientations towards the reference point.
 """
-function calc_orientations(reference, positions; towards=false, away=true)
-    if towards
+function calc_orientations(reference, positions; direction::String="away")
+    if direction=="towards"
         orientation_vecs = reference .- positions
-    else
+    else 
         orientation_vecs = positions .- reference
     end
     return orientation_vecs ./ norm.(eachrow(orientation_vecs))
@@ -82,7 +84,7 @@ end
 
 """
 TODO docstring
-Calculate the angle between two 3-D vectors.
+Return the angle (in degrees) between two 3-D vectors in Cartesian coordinates.
 """
 function angle_between(a,b) 
     return acosd.(dot(a, b)/(norm(a)*norm(b)))
@@ -92,6 +94,7 @@ end
 """
     is_corneapoint(orientation::Vector{Float64}, gazedir::Vector{Float64}, max_cornea_angle_deg::Float64)
 
+Return 1 if the angle between the given orientation vector and the gaze direction vector is less than or equal to the given maximum cornea angle; else return -1.
 
 """
 function is_corneapoint(orientation::Vector{Float64}, gazedir::Vector{Float64}, max_cornea_angle_deg::Float64)
@@ -117,25 +120,10 @@ end
 
 
 """
-TODO docstring
-Multiple gaze direction vectors. Assumes orientations are already set in eyemodel
-"""
-function eyegaze_eeg(eyemodel, src_idx::Vector{Int}, gazedir::Vector{Vector{Float64}}, weights)
-
-    signal = zeros(size(eyemodel["pos"])[1],length(gazedir))
-    for ix in eachindex(gazedir)
-        signal[:,ix] = eyegaze_eeg(eyemodel, src_idx, weights[ix])
-    end
-
-    return signal
-end
-
-
-"""
 TODO docstring 
 Single gaze direction. Assumes orientations are already set in eyemodel
 """
-function eyegaze_eeg(eyemodel, src_idx::Vector{Int}, weights::Vector{Int})
+function generate_eyegaze_eeg(eyemodel, src_idx::Vector{Int}, weights::Vector{Int})
 
     mag = magnitude(eyemodel["leadfield"],eyemodel["orientation"])
     signal = sum(mag[:,idx].* weights[idx] for idx in src_idx)
@@ -145,54 +133,70 @@ end
 
 
 """
-TODO docstring
+Simulate the eye movement and return the corresponding scalp potentials at each of the channels, 
+given a head model, an array of gaze direction vectors defining the eye movement, and optionally an eye-model type. 
+
+# Arguments
+- `headmodel`: Head model to be used.
+- `gazevectors::Vector{Vector{Float64}}`: Vector of gaze direction vectors (in Cartesian coordinates) to define the eye movement trajectory. The vector should point from the eyes towards the point at which the gaze is directed. 
+- `eye_model::String` (optional): Choice of model to use for the eye. Options available are "crd" (default) and "ensemble".
+
+# Returns
+- 
+    
+TODO docstring; type for headmodel; auto-conversion from x,y angles to gaze direction vectors
 """
-function simulate_eyemovement(eyemodel, gazevectors::Vector{Vector{Float64}}; time::Vector{Number}, samplingrate::Number, crd=false, ensemble=false)
-    if (!crd && !ensemble)
-        @warn "Neither CRD nor Ensemble model selected. No simulation performed."
-        return []
-    end
+function simulate_eyemovement(headmodel, gazevectors::Vector{Vector{Float64}}; eye_model::String="crd")
 
-    # when gaze direction changes, 
-    # CRD: orientation changes, weight stays the same
-    # Ensemble: orientation stays the same, weight changes
+    # if (x,y) angles have been passed in, convert them to cartesian coordinates
+    # if(size(gazevectors)[2]==2)       
+    #   hcat(gazevec_from_angle_3d.(gd_realdata[1,:],gd_realdata[2,:]))
+    # end
 
-    # signal: matrix with dimensions [electrodes x n_gazepoints] 
-    signal = zeros(size(eyemodel["pos"])[1],length(gazevectors))
 
-    # weights: n_channel x n_gazevec
+    # when gaze direction vector changes, 
+    # CRD: orientation changes, weight stays the same (=1 for all points)
+    # Ensemble: orientation stays the same, weight changes (=1 for cornea points, -1 for retina points, calculated based on gaze direction)
 
-    if crd
-        weights = ones(size(eyemodel["pos"])[1])
-        src_idx = [eyemodel["eyecenter_left_idx"] eyemodel["eyecenter_right_idx"]]
+    # leadfields: matrix with dimensions [electrodes x n_gazepoints] 
+    leadfields = zeros(size(headmodel["pos"])[1],length(gazevectors))
+
+    # weights: matrix of dimensions [n_channel x n_gazevec]
+
+    if eye_model=="crd"
+        weights = ones(size(headmodel["pos"])[1])
+        src_idx = [headmodel["eyecenter_left_idx"] headmodel["eyecenter_right_idx"]]
         # select eye centers as source points; set orientation = gazevector
         for ix in eachindex(gazevectors)
-            eyemodel["orientation"][eyemodel["eyecenter_left_idx"]] = gazevectors[ix]
-            eyemodel["orientation"][eyemodel["eyecenter_right_idx"]] = gazevectors[ix]
+            headmodel["orientation"][headmodel["eyecenter_left_idx"]] = gazevectors[ix]
+            headmodel["orientation"][headmodel["eyecenter_right_idx"]] = gazevectors[ix]
             # or just use src_idx - will help later if we want to simulate just for one eye or so
 
-            signal[:,ix] = eyegaze_eeg(eyemodel, src_idx, weights)
+            leadfields[:,ix] = generate_eyegaze_eeg(headmodel, src_idx, weights)
         end
 
-    elseif ensemble
-        weights = zeros(size(eyemodel["pos"])[1])
+    elseif eye_model=="ensemble"
+        weights = zeros(size(headmodel["pos"])[1])
+
         # select cornea and retina sources to simulate; set orientation; simulate EEG for each of the gaze vectors
 
-        # indices in eyemodel, of the points which we want to use to simulate data, i.e. retina & cornea. used for ensemble simulation. 
-        src_idx = [eyemodel["eyeleft_idx"]; eyemodel["eyeright_idx"]]
+        # indices in headmodel, of the points which we want to use to simulate data, i.e. retina & cornea. used for ensemble simulation. 
+        src_idx = [headmodel["eyeleft_idx"]; headmodel["eyeright_idx"]]
         
         
         for ix in eachindex((gazevectors))
             # weight changes depending on retina/cornea type based on current gazevector
-            weights[src_idx] .= mapslices(x -> is_corneapoint(x,gazedir,max_cornea_angle_deg), eyemodel["orientation"][src_idx,:])
+            weights[src_idx] .= mapslices(x -> is_corneapoint(x,gazedir,max_cornea_angle_deg), headmodel["orientation"][src_idx,:])
             # change the above line to separately calculate weights for left and right eye if giving gazepoints and calculating gaze vectors separately. or just run simulate_eyemovement twice, once with gazevectors based on left eye and once with right eye? 
 
-            signal[:,ix] = eyegaze_eeg(eyemodel, src_idx, weights)
+            leadfields[:,ix] = generate_eyegaze_eeg(headmodel, src_idx, weights)
         end
 
+    else
+        @error "Neither CRD nor Ensemble model selected. No eye movement simulation performed."
     end
 
-    return signal
+    return leadfields
 end
 
 
