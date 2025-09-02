@@ -68,7 +68,7 @@ end
 
 """
 TODO docstring
-Calculate orientations from the given positions with respect to the reference. `direction` is by default "away" from the reference point; set `towards` to calculate orientations away from the reference point.
+Calculate orientations from the given positions with respect to the reference. `direction` is by default "away" from the reference point; set `towards=true` to calculate orientations away from the reference point.
 """
 function calc_orientations(reference, positions; towards=false, away=true)
     if towards
@@ -111,18 +111,88 @@ function ensemble_leadfield(eyemodel, sim_idx::Vector{Int}, gazedir::Vector{Floa
 	source_weights = zeros(size(eyemodel["pos"])[1]) # all sources other than those defined by sim_idx will be set to zero magnitude 
 	source_weights[sim_idx] .= mapslices(x -> is_corneapoint(x,gazedir,max_cornea_angle_deg), eyemodel["orientation"][sim_idx,:],dims=2)
 	
-	weighted_sum = sum(mag_model[:,idx].* source_weights[idx] for idx in sim_idx,dims=2)
+	weighted_sum = sum(mag_model[:,idx].* source_weights[idx] for idx in sim_idx)
 	return weighted_sum
 end
 
 
 """
 TODO docstring
-Calculate the sum of leadfields of just the source points at the given indices. 
+Multiple gaze direction vectors. Assumes orientations are already set in eyemodel
 """
-function selected_sources_eeg(eyemodel,src_idx,equiv_orientations)
-	mag_eyemodel_equiv = magnitude(eyemodel["leadfield"],eyemodel["orientation"])
-	mag = sum(mag_eyemodel_equiv[:,ii] for ii in src_idx)
+function eyegaze_eeg(eyemodel, src_idx::Vector{Int}, gazedir::Vector{Vector{Float64}}, weights)
+
+    signal = zeros(size(eyemodel["pos"])[1],length(gazedir))
+    for ix in eachindex(gazedir)
+        signal[:,ix] = eyegaze_eeg(eyemodel, src_idx, weights[ix])
+    end
+
+    return signal
+end
+
+
+"""
+TODO docstring 
+Single gaze direction. Assumes orientations are already set in eyemodel
+"""
+function eyegaze_eeg(eyemodel, src_idx::Vector{Int}, weights::Vector{Int})
+
+    mag = magnitude(eyemodel["leadfield"],eyemodel["orientation"])
+    signal = sum(mag[:,idx].* weights[idx] for idx in src_idx)
+
+    return signal
+end
+
+
+"""
+TODO docstring
+"""
+function simulate_eyemovement(eyemodel, gazevectors::Vector{Vector{Float64}}; time::Vector{Number}, samplingrate::Number, crd=false, ensemble=false)
+    if (!crd && !ensemble)
+        @warn "Neither CRD nor Ensemble model selected. No simulation performed."
+        return []
+    end
+
+    # when gaze direction changes, 
+    # CRD: orientation changes, weight stays the same
+    # Ensemble: orientation stays the same, weight changes
+
+    # signal: matrix with dimensions [electrodes x n_gazepoints] 
+    signal = zeros(size(eyemodel["pos"])[1],length(gazevectors))
+
+    # weights: n_channel x n_gazevec
+
+    if crd
+        weights = ones(size(eyemodel["pos"])[1])
+        src_idx = [eyemodel["eyecenter_left_idx"] eyemodel["eyecenter_right_idx"]]
+        # select eye centers as source points; set orientation = gazevector
+        for ix in eachindex(gazevectors)
+            eyemodel["orientation"][eyemodel["eyecenter_left_idx"]] = gazevectors[ix]
+            eyemodel["orientation"][eyemodel["eyecenter_right_idx"]] = gazevectors[ix]
+            # or just use src_idx - will help later if we want to simulate just for one eye or so
+
+            signal[:,ix] = eyegaze_eeg(eyemodel, src_idx, weights)
+        end
+
+    elseif ensemble
+        weights = zeros(size(eyemodel["pos"])[1])
+        # select cornea and retina sources to simulate; set orientation; simulate EEG for each of the gaze vectors
+
+        # indices in eyemodel, of the points which we want to use to simulate data, i.e. retina & cornea. used for ensemble simulation. 
+        src_idx = [eyemodel["eyeleft_idx"]; eyemodel["eyeright_idx"]]
+        
+        
+        for ix in eachindex((gazevectors))
+            # weight changes depending on retina/cornea type based on current gazevector
+            weights[src_idx] .= mapslices(x -> is_corneapoint(x,gazedir,max_cornea_angle_deg), eyemodel["orientation"][src_idx,:])
+            # change the above line to separately calculate weights for left and right eye if giving gazepoints and calculating gaze vectors separately. or just run simulate_eyemovement twice, once with gazevectors based on left eye and once with right eye? 
+
+            signal[:,ix] = eyegaze_eeg(eyemodel, src_idx, weights)
+        end
+
+    end
+
+    return signal
 end
 
 
@@ -163,6 +233,11 @@ function import_eyemodel(; labels=[
     # add orientations (by default all set to zero)
 	eyemodel["orientation"] = zeros(size(eyemodel["pos"]))
 
+    # calculate eye surface sources' orientations away from the respective eye centers
+    # later use negative weightage for the points where the source dipole points towards the center (i.e. the retina points).  
+    eyemodel["orientation"][eyemodel["eyeleft_idx"],:] = calc_orientations(eyemodel["eyecenter_left_pos"], eyemodel["pos"][eyemodel["eyeleft_idx"],:])
+    eyemodel["orientation"][eyemodel["eyeright_idx"],:] = calc_orientations(eyemodel["eyecenter_right_pos"], eyemodel["pos"][eyemodel["eyeright_idx"],:]) 
+
     return eyemodel, lsi_eyemodel
 end
 
@@ -179,45 +254,3 @@ function find_avg_gazedir()
 end
 
 #TODO auto-find cornea max. angle from center and cornea point positions
-
-
-"""
-TODO docstring
-"""
-function simulate_eyemovement(eyemodel, gazevectors::Vector{Vector{Float64}}; time::Vector{Number}, samplingrate::Number, crd=false, ensemble=false)
-    if (!crd && !ensemble)
-        @warn "Neither CRD nor Ensemble model selected. No simulation performed."
-        return []
-    end
-
-    # leadfields: matrix with dimensions [electrodes x n_gazepoints] 
-    leadfields = zeros(size(eyemodel["pos"])[1],length(gazevectors))
-
-    if crd
-        # select eye centers as source points; set orientation = gazevector; simulate
-        for ix in eachindex(gazevectors)
-            eyemodel["orientation"][eyemodel["eyecenter_left_idx"]] = gazevectors[ix]
-            eyemodel["orientation"][eyemodel["eyecenter_right_idx"]] = gazevectors[ix]
-            leadfields[:,ix] = selected_sources_eeg(eyemodel,[eyemodel["eyecenter_left_idx"] eyemodel["eyecenter_right_idx"]],gazevectors[ix])
-        end
-
-    elseif ensemble
-        # select cornea and retina sources to simulate; set orientation; simulate EEG for each of the gaze vectors
-
-        sim_srcs_idx = [eyemodel["eyeleft_idx"]; eyemodel["eyeright_idx"]] # indices in eyemodel, of the points which we want to use to simulate data, i.e. retina & cornea. used for ensemble simulation. 
-
-        # calculate eyeball source orientations away from center, later use negative weightage for the points where the source dipole points towards the center (i.e. the retina points).
-        eyemodel["orientation"][eyemodel["eyeleft_idx"],:] = calc_orientations(eyemodel["eyecenter_left_pos"], eyemodel["pos"][eyemodel["eyeleft_idx"],:])
-        eyemodel["orientation"][eyemodel["eyeright_idx"],:] = calc_orientations(eyemodel["eyecenter_right_pos"], eyemodel["pos"][eyemodel["eyeright_idx"],:]) 
-
-        for ix in eachindex((gazevectors))
-            # for each gazepoint, calculate the leadfield and store it in the corresponding column
-            leadfields[:,ix] = ensemble_leadfield(eyemodel, sim_srcs_idx, gazevectors[ix], 54.0384)
-        end
-
-    end
-
-    # placeholder: matching the simulated leadfields with time points?
-
-    leadfields
-end
