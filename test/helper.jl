@@ -18,4 +18,9 @@
 
 
     end
+
+    @testset "example_data_eyemovements" begin
+        example_data = UnfoldSim.example_data_eyemovements()
+        @test size(example_data) == (136, 2000)
+    end
 end

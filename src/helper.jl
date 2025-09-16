@@ -273,3 +273,10 @@ function epoch(data::AbstractVector, args...; kwargs...)
     ep = epoch(data_r, args...; kwargs...)
     return dropdims(ep; dims = 1)
 end
+
+function example_data_eyemovements()
+    return Matrix(CSV.read("src/sample_eeg_eyemovements.csv",DataFrame))
+    # Eye tracking and EEG combined dataset
+    # channels 1,2 are eye tracking values: HREF angles; 3 is pupil size.
+    # channels 4-6: same but for other eye
+end
