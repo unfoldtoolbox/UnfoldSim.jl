@@ -19,6 +19,7 @@ using LinearAlgebra # headmodel
 
 using CoordinateTransformations
 import CoordinateTransformations.CartesianFromSpherical # artifacts - gaze direction vector
+using CSV # artifacts - importing sample data from csv file
 
 import DSP.hanning
 import Base.length
@@ -35,6 +36,7 @@ include("headmodel.jl")
 include("helper.jl")
 include("bases.jl")
 include("UnfoldSimArtifacts.jl")
+include("AbstractContinuousSignal.jl")
 
 export size, length
 export AbstractComponent, AbstractNoise, AbstractOnset, AbstractDesign
