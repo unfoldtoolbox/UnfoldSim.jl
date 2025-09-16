@@ -146,14 +146,7 @@ given a head model, an array of gaze direction vectors defining the eye movement
     
 TODO docstring; type for headmodel; auto-conversion from x,y angles to gaze direction vectors
 """
-function simulate_eyemovement(headmodel, gazevectors::Vector{Vector{Float64}}; eye_model::String="crd")
-
-    # if (x,y) angles have been passed in, convert them to cartesian coordinates
-    # if(size(gazevectors)[2]==2)       
-    #   hcat(gazevec_from_angle_3d.(gd_realdata[1,:],gd_realdata[2,:]))
-    # end
-
-
+function simulate_eyemovement(headmodel, gazevectors::GazeDirectionVectors; eye_model::String="crd")
     # when gaze direction vector changes, 
     # CRD: orientation changes, weight stays the same (=1 for all points)
     # Ensemble: orientation stays the same, weight changes (=1 for cornea points, -1 for retina points, calculated based on gaze direction)
@@ -242,7 +235,7 @@ function import_eyemodel(; labels=[
     eyemodel["orientation"][eyemodel["eyeleft_idx"],:] = calc_orientations(eyemodel["eyecenter_left_pos"], eyemodel["pos"][eyemodel["eyeleft_idx"],:])
     eyemodel["orientation"][eyemodel["eyeright_idx"],:] = calc_orientations(eyemodel["eyecenter_right_pos"], eyemodel["pos"][eyemodel["eyeright_idx"],:]) 
 
-    return eyemodel, lsi_eyemodel
+    return eyemodel
 end
 
 """
@@ -258,3 +251,23 @@ function find_avg_gazedir()
 end
 
 #TODO auto-find cornea max. angle from center and cornea point positions
+
+
+function a_z_simulation()
+    # import hartmut model - modified with new eye points
+    eyemodel::AbstractHeadmodel = import_eyemodel()
+
+    # import href gaze coordinates
+    sample_data = example_data_eyemovements()
+    href_trajectory::HREFCoordinates = sample_data[1:2,:]
+
+    # setup basic ingredients for simulate
+    #       design, .... , noise
+
+        # Ques: should it be possible to simulate just for eyemovement, without specifying any design etc? Just passing in the eye trajectory?
+
+    # call simulate with href coords
+    simulate(d, c, o, [EyeMovement(href_trajectory, eyemodel, nothing) NoNoise()]) # TODO clarify!
+
+    # plot simulated data
+end

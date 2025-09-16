@@ -183,6 +183,13 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
 
 end
 
+function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::AbstractOnset,s::Vector{Union{AbstractContinuousSignal, AbstractNoise}})
+    controlsignal::Matrix = generate_controlsignal(deepcopy(rng),s) # Matrix (feat x time)
+    signal::Matrix = simulate_continuoussignal(deepcopy(rng),s,controlsignal) # --> contains all the different noise-related signals. ((feat x time?))
+    # so here we do the normal simulation and then add the prev result to the result of normal simulation?
+
+    # TODO see Ref syntax from pseudocode
+end
 
 """
     create_continuous_signal(rng, responses, simulation)

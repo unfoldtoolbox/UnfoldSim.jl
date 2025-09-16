@@ -5,8 +5,6 @@ abstract type AbstractDesign end
 
 abstract type AbstractComponent end
 
-abstract type AbstractContinuousSignal end
-
 # find other types in onset.jl and noise.jl
 # and in design.jl and component.jl
 
@@ -70,8 +68,4 @@ struct Simulation
     components::Vector{AbstractComponent}
     onset::AbstractOnset
     noisetype::AbstractNoise
-end
-
-struct EyeMovement <: AbstractContinuousSignal
-    controlsignal
 end
