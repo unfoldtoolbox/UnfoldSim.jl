@@ -69,3 +69,40 @@ struct Simulation
     onset::AbstractOnset
     noisetype::AbstractNoise
 end
+
+
+# Eye Movement
+abstract type AbstractControlSignal{T} end
+
+struct HREFCoordinates{T} <: AbstractControlSignal{T}
+    val::Matrix{T}
+end
+
+struct GazeDirectionVectors{T} <: AbstractControlSignal{T}
+    val::Matrix{T}
+end
+
+
+
+# Artifacts
+
+abstract type AbstractContinuousSignal end
+
+struct EyeMovement{T} <: AbstractContinuousSignal
+    controlsignal::T
+    headmodel
+    # events # <-- from realdata (or from controlsignal?) or passed in by user. will be added into the events dataframe returned by simulation function
+end
+
+struct TRF <: AbstractContinuousSignal
+    controlsignal
+    # TBD
+end
+
+@with_kw struct PowerLineNoise <: AbstractContinuousSignal
+    controlsignal
+    base_freq::Float64 = 50
+    harmonics::Array{Int} = [1 3 5]
+    sampling_rate::Float64 = 500
+end
+

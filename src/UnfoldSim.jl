@@ -20,6 +20,7 @@ using LinearAlgebra # headmodel
 using CoordinateTransformations
 import CoordinateTransformations.CartesianFromSpherical # artifacts - gaze direction vector
 using CSV # artifacts - importing sample data from csv file
+using MAT # artifacts - loading model from .mat file
 
 import DSP.hanning
 import Base.length
@@ -35,8 +36,8 @@ include("predefinedSimulations.jl")
 include("headmodel.jl")
 include("helper.jl")
 include("bases.jl")
-include("UnfoldSimArtifacts.jl")
 include("AbstractContinuousSignal.jl")
+include("UnfoldSimArtifacts.jl")
 
 export size, length
 export AbstractComponent, AbstractNoise, AbstractOnset, AbstractDesign
@@ -86,4 +87,4 @@ export MultichannelComponent
 end
 
 # artifacts
-export simulate_eyemovement
+export simulate_eyemovement, GazeDirectionVectors, HREFCoordinates, AbstractControlSignal, import_eyemodel, AbstractContinuousSignal, EyeMovement

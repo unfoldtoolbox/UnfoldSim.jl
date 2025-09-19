@@ -58,7 +58,7 @@ Arguments:
 Returns:
 - `labelsourceindices::Dict`: Dict with the keys being the label and the values being the indices of sources with that label in the given model. 
 """
-function hart_indices_from_labels(headmodel,labels::Vector{String}=["dummy"])
+function hart_indices_from_labels(headmodel,labels::AbstractVector=["dummy"])
     labelsourceindices = Dict()
     for l in labels
         labelsourceindices[l] = findall(k->occursin(l,k),headmodel["label"][:])
@@ -144,7 +144,7 @@ given a head model, an array of gaze direction vectors defining the eye movement
 # Returns
 - 
     
-TODO docstring; type for headmodel; auto-conversion from x,y angles to gaze direction vectors
+TODO docstring; type for headmodel; always takes in gaze direction vectors as controlsignal
 """
 function simulate_eyemovement(headmodel, gazevectors::GazeDirectionVectors; eye_model::String="crd")
     # when gaze direction vector changes, 
@@ -205,7 +205,7 @@ function import_eyemodel(; labels=[
     ,"EyeCornea_right"
     ,"EyeCenter_left"
     ,"EyeCenter_right"
-], modelpath="HArtMuT_NYhead_extra_eyemodel_hull_mesh8_2025-03-01.mat"
+], modelpath="src/HArtMuT_NYhead_extra_eyemodel_hull_mesh8_2025-03-01.mat"
 )   
     eyemodel = read_eyemodel(; p=modelpath)
     remove_indices = [164, 165, 166, 167] # since eyemodel structure doesn't exactly correspond to the main hartmut mat structure expected by the read_new_hartmut function, just get the indices of the electrodes that it drops & drop the same indices from eyemodel directly 
@@ -217,7 +217,6 @@ function import_eyemodel(; labels=[
 	hart_small = Hartmut()
 	pos3d = hart_small.electrodes["pos"]
     eyemodel["electrodes"] = deepcopy(hart_small.electrodes)
-    eyemodel["electrodes"]["pos2d"] = pos2dfrom3d(pos3d)
 
     # add indices and positions of certain sets of sources, to make them easier to access
     eyemodel["eyeleft_idx"] = [ lsi_eyemodel["EyeCornea_left"] ; lsi_eyemodel[r"EyeRetina_Choroid_Sclera_left$"] ] # eyemodel_left_idx
@@ -253,21 +252,29 @@ end
 #TODO auto-find cornea max. angle from center and cornea point positions
 
 
-function a_z_simulation()
+function az_simulation()
     # import hartmut model - modified with new eye points
-    eyemodel::AbstractHeadmodel = import_eyemodel()
+    eyemodel = import_eyemodel()
 
     # import href gaze coordinates
     sample_data = example_data_eyemovements()
-    href_trajectory::HREFCoordinates = sample_data[1:2,:]
+    href_trajectory = sample_data[1:2,:]
 
     # setup basic ingredients for simulate
-    #       design, .... , noise
-
-        # Ques: should it be possible to simulate just for eyemovement, without specifying any design etc? Just passing in the eye trajectory?
+    design = SingleSubjectDesign(; conditions = Dict(:cond_A => ["level_A", "level_B"])) |> x -> RepeatDesign(x, 10);
+    signal = LinearModelComponent(;
+    basis = [0, 0, 0, 0.5, 1, 1, 0.5, 0, 0],
+    formula = @formula(0 ~ 1 + cond_A),
+    β = [1, 0.5],
+    );
+    onset = UniformOnset(; width = 20, offset = 4);
+    noise = PinkNoise(; noiselevel = 0.2);
 
     # call simulate with href coords
-    simulate(d, c, o, [EyeMovement(href_trajectory, eyemodel, nothing) NoNoise()]) # TODO clarify!
+
+    println("Calling simulate...")
+    data, events = simulate(MersenneTwister(1), design, signal, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise]);
+    # simulate(d, c, o, [EyeMovement(href_trajectory, eyemodel) NoNoise()])
 
     # plot simulated data
 end
