@@ -183,12 +183,22 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
 
 end
 
-function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::AbstractOnset,s::Vector{Union{AbstractContinuousSignal, AbstractNoise}})
-    controlsignal::Matrix = generate_controlsignal(deepcopy(rng),s) # Matrix (feat x time)
-    signal::Matrix = simulate_continuoussignal(deepcopy(rng),s,controlsignal) # --> contains all the different noise-related signals. ((feat x time?))
-    # so here we do the normal simulation and then add the prev result to the result of normal simulation?
+"""TODO docstring
+s: Vector of AbstractContinuousSignal and/or AbstractNoise 
+"""
+function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::AbstractOnset,s::AbstractVector)
+    
 
-    # TODO see Ref syntax from pseudocode
+    sim = Simulation(d, c, o, NoNoise()) # since generated controlsignal might depend on some aspect of the simulation
+
+    println(typeof.(s))
+    controlsignal = generate_controlsignal.(deepcopy(rng),s,Ref(sim)) # Matrix (feat x time)
+    signal, evts = simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim))
+
+    # do the normal simulation and then add to the previous result
+    signal2,evts = simulate(rng,d,c,o,NoNoise())
+    # simulate_noise(rng,PinkNoise(3),max(length(signal),length(signal2)))
+    # return signal .+ signal2,evts # i.e. add the signals eeg & artifact
 end
 
 """

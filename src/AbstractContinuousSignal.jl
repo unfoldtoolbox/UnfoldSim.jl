@@ -1,33 +1,20 @@
-abstract type AbstractContinuousSignal end
-
-struct EyeMovement <: AbstractContinuousSignal
-    controlsignal
-    headmodel
-    # events # <-- from realdata (or from controlsignal?) or passed in by user. will be added into the events dataframe returned by simulation function
-end
-
-struct TRF <: AbstractContinuousSignal
-    controlsignal
-    # TBD
-end
-
-struct PowerLineNoise <: AbstractContinuousSignal
-    controlsignal
-    base_freq::Float64 = 50
-    harmonics::Array{Int} = [1 3 5]
-    sampling_rate::Float64 = 500
-end
-
 """
 controlsignal: 
 2 x n_timepoints Matrix containing x,y angles specifying n gaze direction vectors (measured from center gaze reference)
 TODO docstring
 """
-function simulate_continuoussignal(rng::AbstractRNG,s::EyeMovement,controlsignal::HREFCoordinates, headmodel::AbstractHeadmodel, eye_model="crd")
-    return simulate_eyemovement(headmodel,gazevec_from_angle_3d.(controlsignal[1,:],controlsignal[2,:]); eye_model=eye_model)
+# -> also takes the simulation object since it might influence the generated controlsignal 
+# always take controlsignal only of GazeDirectionVectors
+function simulate_continuoussignal(rng::AbstractRNG, s::EyeMovement, controlsignal::GazeDirectionVectors, sim::Simulation)
+    headmodel = s.headmodel
+    return simulate_eyemovement(headmodel,controlsignal.coords; eye_model=s.eye_model)
 end
 
-function simulate_continuoussignal(rng::AbstractRNG,s::PowerLineNoise,controlsignal::AbstractArray, base_freq::Float64, harmonics::Array{Int} = [1 3 5], sampling_rate::Float64 = 500.0)
+function simulate_continuoussignal(rng::AbstractRNG, s::PowerLineNoise, controlsignal::AbstractArray, sim::Simulation;)
+    base_freq = s.base_freq
+    harmonics = s.harmonics
+    sampling_rate = s.sampling_rate
+
     k = 0:1:size(controlsignal)-1 # assumes controlsignal is just 1D 
     # TODO add check for nyquist criterion? sampling rate & freq -> warn or error?
 
@@ -39,6 +26,11 @@ function simulate_continuoussignal(rng::AbstractRNG,s::PowerLineNoise,controlsig
     # weight the values at each point, if we need to have different relative strengths of harmonics or if we want to switch on/off the PLN
 end
 
+# AbstractNoise: doesn't simulate anything, returns empty Array. Since noise simulation will be handled separately in artifact-aware simulate()
+function simulate_continuoussignal(rng::AbstractRNG, s::AbstractNoise, controlsignal::AbstractArray, sim::Simulation)
+    
+end
+
 # function simulate_continuoussignal(rng, s::TRF, controlsignal::)
 #     # TBD
 # end
@@ -47,16 +39,24 @@ end
 
 # sketching possibilities for generate_controlsignal
 
-function generate_controlsignal(rng::AbstractRNG, c::GazeDirectionVectors)
-    return c
+# generate_controlsignal - returns controlsignal for the specified type of AbstractContinuousSignal
+# -> also takes the simulation object since it might influence the generated controlsignal (e.g. generate blinks right after event A -> controlsignal depends on the design) 
+
+# for EyeMovement, always return GazeDirectionVectors
+
+function generate_controlsignal(rng::AbstractRNG, cs::GazeDirectionVectors, sim::Simulation)
+    return cs.val
 end
 
-function generate_controlsignal(rng::AbstractRNG, c::HREFCoordinates)
-    return gazevec_from_angle_3d.(c[1,:],c[2,:])
+function generate_controlsignal(rng::AbstractRNG, cs::HREFCoordinates, sim::Simulation)
+    return gazevec_from_angle_3d.(cs.val[1,:],cs.val[2,:])
 end
 
-abstract type AbstractControlSignal end
+function generate_controlsignal(rng::AbstractRNG, s::EyeMovement, sim::Simulation)
+    return generate_controlsignal(rng, s.controlsignal, sim)
+end
 
-struct HREFCoordinates <: AbstractControlSignal end
-
-struct GazeDirectionVectors <: AbstractControlSignal end
+# AbstractNoise: returns empty Array. Since noise simulation will be handled separately in artifact-aware simulate()
+function generate_controlsignal(rng::AbstractRNG, s::AbstractNoise, sim::Simulation)
+    return []
+end
