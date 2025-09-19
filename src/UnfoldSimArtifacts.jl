@@ -22,7 +22,7 @@ Calculate the gaze vector in 3-D world coordinates, given the horizontal and ver
 function gazevec_from_angle_3d(angle_H, angle_V)
 	# angles measured from center gaze position => use complementary angle for θ; 
     # ϕ is already measured upwards from the x-y plane, according to the conventions of CoordinateTransformations.jl
-	return Array{Float32}(CartesianFromSpherical()(Spherical(1, deg2rad(90-angle_H), deg2rad(angle_V))))
+	return Vector{Float32}(CartesianFromSpherical()(Spherical(1, deg2rad(90-angle_H), deg2rad(angle_V))))
 end
 
 
@@ -123,7 +123,7 @@ end
 TODO docstring 
 Single gaze direction. Assumes orientations are already set in eyemodel
 """
-function generate_eyegaze_eeg(eyemodel, src_idx::Vector{Int}, weights::Vector{Int})
+function generate_eyegaze_eeg(eyemodel, src_idx::AbstractVector, weights::AbstractVector)
 
     mag = magnitude(eyemodel["leadfield"],eyemodel["orientation"])
     signal = sum(mag[:,idx].* weights[idx] for idx in src_idx)
@@ -146,26 +146,31 @@ given a head model, an array of gaze direction vectors defining the eye movement
     
 TODO docstring; type for headmodel; always takes in gaze direction vectors as controlsignal
 """
-function simulate_eyemovement(headmodel, gazevectors::GazeDirectionVectors; eye_model::String="crd")
+function simulate_eyemovement(headmodel, gazevectors::AbstractMatrix; eye_model::String="crd")
     # when gaze direction vector changes, 
     # CRD: orientation changes, weight stays the same (=1 for all points)
     # Ensemble: orientation stays the same, weight changes (=1 for cornea points, -1 for retina points, calculated based on gaze direction)
 
     # leadfields: matrix with dimensions [electrodes x n_gazepoints] 
-    leadfields = zeros(size(headmodel["pos"])[1],length(gazevectors))
+    leadfields = zeros(size(headmodel["electrodes"]["pos"])[1],size(gazevectors)[2])
 
     # weights: matrix of dimensions [n_channel x n_gazevec]
+
+    println(size(gazevectors))
 
     if eye_model=="crd"
         weights = ones(size(headmodel["pos"])[1])
         src_idx = [headmodel["eyecenter_left_idx"] headmodel["eyecenter_right_idx"]]
-        # select eye centers as source points; set orientation = gazevector
-        for ix in eachindex(gazevectors)
-            headmodel["orientation"][headmodel["eyecenter_left_idx"]] = gazevectors[ix]
-            headmodel["orientation"][headmodel["eyecenter_right_idx"]] = gazevectors[ix]
+        # select eye centers as source points; set orientation = each respective gazevector and find corresponding leadfield
+        
+        #TODO: can we make this independent of the headmodel object's orientations, and pass in the corresponding orientations directly to the function instead?
+        # the problem is that magnitude() will still only work with the model object's orientations.
+        for ix = 1:size(gazevectors)[2]
+            headmodel["orientation"][headmodel["eyecenter_left_idx"],:] = gazevectors[:,ix]
+            headmodel["orientation"][headmodel["eyecenter_right_idx"],:] = gazevectors[:,ix]
             # or just use src_idx - will help later if we want to simulate just for one eye or so
 
-            leadfields[:,ix] = generate_eyegaze_eeg(headmodel, src_idx, weights)
+            leadfields[:,ix] = generate_eyegaze_eeg(headmodel, vec(src_idx), weights)
         end
 
     elseif eye_model=="ensemble"
@@ -258,7 +263,7 @@ function az_simulation()
 
     # import href gaze coordinates
     sample_data = example_data_eyemovements()
-    href_trajectory = sample_data[1:2,:]
+    href_trajectory = sample_data[1:2,1:200]
 
     # setup basic ingredients for simulate
     design = SingleSubjectDesign(; conditions = Dict(:cond_A => ["level_A", "level_B"])) |> x -> RepeatDesign(x, 10);
@@ -270,11 +275,9 @@ function az_simulation()
     onset = UniformOnset(; width = 20, offset = 4);
     noise = PinkNoise(; noiselevel = 0.2);
 
-    # call simulate with href coords
+    # data, events = simulate(MersenneTwister(1), design, signal, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel)]);
 
-    println("Calling simulate...")
     data, events = simulate(MersenneTwister(1), design, signal, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise]);
-    # simulate(d, c, o, [EyeMovement(href_trajectory, eyemodel) NoNoise()])
 
     # plot simulated data
 end

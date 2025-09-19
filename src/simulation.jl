@@ -187,18 +187,22 @@ end
 s: Vector of AbstractContinuousSignal and/or AbstractNoise 
 """
 function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::AbstractOnset,s::AbstractVector)
-    
-
+    @assert all(x -> x isa AbstractContinuousSignal || x isa AbstractNoise, s) "Artifact-related inputs should all be of type AbstractContinuousSignal or AbstractNoise"
     sim = Simulation(d, c, o, NoNoise()) # since generated controlsignal might depend on some aspect of the simulation
 
-    println(typeof.(s))
-    controlsignal = generate_controlsignal.(deepcopy(rng),s,Ref(sim)) # Matrix (feat x time)
-    signal, evts = simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim))
+    println("Generating controlsignals...")
+    controlsignal = generate_controlsignal.(deepcopy(rng),s,Ref(sim)) # Vector (n_feat) of Matrix (__ x time)
+    @show size.(controlsignal)
+    println("Simulating continuous signals...")
+    signal, evts = simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim));
 
     # do the normal simulation and then add to the previous result
-    signal2,evts = simulate(rng,d,c,o,NoNoise())
+    println("Simulating EEG with no noise...")
+    signal2,evts = simulate(rng,d,c,o,NoNoise());
+    println("Simulate just noise -->")
     # simulate_noise(rng,PinkNoise(3),max(length(signal),length(signal2)))
     # return signal .+ signal2,evts # i.e. add the signals eeg & artifact
+    return signal, evts
 end
 
 """

@@ -4,10 +4,10 @@ controlsignal:
 TODO docstring
 """
 # -> also takes the simulation object since it might influence the generated controlsignal 
-# always take controlsignal only of GazeDirectionVectors
-function simulate_continuoussignal(rng::AbstractRNG, s::EyeMovement, controlsignal::GazeDirectionVectors, sim::Simulation)
+# always take controlsignal only of Gaze Direction Vectors: Matrix of size 3 x n_timepoints 
+function simulate_continuoussignal(rng::AbstractRNG, s::EyeMovement, controlsignal::AbstractMatrix, sim::Simulation)
     headmodel = s.headmodel
-    return simulate_eyemovement(headmodel,controlsignal.coords; eye_model=s.eye_model)
+    return simulate_eyemovement(headmodel,controlsignal)
 end
 
 function simulate_continuoussignal(rng::AbstractRNG, s::PowerLineNoise, controlsignal::AbstractArray, sim::Simulation;)
@@ -28,7 +28,7 @@ end
 
 # AbstractNoise: doesn't simulate anything, returns empty Array. Since noise simulation will be handled separately in artifact-aware simulate()
 function simulate_continuoussignal(rng::AbstractRNG, s::AbstractNoise, controlsignal::AbstractArray, sim::Simulation)
-    
+    return []
 end
 
 # function simulate_continuoussignal(rng, s::TRF, controlsignal::)
@@ -45,11 +45,13 @@ end
 # for EyeMovement, always return GazeDirectionVectors
 
 function generate_controlsignal(rng::AbstractRNG, cs::GazeDirectionVectors, sim::Simulation)
+    @assert size(cs.val)[1] == 3 "Please make sure gaze data has the shape 3 x n_timepoints."
     return cs.val
 end
 
 function generate_controlsignal(rng::AbstractRNG, cs::HREFCoordinates, sim::Simulation)
-    return gazevec_from_angle_3d.(cs.val[1,:],cs.val[2,:])
+    return reduce(hcat,gazevec_from_angle_3d.(cs.val[1,:],cs.val[2,:])) # always return a 3 x time_points matrix
+
 end
 
 function generate_controlsignal(rng::AbstractRNG, s::EyeMovement, sim::Simulation)

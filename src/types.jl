@@ -79,18 +79,18 @@ struct HREFCoordinates{T} <: AbstractControlSignal{T}
 end
 
 struct GazeDirectionVectors{T} <: AbstractControlSignal{T}
-    val::Matrix{T}
+    val::Matrix{T} # size 3 x n_timepoints
 end
 
 
 
 # Artifacts
-
 abstract type AbstractContinuousSignal end
 
 struct EyeMovement{T} <: AbstractContinuousSignal
     controlsignal::T
     headmodel
+    # TODO eye_model?
     # events # <-- from realdata (or from controlsignal?) or passed in by user. will be added into the events dataframe returned by simulation function
 end
 
