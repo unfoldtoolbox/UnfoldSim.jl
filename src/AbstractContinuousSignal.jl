@@ -27,6 +27,7 @@ function simulate_continuoussignal(rng::AbstractRNG, s::PowerLineNoise, controls
 end
 
 # AbstractNoise: doesn't simulate anything, returns empty Array. Since noise simulation will be handled separately in artifact-aware simulate()
+# TODO: option: select only the AbstractContinuousSignal objects by type when calling simulate_continuoussignal. Then we don't need this method
 function simulate_continuoussignal(rng::AbstractRNG, s::AbstractNoise, controlsignal::AbstractArray, sim::Simulation)
     return []
 end
@@ -51,14 +52,13 @@ end
 
 function generate_controlsignal(rng::AbstractRNG, cs::HREFCoordinates, sim::Simulation)
     return reduce(hcat,gazevec_from_angle_3d.(cs.val[1,:],cs.val[2,:])) # always return a 3 x time_points matrix
-
 end
 
-function generate_controlsignal(rng::AbstractRNG, s::EyeMovement, sim::Simulation)
-    return generate_controlsignal(rng, s.controlsignal, sim)
+function generate_controlsignal(rng::AbstractRNG, cs::EyeMovement, sim::Simulation)
+    return generate_controlsignal(rng, cs.controlsignal, sim)
 end
 
 # AbstractNoise: returns empty Array. Since noise simulation will be handled separately in artifact-aware simulate()
-function generate_controlsignal(rng::AbstractRNG, s::AbstractNoise, sim::Simulation)
-    return []
+function generate_controlsignal(rng::AbstractRNG, cs::AbstractNoise, sim::Simulation)
+    return zeros(Float64, 0, 0)
 end

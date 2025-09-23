@@ -272,12 +272,12 @@ function az_simulation()
     formula = @formula(0 ~ 1 + cond_A),
     β = [1, 0.5],
     );
+    hart = Hartmut();
+    mc = UnfoldSim.MultichannelComponent(signal, hart => "Left Postcentral Gyrus");
     onset = UniformOnset(; width = 20, offset = 4);
     noise = PinkNoise(; noiselevel = 0.2);
 
-    # data, events = simulate(MersenneTwister(1), design, signal, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel)]);
-
-    data, events = simulate(MersenneTwister(1), design, signal, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise]);
+    data, events = simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise; RedNoise()]);
 
     # plot simulated data
 end

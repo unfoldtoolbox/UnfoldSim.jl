@@ -191,18 +191,31 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     sim = Simulation(d, c, o, NoNoise()) # since generated controlsignal might depend on some aspect of the simulation
 
     println("Generating controlsignals...")
-    controlsignal = generate_controlsignal.(deepcopy(rng),s,Ref(sim)) # Vector (n_feat) of Matrix (__ x time)
-    @show size.(controlsignal)
+    controlsignal = generate_controlsignal.(deepcopy(rng),s,Ref(sim)) # Vector (n_feat) of Matrix (__ x time) -> each kind of artifact could have a different shape of controlsignal, so keep them as elements of the vector rather than combining to a matrix and losing information of which row(s) corresp. to which artifact  
+    @show size.(controlsignal) 
+    artifact_lengths = size.(controlsignal,2)
+    maxtime_artifacts = maximum(artifact_lengths)
+    padlengths = maxtime_artifacts .- artifact_lengths
+
     println("Simulating continuous signals...")
-    signal, evts = simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim));
+    artifact_signal, evts = [simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim))];
 
     # do the normal simulation and then add to the previous result
     println("Simulating EEG with no noise...")
-    signal2,evts = simulate(rng,d,c,o,NoNoise());
-    println("Simulate just noise -->")
-    # simulate_noise(rng,PinkNoise(3),max(length(signal),length(signal2)))
-    # return signal .+ signal2,evts # i.e. add the signals eeg & artifact
-    return signal, evts
+    eeg_signal,evts = simulate(rng,d,c,o,NoNoise());
+
+    length_noise = max(maxtime_artifacts,length(eeg_signal))
+    #TODO how to handle changing shape of eeg signal for 1D-4D case? specifically how to find the length in the time dimension
+    # use length of eyemovement only in time dimension. 
+    # PLN will also use the max length in time rather than counting the total number of simulated points across all channels 
+    @show length(artifact_signal),length(eeg_signal), size(artifact_signal) ,size(eeg_signal) 
+
+    println("Simulating just noise...")
+    noise_signal = [simulate_noise(rng,x,max(size(artifact_signal)[2],length(eeg_signal))) for x in s if x isa AbstractNoise]  
+    # for noise simulation, use length(eeg_signal) since we want to generate noise for all channels all timepoints in one go 
+    
+    # return signal .+ signal2,evts
+    return artifact_signal, evts, noise_signal, eeg_signal
 end
 
 """
