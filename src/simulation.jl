@@ -198,7 +198,8 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     padlengths = maxtime_artifacts .- artifact_lengths
 
     println("Simulating continuous signals...")
-    artifact_signal, evts = [simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim))];
+    artifact_signal = simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim)); #TODO handle events: right now for simplicity assume no events are being returned
+    @show size(artifact_signal), size.(artifact_signal)
 
     # do the normal simulation and then add to the previous result
     println("Simulating EEG with no noise...")
@@ -211,7 +212,7 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     @show length(artifact_signal),length(eeg_signal), size(artifact_signal) ,size(eeg_signal) 
 
     println("Simulating just noise...")
-    noise_signal = [simulate_noise(rng,x,max(size(artifact_signal)[2],length(eeg_signal))) for x in s if x isa AbstractNoise]  
+    noise_signal = [simulate_noise(rng,x,length(eeg_signal)) for x in s if x isa AbstractNoise]  #assumption: length(eeg) will always be more than the artifact length for multichannel simulation.  TODO take max. later when addressing single channel eeg sim
     # for noise simulation, use length(eeg_signal) since we want to generate noise for all channels all timepoints in one go 
     
     # return signal .+ signal2,evts
