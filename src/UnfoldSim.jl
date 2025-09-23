@@ -87,4 +87,6 @@ export MultichannelComponent
 end
 
 # artifacts
-export simulate_eyemovement, GazeDirectionVectors, HREFCoordinates, AbstractControlSignal, import_eyemodel, AbstractContinuousSignal, EyeMovement
+export simulate_eyemovement 
+export AbstractControlSignal, GazeDirectionVectors, HREFCoordinates
+export AbstractContinuousSignal, EyeMovement
