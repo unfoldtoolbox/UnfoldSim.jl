@@ -85,7 +85,12 @@ end
 
 
 # Artifacts
+"""
+TODO docstring
+`controlsignal`: Defines the control signal, always starting from the first time point. 
+"""
 abstract type AbstractContinuousSignal end
+# in future we may want to allow generating the noise on only a particular channel.
 
 struct EyeMovement{T} <: AbstractContinuousSignal
     controlsignal::T

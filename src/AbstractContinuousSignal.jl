@@ -11,6 +11,7 @@ function simulate_continuoussignal(rng::AbstractRNG, s::EyeMovement, controlsign
 end
 
 function simulate_continuoussignal(rng::AbstractRNG, s::PowerLineNoise, controlsignal::AbstractArray, sim::Simulation;)
+    # are different channels of the PLN in phase with each other?
     base_freq = s.base_freq
     harmonics = s.harmonics
     sampling_rate = s.sampling_rate
@@ -26,10 +27,9 @@ function simulate_continuoussignal(rng::AbstractRNG, s::PowerLineNoise, controls
     # weight the values at each point, if we need to have different relative strengths of harmonics or if we want to switch on/off the PLN
 end
 
-# AbstractNoise: doesn't simulate anything, returns empty Array. Since noise simulation will be handled separately in artifact-aware simulate()
-# TODO: option: select only the AbstractContinuousSignal objects by type when calling simulate_continuoussignal. Then we don't need this method
+# AbstractNoise: just returns empty Array - the noise simulation is handled separately in artifact-aware simulate()
 function simulate_continuoussignal(rng::AbstractRNG, s::AbstractNoise, controlsignal::AbstractArray, sim::Simulation)
-    return []
+    return zeros(Float64, 0, 0)
 end
 
 # function simulate_continuoussignal(rng, s::TRF, controlsignal::)
@@ -58,7 +58,7 @@ function generate_controlsignal(rng::AbstractRNG, cs::EyeMovement, sim::Simulati
     return generate_controlsignal(rng, cs.controlsignal, sim)
 end
 
-# AbstractNoise: returns empty Array. Since noise simulation will be handled separately in artifact-aware simulate()
+# AbstractNoise: returns empty Array for now, however in future the controlsignal for AbstractNoise may depend on the Simulation.
 function generate_controlsignal(rng::AbstractRNG, cs::AbstractNoise, sim::Simulation)
     return zeros(Float64, 0, 0)
 end

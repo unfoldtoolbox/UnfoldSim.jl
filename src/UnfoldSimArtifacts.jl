@@ -263,7 +263,7 @@ function az_simulation()
 
     # import href gaze coordinates
     sample_data = example_data_eyemovements()
-    href_trajectory = sample_data[1:2,1:200]
+    href_trajectory = sample_data[1:2,1:20]
 
     # setup basic ingredients for simulate
     design = SingleSubjectDesign(; conditions = Dict(:cond_A => ["level_A", "level_B"])) |> x -> RepeatDesign(x, 10);

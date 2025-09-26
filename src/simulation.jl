@@ -185,38 +185,63 @@ end
 
 """TODO docstring
 s: Vector of AbstractContinuousSignal and/or AbstractNoise 
+NOTE:
+1. It is assumed that `AbstractContinuousSignal.controlsignal` 
+    is defined from the start of the simulation. If you require the artifact to start at
+    a different time, please take care to pre-pad the controlsignal with zeros.
+2. EEG simulation components must be multichannel, and it is assumed that
+    the number and position of EEG channels are the same as in the artifact head model. 
 """
 function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::AbstractOnset,s::AbstractVector)
     @assert all(x -> x isa AbstractContinuousSignal || x isa AbstractNoise, s) "Artifact-related inputs should all be of type AbstractContinuousSignal or AbstractNoise"
     sim = Simulation(d, c, o, NoNoise()) # since generated controlsignal might depend on some aspect of the simulation
 
-    println("Generating controlsignals...")
-    controlsignal = generate_controlsignal.(deepcopy(rng),s,Ref(sim)) # Vector (n_feat) of Matrix (__ x time) -> each kind of artifact could have a different shape of controlsignal, so keep them as elements of the vector rather than combining to a matrix and losing information of which row(s) corresp. to which artifact  
-    @show size.(controlsignal) 
-    artifact_lengths = size.(controlsignal,2)
-    maxtime_artifacts = maximum(artifact_lengths)
-    padlengths = maxtime_artifacts .- artifact_lengths
+    # Current Assumptions:
+    # events from artifacts - not considered/handled right now
+    # EEG component is assumed to be multichannel and having the same number and positions of channels as the artifact.
+    # noise is considered to be independent of EEG/artifacts.
+    # controlsignals are generated only for AbstractContinuousSignal and not AbstractNoise.
+    # currently any number of noise components and/or artifacts are allowed. e.g. we can simulate RedNoise as well as PinkNoise and multiple EyeMovements each starting from t=0.
+    # eeg and artifact signals are simulated separately and then added together, padding to the larger of the two. Then noise is added to this signal.
 
-    println("Simulating continuous signals...")
-    artifact_signal = simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim)); #TODO handle events: right now for simplicity assume no events are being returned
-    @show size(artifact_signal), size.(artifact_signal)
 
-    # do the normal simulation and then add to the previous result
     println("Simulating EEG with no noise...")
     eeg_signal,evts = simulate(rng,d,c,o,NoNoise());
+    @show(size(eeg_signal))
 
-    length_noise = max(maxtime_artifacts,length(eeg_signal))
-    #TODO how to handle changing shape of eeg signal for 1D-4D case? specifically how to find the length in the time dimension
-    # use length of eyemovement only in time dimension. 
-    # PLN will also use the max length in time rather than counting the total number of simulated points across all channels 
-    @show length(artifact_signal),length(eeg_signal), size(artifact_signal) ,size(eeg_signal) 
-
-    println("Simulating just noise...")
-    noise_signal = [simulate_noise(rng,x,length(eeg_signal)) for x in s if x isa AbstractNoise]  #assumption: length(eeg) will always be more than the artifact length for multichannel simulation.  TODO take max. later when addressing single channel eeg sim
-    # for noise simulation, use length(eeg_signal) since we want to generate noise for all channels all timepoints in one go 
+    println("Generating controlsignals...")
+    controlsignal = generate_controlsignal.(deepcopy(rng),s,Ref(sim)) 
+    # Vector (n_feat) of Matrix (__ x time) -> each kind of artifact could have a different shape of controlsignal, so keep them as elements of the vector rather than combining to a matrix and losing information of which row(s) corresp. to which artifact  
+    @show size.(controlsignal) 
     
-    # return signal .+ signal2,evts
-    return artifact_signal, evts, noise_signal, eeg_signal
+    println("Simulating continuous signals...")
+    artifact_signal = simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim)); #TODO handle events: right now for simplicity assume no events are being returned
+    
+    filter!(signal -> size(signal) != (0,0), artifact_signal) # remove the empty arrays (e.g. from AbstractNoise)
+
+    combined_signals = [[eeg_signal] ; artifact_signal]
+    @info size(combined_signals), size.(combined_signals)
+
+    row_counts = [size(mat, 1) for mat in combined_signals];
+    @show row_counts
+    if length(unique(row_counts)) > 1
+        @warn "Simulated EEG and artifacts do not have the same number of channels: $(row_counts)"
+    end
+
+    max_cols = maximum([size(mat, 2) for mat in combined_signals])
+    for i in 1:length(combined_signals)
+        mat = combined_signals[i]
+        if size(mat, 2) < max_cols
+            combined_signals[i] = hcat(mat, zeros(size(mat, 1), max_cols - size(mat, 2)))
+        end
+    end
+
+    sum_signals = reduce(+, combined_signals) # sum of eeg and artifacts
+
+    println("Adding noise...")    
+    add_noise!.(rng,[x for x in s if x isa AbstractNoise],Ref(sum_signals))
+
+    return eeg_signal, artifact_signal, combined_signals, sum_signals, evts
 end
 
 """
