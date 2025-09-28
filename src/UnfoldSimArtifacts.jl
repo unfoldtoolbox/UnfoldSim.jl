@@ -210,7 +210,7 @@ function import_eyemodel(; labels=[
     ,"EyeCornea_right"
     ,"EyeCenter_left"
     ,"EyeCenter_right"
-], modelpath="src/HArtMuT_NYhead_extra_eyemodel_hull_mesh8_2025-03-01.mat"
+], modelpath=joinpath(pkgdir(UnfoldSim),"src/HArtMuT_NYhead_extra_eyemodel_hull_mesh8_2025-03-01.mat")
 )   
     eyemodel = read_eyemodel(; p=modelpath)
     remove_indices = [164, 165, 166, 167] # since eyemodel structure doesn't exactly correspond to the main hartmut mat structure expected by the read_new_hartmut function, just get the indices of the electrodes that it drops & drop the same indices from eyemodel directly 
@@ -277,7 +277,6 @@ function az_simulation()
     onset = UniformOnset(; width = 20, offset = 4);
     noise = PinkNoise(; noiselevel = 0.2);
 
-    data, events = simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise; RedNoise()]);
+    simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise; RedNoise()]);
 
-    # plot simulated data
 end

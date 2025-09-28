@@ -90,3 +90,4 @@ end
 export simulate_eyemovement 
 export AbstractControlSignal, GazeDirectionVectors, HREFCoordinates
 export AbstractContinuousSignal, EyeMovement
+export az_simulation

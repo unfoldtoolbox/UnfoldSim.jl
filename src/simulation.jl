@@ -203,7 +203,7 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     # controlsignals are generated only for AbstractContinuousSignal and not AbstractNoise.
     # currently any number of noise components and/or artifacts are allowed. e.g. we can simulate RedNoise as well as PinkNoise and multiple EyeMovements each starting from t=0.
     # eeg and artifact signals are simulated separately and then added together, padding to the larger of the two. Then noise is added to this signal.
-
+    # multiple EyeMovement artifacts are currently allowed. (TODO: check if it makes sense to restrict this. This could be useful if different Eyemovements have different offsets?)
 
     println("Simulating EEG with no noise...")
     eeg_signal,evts = simulate(rng,d,c,o,NoNoise());
@@ -241,7 +241,7 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     println("Adding noise...")    
     add_noise!.(rng,[x for x in s if x isa AbstractNoise],Ref(sum_signals))
 
-    return eeg_signal, artifact_signal, combined_signals, sum_signals, evts
+    return combined_signals, sum_signals, evts
 end
 
 """
