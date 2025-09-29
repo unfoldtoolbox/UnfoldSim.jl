@@ -37,9 +37,6 @@ end
 # end
 
 
-
-# sketching possibilities for generate_controlsignal
-
 # generate_controlsignal - returns controlsignal for the specified type of AbstractContinuousSignal
 # -> also takes the simulation object since it might influence the generated controlsignal (e.g. generate blinks right after event A -> controlsignal depends on the design) 
 

@@ -276,8 +276,7 @@ end
 
 """
 Returns example combined EEG-Eyetracking data from a dataset (Gert et al. 2022).
-Channels 1,2 are eye tracking values in head-referenced angle coordinates (HREF); channel 3 is the pupil size for that eye.
-Channels 4-6 are the same, for the other eye.
+Channels (rows) 1-7 are eye tracking channels: x/y left, pupil left, x/y right, pupil right, DIN.
 The remaining channels contain the corresponding EEG.
 
 TODO docstring

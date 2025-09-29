@@ -156,8 +156,6 @@ function simulate_eyemovement(headmodel, gazevectors::AbstractMatrix; eye_model:
 
     # weights: matrix of dimensions [n_channel x n_gazevec]
 
-    println(size(gazevectors))
-
     if eye_model=="crd"
         weights = ones(size(headmodel["pos"])[1])
         src_idx = [headmodel["eyecenter_left_idx"] headmodel["eyecenter_right_idx"]]
@@ -277,6 +275,6 @@ function az_simulation()
     onset = UniformOnset(; width = 20, offset = 4);
     noise = PinkNoise(; noiselevel = 0.2);
 
-    simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise; RedNoise()]);
+    simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise]);
 
 end
