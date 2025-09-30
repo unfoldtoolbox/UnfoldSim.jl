@@ -105,9 +105,10 @@ struct TRF <: AbstractContinuousSignal
 end
 
 @with_kw struct PowerLineNoise <: AbstractContinuousSignal
-    controlsignal
+    controlsignal::Matrix{Float64} = zeros(Float64, 0, 0)
     base_freq::Float64 = 50
     harmonics::Array{Int} = [1 3 5]
-    sampling_rate::Float64 = 500
+    weights_harmonics::Array{Float64} = ones(length(harmonics))
+    sampling_rate::Float64 = 1000
 end
 

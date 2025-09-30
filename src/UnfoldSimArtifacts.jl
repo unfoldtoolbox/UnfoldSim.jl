@@ -275,6 +275,6 @@ function az_simulation()
     onset = UniformOnset(; width = 20, offset = 4);
     noise = PinkNoise(; noiselevel = 0.2);
 
-    simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel, "ensemble"); noise]);
+    simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel, "ensemble"); noise; PowerLineNoise([0 0; 0 0], 50, [1 3 5], [0.001 0.0005 0], 1000); PowerLineNoise([0 0; 0 0], 60, [1 3 5], [0 0 0], 1000)]);
 
 end

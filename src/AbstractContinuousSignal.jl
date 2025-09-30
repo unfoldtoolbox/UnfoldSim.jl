@@ -11,21 +11,26 @@ function simulate_continuoussignal(rng::AbstractRNG, s::EyeMovement, controlsign
     return simulate_eyemovement(headmodel,controlsignal, eye_model)
 end
 
+"""
+controlsignal: weights to each channel x timepoint? -> user can decide this themselves.
+for now as an initial step it can directly be the simulated eeg itself.
+#TODO docstring
+"""
 function simulate_continuoussignal(rng::AbstractRNG, s::PowerLineNoise, controlsignal::AbstractArray, sim::Simulation;)
-    # are different channels of the PLN in phase with each other?
     base_freq = s.base_freq
     harmonics = s.harmonics
     sampling_rate = s.sampling_rate
+    weights_harmonics = s.weights_harmonics
 
-    k = 0:1:size(controlsignal)-1 # assumes controlsignal is just 1D 
+    n_samples = size(controlsignal,2)
+    k = 0:1:n_samples-1
     # TODO add check for nyquist criterion? sampling rate & freq -> warn or error?
 
-    n_samples = sampling_rate*length(controlsignal) + 1 # TODO check if we need the +1 or not depending on UnfoldSim conventions
-    # TODO generate sinusoids at each harmonic
+    harmonics_signals = [sin.(2 * pi * (base_freq.*h)/sampling_rate .* k) for h in harmonics].*weights_harmonics
+    # TODO: use controlsignal as weights for each channel x timepoint?
+    
+    return reduce(+,harmonics_signals)
 
-    # not sure yet if controlsignal should be multidimensional (e.g. different magnitudes for different channels => n_chan x time) 
-    # or if we just take the simplest case: the same vector will be used for all channels.
-    # weight the values at each point, if we need to have different relative strengths of harmonics or if we want to switch on/off the PLN
 end
 
 # AbstractNoise: just returns empty Array - the noise simulation is handled separately in artifact-aware simulate()
@@ -54,6 +59,12 @@ end
 
 function generate_controlsignal(rng::AbstractRNG, cs::EyeMovement, sim::Simulation)
     return generate_controlsignal(rng, cs.controlsignal, sim)
+end
+
+# PowerLineNoise: returns empty Array for now.
+# later, maybe weights for each channel x timepoint
+function generate_controlsignal(rng::AbstractRNG, cs::PowerLineNoise, sim::Simulation)
+    return zeros(Float64, 0, 0)
 end
 
 # AbstractNoise: returns empty Array for now, however in future the controlsignal for AbstractNoise may depend on the Simulation.

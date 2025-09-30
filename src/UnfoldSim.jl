@@ -89,5 +89,5 @@ end
 # artifacts
 export simulate_eyemovement 
 export AbstractControlSignal, GazeDirectionVectors, HREFCoordinates
-export AbstractContinuousSignal, EyeMovement
+export AbstractContinuousSignal, EyeMovement, PowerLineNoise
 export az_simulation
