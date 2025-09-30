@@ -7,7 +7,8 @@ TODO docstring
 # always take controlsignal only of Gaze Direction Vectors: Matrix of size 3 x n_timepoints 
 function simulate_continuoussignal(rng::AbstractRNG, s::EyeMovement, controlsignal::AbstractMatrix, sim::Simulation)
     headmodel = s.headmodel
-    return simulate_eyemovement(headmodel,controlsignal)
+    eye_model = s.eye_model
+    return simulate_eyemovement(headmodel,controlsignal, eye_model)
 end
 
 function simulate_continuoussignal(rng::AbstractRNG, s::PowerLineNoise, controlsignal::AbstractArray, sim::Simulation;)

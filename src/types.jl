@@ -92,10 +92,10 @@ TODO docstring
 abstract type AbstractContinuousSignal end
 # in future we may want to allow generating the noise on only a particular channel.
 
-struct EyeMovement{T} <: AbstractContinuousSignal
+@with_kw struct EyeMovement{T} <: AbstractContinuousSignal
     controlsignal::T
     headmodel
-    # TODO eye_model?
+    eye_model::String = "crd"
     # events # <-- from realdata (or from controlsignal?) or passed in by user. will be added into the events dataframe returned by simulation function
 end
 

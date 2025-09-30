@@ -97,7 +97,7 @@ end
 Return 1 if the angle between the given orientation vector and the gaze direction vector is less than or equal to the given maximum cornea angle; else return -1.
 
 """
-function is_corneapoint(orientation::Vector{Float64}, gazedir::Vector{Float64}, max_cornea_angle_deg::Float64)
+function is_corneapoint(orientation::Vector{Float64}, gazedir::Vector, max_cornea_angle_deg::Float64)
 	if(angle_between(orientation,gazedir)<=max_cornea_angle_deg)
 		return 1
 	else 
@@ -138,7 +138,7 @@ given a head model, an array of gaze direction vectors defining the eye movement
 
 # Arguments
 - `headmodel`: Head model to be used.
-- `gazevectors::Vector{Vector{Float64}}`: Vector of gaze direction vectors (in Cartesian coordinates) to define the eye movement trajectory. The vector should point from the eyes towards the point at which the gaze is directed. 
+- `gazevectors`: Gaze direction vectors (in Cartesian coordinates) to define the eye movement trajectory. The vector should point from the eyes towards the gaze target. 
 - `eye_model::String` (optional): Choice of model to use for the eye. Options available are "crd" (default) and "ensemble".
 
 # Returns
@@ -146,7 +146,7 @@ given a head model, an array of gaze direction vectors defining the eye movement
     
 TODO docstring; type for headmodel; always takes in gaze direction vectors as controlsignal
 """
-function simulate_eyemovement(headmodel, gazevectors::AbstractMatrix; eye_model::String="crd")
+function simulate_eyemovement(headmodel, gazevectors::AbstractMatrix, eye_model::String="crd")
     # when gaze direction vector changes, 
     # CRD: orientation changes, weight stays the same (=1 for all points)
     # Ensemble: orientation stays the same, weight changes (=1 for cornea points, -1 for retina points, calculated based on gaze direction)
@@ -180,9 +180,9 @@ function simulate_eyemovement(headmodel, gazevectors::AbstractMatrix; eye_model:
         src_idx = [headmodel["eyeleft_idx"]; headmodel["eyeright_idx"]]
         
         
-        for ix in eachindex((gazevectors))
+        for ix in 1:size(gazevectors,2)
             # weight changes depending on retina/cornea type based on current gazevector
-            weights[src_idx] .= mapslices(x -> is_corneapoint(x,gazedir,max_cornea_angle_deg), headmodel["orientation"][src_idx,:])
+            weights[src_idx] .= mapslices(x -> is_corneapoint(x,gazevectors[:,ix],54.0384), headmodel["orientation"][src_idx,:],dims=2)
             # change the above line to separately calculate weights for left and right eye if giving gazepoints and calculating gaze vectors separately. or just run simulate_eyemovement twice, once with gazevectors based on left eye and once with right eye? 
 
             leadfields[:,ix] = generate_eyegaze_eeg(headmodel, src_idx, weights)
@@ -275,6 +275,6 @@ function az_simulation()
     onset = UniformOnset(; width = 20, offset = 4);
     noise = PinkNoise(; noiselevel = 0.2);
 
-    simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel); noise]);
+    simulate(MersenneTwister(1), design, mc, onset, [EyeMovement(HREFCoordinates(href_trajectory), eyemodel, "ensemble"); noise]);
 
 end

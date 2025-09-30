@@ -217,13 +217,12 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     println("Simulating continuous signals...")
     artifact_signal = simulate_continuoussignal.(deepcopy(rng),s,controlsignal,Ref(sim)); #TODO handle events: right now for simplicity assume no events are being returned
     
-    filter!(signal -> size(signal) != (0,0), artifact_signal) # remove the empty arrays (e.g. from AbstractNoise)
+    println("Removing empty artifact signals...")
+    filter!(signal -> size(signal) != (0,0), artifact_signal) # remove the empty arrays (e.g. from AbstractNoise, PowerLineNoise)
 
     combined_signals = [[eeg_signal] ; artifact_signal]
-    @info size(combined_signals), size.(combined_signals)
 
     row_counts = [size(mat, 1) for mat in combined_signals];
-    @show row_counts
     if length(unique(row_counts)) > 1
         @warn "Simulated EEG and artifacts do not have the same number of channels: $(row_counts)"
     end
