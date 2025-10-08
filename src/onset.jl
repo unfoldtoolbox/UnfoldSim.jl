@@ -218,6 +218,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
     end
     # accumulate them
     onsets_accum = accumulate(+, onsets, dims = 1, init = 1)
+    # If the minimum component offset is negative, the onsets are shifted towards later in time to avoid that a component starts before the continuous signal starts.
     onsets_accum = onsets_accum .- min(minoffset(simulation.components), 0)
 
     return onsets_accum
