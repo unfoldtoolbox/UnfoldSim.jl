@@ -254,21 +254,26 @@ function create_continuous_signal(rng, responses, simulation)
     # flatten onsets (since subjects are concatenated in the events df)
     latencies = onsets[:,]
 
-    # combine responses with onsets
+    # calculate the required length of the continuous signal
+
+    # Reasoning:
+    # (1) We want the last event onset time to be within the signal -> lowerbound of max_length_continuous is `maximum(onsets)`
+    # (2) We want to extend the signal for those cases, where the response is longer than the last event onset time, without offset, the upper bound is: maximum(onsets)+max_length_component
+    # (3) In cases where we have a positive offset, the largest offset needs to be added  => maximum(onsets) + max_length_component + max(maxoffset(components), 0)
+    # (4) In cases where we have a negative offset, `max_length_component` might be reduced, by maximally the largest minoffset => maximum(onsets) + max_length_component + max(maxoffset(components), 0) + maximum(min.(get_offset.(components),0))
+
+    last_onset = maximum(onsets)
     max_length_component = maxlength(components)
 
+    calculated_onset = maximum(onsets) + max_length_component  # add the signal (ideally, we'd add the longest signal of the last event - but it's not so easy). (2)
+    calculated_onset += max(UnfoldSim.maxoffset(components), 0) # if the largest offset is positive, add it (3)
+    calculated_onset += maximum(min.(UnfoldSim.get_offset.(components), 0)) # add maximum of offsets that is smaller than 0 (4)
 
-    offset_range = max(maxoffset(components), 0) - min(minoffset(components), 0)
-
-    # because the maximum(onset) is already shifted by minoffset in onsets.jl / simulate_onsets, we have to undo it here, if not, we'd get signals that are too long
-
-    max_length_continuoustime =
-        Int(ceil(maximum(onsets) + minoffset(components))) .+ max_length_component .+
-        offset_range
-
+    max_length_continuoustime = max(last_onset, calculated_onset) # ensure that maximum(onsets) is lowerbound (1)
 
     signal = zeros(n_chan, max_length_continuoustime, n_subjects)
-    @debug size(signal), offset_range
+
+    # combine responses with onsets
     for e = 1:n_chan
         for s = 1:n_subjects
             for i = 1:n_trials
