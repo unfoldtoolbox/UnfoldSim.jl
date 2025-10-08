@@ -101,6 +101,8 @@ Should the `basis` be shifted? Returns c.offset for most components, if not impl
 get_offset(c::AbstractComponent)::Int = 0
 get_offset(c::LinearModelComponent)::Int = c.offset
 get_offset(c::MixedModelComponent)::Int = c.offset
+get_offset(c::Vector{<:AbstractComponent}) = get_offset.(c)
+get_offset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = get_offset.(values(d))
 
 maxoffset(c::Vector{<:AbstractComponent}) = maximum(get_offset.(c))
 maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(maxoffset.(values(d)))
