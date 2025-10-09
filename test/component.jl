@@ -86,12 +86,13 @@
             offset = 5,
         )
         @test UnfoldSim.get_offset(smin10) == -10
+        @test UnfoldSim.get_offset([smin10, splus5]) == [-10, 5]
         @test UnfoldSim.maxoffset([smin10, splus5]) == 5
         @test UnfoldSim.minoffset([smin10, splus5]) == -10
         @test UnfoldSim.minoffset(Dict('A' => [smin10, splus5])) == -10
         @test UnfoldSim.maxoffset(Dict('A' => [smin10, smin10], 'B' => [splus5, splus5])) ==
               5
-        # test that you can have a super large negative offset and dont run into errors (e.g. an event cannot even run in the issue to start before simulation time = 0)
+        # test that you can have a super large negative offset and don't run into errors (e.g. an event cannot even run in the issue to start before simulation time = 0)
 
         smin10000 = LinearModelComponent(;
             basis = [1, 2, 3],
@@ -120,7 +121,7 @@
         # if we go back -10_000 and front +10_000, we should get a signal measuring 20_000
         d, e = simulate(design, [smax10000, smin10000], UniformOnset(50, 0))
         @test length(d) > 20_000
-        @test length(d) < 25_000 # earlier tests had the signal at 30_000, a bti too long
+        @test length(d) < 25_000 # earlier tests had the signal at 30_000, a bit too long
         @test d[e.latency[1]+10_000] == 1
         @test d[e.latency[1]-10_000] == 1
 
@@ -159,5 +160,38 @@
         d, e = simulate(design, [smin10, smin20], UniformOnset(50, 0))
         @test d[e.latency[1]-1000] == 1
         @test d[e.latency[1]-2000] == 1
+
+        # Sequences with component offsets
+        design =
+            SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"])) |>
+            d -> RepeatDesign(SequenceDesign(d, "SR_"), 4)
+
+        components = Dict('S' => [smin10, splus5], 'R' => [smin10000])
+
+        @test UnfoldSim.get_offset(components) == [[-10_000], [-10, 5]]
+
+        o_width = 20
+        o_offset = 0
+        minoffset_shift = -1 * min(UnfoldSim.minoffset(components), 0) # latencies should be shifted to the right if minoffset is negative
+
+        for seed in range(1, 10)
+            d, e = simulate(
+                StableRNG(seed),
+                design,
+                components,
+                UniformOnset(offset = o_offset, width = o_width),
+                NoNoise(),
+            )
+            sequence_length = length(UnfoldSim.sequencestring(StableRNG(seed), design)) - 1 # without _
+
+            # Test onset shifts with component offsets and sequences (in particular inter-event-block distances) combined
+            @test minoffset_shift + 1 <= e.latency[1] <= minoffset_shift + 1 + o_width
+            @test minoffset_shift + 1 + (sequence_length + 1) * o_offset <=
+                  e.latency[sequence_length+1] <=
+                  minoffset_shift +
+                  1 +
+                  (sequence_length + 1) * o_width +
+                  2 * UnfoldSim.maxlength(components) # TODO: This part will fail once we implement a different went to specify the inter-event-block distances. Should be adapted then.
+        end
     end
 end
