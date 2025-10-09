@@ -267,7 +267,7 @@ function create_continuous_signal(rng, responses, simulation)
 
     calculated_onset = maximum(onsets) + max_length_component  # add the signal (ideally, we'd add the longest signal of the last event - but it's not so easy). (2)
     calculated_onset += max(maxoffset(components), 0) # if the largest offset is positive, add it (3)
-    calculated_onset += maximum(min.(vcat(get_offset(components)...), 0)) # add maximum of offsets that is smaller than 0 (4)
+    calculated_onset += maximum(min.(vcat(values(get_offset(components))...), 0)) # add maximum of offsets that is smaller than 0 (4)
 
     max_length_continuoustime = max(last_onset, calculated_onset) # ensure that maximum(onsets) is lowerbound (1)
 

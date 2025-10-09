@@ -168,7 +168,7 @@
 
         components = Dict('S' => [smin10, splus5], 'R' => [smin10000])
 
-        @test UnfoldSim.get_offset(components) == [[-10_000], [-10, 5]]
+        @test UnfoldSim.get_offset(components) == Dict('R' => [-10_000], 'S' => [-10, 5])
 
         o_width = 20
         o_offset = 0
@@ -191,7 +191,7 @@
                   minoffset_shift +
                   1 +
                   (sequence_length + 1) * o_width +
-                  2 * UnfoldSim.maxlength(components) # TODO: This part will fail once we implement a different went to specify the inter-event-block distances. Should be adapted then.
+                  2 * UnfoldSim.maxlength(components) # TODO: This part will fail once we implement a different way to specify the inter-event-block distances. Should be adapted then.
         end
     end
 end
