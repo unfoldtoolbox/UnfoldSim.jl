@@ -26,11 +26,36 @@ Generator for Hanning window, negative (!) peak at 400ms, width 400ms, at kwargs
 n400(; sfreq = 100) = -hanning(0.4, 0.4, sfreq)
 
 """
-generate a hanning window
+    hanning(duration, offset, sfreq)
 
-width: in s
-offset: in s, defines hanning peak, must be > round(width/2)
-sfreq: sampling rate in Hz
+Generate a (potentially shifted) hanning window with a certain duration. 
+
+Note: This function extends the `DSP.hanning` function using multiple dispatch.
+
+# Arguments
+- `width`: in s.
+- `offset`: in s, defines the location of the hanning peak i.e. shift of the hanning window. Must be > `round(width/2)` (otherwise the left part of the curve would be cut off).
+- `sfreq`: Sampling rate in Hz.
+
+# Returns
+- `Vector`: Contains a shifted (i.e. zero-padded) hanning window.
+
+# Examples
+```julia-repl
+julia> UnfoldSim.hanning(0.1, 0.3, 100)
+35-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ ⋮
+ 0.9698463103929542
+ 0.75
+ 0.4131759111665348
+ 0.116977778440511
+ 0.0
+```
 """
 function DSP.hanning(width, offset, sfreq)
     width = width * sfreq
