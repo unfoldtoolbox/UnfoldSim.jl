@@ -61,7 +61,7 @@ function DSP.hanning(width, offset, sfreq)
     width = width * sfreq
     offset = offset * sfreq
     signal = hanning(Int(round(width)))
-    pad_by = Int(round(offset - length(signal) / 2))
+    pad_by = Int(round(offset - (length(signal)+1) / 2))
 
     pad_by < 0 ? error("The offset has to be > round((width+1)/2). Otherwise, the left part of the curve would be cut off. To create a component which starts before the event onset, one can use the `offset` parameter of a component.") : ""
     return pad_array(signal, -pad_by, 0)
