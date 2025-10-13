@@ -127,37 +127,37 @@
 
 
 
-        smax10 = LinearModelComponent(;
+        smax1000 = LinearModelComponent(;
             basis = [1, 2, 3],
             formula = @formula(0 ~ 1),
             β = [1],
             offset = +1000,
         )
-        smax20 = LinearModelComponent(;
+        smax2000 = LinearModelComponent(;
             basis = [1, 2, 3],
             formula = @formula(0 ~ 1),
             β = [1],
             offset = +2000,
         )
 
-        d, e = simulate(design, [smax10, smax20], UniformOnset(50, 0))
+        d, e = simulate(design, [smax1000, smax2000], UniformOnset(50, 0))
         @test d[e.latency[1]+1000] == 1
         @test d[e.latency[1]+2000] == 1
 
-        smin10 = LinearModelComponent(;
+        smin1000 = LinearModelComponent(;
             basis = [1, 2, 3],
             formula = @formula(0 ~ 1),
             β = [1],
             offset = -1000,
         )
-        smin20 = LinearModelComponent(;
+        smin2000 = LinearModelComponent(;
             basis = [1, 2, 3],
             formula = @formula(0 ~ 1),
             β = [1],
             offset = -2000,
         )
 
-        d, e = simulate(design, [smin10, smin20], UniformOnset(50, 0))
+        d, e = simulate(design, [smin1000, smin2000], UniformOnset(50, 0))
         @test d[e.latency[1]-1000] == 1
         @test d[e.latency[1]-2000] == 1
 
