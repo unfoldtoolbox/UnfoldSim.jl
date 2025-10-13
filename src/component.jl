@@ -102,7 +102,8 @@ get_offset(c::AbstractComponent)::Int = 0
 get_offset(c::LinearModelComponent)::Int = c.offset
 get_offset(c::MixedModelComponent)::Int = c.offset
 get_offset(c::Vector{<:AbstractComponent}) = get_offset.(c)
-get_offset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = Dict(k => get_offset(v) for (k,v) in d)
+get_offset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) =
+    Dict(k => get_offset(v) for (k, v) in d)
 
 maxoffset(c::Vector{<:AbstractComponent}) = maximum(get_offset.(c))
 maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(maxoffset.(values(d)))
