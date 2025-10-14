@@ -273,3 +273,14 @@ function epoch(data::AbstractVector, args...; kwargs...)
     ep = epoch(data_r, args...; kwargs...)
     return dropdims(ep; dims = 1)
 end
+
+"""
+Returns example combined EEG-Eyetracking data from a dataset (Gert et al. 2022).
+Channels (rows) 1-7 are eye tracking channels: x/y left, pupil left, x/y right, pupil right, DIN.
+The remaining channels contain the corresponding EEG.
+
+TODO docstring
+"""
+function example_data_eyemovements()
+    return Matrix(CSV.read(joinpath(pkgdir(UnfoldSim),"src/sample_eeg_eyemovements.csv"),DataFrame))
+end

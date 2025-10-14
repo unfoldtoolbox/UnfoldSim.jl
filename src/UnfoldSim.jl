@@ -17,6 +17,11 @@ using HDF5, Artifacts, FileIO
 
 using LinearAlgebra # headmodel
 
+using CoordinateTransformations
+import CoordinateTransformations.CartesianFromSpherical # artifacts - gaze direction vector
+using CSV # artifacts - importing sample data from csv file
+using MAT # artifacts - loading model from .mat file
+
 import DSP.hanning
 import Base.length
 import Base.size
@@ -31,6 +36,8 @@ include("predefinedSimulations.jl")
 include("headmodel.jl")
 include("helper.jl")
 include("bases.jl")
+include("AbstractContinuousSignal.jl")
+include("UnfoldSimArtifacts.jl")
 
 export size, length
 export AbstractComponent, AbstractNoise, AbstractOnset, AbstractDesign
@@ -78,3 +85,10 @@ export AbstractHeadmodel, Hartmut, headmodel, leadfield, orientation, magnitude
 # multichannel
 export MultichannelComponent
 end
+
+# artifacts
+export simulate_eyemovement 
+export AbstractControlSignal, GazeDirectionVectors, HREFCoordinates
+export AbstractContinuousSignal, EyeMovement, PowerLineNoise
+export az_simulation
+export example_data_eyemovements

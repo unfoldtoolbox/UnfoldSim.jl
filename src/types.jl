@@ -69,3 +69,47 @@ struct Simulation
     onset::AbstractOnset
     noisetype::AbstractNoise
 end
+
+
+# Eye Movement
+abstract type AbstractControlSignal{T} end
+
+struct HREFCoordinates{T} <: AbstractControlSignal{T}
+    val::Matrix{T}
+end
+
+struct GazeDirectionVectors{T} <: AbstractControlSignal{T}
+    val::Matrix{T} # size 3 x n_timepoints
+end
+
+
+
+# Artifacts
+"""
+TODO docstring
+`controlsignal`: Defines the control signal, always starting from the first time point. 
+"""
+abstract type AbstractContinuousSignal end
+# in future we may want to allow generating the noise on only a particular channel.
+
+@with_kw struct EyeMovement{T} <: AbstractContinuousSignal
+    controlsignal::T
+    headmodel
+    eye_model::String = "crd"
+    # events # <-- from realdata (or from controlsignal?) or passed in by user. will be added into the events dataframe returned by simulation function
+end
+
+struct TRF <: AbstractContinuousSignal
+    controlsignal
+    # TBD
+end
+
+# harmonics are always weighted the same relative to each other 
+@with_kw struct PowerLineNoise <: AbstractContinuousSignal
+    controlsignal::Matrix{Float64} = zeros(Float64, 0, 0)
+    base_freq::Float64 = 50
+    harmonics::Array{Int} = [1 3 5]
+    weights_harmonics::Array{Float64} = ones(length(harmonics))
+    sampling_rate::Float64 = 1000
+end
+
