@@ -8,4 +8,6 @@ include("setup.jl")
     include("onset.jl")
     include("simulation.jl")
     include("helper.jl")
+    include("headmodel.jl")
+    include("multichannel.jl")
 end
