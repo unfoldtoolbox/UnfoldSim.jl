@@ -14,7 +14,6 @@ end
     
 
     @test isa(lf, AbstractArray)
-    @test isa(lf, AbstractArray)
     @test mg_man == mg
     @test mg_lf == mg
     @test size(mg) == (231 - 4, 2004)
