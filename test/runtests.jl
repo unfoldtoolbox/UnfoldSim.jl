@@ -2,6 +2,7 @@ using UnfoldSim
 include("setup.jl")
 
 @testset "UnfoldSim.jl" begin
+    include("bases.jl")
     include("component.jl")
     include("design.jl")
     include("noise.jl")
