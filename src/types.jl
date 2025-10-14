@@ -104,6 +104,7 @@ struct TRF <: AbstractContinuousSignal
     # TBD
 end
 
+# harmonics are always weighted the same relative to each other 
 @with_kw struct PowerLineNoise <: AbstractContinuousSignal
     controlsignal::Matrix{Float64} = zeros(Float64, 0, 0)
     base_freq::Float64 = 50

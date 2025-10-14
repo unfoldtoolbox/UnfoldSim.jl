@@ -91,3 +91,4 @@ export simulate_eyemovement
 export AbstractControlSignal, GazeDirectionVectors, HREFCoordinates
 export AbstractContinuousSignal, EyeMovement, PowerLineNoise
 export az_simulation
+export example_data_eyemovements

@@ -207,7 +207,7 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     # PLN simulation assumes that the sampling frequency of the final signal is the same as the sampling frequency of the other signals (eeg/artifacts). TODO: declare this more explicitly in the docstring.
 
     println("Simulating EEG with no noise...")
-    eeg_signal,evts = simulate(rng,d,c,o,NoNoise());
+    eeg_signal,evts = simulate(deepcopy(rng),sim);
 
     sim_artifacts = [x for x in s if !(x isa PowerLineNoise)] # ignore PLN for now, it is handled separately since it needs to know the length of the final signal
     controlsignal = generate_controlsignal.(deepcopy(rng),sim_artifacts,Ref(sim)) 
@@ -226,7 +226,7 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     end
 
     # pad all signals to the same length (max length of all signals)
-    max_cols = maximum([size(mat, 2) for mat in combined_signals])
+    max_cols = maximum(size.(combined_signals,2))
     for i in 1:length(combined_signals)
         mat = combined_signals[i]
         if size(mat, 2) < max_cols
