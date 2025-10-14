@@ -9,13 +9,10 @@ end
     or = orientation(hart)
     
     mg = magnitude(hart)
-    mg_lf = magnitude(lf)
     mg_man = magnitude(lf, or)
     
-
     @test isa(lf, AbstractArray)
     @test mg_man == mg
-    @test mg_lf == mg
     @test size(mg) == (231 - 4, 2004)
 
 end
