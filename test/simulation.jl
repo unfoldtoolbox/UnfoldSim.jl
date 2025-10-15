@@ -222,10 +222,15 @@ using Base: AbstractCartesianIndex
         end
         MyLinearModelComponent1(b, f, β) =
             MyLinearModelComponent1(LinearModelComponent(; basis = b, formula = f, β))
-        UnfoldSim.simulate_component(rng, c::MyLinearModelComponent1, design) =
-            simulate_component(rng, c.comp, design)
-        Simulation(
-            SingleSubjectDesign(),
+        UnfoldSim.simulate_component(
+            rng,
+            c::MyLinearModelComponent1,
+            design::UnfoldSim.SubselectDesign,
+        ) = simulate_component(rng, c.comp, design)
+        UnfoldSim.length(c::MyLinearModelComponent1) = length(c.comp)
+        UnfoldSim.size(c::MyLinearModelComponent1) = size(c.comp)
+        sim = Simulation(
+            SingleSubjectDesign(conditions = Dict(:event => ['A', 'B'])),
             Dict(
                 'A' => [
                     LinearModelComponent(
@@ -239,6 +244,7 @@ using Base: AbstractCartesianIndex
             NoOnset(),
             NoNoise(),
         )
+        simulate(UnfoldSim.MersenneTwister(1), sim; return_epoched = true)
     end
 
 end
