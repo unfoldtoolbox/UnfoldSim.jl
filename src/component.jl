@@ -250,7 +250,11 @@ function get_basis(rng::AbstractRNG, basis::Tuple{Function,Int}, design)
     limit_basis(basis_out, maxlength)
 end
 
+"""
+    limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
 
+    Cut all basis vectors to `maxlength` and pad them with 0s if they are shorter than `maxlength`.
+"""
 function limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
 
     # first cut off maxlength
