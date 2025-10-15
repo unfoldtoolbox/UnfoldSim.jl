@@ -236,15 +236,17 @@ using Base: AbstractCartesianIndex
                     LinearModelComponent(
                         basis = p100(),
                         formula = @formula(0 ~ 1),
-                        β = [0],
+                        β = [1],
                     ),
                 ],
-                'B' => [MyLinearModelComponent1(p100(), @formula(0 ~ 1), [0])],
+                'B' => [MyLinearModelComponent1(p100(), @formula(0 ~ 1), [2])],
             ),
             NoOnset(),
             NoNoise(),
         )
-        simulate(UnfoldSim.MersenneTwister(1), sim; return_epoched = true)
+        d, e = simulate(UnfoldSim.MersenneTwister(1), sim; return_epoched = true)
+        @test d[10, 1] < 1 # 1 if the hanning would hit perfectly
+        @test d[11, 2] > 1.9 # 2 if the hanning would hit perfectly
     end
 
 end
