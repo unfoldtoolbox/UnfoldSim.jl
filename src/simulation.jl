@@ -209,20 +209,19 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     println("Simulating EEG with no noise...")
     eeg_signal,evts = simulate(deepcopy(rng),sim);
 
-    sim_artifacts = [x for x in s if !(x isa PowerLineNoise)] # ignore PLN for now, it is handled separately since it needs to know the length of the final signal
-    controlsignal = generate_controlsignal.(deepcopy(rng),sim_artifacts,Ref(sim)) 
-    # Vector (n_feat) of Matrix (__ x time) -> each kind of artifact could have a different shape of controlsignal, so keep them as elements of the vector rather than combining to a matrix and losing information of which row(s) corresp. to which artifact
-
-    artifact_signal = simulate_continuoussignal.(deepcopy(rng),sim_artifacts,controlsignal,Ref(sim)); #TODO handle events: right now for simplicity assume no events are being returned
+    sim_artifacts = s
+    controlsignal = generate_controlsignal.(deepcopy.(rng),sim_artifacts,Ref(sim)) # map(x->generate_controlsignal(deepcopy(rng),x,sim),sim_artifacts) 
+    # Vector (n_feat) of Arrays (last dimension time) -> each kind of artifact could have a different shape of controlsignal, so keep them as elements of the vector rather than combining to a matrix and losing information of which row(s) corresp. to which artifact
     
-    println("Removing empty artifact signals...")
-    filter!(signal -> size(signal) != (0,0), artifact_signal) # remove the empty arrays (e.g. from AbstractNoise, PowerLineNoise)
-
+    replace!(controlsignal, nothing => ones(size(eeg_signal)[1],max(size(eeg_signal)[end],map(x->size(x)[end],filter(!isnothing,controlsignal))...)))
+    
+    artifact_signal = map((x,y)->simulate_continuoussignal(deepcopy(rng),x,y,sim),sim_artifacts,controlsignal); #TODO handle events: right now for simplicity assume no events are being returned
+    # simulate_continuoussignal.(deepcopy(rng),sim_artifacts,controlsignal, sim)
     combined_signals = [[eeg_signal] ; artifact_signal]
     
     row_counts = [size(mat, 1) for mat in combined_signals];
     if length(unique(row_counts)) > 1
-        @warn "Simulated EEG and artifacts do not have the same number of channels: $(row_counts)"
+        error("Simulated EEG and artifacts do not have the same number of channels: $(row_counts)")
     end
 
     # pad all signals to the same length (max length of all signals)
@@ -234,15 +233,9 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
         end
     end
 
-    # once all other signals are the same size, pass any one of them to PLN simulation as controlsignal to get the right length
-    plns = [simulate_continuoussignal(rng,p,combined_signals[1],sim) for p in s if p isa PowerLineNoise]
-    sum_pln = plns == [] ? zeros(size(combined_signals[1],2)) : reduce(+,plns)
-    sum_signals = reduce(+, combined_signals) .+ reshape(sum_pln,1,:)
+    sum_signals = reduce(+, combined_signals)
 
-    println("Adding noise...")    
-    add_noise!.(rng,[x for x in s if x isa AbstractNoise],Ref(sum_signals))
-
-    return combined_signals, sum_signals, sum_pln, evts
+    return combined_signals, sum_signals, evts
 end
 
 """

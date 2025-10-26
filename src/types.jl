@@ -106,9 +106,9 @@ end
 
 # harmonics are always weighted the same relative to each other 
 @with_kw struct PowerLineNoise <: AbstractContinuousSignal
-    controlsignal::Matrix{Float64} = zeros(Float64, 0, 0)
+    controlsignal = nothing
     base_freq::Float64 = 50
-    harmonics::Array{Int} = [1 3 5]
+    harmonics::Array{Int64} = [1 3 5]
     weights_harmonics::Array{Float64} = ones(length(harmonics))
     sampling_rate::Float64 = 1000
 end
