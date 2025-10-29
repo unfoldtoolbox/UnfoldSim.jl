@@ -245,8 +245,8 @@ using Base: AbstractCartesianIndex
             NoNoise(),
         )
         d, e = simulate(UnfoldSim.MersenneTwister(1), sim; return_epoched = true)
-        @test d[10, 1] < 1 # 1 if the hanning would hit perfectly
-        @test d[11, 2] > 1.9 # 2 if the hanning would hit perfectly
+        @test d[10, 1] > 0.9 # 1 if the hanning would hit perfectly (currently the peak is between samples)
+        @test d[10, 2] > 1.9 # 2 if the hanning would hit perfectly (currently case the peak is between samples)
     end
 
 end
