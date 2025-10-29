@@ -54,4 +54,5 @@ end
     )
     s, e = simulate(design, c, NoOnset(); return_epoched = true)
     @test size(s) == (40, 6)
+
 end
