@@ -533,17 +533,19 @@ typical_value(v::Vector{<:Number}) = [mean(v)]
 typical_value(v) = unique(v)
 
 """
-    UnfoldSim.generate_events(rng,design::EffectsDesign)
+    generate_events(rng::AbstractRNG, design::EffectsDesign)
 
-Generates events to simulate marginalized effects using an Effects.jl reference-grid dictionary. Every covariate that is in the `EffectsDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
+Generate events to simulate marginal effects using an Effects.jl reference-grid dictionary. Every covariate that is in the `EffectsDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean).
 
-# Example
-```julia
-effects_dict = Dict(:conditionA=>[0,1])
-design = SingleSubjectDesign(; conditions = Dict(:conditionA => [0,1,2])) 
-eff_design = EffectsDesign(design,effects_dict) 
-generate_events(MersenneTwister(1),eff_design)
+# Examples
+```julia-repl
+julia> effects_dict = Dict(:conditionA => [0, 1]);
 
+julia> design = SingleSubjectDesign(; conditions = Dict(:conditionA => [0, 1, 2]));
+
+julia> eff_design = EffectsDesign(design,effects_dict);
+
+julia> generate_events(MersenneTwister(1),eff_design)
 2×1 DataFrame
  Row │ conditionA 
      │ Int64      
@@ -552,7 +554,7 @@ generate_events(MersenneTwister(1),eff_design)
    2 │          1
 ```
 """
-function UnfoldSim.generate_events(rng, t::EffectsDesign)
+function generate_events(rng::AbstractRNG, t::EffectsDesign)
     effects_dict = Dict{Any,Any}(t.effects_dict)
     #effects_dict = t.effects_dict
     current_design = generate_events(deepcopy(rng), t.design)
