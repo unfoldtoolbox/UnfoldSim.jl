@@ -55,7 +55,7 @@ makedocs(;
             "Define a new component (with variable duration and shift)" => "./generated/HowTo/newComponent.md",
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
             "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
-            "Simulated marginal effects" => "./generated/HowTo/getGroundTruth.md",
+            "Simulate ground truth marginal effects" => "./generated/HowTo/getGroundTruth.md",
             "Sequence of events (e.g. SCR)" => "./generated/HowTo/sequence.md",
         ],
         "Developer documentation" => "developer_docs.md",

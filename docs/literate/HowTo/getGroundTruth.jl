@@ -1,7 +1,7 @@
-# # Simulate ground truth marginalized Effects
+# # Simulate ground truth marginal effects
 
-# Often when testing some algorithm, we want to compare our results to a known ground truth. In the case of marginalized effects via the `Unfold.effects`/ `Effects.jl` interface, we can do this using an `EffectsDesign`.
-# You can find more on what marginalized effects are here in the [Unfold.jl documentation](https://unfoldtoolbox.github.io/Unfold.jl/dev/generated/HowTo/effects/)
+# Often when testing some algorithm, we want to compare our results to a known ground truth. In the case of marginal effects via the `Unfold.effects`/ `Effects.jl` interface, we can do this using an `EffectsDesign`.
+# You can find more on what marginalized effects are here in the [Unfold.jl documentation](https://unfoldtoolbox.github.io/Unfold.jl/dev/generated/HowTo/effects/).
 
 # ### Setup
 # ```@raw html
@@ -18,10 +18,10 @@ using Random
 # </details >
 # ```
 # ## Simulation
-# First let's make up a SingleSubject simulation
+# First let's set up a SingleSubject simulation
 
 # !!! note
-#     Getting a ground truth for a MultiSubjectDesign is not implemented yet
+#     An `EffectsDesign` for a `MultiSubjectDesign` is not implemented yet.
 
 design =
     SingleSubjectDesign(;
@@ -77,7 +77,7 @@ gt_data, gt_events = simulate(
 @show gt_events
 
 # Additionally, we can get the simulated effects into a tidy dataframe using Unfold's `result_to_table`.
-# Note that the data has to be reshaped into a channel X times X predictor form. (In our one channel example `size(gt_data) = (45,2)`, missing the channel dimension)
+# Note that the data has to be reshaped into a channel X times X predictor form. (In our one channel example `size(gt_data) = (45,2)`, missing the channel dimension.)
 
 g = reshape(gt_data, 1, size(gt_data)...)
 times = range(1, size(gt_data, 1));
@@ -102,8 +102,8 @@ m = fit(
 ef = effects(effects_dict, m);
 
 # !!! note
-#      The ground truth is shorter because the ground truth typically returns values between `[0 maxlength(components)]`, whereas in our unfold-model we included a baseline period of 0.1s.
-#      If you want to actually compare results with the ground truth, you could either us `UnfoldSim.pad_array()` or set the Unfold modelling window to `τ=[0,1]`
+#      The ground truth signal is shorter because the ground truth typically returns values between `[0 maxlength(components)]`, whereas in our Unfold model we included a baseline period of 0.1s.
+#      If you want to actually compare results with the ground truth, you could either us `UnfoldSim.pad_array()` or set the Unfold modelling window to `τ=[0,1]`.
 
 gt_effects.type .= "UnfoldSim effects"
 ef.type .= "Unfold effects"
