@@ -54,8 +54,8 @@ data, evts = simulate(
     PinkNoise(),
 );
 
-# ## Simulate marginalized effects directly
-# To marginalize effects we first have to specify an effects dictionary and subsequently hand this dict plus the original design to `EffectsDesign()`
+# ## Simulate marginal effects directly
+# To simulate marginal effects we first have to specify an effects dictionary and subsequently hand this dict plus the original design to `EffectsDesign()`
 
 effects_dict = Dict(:condition => ["bike", "face"])
 
