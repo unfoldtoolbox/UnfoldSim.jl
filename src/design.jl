@@ -354,22 +354,19 @@ end
 
 """
     SequenceDesign{T} <: AbstractDesign
-Enforce a sequence of events for each entry of a provided `AbstractDesign`.
+
+Create a sequence of events for each entry of a provided `AbstractDesign`.
+
 The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap and has to be at the end of the sequence string. There can only be one `_` character in a sequence string.
-
-
-Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the `ImbalancedDesign` tutorial
-
-
+Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the [`ImbalancedDesign`](https://unfoldtoolbox.github.io/UnfoldDocs/UnfoldSim.jl/stable/generated/HowTo/newDesign/) tutorial.
 
 # Fields
-- `design::AbstractDesign`: The design that is generated for every sequence-event
+- `design::AbstractDesign`: The design that is generated for every sequence event.
 - `sequence::String = ""` (optional): A string of characters depicting sequences.
             A variable sequence is defined using `[]`. For example, `S[ABC]` could result in any one sequence `SA`, `SB`, `SC`.
-            Experimental: It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`'s.
+            Experimental: It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`s.
 
 # Examples
-
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 design = SequenceDesign(design, "SCR_")
@@ -388,49 +385,47 @@ Would result in a `generate_events(design)`
    6 │ two        R
 ```
 
-## Example for Sequence -> Repeat vs. Repeat -> Sequence
+## Combination of SequenceDesign and RepeatDesign
 
 ### Sequence -> Repeat 
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 design = SequenceDesign(design, "[AB]")
 design = RepeatDesign(design,2)
-generate_events(design)
 ```
 
-
-```repl
+```julia-repl
+julia> generate_events(design)
 4×2 DataFrame
  Row │ condition  event 
      │ String     Char  
 ─────┼──────────────────
-   1 │ one        A
-   2 │ two        A
-   3 │ one        B
-   4 │ two        B
+   1 │ one        B
+   2 │ two        B
+   3 │ one        A
+   4 │ two        A
 ```
-Sequence -> Repeat: a sequence design is repeated, then for each repetition a sequence is generated and applied. Events have different values
+Sequence -> Repeat: If a sequence design is repeated, then for each repetition a sequence is generated and applied. Events have different values.
 
 ### Repeat -> Sequence
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 design = RepeatDesign(design,2)
 design = SequenceDesign(design, "[AB]")
-generate_events(design)
 ```
 
-```repl
+```julia-repl
+julia> generate_events(design)
 4×2 DataFrame
  Row │ condition  event 
      │ String     Char  
 ─────┼──────────────────
-   1 │ one        A
-   2 │ two        A
-   3 │ one        A
-   4 │ two        A
+   1 │ one        B
+   2 │ two        B
+   3 │ one        B
+   4 │ two        B
 ```
-Repeat -> Sequence: the design is first repeated, then for that design one sequence generated and applied. All events are the same
-
+Repeat -> Sequence: The design is first repeated, then for that design one sequence is generated and applied. All events are the same.
 
 See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref), [`RepeatDesign`](@ref)
 """
