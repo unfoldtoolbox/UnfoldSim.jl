@@ -285,7 +285,7 @@ function create_continuous_signal(rng, responses, simulation)
                     s,
                     (one_onset+minoffset(simulation.components)):(one_onset+max_length_component-1+maxoffset(
                         simulation.components,
-                    ),
+                    )),
                     (s - 1) * n_trials + i,
                 )
             end
