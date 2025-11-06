@@ -697,7 +697,7 @@ function simulate_and_add!(
     off = get_offset(component) - minoffset(simulation.components)
 
 
-    @views epoch_data[1+off:length(component)+off, :] .+=
+    @views epoch_data[(1+off):(length(component)+off), :] .+=
         simulate_component(rng, component, simulation)
 end
 function simulate_and_add!(
@@ -708,6 +708,6 @@ function simulate_and_add!(
 )
     @debug "3D Array"
     off = get_offset(component) - minoffset(simulation.components)
-    @views epoch_data[:, 1+off:length(component)+off, :] .+=
+    @views epoch_data[:, (1+off):(length(component)+off), :] .+=
         simulate_component(rng, component, simulation)
 end

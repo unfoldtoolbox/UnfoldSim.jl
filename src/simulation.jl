@@ -146,7 +146,7 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
         # TODO: This assumes a balanced design, but create_continuous_signal also assumes this, so we should be fine ;)
         size_responses = size(responses)
         signal =
-            reshape(responses, size_responses[1:end-1]..., size(deepcopy(rng), design)...)
+            reshape(responses, size_responses[1:(end-1)]..., size(deepcopy(rng), design)...)
     else # if there is an onset distribution given the next step is to create a continuous signal
         signal, latencies = create_continuous_signal(deepcopy(rng), responses, simulation)
         events.latency = latencies
@@ -283,7 +283,7 @@ function create_continuous_signal(rng, responses, simulation)
                     responses,
                     e,
                     s,
-                    one_onset+minoffset(simulation.components):one_onset+max_length_component-1+maxoffset(
+                    (one_onset+minoffset(simulation.components)):(one_onset+max_length_component-1+maxoffset(
                         simulation.components,
                     ),
                     (s - 1) * n_trials + i,

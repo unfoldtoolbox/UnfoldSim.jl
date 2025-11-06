@@ -83,14 +83,11 @@ nothing ## hide
 
 # Finally we can plot the results
 f, ax, h = lines(data)
-vlines!(ax, evts.latency[evts.event.=='S'], color = (:darkblue, 0.5))
-vlines!(ax, evts.latency[evts.event.=='R'], color = (:darkred, 0.5))
+vlines!(ax, evts.latency[evts.event .== 'S'], color = (:darkblue, 0.5))
+vlines!(ax, evts.latency[evts.event .== 'R'], color = (:darkred, 0.5))
 ax.xlabel = "Time [samples]"
 ax.ylabel = "EEG [a.u]"
 xlims!(ax, 0, 500)
 f
 
 # As visible, the `R` response always follows the `S` response. Due to the "`_`" we have large breaks between the individual sequences.
-
-
-

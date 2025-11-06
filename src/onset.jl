@@ -162,8 +162,8 @@ function simulate_interonset_distances(rng, onset::UniformOnset, design::Abstrac
                 deepcopy(rng),
                 onset.offset:(onset.offset+onset.width),
                 size(deepcopy(rng), design),
-            )
-        )
+            ),
+        ),
     )
 end
 
@@ -245,7 +245,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
             # add to every stepsize onset the maxlength of the response
             #@debug onsets[stepsize:stepsize:end]
             @debug stepsize
-            onsets[stepsize+1:stepsize:end] .+= 2 .* maxlength(simulation.components)
+            onsets[(stepsize+1):stepsize:end] .+= 2 .* maxlength(simulation.components)
             #@debug onsets[stepsize:stepsize:end]
         end
     end
