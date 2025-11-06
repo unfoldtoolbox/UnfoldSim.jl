@@ -1,6 +1,7 @@
 # # Sequence of events (e.g. SCR)
 
-# In this HoWTo we learn to simulate a "SR"-Sequence, a stimulus response, followed by a button press response. 
+# In this HowTo you will learn to simulate a "SR"-Sequence, a stimulus response, followed by a button press response. 
+
 # ### Setup
 # ```@raw html
 # <details>
@@ -12,17 +13,18 @@ using CairoMakie
 using StableRNGs
 # ```@raw html
 # </details >
+# <br />
 # ```
 
-
-# 
+# ## Create sequence design
 # First we generate the minimal design of the experiment by specifying our conditions (a one-condition-two-levels design in our case)
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 generate_events(design)
 # Next we use the `SequenceDesign` and nest our initial design in it. "`SR_`" is code for an "`S`" (stimulus) event and an "`R`" (response) event - only single letter events are supported! The "`_`" is a signal for the onset generator to generate a bigger pause - no overlap between adjacent "`SR`" pairs.
 design = SequenceDesign(design, "SR_")
 generate_events(StableRNG(1), design)
-# The main thing that happened is that the design was repeated for every event (each 'letter') of the sequence, and an `eventtype` column was added.
+# The main thing that happened is that the design was repeated for every event (each 'letter') of the sequence, and an `event` column was added.
+
 # !!! hint
 #     More advanced sequences are possible as well, like "SR{1,3}", or "A[BC]". Infinite sequences are **not** possible like "AB*". 
 
@@ -30,12 +32,12 @@ generate_events(StableRNG(1), design)
 design = RepeatDesign(design, 4)
 generate_events(StableRNG(1), design)
 
-# This results in 16 trials that nicely follow our sequence
+# This results in 16 trials that nicely follow our sequence.
 
 # !!! hint
 #     There is a difference between `SequenceDesign(RepeatDesign)` and `RepeatDesign(SequenceDesign)` for variable sequences e.g. "A[BC]", where in the former case,  one sequence is drawn e.g. "AC" and applied to all repeated rows, in the latter, one sequence for each repeat is drawn.
 
-
+# ## Specify components for sequence events
 # Next we have to specify for both events `S` and `R` what the responses should look like.
 p1 = LinearModelComponent(;
     basis = p100(),
@@ -63,9 +65,12 @@ resp = LinearModelComponent(;
 )
 nothing ## hide
 
-
-# We combine them into a dictionary with a sequence-`Char` as key and simulate
+# We combine them into a dictionary with a sequence-`Char` as key 
 components = Dict('S' => [p1, n1, p3], 'R' => [resp])
+
+# ## Simulate data
+# Given the design and the components. we specify onset and noise and simulate data
+
 
 data, evts = simulate(
     StableRNG(1),

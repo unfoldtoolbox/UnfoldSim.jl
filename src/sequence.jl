@@ -41,7 +41,7 @@ sequencestring(rng, d::SequenceDesign) = sequencestring(rng, d.sequence)
     sequencestring(rng, dS::SequenceDesign)
     sequencestring(rng, dR::RepeatDesign)
 
-Generates a sequence based on the reverse regex style string in `str`, `dS.sequence` or `dR.design.sequence`.
+Generate a sequence based on the reverse regex style string in `str`, `dS.sequence` or `dR.design.sequence`.
 
 Directly converting to Automa.Compileis not possible, as we first need to match & evaluate the curly brackets. We simply detect and expand them.
 
@@ -55,14 +55,13 @@ Directly converting to Automa.Compileis not possible, as we first need to match 
 ```julia-repl
 julia> sequencestring(MersenneTwister(1),"bla{3,4}")
 "blaaaa"
-
 ```
 
 See also [`rand_re`](@ref)
 """
 function sequencestring(rng, str::String)
     #match curly brackets and replace them
-    @assert isnothing(findfirst("*", str)) && isnothing(findfirst("+", str)) "'infinite' sequences currently not supported"
+    @assert isnothing(findfirst("*", str)) && isnothing(findfirst("+", str)) "'Infinite' sequences are currently not supported."
     crly = collect(eachmatch(r"(\{[\d]+,[\d]+\})", str))
     for c in reverse(crly)
         m = replace(c.match, "{" => "", "}" => "")
