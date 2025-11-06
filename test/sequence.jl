@@ -54,5 +54,6 @@ end
     )
     s, e = simulate(design, c, NoOnset(); return_epoched = true)
     @test size(s) == (40, 6)
+    @test s[:, 1] == s[:, 2] # If no component dict is specified, all events have the same component
 
 end

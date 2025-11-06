@@ -263,6 +263,7 @@ end
 
 """
     simulate_interonset_distances(rng, onsets::ShiftOnsetByOne, design)
+    
 Same functionality as `simulate_interonset_distances(rng,onsets::AbstractOnset)` except that it shifts the resulting vector by one, adding a `0` to the front and removing the last simuluated distance.
 """
 UnfoldSim.simulate_interonset_distances(rng, onsets::ShiftOnsetByOne, design) =
@@ -272,7 +273,7 @@ UnfoldSim.simulate_interonset_distances(rng, onsets::ShiftOnsetByOne, design) =
 """
     UniformOnsetFormula <: AbstractOnset
 
-Provides a Uniform Distribution of the inter-event distances, but with regression formulas.
+Provide a Uniform Distribution for the inter-event distances, but with regression formulas for the distribution's parameters `offset` and `width`.
 
 This is helpful if your overlap/event-distribution should be dependent on some condition, e.g. more overlap in cond = 'A' than cond = 'B'.
 `Offset` affects the minimal distance. The maximal distance is `offset + width`.
@@ -283,7 +284,7 @@ This is helpful if your overlap/event-distribution should be dependent on some c
 - `offset_β::Vector = [0] `(optional): Choose a `Vector` of betas. The number of betas needs to fit the formula chosen.
 - `offset_contrasts::Dict = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
 - `width_formula = `@formula(0~1)`: Choose a formula depending on your `Design`.
-- `width_β::Vector = [0] (optional)`: Choose a `Vector` of betas, number needs to fit the formula chosen. 
+- `width_β::Vector`: Choose a `Vector` of betas, number needs to fit the formula chosen. 
 - `width_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
 
 # Combined with [ShiftOnsetByOne](@ref)
@@ -330,7 +331,8 @@ end
 
     LogNormalOnsetFormula <: AbstractOnset
 
-Provide a Log-normal Distribution of the inter-event distances, but with regression formulas.
+Provide a Log-normal Distribution of the inter-event distances, but with regression formulas for the distribution's parameters `offset`, `μ` and `σ`.
+
 This is helpful if your overlap/event-distribution should be dependent on some condition, e.g. more overlap in cond = 'A' than cond = 'B'.
 
 # Fields

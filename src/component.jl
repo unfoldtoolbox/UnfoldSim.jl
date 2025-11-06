@@ -255,7 +255,7 @@ end
 """
 function limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
 
-    # first cut off maxlength
+    # first cut off after maxlength
     b = limit_basis.(b, maxlength)
     # now fill up with 0's
     Δlengths = maxlength .- length.(b)
@@ -429,6 +429,8 @@ function simulate_component(
     # in case the parameters are of interest, we will return those, not them weighted by basis
     b = return_parameters ? [1.0] : get_basis(deepcopy(rng), c, design)
     @debug :b, typeof(b), size(b), :m, size(m.y')
+    # in case get_basis returns a Matrix, it will be trial x time (or the transpose of it, we didnt check when writing this comment), thus we only need to scale each row by the scaling factor from the LMM
+    # in case get_basis returns a Vector of length time, it needs to be "repeated" to a trial x time matrix and then scaled again. The kronecker product efficiently does that.
     if isa(b, AbstractMatrix)
         epoch_data_component = ((m.y' .* b))
     else

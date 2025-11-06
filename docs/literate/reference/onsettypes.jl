@@ -288,7 +288,7 @@ end
 
 # ## Design-dependent `X-OnsetFormula`
 
-# For additional control we provide `UniformOnsetFormula` and `LogNormalOnsetFormula` types, that allow to control all parameters by specifying formulas
+# For additional control, we provide `UniformOnsetFormula` and `LogNormalOnsetFormula` types, which allow to control all distribution parameters by specifying formulas based on the design
 o = UnfoldSim.UniformOnsetFormula(
     width_formula = @formula(0 ~ 1 + cond),
     width_β = [50, 20],

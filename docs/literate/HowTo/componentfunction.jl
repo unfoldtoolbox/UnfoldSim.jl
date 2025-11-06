@@ -1,5 +1,5 @@
-# # Component Basisfunctions
-# HowTo use functions that depend on the `design` and return  per-event basis-vectors, instead of the same basis vector for all events.
+# # [Define design-dependent component basis functions](@id componentfunction)
+# Here you will learn how to specify a component basis that uses a function that depends on the `design` and returns per-event basis vectors, instead of the same basis vector for all events.
 
 
 # ### Setup
@@ -30,10 +30,10 @@ design = UnfoldSim.SingleSubjectDesign(;
 );
 
 
-# Instead of defining a "boring" vector basis function e.g. `[0,0,1,2,3,3,2,1,0,0,0]`, let's use function - in our case a hanning window with the size depending on the experimental design's duration.
+# Instead of defining a "boring" vector basis function e.g. `[0,0,1,2,3,3,2,1,0,0,0]`, let's use a function - in our case, a Hanning window with the size depending on the experimental design's duration.
 # !!! important
 #     Two things have to be taken care of:
-#     1. in case a rng is required to e.g. generate the design, or your basisfunction depends on it, you have to specify a two-argument basis-function: `(rng,design)->...`
+#     1. in case a rng is required to e.g. generate the design, or your basis function depends on it, you have to specify a two-argument basis function: `(rng,design)->...`
 #     2. a `maxlength` has to be specified via a tuple `(function,maxlength)``
 
 mybasisfun = design -> hanning.(generate_events(design).duration)
@@ -45,7 +45,7 @@ signal = LinearModelComponent(;
 
 erp = UnfoldSim.simulate_component(MersenneTwister(1), signal, design);
 
-# After simulation, we are ready to plot it. We expect that the simulated responses are scaled by the design's duration. To show it more effectively, we sort by duration.
+# After simulation, we are ready to plot it. We expect that the length of the simulated responses is scaled by the design's duration. To show it more effectively, we sort by duration.
 ##---
 f = Figure()
 df = UnfoldMakie.eeg_array_to_dataframe(erp')
@@ -66,4 +66,4 @@ plot_erpimage!(
 )
 f
 
-# The scaling by the two `condition` effect levels and the modified event duration by the `duration` are clearly visible
+# The scaling by the two `condition` effect levels and the modified event duration by the `duration` are clearly visible.
