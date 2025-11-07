@@ -439,12 +439,18 @@ generate_events(rng, design::SequenceDesign{MultiSubjectDesign}) =
     error("not yet implemented")
 
 
+"""
+    generate_events(rng, design::SequenceDesign)
+
+First generates a sequence-string using `evaluate_sequencestring(rng,design.sequence)`. Then generates events from the nested `design.design` and repeats them according to the length of the sequence string.
+Finally, assigns the sequence-string-characters to the `:event` column in `events`.
+"""
 function generate_events(rng, design::SequenceDesign)
     df = generate_events(deepcopy(rng), design.design)
     nrows_df = size(df, 1)
 
     #   @debug design.sequence
-    currentsequence = sequencestring(rng, design.sequence)
+    currentsequence = evaluate_sequencestring(rng, design.sequence)
     #    @debug currentsequence
     currentsequence = replace(currentsequence, "_" => "")
     df = repeat(df, inner = length(currentsequence))
@@ -497,13 +503,25 @@ end
 """
     EffectsDesign <: AbstractDesign
 
-Design to obtain ground truth simulation.
+This design evaluates the nested design at the marginalized effects specified in the `effects_dict`. That is, it calculates all combination of the variables in the `effects_dict` while setting all other variables to a "typical" value (i.e. the mean for numerical variables).
 
 # Fields
 - `design::AbstractDesign`: The design of your (main) simulation.
 - `effects_dict::Dict`: Effects.jl style dictionary specifying variable effects. See also [Unfold.jl marginalized effects](https://unfoldtoolbox.github.io/UnfoldDocs/Unfold.jl/stable/generated/HowTo/effects/)
 
 # Examples
+```julia-repl
+design =
+    SingleSubjectDesign(;
+        conditions = Dict(
+            :condition => ["bike", "face"],
+            :continuous => range(0, 5, length = 10),
+        ),
+    ) |> x -> RepeatDesign(x, 5);
+
+effects_dict = Dict(:condition => ["bike", "face"])
+effects_design = EffectsDesign(design, effects_dict)
+```
 """
 struct EffectsDesign <: AbstractDesign
     design::AbstractDesign

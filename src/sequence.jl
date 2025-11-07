@@ -12,9 +12,10 @@ Mimicks a reverse-regex, generating strings from regex instead of matching. Base
 # Examples
 ```julia-repl
 julia> using Automa
-julia> machine = Automa.Compile(Automa.RegExp.RE("b+l+a+))
+julia> machine = Automa.compile(Automa.RegExp.RE("b+l+a+"))
 julia> rand_re(MersenneTwister(2),machine)
 "bbbbblllaaa"
+```
 """
 function rand_re(rng::AbstractRNG, machine::Automa.Machine)
     out = IOBuffer()
@@ -22,7 +23,7 @@ function rand_re(rng::AbstractRNG, machine::Automa.Machine)
 
     while true
         if node.state ∈ machine.final_states
-            (rand() ≤ 1 / (length(node.edges) + 1)) && break
+            (rand(rng) ≤ 1 / (length(node.edges) + 1)) && break
         end
 
         edge, node = rand(rng, node.edges)
@@ -33,13 +34,13 @@ function rand_re(rng::AbstractRNG, machine::Automa.Machine)
     return String(take!(out))
 end
 
-sequencestring(rng, d::SequenceDesign) = sequencestring(rng, d.sequence)
+evaluate_sequencestring(rng, d::SequenceDesign) = evaluate_sequencestring(rng, d.sequence)
 
 
 """
-    sequencestring(rng, str::String)
-    sequencestring(rng, dS::SequenceDesign)
-    sequencestring(rng, dR::RepeatDesign)
+    evaluate_sequencestring(rng, str::String)
+    evaluate_sequencestring(rng, dS::SequenceDesign)
+    evaluate_sequencestring(rng, dR::RepeatDesign)
 
 Generate a sequence based on the reverse regex style string in `str`, `dS.sequence` or `dR.design.sequence`.
 
@@ -53,13 +54,13 @@ Directly converting to Automa.Compileis not possible, as we first need to match 
 
 # Examples
 ```julia-repl
-julia> sequencestring(MersenneTwister(1),"bla{3,4}")
+julia> evaluate_sequencestring(MersenneTwister(1),"bla{3,4}")
 "blaaaa"
 ```
 
 See also [`rand_re`](@ref)
 """
-function sequencestring(rng, str::String)
+function evaluate_sequencestring(rng, str::String)
     #match curly brackets and replace them
     @assert isnothing(findfirst("*", str)) && isnothing(findfirst("+", str)) "'Infinite' sequences are currently not supported."
     crly = collect(eachmatch(r"(\{[\d]+,[\d]+\})", str))
@@ -90,4 +91,4 @@ function sequencestring(rng, str::String)
     return rand_re(rng, Automa.compile(RE(str)))
 end
 
-sequencestring(rng, d::RepeatDesign) = sequencestring(rng, d.design)
+evaluate_sequencestring(rng, d::RepeatDesign) = evaluate_sequencestring(rng, d.design)

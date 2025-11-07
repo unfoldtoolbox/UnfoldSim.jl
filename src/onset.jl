@@ -177,9 +177,12 @@ function simulate_interonset_distances(rng, onset::LogNormalOnset, design::Abstr
 end
 
 
+"""
+Returns true if the design, or any nested design contains the target design type
+"""
 contains_design(d::AbstractDesign, target::Type) = false
 contains_design(d::Union{RepeatDesign,SequenceDesign,SubselectDesign}, target::Type) =
-    d.design isa target ? true : contains_design(d.design, target)
+    (d isa target || d.design isa target) ? true : contains_design(d.design, target)
 
 
 """
@@ -235,7 +238,7 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
 
 
     if contains_design(simulation.design, SequenceDesign)
-        currentsequence = sequencestring(deepcopy(rng), simulation.design)
+        currentsequence = evaluate_sequencestring(deepcopy(rng), simulation.design)
         if !isnothing(findfirst("_", currentsequence))
 
             @assert currentsequence[end] == '_' "the blank-indicator '_' has to be the last sequence element"
@@ -335,6 +338,10 @@ Provide a Log-normal Distribution of the inter-event distances, but with regress
 
 This is helpful if your overlap/event-distribution should be dependent on some condition, e.g. more overlap in cond = 'A' than cond = 'B'.
 
+μ: The mean of the log-transformed variable (the log-normal random variable's logarithm follows a normal distribution).
+σ: The standard deviation of the log-transformed variable.
+offset: The minimal distance between events - aka a shift of the LogNormal distribution.
+
 # Fields
 
 - `μ_formula = @formula(0~1)` (optional): Choose a formula depending on your `design`
@@ -343,6 +350,10 @@ This is helpful if your overlap/event-distribution should be dependent on some c
 - `σ_formula = @formula(0~1)` (optional): Choose a formula depending on your `Design`.
 - `σ_β::Vector`: Choose a `Vector` of betas, number needs to fit the formula chosen.
 - `σ_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
+- `offset_formula = @formula(0~1)` (optional): Choose a formula depending on your `design` for the offset.
+- `offset_β::Vector = [0] ` (optional): Choose a `Vector` of betas. The number of betas needs to fit the formula chosen.
+- `offset_contrasts::Dict = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
+- `truncate_upper::nothing` (optional): Upper limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
 
 # Combined with [ShiftOnsetByOne](@ref)
 

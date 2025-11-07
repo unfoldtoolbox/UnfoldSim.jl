@@ -125,3 +125,26 @@
 
     end
 end
+
+@testset "contains design" begin
+    @test UnfoldSim.contains_design(
+        RepeatDesign(SequenceDesign(SingleSubjectDesign(), "ABC"), 1),
+        SequenceDesign,
+    )
+    @test UnfoldSim.contains_design(
+        RepeatDesign(SequenceDesign(SingleSubjectDesign(), "ABC"), 1),
+        SingleSubjectDesign,
+    )
+    @test UnfoldSim.contains_design(
+        RepeatDesign(SequenceDesign(SingleSubjectDesign(), "ABC"), 1),
+        RepeatDesign,
+    )
+    @test UnfoldSim.contains_design(
+        SequenceDesign(SingleSubjectDesign(), "ABC"),
+        SequenceDesign,
+    )
+    @test !UnfoldSim.contains_design(
+        SequenceDesign(SingleSubjectDesign(), "ABC"),
+        RepeatDesign,
+    )
+end

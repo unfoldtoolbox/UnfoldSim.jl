@@ -182,7 +182,8 @@
                 UniformOnset(offset = o_offset, width = o_width),
                 NoNoise(),
             )
-            sequence_length = length(UnfoldSim.sequencestring(StableRNG(seed), design)) - 1 # without _
+            sequence_length =
+                length(UnfoldSim.evaluate_sequencestring(StableRNG(seed), design)) - 1 # without _
 
             # Test onset shifts with component offsets and sequences (in particular inter-event-block distances) combined
             @test minoffset_shift + 1 <= e.latency[1] <= minoffset_shift + 1 + o_width
