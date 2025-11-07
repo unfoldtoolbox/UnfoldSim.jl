@@ -298,9 +298,16 @@ This is possible by using `ShiftOnsetByOne(UniformOnset(...))`, effectively shif
 # Examples
 ```julia-repl
 julia> o = UnfoldSim.UniformOnsetFormula(
-    width_formula = @formula(0 ~ 1 + cond),
-    width_β = [50, 20],
-)
+           width_formula = @formula(0 ~ 1 + cond),
+           width_β = [50, 20],
+       )
+UniformOnsetFormula
+  width_formula: StatsModels.FormulaTerm{StatsModels.ConstantTerm{Int64}, Tuple{StatsModels.ConstantTerm{Int64}, StatsModels.Term}}
+  width_β: Array{Int64}((2,)) [50, 20]
+  width_contrasts: Dict{Any, Any}
+  offset_formula: StatsModels.FormulaTerm{StatsModels.ConstantTerm{Int64}, StatsModels.ConstantTerm{Int64}}
+  offset_β: Array{Int64}((1,)) [0]
+  offset_contrasts: Dict{Any, Any}
 ```
 
 See also [`UniformOnset`](@ref UnfoldSim.UniformOnset) for a simplified version without linear regression specifications.
