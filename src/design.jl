@@ -501,7 +501,7 @@ Design to obtain ground truth simulation.
 
 # Fields
 - `design::AbstractDesign`: The design of your (main) simulation.
-- `effects_dict::Dict`: Effects.jl style dictionary specifying variable effects. See also [Unfold.jl marginalized effects](https://unfoldtoolbox.github.io/UnfoldDocs/Unfold.jl/stable/generated/HowTo/effects/)
+- `effects_dict::Dict`: Effects.jl style dictionary specifying variable effects. See also [Unfold.jl marginal effects](https://unfoldtoolbox.github.io/UnfoldDocs/Unfold.jl/stable/generated/HowTo/effects/)
 
 # Examples
 """
