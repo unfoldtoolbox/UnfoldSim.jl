@@ -55,6 +55,7 @@
             formula = @formula(0 ~ 1),
             β = [1],
         )
+        # test that SingleSubjectDesign (and thus get_basis) does not depend on the rng. 
         @test UnfoldSim.get_basis(deepcopy(rng), signal, design) ==
               UnfoldSim.get_basis(signal, design)
 

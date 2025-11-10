@@ -34,7 +34,7 @@ design = UnfoldSim.SingleSubjectDesign(;
 # !!! important
 #     Two things have to be taken care of:
 #     1. in case a rng is required to e.g. generate the design, or your basis function depends on it, you have to specify a two-argument basis function: `(rng,design)->...`
-#     2. a `maxlength` has to be specified via a tuple `(function,maxlength)``
+#     2. a `maxlength` in samples has to be specified via a tuple `(function,maxlength)`
 
 mybasisfun = design -> hanning.(generate_events(design).duration)
 signal = LinearModelComponent(;

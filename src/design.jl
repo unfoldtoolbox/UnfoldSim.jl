@@ -451,7 +451,6 @@ function generate_events(rng, design::SequenceDesign)
 
     #   @debug design.sequence
     currentsequence = evaluate_sequencestring(rng, design.sequence)
-    #    @debug currentsequence
     currentsequence = replace(currentsequence, "_" => "")
     df = repeat(df, inner = length(currentsequence))
 
@@ -542,6 +541,12 @@ function expand_grid(design)
     return DataFrame(vec(rowtab))
 end
 
+"""
+    typical_value(v)
+    typical_value(v::Vector{<:Number})
+    
+Return the typical value, either the mean (if a vector) or all unique levels otherwise. Copied from Effects.jl
+"""
 typical_value(v::Vector{<:Number}) = [mean(v)]
 typical_value(v) = unique(v)
 
@@ -569,7 +574,6 @@ julia> generate_events(MersenneTwister(1),eff_design)
 """
 function generate_events(rng::AbstractRNG, t::EffectsDesign)
     effects_dict = Dict{Any,Any}(t.effects_dict)
-    #effects_dict = t.effects_dict
     current_design = generate_events(deepcopy(rng), t.design)
     to_be_added = setdiff(names(current_design), string.(keys(effects_dict)))
     for tba in to_be_added

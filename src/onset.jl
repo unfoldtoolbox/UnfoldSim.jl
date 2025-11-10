@@ -243,13 +243,10 @@ function simulate_onsets(rng, onset::AbstractOnset, simulation::Simulation)
 
             @assert currentsequence[end] == '_' "the blank-indicator '_' has to be the last sequence element"
             df = generate_events(deepcopy(rng), simulation.design)
-            nrows_df = size(df, 1)
             stepsize = length(currentsequence) - 1
             # add to every stepsize onset the maxlength of the response
-            #@debug onsets[stepsize:stepsize:end]
             @debug stepsize
             onsets[(stepsize+1):stepsize:end] .+= 2 .* maxlength(simulation.components)
-            #@debug onsets[stepsize:stepsize:end]
         end
     end
 
