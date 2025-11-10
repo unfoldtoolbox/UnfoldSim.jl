@@ -329,7 +329,7 @@ function simulate_interonset_distances(rng, o::UniformOnsetFormula, design::Abst
         o.offset_β
 
     return Int.(
-        round.(reduce(vcat, rand.(deepcopy(rng), range.(offsets, offsets .+ widths), 1)))
+        round.(reduce(vcat, rand.(deepcopy(rng), range.(offsets, offsets .+ widths), 1))),
     )
 end
 
