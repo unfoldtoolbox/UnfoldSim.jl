@@ -53,7 +53,7 @@ All fields can be named. Works best with [`SingleSubjectDesign`](@ref).
 - `formula::Any`: StatsModels `formula` object, e.g.  `@formula 0 ~ 1 + cond` (left-hand side must be 0).
 - `β::Vector` Vector of betas/coefficients, must fit the formula.
 - `contrasts::Dict` (optional): Determines which coding scheme to use for which categorical variables. Default is empty which corresponds to dummy coding. For more information see <https://juliastats.org/StatsModels.jl/stable/contrasts>.
-- `offset::Int = 0`: Can be used to shift the basis function in time.
+- `offset::Int = 0`: Can be used to shift the basis function in time (in samples).
 
 # Examples
 ```julia-repl
@@ -244,7 +244,7 @@ function get_basis(rng::AbstractRNG, basis::Tuple{Function,Int}, design)
     basis_out = applicable(f, rng, design) ? f(rng, design) : f(design)
     l = _get_basis_length(basis_out)
 
-    @assert l == length(design) "Component basis function needs to either return a Vector of vectors or a Matrix with dim(2) == length(design) [$l / $(length(design))], or a Vector of Vectors with length(b) == length(design) [$l / $(length(design))]. "
+    @assert l == length(design) "Component basis function needs to either return a Matrix with dim(2) == length(design) [$l / $(length(design))], or a Vector of Vectors with length(b) == length(design) [$l / $(length(design))]. "
     limit_basis(basis_out, maxlength)
 end
 
@@ -275,7 +275,7 @@ Base.length(c::AbstractComponent) =
     maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
     maxlength(components::Dict) 
 
-Maximum of individual component lengths
+Return the maximum of the individual components' lengths.
 """
 maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
 maxlength(components::Dict) = maximum([maximum(length.(c)) for c in values(components)])
@@ -425,10 +425,8 @@ function simulate_component(
         rethrow(e)
     end
 
-    @debug size(get_basis(deepcopy(rng), c, design))
     # in case the parameters are of interest, we will return those, not them weighted by basis
     b = return_parameters ? [1.0] : get_basis(deepcopy(rng), c, design)
-    @debug :b, typeof(b), size(b), :m, size(m.y')
     # in case get_basis returns a Matrix, it will be trial x time (or the transpose of it, we didnt check when writing this comment), thus we only need to scale each row by the scaling factor from the LMM
     # in case get_basis returns a Vector of length time, it needs to be "repeated" to a trial x time matrix and then scaled again. The kronecker product efficiently does that.
     if isa(b, AbstractMatrix)
@@ -638,7 +636,7 @@ function init_epoch_data(rng, components, design)
             length(deepcopy(rng), design),
         )
     else
-        epoch_data = zeros(maxlength(components) + range_offset, length(rng, design))
+        epoch_data = zeros(maxlength(components) + range_offset, length(deepcopy(rng), design))
     end
     return epoch_data
 end

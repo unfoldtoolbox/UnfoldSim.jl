@@ -449,7 +449,6 @@ function generate_events(rng, design::SequenceDesign)
     df = generate_events(deepcopy(rng), design.design)
     nrows_df = size(df, 1)
 
-    #   @debug design.sequence
     currentsequence = evaluate_sequencestring(rng, design.sequence)
     currentsequence = replace(currentsequence, "_" => "")
     df = repeat(df, inner = length(currentsequence))
