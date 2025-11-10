@@ -643,6 +643,22 @@ function init_epoch_data(rng, components, design)
     return epoch_data
 end
 
+"""
+    simulate_responses(
+        rng,
+        event_component_dict::Dict,
+        s::Simulation)
+
+Per event, simulate the components specified by the Dict, and return the epoched_data array.
+Internally wraps the designs in a `SubselectDesign` for each event type, so that only the relevant trials are simulated.
+If a `_` is present, it is ignored.
+
+# Arguments
+- `rng`: Random number generator.
+- `event_component_dict::Dict`: Dictionary mapping character event types to Vector of components
+- `s::Simulation`: Simulation object containing design and other parameters.    
+
+"""
 function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
     #@debug rng.state
     epoch_data = init_epoch_data(deepcopy(rng), event_component_dict, s.design)
