@@ -679,7 +679,7 @@ function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
         ix = evts.event .== key
         if multichannel
             simulate_responses!(
-                rng,
+                deepcopy(rng),
                 @view(epoch_data[:, :, ix]),
                 event_component_dict[key],
                 s_key,
@@ -687,7 +687,7 @@ function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
         else
             #@debug sum(ix), size(simulate_responses(rng, event_component_dict[key], s_key)), key
             simulate_responses!(
-                rng,
+                deepcopy(rng),
                 @view(epoch_data[:, ix]),
                 event_component_dict[key],
                 s_key,
