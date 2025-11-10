@@ -196,3 +196,37 @@
         end
     end
 end
+
+
+@testset "limit_base" begin
+    # 1) scalar vector -> truncates to maxlength
+
+    v = collect(1:6)
+    @test limit_basis(v, 4) == [1, 2, 3, 4]
+
+    # 2) matrix -> truncates rows (keeps columns)
+    m = reshape(1:12, 6, 2)  # 6×2
+    @test limit_basis(m, 4) == m[1:4, :]
+
+    # 3) vector of vectors -> pads shorter vectors with zeros and returns maxlength × ncols matrix
+    b = [[1.0, 2.0, 3.0], [4.0, 5.0]]
+    res = limit_basis(b, 4)
+    @test size(res) == (4, 2)
+    @test res[:, 1] == [1.0, 2.0, 3.0, 0.0]
+    @test res[:, 2] == [4.0, 5.0, 0.0, 0.0]
+
+    # 4) truncation for per-element vectors longer than maxlength and padding for short ones
+    b2 = [[10, 20, 30, 40, 50], [1, 2]]
+    res2 = limit_basis(b2, 3)
+    @test size(res2) == (3, 2)
+    @test res2[:, 1] == [10, 20, 30]
+    @test res2[:, 2] == [1, 2, 0]
+
+    # 5) handle empty inner vectors (produce zero-filled column)
+    b3 = [Int[], [7]]
+    res3 = limit_basis(b3, 2)
+    @test size(res3) == (2, 2)
+    @test res3 == [0 7; 0 0]  # columns: first empty-> [0,0], second [7,0]
+
+
+end
