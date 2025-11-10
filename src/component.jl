@@ -666,6 +666,7 @@ function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
     @debug size(epoch_data), size(evts)
     multichannel = n_channels(event_component_dict) > 1
     for key in keys(event_component_dict)
+        # we don't remember why we explicitly check for key == '_', maybe can be removed in future iterations
         if key == '_'
             continue
         end
