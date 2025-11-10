@@ -636,7 +636,8 @@ function init_epoch_data(rng, components, design)
             length(deepcopy(rng), design),
         )
     else
-        epoch_data = zeros(maxlength(components) + range_offset, length(deepcopy(rng), design))
+        epoch_data =
+            zeros(maxlength(components) + range_offset, length(deepcopy(rng), design))
     end
     return epoch_data
 end
