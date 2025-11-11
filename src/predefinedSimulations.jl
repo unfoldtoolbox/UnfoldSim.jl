@@ -42,7 +42,7 @@ The most used keyword argument is: `return_epoched = true` which returns already
 
 
 ## multichannel
-- `multichannel = nothing` # to receive 227 channels multichannel data, provide a list of `hartmut.cortical["label"]`. If set to `true` uses: `["Right Occipital Pole", "Left Postcentral Gyrus", "Left Superior Frontal Gyrus",]`.
+- `multichannel = nothing`: to receive 227 channels multichannel data, provide a list of `hartmut.cortical["label"]`. If set to `true` uses: `["Right Occipital Pole", "Left Postcentral Gyrus", "Left Superior Frontal Gyrus",]`.
 
 ## Other parameters
 - `return_epoched = false`: If true, already epoched data is returned. Otherwise, continuous data is returned.
