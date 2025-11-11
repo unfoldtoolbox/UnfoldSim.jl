@@ -1,4 +1,4 @@
-using StableRNG
+using StableRNGs
 @testset "noise" begin
 
     for n in [PinkNoise RedNoise WhiteNoise ExponentialNoise]
