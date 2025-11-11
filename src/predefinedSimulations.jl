@@ -1,4 +1,3 @@
-using Distributions: multinom_rand!
 
 # Here we define some predefined simulations. Convenient if you just want to have a quick simulation :)
 
