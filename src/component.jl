@@ -602,7 +602,7 @@ function simulate_responses(
     rng,
     components::Vector{<:AbstractComponent},
     simulation::Simulation{SimDataType},
-)
+)where{SimDataType}
     epoch_data = init_epoch_data(SimDataType, deepcopy(rng), components, simulation.design)
     simulate_responses!(rng, epoch_data, components, simulation)
     return epoch_data
