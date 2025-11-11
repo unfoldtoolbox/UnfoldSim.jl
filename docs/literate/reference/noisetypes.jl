@@ -54,4 +54,4 @@ f
 
 
 # !!! hint
-#     We recommed for smaller signals the `ExponentialNoise`, maybe with a removed DC offset or a HighPass filter. For long signals, this Noise requires lots of memory though. maybe Pinknoise is a better choice then. 
+#     From a theoretical point, `ExponentialNoise` seems to be the best fit for the AR spectrum of EEG signals. PinkNoise seems to be the most common choice in research papers.
