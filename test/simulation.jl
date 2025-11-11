@@ -1,3 +1,4 @@
+using Base: AbstractCartesianIndex
 @testset "simulation" begin
 
     @testset "general_test_simulate" begin
@@ -213,6 +214,39 @@
 
             end
         end
+    end
+
+    @testset "multi-component sequence #124" begin
+        struct MyLinearModelComponent1 <: AbstractComponent
+            comp::Any
+        end
+        MyLinearModelComponent1(b, f, β) =
+            MyLinearModelComponent1(LinearModelComponent(; basis = b, formula = f, β))
+        UnfoldSim.simulate_component(
+            rng,
+            c::MyLinearModelComponent1,
+            design::UnfoldSim.SubselectDesign,
+        ) = simulate_component(rng, c.comp, design)
+        UnfoldSim.length(c::MyLinearModelComponent1) = length(c.comp)
+        UnfoldSim.size(c::MyLinearModelComponent1) = size(c.comp)
+        sim = Simulation(
+            SingleSubjectDesign(conditions = Dict(:event => ['A', 'B'])),
+            Dict(
+                'A' => [
+                    LinearModelComponent(
+                        basis = p100(),
+                        formula = @formula(0 ~ 1),
+                        β = [1],
+                    ),
+                ],
+                'B' => [MyLinearModelComponent1(p100(), @formula(0 ~ 1), [2])],
+            ),
+            NoOnset(),
+            NoNoise(),
+        )
+        d, e = simulate(UnfoldSim.MersenneTwister(1), sim; return_epoched = true)
+        @test d[10, 1] > 0.9 # 1 if the hanning would hit perfectly (currently the peak is between samples)
+        @test d[10, 2] > 1.9 # 2 if the hanning would hit perfectly (currently the peak is between samples)
     end
 
 end

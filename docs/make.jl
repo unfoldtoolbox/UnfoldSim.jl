@@ -2,7 +2,9 @@ using UnfoldSim
 using Documenter
 using Glob
 using Literate
+using Revise
 
+Revise.revise()
 
 GENERATED = joinpath(@__DIR__, "src", "generated")
 SOURCE = joinpath(@__DIR__, "literate")
@@ -32,6 +34,7 @@ makedocs(;
     ),
     pages = [
         "Home" => "index.md",
+        "Installing Julia & UnfoldSim.jl" => "installation.md",
         "Tutorials" => [
             "Quickstart" => "generated/tutorials/quickstart.md",
             "Simulate event-related potentials (ERPs)" => "generated/tutorials/simulateERP.md",
@@ -47,11 +50,15 @@ makedocs(;
         ],
         "HowTo" => [
             "Define a new (imbalanced) design" => "./generated/HowTo/newDesign.md",
+            "Define design-dependent component basis functions" => "./generated/HowTo/componentfunction.md",
             "Get multiple trials with identical subject/item combinations" => "./generated/HowTo/repeatTrials.md",
             "Define a new component (with variable duration and shift)" => "./generated/HowTo/newComponent.md",
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
             "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
+            "Simulate ground truth marginal effects" => "./generated/HowTo/getGroundTruth.md",
+            "Sequence of events (e.g. SCR)" => "./generated/HowTo/sequence.md",
         ],
+        "Developer documentation" => "developer_docs.md",
         "API / Docstrings" => "api.md",
     ],
 )
