@@ -93,5 +93,5 @@ Simulation{T}(
     components::Dict{<:Char,<:Vector},
     onset::AbstractOnset,
     noisetype::AbstractNoise,
-) = Simulation{T}(design, Dict{Char,Vector{<:AbstractComponent}}(components), onset, noisetype)
+) where{T} = Simulation{T}(design, Dict{Char,Vector{<:AbstractComponent}}(components), onset, noisetype)
 
