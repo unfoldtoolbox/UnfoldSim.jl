@@ -113,3 +113,26 @@ end
     sampling_rate::Float64 = 1000
 end
 
+@with_kw struct UserDefinedContinuousSignal <: AbstractContinuousSignal
+    controlsignal = nothing
+    signal::Array
+end
+
+@with_kw struct DCDriftNoise <: AbstractContinuousSignal
+    controlsignal = nothing
+    scaling_factor = 1
+end
+@with_kw struct ARDriftNoise <: AbstractContinuousSignal
+    controlsignal = nothing
+    σ
+end
+@with_kw struct LinearDriftNoise <: AbstractContinuousSignal
+    controlsignal = nothing
+    scaling_factor = 1
+end
+
+@with_kw struct DriftNoise <: AbstractContinuousSignal
+    ar::ARDriftNoise = ARDriftNoise(σ=1)
+    linear::LinearDriftNoise = LinearDriftNoise()
+    dc::DCDriftNoise = DCDriftNoise()
+end

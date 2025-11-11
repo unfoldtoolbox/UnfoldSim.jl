@@ -40,6 +40,9 @@ function simulate_continuoussignal(rng::AbstractRNG, s::AbstractNoise, controlsi
     return reshape(simulate_noise(rng,s,length(controlsignal)),size(controlsignal)) .* controlsignal
 end
 
+function simulate_continuoussignal(rng::AbstractRNG, s::UserDefinedContinuousSignal, controlsignal::AbstractArray, sim::Simulation)
+    return s.signal .* controlsignal # the user has already defined what they want
+end
 
 # generate_controlsignal - returns controlsignal for the specified type of AbstractContinuousSignal
 # -> also takes the simulation object since it might influence the generated controlsignal (e.g. generate blinks right after event A -> controlsignal depends on the design) 
@@ -88,3 +91,39 @@ end
 #     # return controlsignal matrix
 # end
 
+
+#---
+function simulate_continuoussignal(rng::AbstractRNG, s::Union{ARDriftNoise,DCDriftNoise,LinearDriftNoise}, controlsignal::AbstractMatrix, sim::Simulation)
+     # call the singlechannel simulate_continououssignal(..., controlsignal[i,:]) for each row (channel) of controlsignal
+     return hcat(map(controlsignal_channelwise->simulate_continuoussignal(rng,s,controlsignal_channelwise,sim), eachrow(controlsignal))...)'
+end
+
+function simulate_continuoussignal(rng::AbstractRNG, s::LinearDriftNoise, controlsignal::AbstractVector, sim::Simulation)
+    # simulate single-channel drift
+    n_samples = size(controlsignal)[end]
+    return  range(0,1,length=n_samples).*
+            (rand((rng))*2-1) .*    # slope of the line for this particular channel
+            s.scaling_factor .*     # global scaling factor for the entire current LinearDriftNoise
+            controlsignal           # user-controllable weights (current_channel x timepoint) 
+end
+
+function simulate_continuoussignal(rng::AbstractRNG, s::ARDriftNoise, controlsignal::AbstractVector, sim::Simulation)
+    n_samples = size(controlsignal)[end]
+    return cumsum(s.σ .* randn((rng),n_samples).*controlsignal) 
+end
+
+function simulate_continuoussignal(rng::AbstractRNG, s::DCDriftNoise, controlsignal::AbstractVector, sim::Simulation)
+    n_samples = size(controlsignal)[end]
+    return ones(n_samples).*rand((rng)).* s.scaling_factor .*controlsignal
+end
+
+
+function simulate_continuoussignal(rng::AbstractRNG, s::DriftNoise, controlsignal::AbstractMatrix, sim::Simulation)
+    fn = fieldnames(DriftNoise)
+    all_s = []
+    for f in fn
+        push!(all_s,simulate_continuoussignal(rng,getfield(s,f),controlsignal,sim))
+    end
+
+    return sum(all_s)
+end
