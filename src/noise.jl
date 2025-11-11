@@ -201,7 +201,8 @@ end
 #-----------------------------
 
 """
-    simulate_noise(rng, t::AbstractNoise, n::Int)
+    simulate_noise(rng, t::AbstractNoise, n::Int, [Simulation::Simulation])
+    simulate_noise(rng, t::AbstractNoise, n::Tuple, [Simulation::Simulation])
 
 Generate noise samples of the given type `t`.
 
@@ -211,8 +212,8 @@ Use `subtypes(AbstractNoise)` for a list of the implemented noise types.
 # Arguments
 - `rng::AbstractRNG`: Random number generator (RNG) to make the process reproducible.
 - `t::AbstractNoise`: Instance of a noise type e.g. `PinkNoise()`.
-- `n::Int`: The number of noise samples that should be generated.
-
+- `n::Int`: The number of noise samples that should be generated. If a tuple is provided, the `prod(n)` samples are generated. Future usage might generate multi-dimensional noise more directly.
+- `simulation::Simulation` (optional): Currently not used, but provided for future extensions where the noise generation might depend on the simulation design.
 # Returns
 - `Vector`: Vector of length `n` containing the noise samples.
 
@@ -276,22 +277,38 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
     return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]
 end
 
+simulate_noise(rng::AbstractRNG, t::AbstractNoise, signal, Simulation::Simulation) =
+    simulate_noise(rng, t, prod(signal))
+
 
 """
-    add_noise!(rng::AbstractRNG, noisetype::AbstractNoise, signal,[simulation::Simulation])
+    add_noise!(rng::AbstractRNG, noisetype::AbstractNoise, signal[, simulation::Simulation])
 
-Generate and add noise to a signal.
+Add simulated noise to `signal` in-place.
 
-Assumes that the signal can be linearized, that is, that the noise is stationary.
+Arguments
+- `rng`: random number generator.
+- `noisetype`: noise descriptor (e.g. `WhiteNoise`, `PinkNoise`, `ExponentialNoise`, `NoNoise`).
+- `signal`: array-like container to mutate; generated noise is reshaped to `size(signal)`.
+- `simulation` (optional): reserved for future use.
 
-`simulation` is  used to provide a future interface to make the noise dependent on e.g. `simulation.design`. It is currently not used and just dropped
+Returns
+- `nothing` (mutates `signal`).
+
+Notes
+- Internally calls `simulate_noise(deepcopy(rng), ...)`.
 """
-add_noise!(rng::AbstractRNG, noisetype::AbstractNoise, signal, simulation::Simulation) =
-    add_noise!(rng, noisetype, signal)
-function add_noise!(rng::AbstractRNG, noisetype::AbstractNoise, signal)
+
+#    add_noise!(rng, noisetype, signal)
+function add_noise!(
+    rng::AbstractRNG,
+    noisetype::AbstractNoise,
+    signal,
+    simulation::Simulation,
+)
 
     # generate noise
-    noise = simulate_noise(deepcopy(rng), noisetype, length(signal))
+    noise = simulate_noise(deepcopy(rng), noisetype, size(signal), simulation)
 
     noise = reshape(noise, size(signal))
 
