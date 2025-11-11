@@ -167,37 +167,28 @@ Noise with exponential decay in AR spectrum. Implements the algorithm (3) from M
 The noise has std of 1 and mean of 0 (over many samples)
 
 The factor "τ" defines the decay over samples. 
-Type for generating noise with exponential decay in AR spectrum.
 
-Tip: To manually create noise samples use the [`simulate_noise`](@ref) function.
-
-XXXX 
 # Fields
 - `noiselevel = 1` (optional): Factor that is used to scale the noise.
-- `ν = 1.5 `: Exponential factor of AR decay "nu".
+- `τ`: Exponential factor of AR decay "tau" in samples. Must be > 0. This factor should depend on your sampling rate, therefore no default is provided.
 
 # Examples
 ```julia-repl
-julia> noise = ExponentialNoise()
-ExponentialNoise
-  noiselevel: Int64 1
-  ν: Float64 1.5
-
+julia> noise = ExponentialNoise(τ = 10)
 julia> using StableRNGs
-
 julia> simulate_noise(StableRNG(1), noise, 5)
 5-element Vector{Float64}:
-  -5.325200748641231
-  -3.437402125380177
-   2.7852625669058884
-  -1.5381022393382109
- -14.818799857226612
+ -0.5325200748641231
+ -0.43992168173929114
+ -0.07751069370021019
+ -0.42927675219497446
+ -1.2458281425035913
 ```
 See also [`PinkNoise`](@ref), [`RedNoise`](@ref), [`NoNoise`](@ref), [`WhiteNoise`](@ref).
 """
 @with_kw struct ExponentialNoise <: AbstractNoise
     noiselevel = 1
-    τ = 1000
+    τ::Any
 end
 
 #-----------------------------
