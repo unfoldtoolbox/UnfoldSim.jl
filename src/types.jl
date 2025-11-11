@@ -18,7 +18,7 @@ A type to store all "ingredients" for a simulation including their parameters.
 Can either be created by the user or will be created automatically when calling the [`simulate`](@ref) function with the required "ingredients".
 Tip: Use the `subtypes` function to get an overview of the implemented "ingredients", e.g. `subtypes(AbstractDesign)`.
 
-The parametric type `T` (default `Float64`), defines the element type of the data in the `simulate` function. `AbstractComponent` needs to produce a compatible data-type, e.g. `Simulation{Int}` and `AbstractComponent` returning `Float64` would not work, but e.g. `Complex` and `Float64` would work.
+The parametric type `T` (default `Float64`), defines the element type of the data returned by the `simulate` function. `AbstractComponent` needs to produce a compatible data-type, e.g. `Simulation{Int}` and an `AbstractComponent` returning `Float64` would not work because `Float64`'s cannot be cast into an `Vector{Int}` the reverse would work though.
 
 # Fields
 - `design::AbstractDesign`: Experimental design.
