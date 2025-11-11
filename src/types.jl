@@ -65,7 +65,18 @@ julia> data
 """
 struct Simulation
     design::AbstractDesign
-    components::Vector{AbstractComponent}
+    components::Union{
+        <:Dict{<:Char,<:Vector{<:AbstractComponent}},
+        <:Vector{<:AbstractComponent},
+    }
     onset::AbstractOnset
     noisetype::AbstractNoise
 end
+
+
+Simulation(
+    design::AbstractDesign,
+    components::Dict{<:Char,<:Vector},
+    onset::AbstractOnset,
+    noisetype::AbstractNoise,
+) = Simulation(design, Dict{Char,Vector{<:AbstractComponent}}(components), onset, noisetype)

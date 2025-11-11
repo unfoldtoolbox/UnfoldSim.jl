@@ -18,6 +18,7 @@ function simulate(
     simulate(MersenneTwister(1), design, components, onset, args...; kwargs...)
 end
 
+
 """
     simulate(
     rng::AbstractRNG,
@@ -127,7 +128,6 @@ simulate(
     kwargs...,
 ) = simulate(rng, Simulation(design, components, onset, noise); kwargs...)
 
-
 function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool = false)
     (; design, components, onset, noisetype) = simulation
 
@@ -145,7 +145,8 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
         # such that the resulting dimensions are dimensions: channels x times x trials x subjects
         # TODO: This assumes a balanced design, but create_continuous_signal also assumes this, so we should be fine ;)
         size_responses = size(responses)
-        signal = reshape(responses, size_responses[1:end-1]..., size(design)...)
+        signal =
+            reshape(responses, size_responses[1:(end-1)]..., size(deepcopy(rng), design)...)
     else # if there is an onset distribution given the next step is to create a continuous signal
         signal, latencies = create_continuous_signal(deepcopy(rng), responses, simulation)
         events.latency = latencies
@@ -241,8 +242,9 @@ function create_continuous_signal(rng, responses, simulation)
 
     (; design, components, onset, noisetype) = simulation
 
-    n_subjects = length(size(design)) == 1 ? 1 : size(design)[2]
-    n_trials = size(design)[1]
+    n_subjects =
+        length(size(deepcopy(rng), design)) == 1 ? 1 : size(deepcopy(rng), design)[2]
+    n_trials = size(deepcopy(rng), design)[1]
     n_chan = n_channels(components)
 
     # we only need to simulate onsets & pull everything together, if we 
@@ -252,13 +254,26 @@ function create_continuous_signal(rng, responses, simulation)
     # flatten onsets (since subjects are concatenated in the events df)
     latencies = onsets[:,]
 
-    # combine responses with onsets
-    max_length_component = maxlength(components)
-    max_length_continuoustime = Int(ceil(maximum(onsets))) .+ max_length_component
+    # calculate the required length of the continuous signal
 
+    # Reasoning:
+    # (1) We want the last event onset time to be within the signal -> lowerbound of max_length_continuous is `maximum(onsets)`
+    # (2) We want to extend the signal for those cases, where the response is longer than the last event onset time, without offset, the upper bound is: maximum(onsets)+max_length_component
+    # (3) In cases where we have a positive offset, the largest offset needs to be added  => maximum(onsets) + max_length_component + max(maxoffset(components), 0)
+    # (4) In cases where we have a negative offset, `max_length_component` might be reduced, by maximally the largest minoffset => maximum(onsets) + max_length_component + max(maxoffset(components), 0) + maximum(min.(get_offset.(components),0))
+
+    last_onset = maximum(onsets)
+    max_length_component = maxlength(components)
+
+    calculated_onset = maximum(onsets) + max_length_component  # add the signal (ideally, we'd add the longest signal of the last event - but it's not so easy). (2)
+    calculated_onset += max(maxoffset(components), 0) # if the largest offset is positive, add it (3)
+    calculated_onset += maximum(min.(vcat(values(get_offset(components))...), 0)) # add maximum of offsets that is smaller than 0 (4)
+
+    max_length_continuoustime = max(last_onset, calculated_onset) # ensure that maximum(onsets) is lowerbound (1)
 
     signal = zeros(n_chan, max_length_continuoustime, n_subjects)
 
+    # combine responses with onsets
     for e = 1:n_chan
         for s = 1:n_subjects
             for i = 1:n_trials
@@ -268,7 +283,9 @@ function create_continuous_signal(rng, responses, simulation)
                     responses,
                     e,
                     s,
-                    one_onset:one_onset+max_length_component-1,
+                    (one_onset+minoffset(simulation.components)):(one_onset+max_length_component-1+maxoffset(
+                        simulation.components,
+                    )),
                     (s - 1) * n_trials + i,
                 )
             end
