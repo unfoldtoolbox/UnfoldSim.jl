@@ -143,7 +143,7 @@ function predef_eeg(
             ]
         end
         hart = headmodel()
-        @assert length(components) == length(multichannel)
+        @assert length(components) == length(multichannel) "Your multichannel labels (n=$(length(multichannel))) need to be the same length as your components (n=$(length(components))). If you specified more or less than 3 components, you need to provide the labels via `multichannel=labelVector`."
 
         components =
             MultichannelComponent.(components, [hart => label for label in multichannel])
