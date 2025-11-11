@@ -210,13 +210,18 @@ function simulate(rng::AbstractRNG,d::AbstractDesign,c::AbstractComponent,o::Abs
     eeg_signal,evts = simulate(deepcopy(rng),sim);
 
     sim_artifacts = s
-    controlsignal = generate_controlsignal.(deepcopy.(rng),sim_artifacts,Ref(sim)) # map(x->generate_controlsignal(deepcopy(rng),x,sim),sim_artifacts) 
-    # Vector (n_feat) of Arrays (last dimension time) -> each kind of artifact could have a different shape of controlsignal, so keep them as elements of the vector rather than combining to a matrix and losing information of which row(s) corresp. to which artifact
+    controlsignal = generate_controlsignal.(deepcopy.(rng),sim_artifacts,Ref(sim)) 
+    # this is a Vector (size same as s) of Arrays (each with last dimension time) -> each kind of artifact could have a different shape of controlsignal, so keep them as elements of the vector rather than combining to a matrix and losing information of which row(s) corresp. to which artifact
     
+    # Note on the use of rng: simply using deepcopy(rng) generates the deepcopy just once and reuses the same object for every call to generate_controlsignal.
+    # This can be tested by checking the objectid and/or generating a random number inside the called function. 
+    # By using deepcopy.(rng) we ensure a new deepcopied object is provided each time.
+    # Another option: map(x->generate_controlsignal(deepcopy(rng),x,sim),sim_artifacts) 
+    
+    # generate controlsignal for those AbstractContinuousSignal types that need to know the signal size first
     replace!(controlsignal, nothing => ones(size(eeg_signal)[1],max(size(eeg_signal)[end],map(x->size(x)[end],filter(!isnothing,controlsignal))...)))
     
     artifact_signal = map((x,y)->simulate_continuoussignal(deepcopy(rng),x,y,sim),sim_artifacts,controlsignal); #TODO handle events: right now for simplicity assume no events are being returned
-    # simulate_continuoussignal.(deepcopy(rng),sim_artifacts,controlsignal, sim)
     combined_signals = [[eeg_signal] ; artifact_signal]
     
     row_counts = [size(mat, 1) for mat in combined_signals];

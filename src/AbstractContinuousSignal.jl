@@ -20,8 +20,6 @@ controlsignal ---> n_channels x n_timepoints
 #TODO docstring
 """
 function simulate_continuoussignal(rng::AbstractRNG, s::PowerLineNoise, controlsignal::AbstractMatrix, sim::Simulation)
-    @show typeof(s), objectid(rng)
-    println(rand(rng))
     base_freq = s.base_freq
     harmonics = s.harmonics
     sampling_rate = s.sampling_rate
@@ -39,8 +37,6 @@ end
 
 
 function simulate_continuoussignal(rng::AbstractRNG, s::AbstractNoise, controlsignal::AbstractArray, sim::Simulation)
-    @show typeof(s), objectid(rng)
-    println(rand(rng))
     return reshape(simulate_noise(rng,s,length(controlsignal)),size(controlsignal)) .* controlsignal
 end
 
@@ -51,49 +47,29 @@ end
 # for EyeMovement, always return a matrix containing gaze direction vectors
 
 function generate_controlsignal(rng::AbstractRNG, cs::GazeDirectionVectors, sim::Simulation)
-    @show "gen_cs", typeof(cs), objectid(rng)
-    println(rand(rng))
     @assert size(cs.val)[1] == 3 "Please make sure gaze data has the shape 3 x n_timepoints."
     return cs.val
 end
 
 function generate_controlsignal(rng::AbstractRNG, cs::HREFCoordinates, sim::Simulation)
-    @show "gen_cs", typeof(cs), objectid(rng)
-    println(rand(rng))
     return reduce(hcat,gazevec_from_angle_3d.(cs.val[1,:],cs.val[2,:])) # always return a 3 x time_points matrix
 end
 
 function generate_controlsignal(rng::AbstractRNG, cs::AbstractContinuousSignal, sim::Simulation)
-    @show "gen_cs", typeof(cs), objectid(rng)
-    println(rand(deepcopy(rng)))
     return generate_controlsignal(deepcopy(rng), cs.controlsignal, sim)
 end
 
-
-# PowerLineNoise: returns empty Array for now.
-# later, maybe weights for each channel x timepoint
-#function generate_controlsignal(rng::AbstractRNG, cs::PowerLineNoise, sim::Simulation)
-#    #return cs.controlsignal#zeros(Float64, 0, 0)
-#    return generate_controlsignal(rng, cs.controlsignal, sim)
-#end
-
 function generate_controlsignal(rng::AbstractRNG, cs::PowerLineNoise, sim::Simulation)
-    @show "gen_cs", typeof(cs), objectid(rng)
-    println(rand(rng))
     return nothing
 end
 
 # AbstractNoise: returns nothing for now, however in future the controlsignal for AbstractNoise may depend on the Simulation.
 function generate_controlsignal(rng::AbstractRNG, cs::AbstractNoise, sim::Simulation)
-    @show "gen_cs", typeof(cs), objectid(rng)
-    println(rand(rng))
     return nothing
 end
 
 # identity function - in case the user already specified the final controlsignal while creating the artifact
 function generate_controlsignal(rng::AbstractRNG, cs::AbstractMatrix, sim::Simulation)
-    @show "gen_cs", typeof(cs), objectid(rng)
-    println(rand(rng))
     return cs
 end
 
