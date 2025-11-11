@@ -67,11 +67,15 @@ julia> data
 """
 struct Simulation{T}
     design::AbstractDesign
-    components::Vector{AbstractComponent}
+    components::Union{
+        <:Dict{<:Char,<:Vector{<:AbstractComponent}},
+        <:Vector{<:AbstractComponent},
+    }
     onset::AbstractOnset
     noisetype::AbstractNoise
 
 end
+
 Simulation(args...) = Simulation{Float64}(args...) # by default we want Float64 :)
 
 # put the AbstractComponent in [ ]  if it didnt exist.
@@ -82,4 +86,12 @@ Simulation{T}(
     noisetype::AbstractNoise,
 ) where {T} = Simulation{T}(design, [component], onset, noisetype)
 
+
+
+Simulation{T}(
+    design::AbstractDesign,
+    components::Dict{<:Char,<:Vector},
+    onset::AbstractOnset,
+    noisetype::AbstractNoise,
+) = Simulation{T}(design, Dict{Char,Vector{<:AbstractComponent}}(components), onset, noisetype)
 

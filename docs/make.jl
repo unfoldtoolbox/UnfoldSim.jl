@@ -50,10 +50,13 @@ makedocs(;
         ],
         "HowTo" => [
             "Define a new (imbalanced) design" => "./generated/HowTo/newDesign.md",
+            "Define design-dependent component basis functions" => "./generated/HowTo/componentfunction.md",
             "Get multiple trials with identical subject/item combinations" => "./generated/HowTo/repeatTrials.md",
             "Define a new component (with variable duration and shift)" => "./generated/HowTo/newComponent.md",
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
             "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
+            "Simulate ground truth marginal effects" => "./generated/HowTo/getGroundTruth.md",
+            "Sequence of events (e.g. SCR)" => "./generated/HowTo/sequence.md",
         ],
         "Developer documentation" => "developer_docs.md",
         "API / Docstrings" => "api.md",
