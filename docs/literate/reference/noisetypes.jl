@@ -30,10 +30,14 @@ ax_auto =
         xlabel = "Lag",
         ylabel = "Autocorrelation",
     )
-for n in [PinkNoise RedNoise WhiteNoise NoNoise ()->ExponentialNoise(τ = 100)]
+for n in [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
 
-    ## generate
-    noisevec = simulate_noise(StableRNG(1), n(), 10000)
+    ## generate noise samples
+    if n == ExponentialNoise
+        noisevec = simulate_noise(StableRNG(1), n(τ = 100), 10000)
+    else
+        noisevec = simulate_noise(StableRNG(1), n(), 10000)
+    end
 
     ## plot 1000 samples
     lines!(ax_sig, noisevec[1:1000]; label = string(n))
