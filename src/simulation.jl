@@ -1,10 +1,3 @@
-# helper to move input ::Component to ::Vector{Component}
-Simulation(
-    design::AbstractDesign,
-    component::AbstractComponent,
-    onset::AbstractOnset,
-    noisetype::AbstractNoise,
-) = Simulation(design, [component], onset, noisetype)
 
 
 function simulate(
@@ -238,7 +231,11 @@ julia> signal
  61
 ```
 """
-function create_continuous_signal(rng, responses, simulation)
+function create_continuous_signal(
+    rng,
+    responses,
+    simulation::Simulation{SimDataType},
+) where {SimDataType}
 
     (; design, components, onset, noisetype) = simulation
 
@@ -271,7 +268,7 @@ function create_continuous_signal(rng, responses, simulation)
 
     max_length_continuoustime = max(last_onset, calculated_onset) # ensure that maximum(onsets) is lowerbound (1)
 
-    signal = zeros(n_chan, max_length_continuoustime, n_subjects)
+    signal = zeros(SimDataType, n_chan, max_length_continuoustime, n_subjects)
 
     # combine responses with onsets
     for e = 1:n_chan

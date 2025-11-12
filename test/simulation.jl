@@ -216,6 +216,52 @@ using Base: AbstractCartesianIndex
         end
     end
 
+    @testset "test data-type" begin
+        # Define experimental factors
+        conditions = Dict(:cond => ["A", "B"])
+
+        # Create design for one subject with 20 trials (10 in each of the two factor levels)
+        repetitions = 10
+        design_single_subject =
+            SingleSubjectDesign(; conditions = conditions) |>
+            x -> RepeatDesign(x, repetitions)
+
+        # Linear component for the single-subject simulation
+        signal_linear = LinearModelComponent(;
+            basis = p100(),
+            formula = @formula(0 ~ 1 + cond),
+            β = [1, 0.5],
+        )
+
+
+        # Define headmodel and MultichannelComponent for multi-channel cases
+        hartmut_model = Hartmut()
+        signal_linear_multichannel = MultichannelComponent(
+            signal_linear,
+            hartmut_model => "Left Central Opercular Cortex",
+        )
+
+        # Overlap since offset<length(signal.basis)
+        onset = UniformOnset(; width = 10, offset = 5)
+
+        noise = PinkNoise(; noiselevel = 0.5)
+
+
+        ## Simulate data
+        simulation = Simulation(design_single_subject, signal_linear, onset, noise)
+        simulation_c64 =
+            Simulation{Complex}(design_single_subject, [signal_linear], onset, noise)
+        @test typeof(simulation) == Simulation{Float64}
+        @test typeof(simulation_c64) == Simulation{Complex}
+        data, events = simulate(MersenneTwister(42), simulation)
+        @test eltype(data) == Float64
+
+        data, events = simulate(MersenneTwister(42), simulation_c64)
+        @test eltype(data) == Complex
+
+
+
+    end
     @testset "multi-component sequence #124" begin
         struct MyLinearModelComponent1 <: AbstractComponent
             comp::Any

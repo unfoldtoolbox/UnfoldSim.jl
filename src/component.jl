@@ -601,9 +601,9 @@ julia> simulate_responses(StableRNG(1), [c1, c2], simulation)
 function simulate_responses(
     rng,
     components::Vector{<:AbstractComponent},
-    simulation::Simulation,
-)
-    epoch_data = init_epoch_data(deepcopy(rng), components, simulation.design)
+    simulation::Simulation{SimDataType},
+) where {SimDataType}
+    epoch_data = init_epoch_data(SimDataType, deepcopy(rng), components, simulation.design)
     simulate_responses!(rng, epoch_data, components, simulation)
     return epoch_data
 end
@@ -625,19 +625,23 @@ end
 Initializes an Array with zeros. Returns either a 2-dimensional for component-length  x length(design), or a 3-D for channels x component-length x length(design)
 
 """
-function init_epoch_data(rng, components, design)
+function init_epoch_data(SimDataType, rng, components, design)
     max_offset = maxoffset(components)
     min_offset = minoffset(components)
     range_offset = (max_offset - min_offset)
     if n_channels(components) > 1
         epoch_data = zeros(
+            SimDataType,
             n_channels(components),
             maxlength(components) + range_offset,
             length(deepcopy(rng), design),
         )
     else
-        epoch_data =
-            zeros(maxlength(components) + range_offset, length(deepcopy(rng), design))
+        epoch_data = zeros(
+            SimDataType,
+            maxlength(components) + range_offset,
+            length(deepcopy(rng), design),
+        )
     end
     return epoch_data
 end
@@ -658,9 +662,13 @@ If a `_` is present, it is ignored.
 - `s::Simulation`: Simulation object containing design and other parameters.    
 
 """
-function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
+function simulate_responses(
+    rng,
+    event_component_dict::Dict,
+    s::Simulation{SimDataType},
+) where {SimDataType}
     #@debug rng.state
-    epoch_data = init_epoch_data(deepcopy(rng), event_component_dict, s.design)
+    epoch_data = init_epoch_data(SimDataType, deepcopy(rng), event_component_dict, s.design)
     #@debug rng.state
     evts = generate_events(deepcopy(rng), s.design)
     #@debug rng.state
