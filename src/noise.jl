@@ -277,8 +277,8 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
     return t.noiselevel .* 10 .* (randn(rng, n)'*cholesky(Σ).U)[1, :]
 end
 
-simulate_noise(rng::AbstractRNG, t::AbstractNoise, signal, Simulation::Simulation) =
-    simulate_noise(rng, t, prod(signal))
+simulate_noise(rng::AbstractRNG, t::AbstractNoise, size_signal, Simulation::Simulation) =
+    simulate_noise(rng, t, prod(size_signal))
 
 
 """
