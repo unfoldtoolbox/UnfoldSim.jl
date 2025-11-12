@@ -1,3 +1,4 @@
+using Base: AbstractCartesianIndex
 @testset "simulation" begin
 
     @testset "general_test_simulate" begin
@@ -213,6 +214,85 @@
 
             end
         end
+    end
+
+    @testset "test data-type" begin
+        # Define experimental factors
+        conditions = Dict(:cond => ["A", "B"])
+
+        # Create design for one subject with 20 trials (10 in each of the two factor levels)
+        repetitions = 10
+        design_single_subject =
+            SingleSubjectDesign(; conditions = conditions) |>
+            x -> RepeatDesign(x, repetitions)
+
+        # Linear component for the single-subject simulation
+        signal_linear = LinearModelComponent(;
+            basis = p100(),
+            formula = @formula(0 ~ 1 + cond),
+            β = [1, 0.5],
+        )
+
+
+        # Define headmodel and MultichannelComponent for multi-channel cases
+        hartmut_model = Hartmut()
+        signal_linear_multichannel = MultichannelComponent(
+            signal_linear,
+            hartmut_model => "Left Central Opercular Cortex",
+        )
+
+        # Overlap since offset<length(signal.basis)
+        onset = UniformOnset(; width = 10, offset = 5)
+
+        noise = PinkNoise(; noiselevel = 0.5)
+
+
+        ## Simulate data
+        simulation = Simulation(design_single_subject, signal_linear, onset, noise)
+        simulation_c64 =
+            Simulation{Complex}(design_single_subject, [signal_linear], onset, noise)
+        @test typeof(simulation) == Simulation{Float64}
+        @test typeof(simulation_c64) == Simulation{Complex}
+        data, events = simulate(MersenneTwister(42), simulation)
+        @test eltype(data) == Float64
+
+        data, events = simulate(MersenneTwister(42), simulation_c64)
+        @test eltype(data) == Complex
+
+
+
+    end
+    @testset "multi-component sequence #124" begin
+        struct MyLinearModelComponent1 <: AbstractComponent
+            comp::Any
+        end
+        MyLinearModelComponent1(b, f, β) =
+            MyLinearModelComponent1(LinearModelComponent(; basis = b, formula = f, β))
+        UnfoldSim.simulate_component(
+            rng,
+            c::MyLinearModelComponent1,
+            design::UnfoldSim.SubselectDesign,
+        ) = simulate_component(rng, c.comp, design)
+        UnfoldSim.length(c::MyLinearModelComponent1) = length(c.comp)
+        UnfoldSim.size(c::MyLinearModelComponent1) = size(c.comp)
+        sim = Simulation(
+            SingleSubjectDesign(conditions = Dict(:event => ['A', 'B'])),
+            Dict(
+                'A' => [
+                    LinearModelComponent(
+                        basis = p100(),
+                        formula = @formula(0 ~ 1),
+                        β = [1],
+                    ),
+                ],
+                'B' => [MyLinearModelComponent1(p100(), @formula(0 ~ 1), [2])],
+            ),
+            NoOnset(),
+            NoNoise(),
+        )
+        d, e = simulate(UnfoldSim.MersenneTwister(1), sim; return_epoched = true)
+        @test d[10, 1] > 0.9 # 1 if the hanning would hit perfectly (currently the peak is between samples)
+        @test d[10, 2] > 1.9 # 2 if the hanning would hit perfectly (currently the peak is between samples)
     end
 
 end

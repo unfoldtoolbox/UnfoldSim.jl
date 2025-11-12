@@ -6,7 +6,7 @@ A component that adds a hierarchical relation between parameters according to a 
 All fields can be named. Works best with [`MultiSubjectDesign`](@ref).
 
 # Fields
-- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. Future versions will allow for functions, as of v0.3 this is restricted to array-like objects
+- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is also possible to provide a function that evaluates to an `Vector` of `Vectors`, with the `design` as input to the function, the outer vector has to have `nrows(design)`, one for each event. The inner vector represents the basis functions which can be of different size (a ragged array). Alternatively, one can also return a Matrix with the second dimension representing `nrows(design)`. In the case of providing a function, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples. If your design depends on `rng`, e.g. because of `event_order_function=shuffle` or some special `SequenceDesign`, then you can provide a two-arguments function `(rng,design)->...`.
 - `formula::Any`: Formula-object in the style of MixedModels.jl e.g. `@formula 0 ~ 1 + cond + (1|subject)`. The left-hand side is ignored.
 - `β::Vector` Vector of betas (fixed effects), must fit the formula.
 - `σs::Dict` Dict of random effect variances, e.g. `Dict(:subject => [0.5, 0.4])` or to specify correlation matrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to the MixedModels.jl `create_re` function, which creates the θ matrices.
@@ -37,8 +37,10 @@ See also [`LinearModelComponent`](@ref), [`MultichannelComponent`](@ref).
     β::Vector
     σs::Dict # Dict(:subject=>[0.5,0.4]) or to specify correlationmatrix Dict(:subject=>[0.5,0.4,I(2,2)],...)
     contrasts::Dict = Dict()
+    offset::Int = 0
 end
-
+MixedModelComponent(basis, formula, β, σs, contrasts) =
+    MixedModelComponent(basis, formula, β, σs, contrasts, 0)
 """
     LinearModelComponent <: AbstractComponent
 
@@ -47,11 +49,11 @@ A multiple regression component for one subject.
 All fields can be named. Works best with [`SingleSubjectDesign`](@ref).
 
 # Fields
-- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. Future versions will allow for functions, as of v0.3 this is restricted to array-like objects
+- `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is also possible to provide a function that evaluates to an `Vector` of `Vectors`, with the `design` as input to the function, the outer vector has to have `nrows(design)`, one for each event. The inner vector represents the basis functions which can be of different size (a ragged array). Alternatively, one can also return a Matrix with the second dimension representing `nrows(design)`. In the case of providing a function, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples. If your design depends on `rng`, e.g. because of `event_order_function=shuffle` or some special `SequenceDesign`, then you can provide a two-arguments function `(rng,design)->...`.
 - `formula::Any`: StatsModels `formula` object, e.g.  `@formula 0 ~ 1 + cond` (left-hand side must be 0).
 - `β::Vector` Vector of betas/coefficients, must fit the formula.
-- `contrasts::Dict` (optional): Determines which coding scheme to use for which categorical variables. Default is empty which corresponds to dummy coding.
-     For more information see <https://juliastats.org/StatsModels.jl/stable/contrasts>.
+- `contrasts::Dict` (optional): Determines which coding scheme to use for which categorical variables. Default is empty which corresponds to dummy coding. For more information see <https://juliastats.org/StatsModels.jl/stable/contrasts>.
+- `offset::Int = 0`: Can be used to shift the basis function in time (in samples).
 
 # Examples
 ```julia-repl
@@ -75,7 +77,37 @@ See also [`MixedModelComponent`](@ref), [`MultichannelComponent`](@ref).
     formula::Any # e.g. 0 ~ 1 + cond - left side must be "0"
     β::Vector
     contrasts::Dict = Dict()
+    offset::Int = 0
+    function LinearModelComponent(basis, formula, β, contrasts, offset)
+        @assert isa(basis, Tuple{Function,Int}) "`basis` needs to be an `::Array` or a `Tuple(function::Function,maxlength::Int)`"
+        @assert basis[2] > 0 "`maxlength` needs to be longer than 0"
+        new(basis, formula, β, contrasts, offset)
+    end
+    LinearModelComponent(basis::Array, formula, β, contrasts, offset) =
+        new(basis, formula, β, contrasts, offset)
 end
+
+# backwards compatability after introducing the `offset` field
+LinearModelComponent(basis, formula, β, contrasts) =
+    LinearModelComponent(basis, formula, β, contrasts, 0)
+
+"""
+    get_offset(AbstractComponent)
+
+Should the `basis` be shifted? Returns c.offset for most components, if not implemented for a type, returns 0. Can be positive or negative, but has to be an Integer.
+"""
+get_offset(c::AbstractComponent)::Int = 0
+get_offset(c::LinearModelComponent)::Int = c.offset
+get_offset(c::MixedModelComponent)::Int = c.offset
+get_offset(c::Vector{<:AbstractComponent}) = get_offset.(c)
+get_offset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) =
+    Dict(k => get_offset(v) for (k, v) in d)
+
+maxoffset(c::Vector{<:AbstractComponent}) = maximum(get_offset.(c))
+maxoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = maximum(maxoffset.(values(d)))
+minoffset(c::Vector{<:AbstractComponent}) = minimum(get_offset.(c))
+minoffset(d::Dict{<:Char,<:Vector{<:AbstractComponent}}) = minimum(minoffset.(values(d)))
+
 
 
 """
@@ -139,7 +171,7 @@ function MultichannelComponent(
     return MultichannelComponent(component, mg[:, ix], noise)
 end
 
-Base.length(c::AbstractComponent) = length(c.basis)
+
 Base.length(c::MultichannelComponent) = length(c.component)
 
 """
@@ -157,10 +189,12 @@ For `MultichannelComponent` return the length of the projection vector.
 """
 n_channels(c::MultichannelComponent) = length(c.projection)
 
+
 """
     n_channels(c::Vector{<:AbstractComponent})
+    n_channels(c::Dict)
 
-For a vector of `MultichannelComponent`s, return the number of channels for the first component but assert all are of equal length.
+For a vector of `MultichannelComponent`s or a Dict of components, return the number of channels for the first component but assert all are of equal length.
 """
 function n_channels(c::Vector{<:AbstractComponent})
     all_channels = n_channels.(c)
@@ -168,12 +202,83 @@ function n_channels(c::Vector{<:AbstractComponent})
     return all_channels[1]
 end
 
+function n_channels(components::Dict)
+    all_channels = [n_channels(c) for c in values(components)]
+    @assert length(unique(all_channels)) == 1 "Error - projections of different components have to be of the same output (=> channel) dimension"
+    return all_channels[1]
+
+end
+
+
+"""
+    get_basis([rng],c::AbstractComponent)
+
+Return the basis of the component (typically `c.basis`). rng is optional and ignored, but exists to have the same interface as `get_basis(c,design)`.
+"""
+get_basis(c::AbstractComponent) = c.basis
+get_basis(rng::AbstractRNG, c::AbstractComponent) = get_basis(c)
+
+
+"""
+     get_basis(c::AbstractComponent, design)
+     get_basis(rng, c::AbstractComponent, design)
+     
+Evaluate the basis, if basis is a vector, directly returns it. If basis is a tuple `(f::Function, maxlength::Int)`, evaluate the function with input `design`. Cut the resulting vector or Matrix at `maxlength`.
+
+To ensure the same design can be generated, `rng` should be the global simulation `rng`. If not specified, `MersenneTwister(1)` is used.
+"""
+get_basis(basis, design) = get_basis(MersenneTwister(1), basis, design)
+get_basis(rng, c::AbstractComponent, design) = get_basis(rng, get_basis(c), design)
+get_basis(rng, b::AbstractVector, design) = b
+
+
+_get_basis_length(basis_out::AbstractMatrix) = size(basis_out, 2)
+_get_basis_length(basis_out::AbstractVector{<:AbstractVector}) = length(basis_out)
+_get_basis_length(basis_out) = error(
+    "Component basis function needs to either return a Vector of vectors or a Matrix ",
+)
+
+function get_basis(rng::AbstractRNG, basis::Tuple{Function,Int}, design)
+    f = basis[1]
+    maxlength = basis[2]
+    basis_out = applicable(f, rng, design) ? f(rng, design) : f(design)
+    l = _get_basis_length(basis_out)
+
+    @assert l == length(design) "Component basis function needs to either return a Matrix with dim(2) == length(design) [$l / $(length(design))], or a Vector of Vectors with length(b) == length(design) [$l / $(length(design))]. "
+    limit_basis(basis_out, maxlength)
+end
+
+"""
+    limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
+
+    Cut all basis vectors to `maxlength` and pad them with 0s if they are shorter than `maxlength`.
+"""
+function limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
+
+    # first cut off after maxlength
+    b = limit_basis.(b, maxlength)
+    # now fill up with 0's
+    Δlengths = maxlength .- length.(b)
+
+    b = pad_array.(b, Δlengths, 0)
+    basis_out = reduce(hcat, b)
+
+    return basis_out
+end
+limit_basis(b::AbstractVector{<:Number}, maxlength) = b[1:min(length(b), maxlength)]
+limit_basis(b::AbstractMatrix, maxlength) = b[1:min(length(b), maxlength), :]
+
+Base.length(c::AbstractComponent) =
+    isa(get_basis(c), Tuple) ? get_basis(c)[2] : length(get_basis(c))
+
 """
     maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
+    maxlength(components::Dict) 
 
 Return the maximum of the individual components' lengths.
 """
 maxlength(c::Vector{<:AbstractComponent}) = maximum(length.(c))
+maxlength(components::Dict) = maximum([maximum(length.(c)) for c in values(components)])
 
 """
     simulate_component(rng, c::AbstractComponent, simulation::Simulation)
@@ -189,7 +294,7 @@ simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
 Generate a linear model design matrix, weight it by the coefficients `c.β` and multiply the result with the given basis vector.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(c.basis) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(get_basis(c.basis)) x length(design)`.
 
 # Examples
 ```julia-repl
@@ -209,21 +314,30 @@ julia> simulate_component(StableRNG(1), c, design)
 """
 function simulate_component(rng, c::LinearModelComponent, design::AbstractDesign)
     events = generate_events(deepcopy(rng), design)
+    X = generate_designmatrix(c.formula, events, c.contrasts)
+    y = X * c.β
 
+    return y' .* get_basis(deepcopy(rng), c, design)
+end
+
+
+"""
+Helper function to generate a designmatrix from formula, events and contrasts.
+"""
+function generate_designmatrix(formula, events, contrasts)
     # special case, intercept only 
     # https://github.com/JuliaStats/StatsModels.jl/issues/269
-    if c.formula.rhs == ConstantTerm(1)
+    if formula.rhs == ConstantTerm(1)
         X = ones(nrow(events), 1)
     else
-        if isempty(c.contrasts)
-            m = StatsModels.ModelFrame(c.formula, events)
+        if isempty(contrasts)
+            m = StatsModels.ModelFrame(formula, events)
         else
-            m = StatsModels.ModelFrame(c.formula, events; contrasts = c.contrasts)
+            m = StatsModels.ModelFrame(formula, events; contrasts = contrasts)
         end
         X = StatsModels.modelmatrix(m)
     end
-    y = X * c.β
-    return y' .* c.basis
+    return X
 end
 
 """
@@ -236,7 +350,7 @@ Generate a MixedModel and simulate data according to the given parameters `c.β`
 - `return_parameters::Bool = false`: Can be used to return the per-event parameters used to weight the basis function. Sometimes useful to inspect what is simulated.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(c.basis) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(get_basis(basis)) x length(design)`.
 
 # Notes
 1) MixedModels/Sim does not allow simulation of data without white noise of the residuals. Because we want our own noise, we use the following trick to remove the MixedModels-Noise:
@@ -312,7 +426,14 @@ function simulate_component(
     end
 
     # in case the parameters are of interest, we will return those, not them weighted by basis
-    epoch_data_component = kron(return_parameters ? [1.0] : c.basis, m.y')
+    b = return_parameters ? [1.0] : get_basis(deepcopy(rng), c, design)
+    # in case get_basis returns a Matrix, it will be trial x time (or the transpose of it, we didnt check when writing this comment), thus we only need to scale each row by the scaling factor from the LMM
+    # in case get_basis returns a Vector of length time, it needs to be "repeated" to a trial x time matrix and then scaled again. The kronecker product efficiently does that.
+    if isa(b, AbstractMatrix)
+        epoch_data_component = ((m.y' .* b))
+    else
+        epoch_data_component = kron(b, m.y')
+    end
     return epoch_data_component
     #=
         else
@@ -348,7 +469,7 @@ end
 Return the projection of a `MultichannelComponent c` from "source" to "sensor" space.
 
 # Returns
-- `Array{Float64,3}`: Projected simulated component for each event in the events data frame. The output dimensions are `length(c.projection) x length(c.basis) x length(design)`.
+- `Array{Float64,3}`: Projected simulated component for each event in the events data frame. The output dimensions are `length(c.projection) x length(get_basis(c)) x length(design)`.
 
 # Examples
 ```julia-repl
@@ -480,15 +601,19 @@ julia> simulate_responses(StableRNG(1), [c1, c2], simulation)
 function simulate_responses(
     rng,
     components::Vector{<:AbstractComponent},
+    simulation::Simulation{SimDataType},
+) where {SimDataType}
+    epoch_data = init_epoch_data(SimDataType, deepcopy(rng), components, simulation.design)
+    simulate_responses!(rng, epoch_data, components, simulation)
+    return epoch_data
+end
+
+function simulate_responses!(
+    rng,
+    epoch_data::AbstractArray,
+    components::Vector,
     simulation::Simulation,
 )
-    if n_channels(components) > 1
-        epoch_data =
-            zeros(n_channels(components), maxlength(components), length(simulation.design))
-    else
-        epoch_data = zeros(maxlength(components), length(simulation.design))
-    end
-
     for c in components
         simulate_and_add!(epoch_data, c, simulation, deepcopy(rng)) # TODO: `deepcopy` necessary?
     end
@@ -496,17 +621,119 @@ function simulate_responses(
 end
 
 
+""" 
+Initializes an Array with zeros. Returns either a 2-dimensional for component-length  x length(design), or a 3-D for channels x component-length x length(design)
+
+"""
+function init_epoch_data(SimDataType, rng, components, design)
+    max_offset = maxoffset(components)
+    min_offset = minoffset(components)
+    range_offset = (max_offset - min_offset)
+    if n_channels(components) > 1
+        epoch_data = zeros(
+            SimDataType,
+            n_channels(components),
+            maxlength(components) + range_offset,
+            length(deepcopy(rng), design),
+        )
+    else
+        epoch_data = zeros(
+            SimDataType,
+            maxlength(components) + range_offset,
+            length(deepcopy(rng), design),
+        )
+    end
+    return epoch_data
+end
+
+"""
+    simulate_responses(
+        rng,
+        event_component_dict::Dict,
+        s::Simulation)
+
+Per event, simulate the components specified by the Dict, and return the epoched_data array.
+Internally wraps the designs in a `SubselectDesign` for each event type, so that only the relevant trials are simulated.
+If a `_` is present, it is ignored.
+
+# Arguments
+- `rng`: Random number generator.
+- `event_component_dict::Dict`: Dictionary mapping character event types to Vector of components
+- `s::Simulation`: Simulation object containing design and other parameters.    
+
+"""
+function simulate_responses(
+    rng,
+    event_component_dict::Dict,
+    s::Simulation{SimDataType},
+) where {SimDataType}
+    #@debug rng.state
+    epoch_data = init_epoch_data(SimDataType, deepcopy(rng), event_component_dict, s.design)
+    #@debug rng.state
+    evts = generate_events(deepcopy(rng), s.design)
+    #@debug rng.state
+    @debug size(epoch_data), size(evts)
+    multichannel = n_channels(event_component_dict) > 1
+    for key in keys(event_component_dict)
+        # we don't remember why we explicitly check for key == '_', maybe can be removed in future iterations
+        if key == '_'
+            continue
+        end
+        s_key = Simulation(
+            s.design |> x -> SubselectDesign(x, key),
+            event_component_dict,
+            s.onset,
+            s.noisetype,
+        )
+        ix = evts.event .== key
+        if multichannel
+            simulate_responses!(
+                deepcopy(rng),
+                @view(epoch_data[:, :, ix]),
+                event_component_dict[key],
+                s_key,
+            )
+        else
+            #@debug sum(ix), size(simulate_responses(rng, event_component_dict[key], s_key)), key
+            simulate_responses!(
+                deepcopy(rng),
+                @view(epoch_data[:, ix]),
+                event_component_dict[key],
+                s_key,
+            )
+        end
+    end
+    return epoch_data
+end
+
 """
     simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
     simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
 
 Helper function to call `simulate_component` and add it to a provided Array `epoch_data`.
 """
-function simulate_and_add!(epoch_data::AbstractMatrix, c, simulation, rng)
+function simulate_and_add!(
+    epoch_data::AbstractMatrix,
+    component::AbstractComponent,
+    simulation,
+    rng,
+)
     @debug "matrix"
-    @views epoch_data[1:length(c), :] .+= simulate_component(rng, c, simulation)
+
+    off = get_offset(component) - minoffset(simulation.components)
+
+
+    @views epoch_data[(1+off):(length(component)+off), :] .+=
+        simulate_component(rng, component, simulation)
 end
-function simulate_and_add!(epoch_data::AbstractArray, c, simulation, rng)
+function simulate_and_add!(
+    epoch_data::AbstractArray,
+    component::AbstractComponent,
+    simulation,
+    rng,
+)
     @debug "3D Array"
-    @views epoch_data[:, 1:length(c), :] .+= simulate_component(rng, c, simulation)
+    off = get_offset(component) - minoffset(simulation.components)
+    @views epoch_data[:, (1+off):(length(component)+off), :] .+=
+        simulate_component(rng, component, simulation)
 end

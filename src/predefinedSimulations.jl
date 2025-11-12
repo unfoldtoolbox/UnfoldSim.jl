@@ -1,3 +1,4 @@
+
 # Here we define some predefined simulations. Convenient if you just want to have a quick simulation :)
 
 # If no RNG is given, create one.
@@ -38,6 +39,10 @@ The most used keyword argument is: `return_epoched = true` which returns already
 ## Noise
 - `noiselevel = 0.2`.
 - `noise = PinkNoise(; noiselevel = noiselevel)`.
+
+
+## Multichannel
+- `multichannel = nothing`: to receive 227 channels multichannel data, provide a list of `hartmut.cortical["label"]`. If set to `true` uses: `["Right Occipital Pole", "Left Postcentral Gyrus", "Left Superior Frontal Gyrus",]`.
 
 ## Other parameters
 - `return_epoched = false`: If true, already epoched data is returned. Otherwise, continuous data is returned.
@@ -90,9 +95,9 @@ function predef_eeg(
 
     # component / signal
     sfreq = 100,
-    p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict()),
-    n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, 3], Dict()),
-    p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5, 1], Dict()),
+    p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict(), 0),
+    n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, 3], Dict(), 0),
+    p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5, 1], Dict(), 0),
     kwargs...,
 )
 
@@ -121,13 +126,30 @@ function predef_eeg(
     # onset
     overlap = (0.5, 0.2),
     onset = UniformOnset(; offset = sfreq * overlap[1], width = sfreq * overlap[2]), #put offset to 1 for no overlap. put width to 0 for no jitter
+    multichannel = nothing,
     kwargs...,
 )
 
-    components = []
+    components = AbstractComponent[]
     for c in comps
         append!(components, [T(c...)])
     end
+    if !isnothing(multichannel)
+        if isa(multichannel, Bool)
+            multichannel = [
+                "Right Occipital Pole",
+                "Left Postcentral Gyrus",
+                "Left Superior Frontal Gyrus",
+            ]
+        end
+        hart = headmodel()
+        @assert length(components) == length(multichannel) "Your multichannel labels (n=$(length(multichannel))) need to be the same length as your components (n=$(length(components))). If you specified more or less than 3 components, you need to provide the labels via `multichannel=labelVector`."
+
+        components =
+            MultichannelComponent.(components, [hart => label for label in multichannel])
+
+    end
+
     return simulate(rng, design, components, onset, noise; kwargs...)
 end
 

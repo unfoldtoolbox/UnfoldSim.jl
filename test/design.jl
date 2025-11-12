@@ -188,4 +188,39 @@
         @test length(unique(i1.cond)) == 1
     end
 
+    @testset "Effects Design" begin
+        # Begin with simulation design
+        design = SingleSubjectDesign(;
+            conditions = Dict(
+                :condition => ["car", "face"],
+                :continuous => range(0, 5, length = 10),
+            ),
+        )
+
+        # Effects dictionary
+        effects_dict_1 = Dict(:condition => ["car", "face"])
+        effects_dict_2 = Dict(:condition => ["car", "face"], :continuous => [2, 3, 4])
+
+        # Generate effects design
+        ef_design_1 = EffectsDesign(design, effects_dict_1)
+        ef_design_2 = EffectsDesign(design, effects_dict_2)
+
+        # Generate events
+        ef_events_1 = generate_events(ef_design_1)
+        ef_events_2 = generate_events(ef_design_2)
+
+        # SingleSubject tests
+        @test size(ef_events_1, 1) == 2 # Test correct length of events df
+        @test unique(ef_events_1[!, :continuous])[1] ≈ mean(range(0, 5, length = 10)) # Test that average is calculated correctly and only one value is present in df
+        @test size(ef_events_2, 1) == 6 # Test correct length of events df when one inputs values for continuous variable
+
+        # MultiSubjectDesign -> not implemented yet, so should error
+        design = MultiSubjectDesign(
+            n_subjects = 20,
+            n_items = 8,
+            items_between = Dict(:condition => ["car", "face"], :continuous => [1, 2]),
+        )
+        @test_throws ErrorException EffectsDesign(design, effects_dict_1)
+
+    end
 end

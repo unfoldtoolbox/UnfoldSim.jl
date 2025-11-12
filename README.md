@@ -1,20 +1,20 @@
 # [![logo_UnfoldSim jl_120px](https://github.com/unfoldtoolbox/UnfoldSim.jl/assets/57703446/139a06c7-55c6-4c2e-8935-627a3c3bf036)](https://github.com/unfoldtoolbox/UnfoldSim.jl/tree/main)
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://unfoldtoolbox.github.io/UnfoldSim.jl/dev/)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://unfoldtoolbox.github.io/UnfoldDocs/UnfoldSim.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://unfoldtoolbox.github.io/UnfoldDocs/UnfoldSim.jl/dev/)
 [![Build Status](https://github.com/unfoldtoolbox/UnfoldSim.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/unfoldtoolbox/UnfoldSim.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/v/UnfoldSim.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/unfoldtoolbox/UnfoldSim.jl)
-[![DOI](https://zenodo.org/badge/413455526.svg)](https://zenodo.org/badge/latestdoi/413455526)
+[![Coverage](https://codecov.io/gh/unfoldtoolbox/UnfoldSim.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/unfoldtoolbox/UnfoldSim.jl)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15401704.svg)](https://doi.org/10.5281/zenodo.15401704)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.06641/status.svg)](https://doi.org/10.21105/joss.06641)
 
-|rERP|EEG visualisation|EEG Simulations|BIDS pipeline|Decode EEG data|Statistical testing|
-|---|---|---|---|---|---|
-| <a href="https://github.com/unfoldtoolbox/Unfold.jl/tree/main"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623787-757575d0-aeb9-4d94-a5f8-832f13dcd2dd.png"></a> | <a href="https://github.com/unfoldtoolbox/UnfoldMakie.jl"><img  src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623793-37af35a0-c99c-4374-827b-40fc37de7c2b.png"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldSim.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623795-328a4ccd-8860-4b13-9fb6-64d3df9e2091.png"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldBIDS.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277622460-2956ca20-9c48-4066-9e50-c5d25c50f0d1.png"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldDecode.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277622487-802002c0-a1f2-4236-9123-562684d39dcf.png"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldStats.jl"><img  src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623799-4c8f2b5a-ea84-4ee3-82f9-01ef05b4f4c6.png"></a>|
+|Estimation|Visualisation|Simulation|BIDS pipeline|Decoding|Statistics|MixedModelling|
+|---|---|---|---|---|---|---|
+| <a href="https://github.com/unfoldtoolbox/Unfold.jl/tree/main"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623787-757575d0-aeb9-4d94-a5f8-832f13dcd2dd.png" alt="Unfold.jl Logo"></a> | <a href="https://github.com/unfoldtoolbox/UnfoldMakie.jl"><img  src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623793-37af35a0-c99c-4374-827b-40fc37de7c2b.png" alt="UnfoldMakie.jl Logo"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldSim.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623795-328a4ccd-8860-4b13-9fb6-64d3df9e2091.png" alt="UnfoldSim.jl Logo"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldBIDS.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277622460-2956ca20-9c48-4066-9e50-c5d25c50f0d1.png" alt="UnfoldBIDS.jl Logo"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldDecode.jl"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277622487-802002c0-a1f2-4236-9123-562684d39dcf.png" alt="UnfoldDecode.jl Logo"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldStats.jl"><img  src="https://github-production-user-asset-6210df.s3.amazonaws.com/10183650/277623799-4c8f2b5a-ea84-4ee3-82f9-01ef05b4f4c6.png" alt="UnfoldStats.jl Logo"></a>|<a href="https://github.com/unfoldtoolbox/UnfoldMixedModels.jl"><img src="https://github.com/user-attachments/assets/ffb2bba6-3a30-48b7-9849-7d4e7195b297" alt="UnfoldMixedModels.jl logo"></a>|
 
 A Julia package to simulate multivariate time series, e.g. model-based ERPs, fMRI activity, pupil dilation etc.
 UnfoldSim.jl provides multi-channel support via EEG-forward models. Moreover, it is possible to simulate overlapping event-related activity and to add noise of a certain type e.g. Pink noise.
 
-Many tutorials, guides, how-tos and references are available in the [documentation](https://unfoldtoolbox.github.io/UnfoldSim.jl/)!
+Many tutorials, guides, how-tos and references are available in the [documentation](https://unfoldtoolbox.github.io/UnfoldDocs/UnfoldSim.jl/)!
 
 ![unfoldsim_animation](https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/assets/docs/src/assets/UnfoldSim_features_animation.gif)
 
@@ -80,7 +80,7 @@ data, events = simulate(
 EEG researchers often analyze data containing (temporally) overlapping events (e.g. stimulus onset and button press, or consecutive eye-fixations), non-linear effects, and complex experimental designs. For a multitude of reasons, we often need to simulate such kinds of data: Simulated EEG data is useful to test preprocessing and analysis tools, validate statistical methods, illustrate conceptual issues, test toolbox functionalities, and find limitations of traditional analysis workflows. For instance, such simulation tools allow for testing the assumptions of new analysis algorithms and testing their robustness against any violation of these assumptions.
 
 <!--
-Note: The statement of need is also used on the documentation landing page (https://unfoldtoolbox.github.io/UnfoldSim.jl/stable/). Make sure that they are synchronized.
+Note: The statement of need is also used on the documentation landing page (https://unfoldtoolbox.github.io/UnfoldDocs/UnfoldSim.jl/stable/). Make sure that they are synchronized.
 -->
 
 ## Contributions
