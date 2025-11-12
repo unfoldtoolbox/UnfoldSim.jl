@@ -2,20 +2,52 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: UnfoldSim.jl
-message: 'If you use this page, please cite it as below.'
+title: >-
+  UnfoldSim.jl: Simulating continuous event-based time
+  series data for EEG and beyond
+message: "If you use this package, please cite it as below."
 type: software
 authors:
   - given-names: Judith
     family-names: Schepers
+    orcid: "https://orcid.org/0009-0000-9270-730X"
   - given-names: Luis
     family-names: Lips
   - given-names: Maanik
     family-names: Marathe
   - given-names: Benedikt
     family-names: Ehinger
-    orcid: 'https://orcid.org/0000-0002-6276-3332'
+    orcid: "https://orcid.org/0000-0002-6276-3332"
 identifiers:
   - type: doi
     value: 10.5281/zenodo.7738651
-repository-code: 'https://github.com/unfoldtoolbox/UnfoldSim.jl'
+    description: Zenodo
+  - type: doi
+    value: 10.21105/joss.06641
+    description: JOSS paper
+repository-code: "https://github.com/unfoldtoolbox/UnfoldSim.jl"
+preferred-citation:
+  authors:
+    - family-names: Schepers
+      given-names: Judith
+      orcid: "https://orcid.org/0009-0000-9270-730X"
+    - family-names: Lips
+      given-names: Luis
+    - family-names: Marathe
+      given-names: Maanik
+    - family-names: Ehinger
+      given-names: Benedikt V.
+      orcid: "https://orcid.org/0000-0002-6276-3332"
+  date-published: "2025-03-14"
+  doi: 10.21105/joss.06641
+  issn: 2475-9066
+  issue: 107
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 6641
+  title: "UnfoldSim.jl: Simulating continuous event-based time series
+    data for EEG and beyond"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.06641"
+  volume: 10
