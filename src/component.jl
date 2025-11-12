@@ -602,7 +602,7 @@ function simulate_responses(
     rng,
     components::Vector{<:AbstractComponent},
     simulation::Simulation{SimDataType},
-)where{SimDataType}
+) where {SimDataType}
     epoch_data = init_epoch_data(SimDataType, deepcopy(rng), components, simulation.design)
     simulate_responses!(rng, epoch_data, components, simulation)
     return epoch_data
@@ -637,8 +637,11 @@ function init_epoch_data(SimDataType, rng, components, design)
             length(deepcopy(rng), design),
         )
     else
-        epoch_data =
-            zeros(SimDataType, maxlength(components) + range_offset, length(deepcopy(rng), design))
+        epoch_data = zeros(
+            SimDataType,
+            maxlength(components) + range_offset,
+            length(deepcopy(rng), design),
+        )
     end
     return epoch_data
 end
@@ -659,9 +662,13 @@ If a `_` is present, it is ignored.
 - `s::Simulation`: Simulation object containing design and other parameters.    
 
 """
-function simulate_responses(rng, event_component_dict::Dict, s::Simulation)
+function simulate_responses(
+    rng,
+    event_component_dict::Dict,
+    s::Simulation{SimDataType},
+) where {SimDataType}
     #@debug rng.state
-    epoch_data = init_epoch_data(deepcopy(rng), event_component_dict, s.design)
+    epoch_data = init_epoch_data(SimDataType, deepcopy(rng), event_component_dict, s.design)
     #@debug rng.state
     evts = generate_events(deepcopy(rng), s.design)
     #@debug rng.state

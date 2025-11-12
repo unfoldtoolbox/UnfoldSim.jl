@@ -73,7 +73,23 @@ struct Simulation{T}
     }
     onset::AbstractOnset
     noisetype::AbstractNoise
-
+    Simulation{F}(
+        design::AbstractDesign,
+        components_dict::Dict,
+        onset::AbstractOnset,
+        noisetype::AbstractNoise,
+    ) where {F} = new{F}(
+        design,
+        Dict{Char,Vector{<:AbstractComponent}}(components_dict),
+        onset,
+        noisetype,
+    )
+    Simulation{F}(
+        design::AbstractDesign,
+        components::Vector{<:AbstractComponent},
+        onset::AbstractOnset,
+        noisetype::AbstractNoise,
+    ) where {F} = new{F}(design, components, onset, noisetype)
 end
 
 Simulation(args...) = Simulation{Float64}(args...) # by default we want Float64 :)
@@ -88,10 +104,4 @@ Simulation{T}(
 
 
 
-Simulation{T}(
-    design::AbstractDesign,
-    components::Dict{<:Char,<:Vector},
-    onset::AbstractOnset,
-    noisetype::AbstractNoise,
-) where{T} = Simulation{T}(design, Dict{Char,Vector{<:AbstractComponent}}(components), onset, noisetype)
 
