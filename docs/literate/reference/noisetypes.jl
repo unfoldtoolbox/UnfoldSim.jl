@@ -32,8 +32,12 @@ ax_auto =
     )
 for n in [PinkNoise RedNoise WhiteNoise NoNoise ExponentialNoise]
 
-    ## generate
-    noisevec = simulate_noise(StableRNG(1), n(), 10000)
+    ## generate noise samples
+    if n == ExponentialNoise
+        noisevec = simulate_noise(StableRNG(1), n(τ = 100), 10000)
+    else
+        noisevec = simulate_noise(StableRNG(1), n(), 10000)
+    end
 
     ## plot 1000 samples
     lines!(ax_sig, noisevec[1:1000]; label = string(n))
@@ -54,4 +58,4 @@ f
 
 
 # !!! hint
-#     We recommed for smaller signals the `ExponentialNoise`, maybe with a removed DC offset or a HighPass filter. For long signals, this Noise requires lots of memory though. maybe Pinknoise is a better choice then. 
+#     From a theoretical point, `ExponentialNoise` seems to be the best fit for the AR spectrum of EEG signals. PinkNoise seems to be the most common choice in research papers.
