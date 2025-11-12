@@ -274,8 +274,8 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
 
 
 
-simulate_noise(rng::AbstractRNG, t::AbstractNoise, signal, Simulation::Simulation) =
-    simulate_noise(rng, t, prod(signal))
+simulate_noise(rng::AbstractRNG, t::AbstractNoise, size_signal, Simulation::Simulation) =
+    simulate_noise(rng, t, prod(size_signal))
 
 
     return t.noiselevel .* r
