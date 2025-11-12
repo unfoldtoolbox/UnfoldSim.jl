@@ -23,7 +23,6 @@ end
     @test size(z) == (n,)
     @test all(z .== 0.0)
 
-
     # WhiteNoise scaling: use identical RNG state (via deepcopy) to compare scaling
     a = simulate_noise(deepcopy(rng), WhiteNoise(noiselevel = 1), n)
     b = simulate_noise(deepcopy(rng), WhiteNoise(noiselevel = 2), n)
@@ -39,9 +38,9 @@ end
     @test all(isapprox.(0.5 .* r1, r2; atol = 0, rtol = 1e-12))
 
     # ExponentialNoise: returns correct length and differs for different seeds
-    e1 = simulate_noise(deepcopy(rng), ExponentialNoise(noiselevel = 1, ν = 1.2), n)
+    e1 = simulate_noise(deepcopy(rng), ExponentialNoise(noiselevel = 1, τ = 100), n)
     e2 =
-        simulate_noise(deepcopy(StableRNG(2)), ExponentialNoise(noiselevel = 1, ν = 1.2), n)
+        simulate_noise(deepcopy(StableRNG(2)), ExponentialNoise(noiselevel = 1, τ = 100), n)
     @test size(e1) == (n,)
     @test size(e2) == (n,)
     @test !(all(isapprox.(e1, e2; atol = 0, rtol = 1e-12)))
