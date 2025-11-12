@@ -30,7 +30,7 @@ ax_auto =
         xlabel = "Lag",
         ylabel = "Autocorrelation",
     )
-for n in [PinkNoise RedNoise WhiteNoise NoNoise ()->ExponentialNoise(τ=100)]
+for n in [PinkNoise RedNoise WhiteNoise NoNoise ()->ExponentialNoise(τ = 100)]
 
     ## generate
     noisevec = simulate_noise(StableRNG(1), n(), 10000)

@@ -267,7 +267,7 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
     g = randn(rng, n)
     r = similar(g)
     r[1] = g[1]
-    for n = 1:length(g)-1
+    for n = 1:(length(g)-1)
         r[n+1] = f * r[n] + sqrt(1 - f^2) * g[n+1]
     end
 
