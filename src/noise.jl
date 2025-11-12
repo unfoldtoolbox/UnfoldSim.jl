@@ -272,14 +272,11 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
         r[n+1] = f * r[n] + sqrt(1 - f^2) * g[n+1]
     end
 
-
-
-simulate_noise(rng::AbstractRNG, t::AbstractNoise, size_signal, Simulation::Simulation) =
-    simulate_noise(rng, t, prod(size_signal))
-
-
     return t.noiselevel .* r
 end
+
+simulate_noise(rng::AbstractRNG, t::AbstractNoise, size_signal, simulation::Simulation) =
+    simulate_noise(rng, t, prod(size_signal))
 
 """
     add_noise!(rng::AbstractRNG, noisetype::AbstractNoise, signal[, simulation::Simulation])
