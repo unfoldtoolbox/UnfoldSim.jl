@@ -1,10 +1,11 @@
 name = "UnfoldSim"
 uuid = "ed8ae6d2-84d3-44c6-ab46-0baf21700804"
 authors = ["Benedikt Ehinger", "Luis Lips", "Judith Schepers", "Maanik Marathe"]
-version = "0.3.0"
+version = "0.4.1"
 
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+Automa = "67c07d97-cdcb-5c2c-af73-a7f9c32a568b"
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -23,7 +24,7 @@ ToeplitzMatrices = "c751599d-da0a-543b-9d20-d0a503d91d24"
 
 [compat]
 Artifacts = "1"
-DSP = "0.7"
+DSP = "0.7,0.8"
 DataFrames = "1"
 Distributions = "0.25"
 FileIO = "1"
@@ -34,7 +35,7 @@ MixedModels = "4"
 MixedModelsSim = "0.2"
 Parameters = "0.12"
 Random = "1"
-SignalAnalysis = "0.4, 0.5,0.6"
+SignalAnalysis = "0.4, 0.5,0.6,0.7,0.8,0.9,0.10"
 Statistics = "1"
 StatsModels = "0.6,0.7"
 ToeplitzMatrices = "0.7, 0.8"

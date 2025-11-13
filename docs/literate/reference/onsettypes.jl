@@ -1,13 +1,13 @@
-# # Onset types
+# # Overview: Onset types
 # The onset types determine the distances between event onsets in the continuous EEG signal. The distances are sampled from a certain probability distribution.
-# Currently, there are two types of onset distributions implemented: `UniformOnset` and `LogNormalOnset`.
+# Currently, there are two types of onset distributions implemented: `UniformOnset` and `LogNormalOnset`. Both are accompanied by their `UniformOnsetFormula` and `LogNormalOnsetFormula` conterparts, which allows to modify the overlap based on the design.
 
-# ## Setup
+# ### Setup
 # ```@raw html
 # <details>
 # <summary>Click to expand</summary>
 # ```
-
+## Load required packages
 using UnfoldSim
 using CairoMakie
 using Random
@@ -58,11 +58,11 @@ let # hide
                 design, # hide
             ) # hide
 
-            hist!(
-                ax,
-                distances,
-                bins = range(0, 100, step = 1),
-                label = "($width, $offset)",
+            hist!( # hide
+                ax, # hide
+                distances, # hide
+                bins = range(0, 100, step = 1), # hide
+                label = "($width, $offset)", # hide
             ) # hide
 
             if label == "offset" && offset != 0 # hide 
@@ -282,3 +282,25 @@ end
 #        - if `offset` < `length(signal.basis)` -> there might be overlap, depending on the other parameters of the onset distribution
 
 # [^1]: Wikipedia contributors. (2023, December 5). Log-normal distribution. In Wikipedia, The Free Encyclopedia. Retrieved 12:27, December 7, 2023, from https://en.wikipedia.org/w/index.php?title=Log-normal_distribution&oldid=1188400077# 
+
+
+
+
+# ## Design-dependent `X-OnsetFormula`
+
+# For additional control, we provide `UniformOnsetFormula` and `LogNormalOnsetFormula` types, which allow to control all distribution parameters by specifying formulas based on the design
+o = UnfoldSim.UniformOnsetFormula(
+    width_formula = @formula(0 ~ 1 + cond),
+    width_β = [50, 20],
+)
+events = generate_events(design)
+onsets = UnfoldSim.simulate_interonset_distances(MersenneTwister(42), o, design)
+
+f = Figure()
+ax = f[1, 1] = Axis(f)
+hist!(ax, onsets[events.cond .== "A"], bins = range(0, 100, step = 1), label = "cond: A")
+hist!(ax, onsets[events.cond .== "B"], bins = range(0, 100, step = 1), label = "cond: B")
+axislegend(ax)
+f
+
+# Voila - the inter-onset intervals are `20` samples longer for condition `B`, exactly as specified.

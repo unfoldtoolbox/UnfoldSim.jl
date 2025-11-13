@@ -12,9 +12,20 @@
         ) == 1
         des = SingleSubjectDesign(;
             conditions = Dict(:A => nlevels(5), :B => nlevels(2)),
-            event_order_function = x -> sort(x, order(:B, rev = true)),
+            event_order_function = (rng, x) -> sort(x, order(:B, rev = true)),
         )
         @test generate_events(des).B[1] == "S2"
+
+        des = SingleSubjectDesign(;
+            conditions = Dict(:A => nlevels(5), :B => nlevels(2)),
+            event_order_function = (rng, x) -> shuffle(rng, x),
+        )
+        @test generate_events(MersenneTwister(3), des) ==
+              generate_events(MersenneTwister(3), des)
+
+        # different sortig seed results in different sorts
+        @test generate_events(MersenneTwister(3), des) !=
+              generate_events(MersenneTwister(4), des)
     end
 
     @testset "MultiSubjectDesign" begin
@@ -35,7 +46,7 @@
             n_subjects = 10,
             n_items = 100,
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
-            event_order_function = x -> sort(x, order(:item, rev = true)),
+            event_order_function = (rng, x) -> sort(x, order(:item, rev = true)),
         )
         @test generate_events(des).subject[1] == "S01"
 
@@ -44,9 +55,24 @@
             n_subjects = 10,
             n_items = 100,
             both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
-            event_order_function = x -> sort(x, order(:B, rev = true)),
+            event_order_function = (rng, x) -> sort(x, order(:B, rev = true)),
         )
         @test generate_events(des).B[1] == "S2"
+
+        # check event_order_function
+        des = MultiSubjectDesign(;
+            n_subjects = 10,
+            n_items = 100,
+            both_within = Dict(:A => nlevels(5), :B => nlevels(2)),
+            event_order_function = (rng, x) -> shuffle(rng, x),
+        )
+        # generating same events with same seed should result in same events
+        @test generate_events(MersenneTwister(3), des) ==
+              generate_events(MersenneTwister(3), des)
+
+        # different sortig seed results in different sorts
+        @test generate_events(MersenneTwister(3), des) !=
+              generate_events(MersenneTwister(4), des)
 
         # check that this throws an error because of `dv` as condition name
         des = MultiSubjectDesign(;
@@ -67,7 +93,8 @@
         )
 
         design = RepeatDesign(designOnce, 3)
-        @test size(generate_events(design)) == (8 * 12 * 3, 3)
+        # Note: the number of items has to be divided by the number of cond levels because cond is both between item and subject
+        @test size(generate_events(design)) == ((8 / 2) * 12 * 3, 3)
         @test size(design) == (8 * 3, 12)
         #--- single sub
 
@@ -149,12 +176,51 @@
         events_df = generate_events(design)
 
         # Extract events for subject 2
-        s2 = subset(events_df, :subject => x -> x .== "S2")
+        s2 = subset(events_df, :subject => ByRow(==("S2")))
 
         # Since cond is a between_subject factor, each subject should only be in one condition
-        # Currently, this is not the case due to a bug in MixedModelsSim.jl (https://github.com/RePsychLing/MixedModelsSim.jl/pull/66)
+        @test length(unique(s2.cond)) == 1
 
-        @test_broken length(unique(s2.cond)) == 1
+        # Extract events for item 1
+        i1 = subset(events_df, :item => ByRow(==("I1")))
+
+        # Since cond is a between_item factor, each item should only be in one condition
+        @test length(unique(i1.cond)) == 1
     end
 
+    @testset "Effects Design" begin
+        # Begin with simulation design
+        design = SingleSubjectDesign(;
+            conditions = Dict(
+                :condition => ["car", "face"],
+                :continuous => range(0, 5, length = 10),
+            ),
+        )
+
+        # Effects dictionary
+        effects_dict_1 = Dict(:condition => ["car", "face"])
+        effects_dict_2 = Dict(:condition => ["car", "face"], :continuous => [2, 3, 4])
+
+        # Generate effects design
+        ef_design_1 = EffectsDesign(design, effects_dict_1)
+        ef_design_2 = EffectsDesign(design, effects_dict_2)
+
+        # Generate events
+        ef_events_1 = generate_events(ef_design_1)
+        ef_events_2 = generate_events(ef_design_2)
+
+        # SingleSubject tests
+        @test size(ef_events_1, 1) == 2 # Test correct length of events df
+        @test unique(ef_events_1[!, :continuous])[1] ≈ mean(range(0, 5, length = 10)) # Test that average is calculated correctly and only one value is present in df
+        @test size(ef_events_2, 1) == 6 # Test correct length of events df when one inputs values for continuous variable
+
+        # MultiSubjectDesign -> not implemented yet, so should error
+        design = MultiSubjectDesign(
+            n_subjects = 20,
+            n_items = 8,
+            items_between = Dict(:condition => ["car", "face"], :continuous => [1, 2]),
+        )
+        @test_throws ErrorException EffectsDesign(design, effects_dict_1)
+
+    end
 end

@@ -2,7 +2,9 @@ using UnfoldSim
 using Documenter
 using Glob
 using Literate
+using Revise
 
+Revise.revise()
 
 GENERATED = joinpath(@__DIR__, "src", "generated")
 SOURCE = joinpath(@__DIR__, "literate")
@@ -19,7 +21,7 @@ DocMeta.setdocmeta!(UnfoldSim, :DocTestSetup, :(using UnfoldSim); recursive = tr
 
 makedocs(;
     modules = [UnfoldSim],
-    authors = "Luis Lips, Benedikt Ehinger, Judith Schepers",
+    authors = "Judith Schepers, Luis Lips, Maanik Marathe, Benedikt Ehinger",
     #repo="https://github.com/unfoldtoolbox/UnfoldSim.jl/blob/{commit}{path}#{line}",
     repo = Documenter.Remotes.GitHub("unfoldtoolbox", "UnfoldSim.jl"),
     sitename = "UnfoldSim.jl",
@@ -27,30 +29,42 @@ makedocs(;
         prettyurls = get(ENV, "CI", "false") == "true",
         canonical = "https://unfoldtoolbox.github.io/UnfoldSim.jl",
         edit_link = "main",
+        sidebar_sitename = false,
         assets = String[],
     ),
     pages = [
         "Home" => "index.md",
+        "Installing Julia & UnfoldSim.jl" => "installation.md",
         "Tutorials" => [
             "Quickstart" => "generated/tutorials/quickstart.md",
-            "Simulate ERPs" => "generated/tutorials/simulateERP.md",
-            "Poweranalysis" => "generated/tutorials/poweranalysis.md",
+            "Simulate event-related potentials (ERPs)" => "generated/tutorials/simulateERP.md",
+            "Power analysis" => "generated/tutorials/poweranalysis.md",
+            "Multi-subject simulation" => "generated/tutorials/multisubject.md",
         ],
         "Reference" => [
-            "Overview: Toolbox Functions" => "./generated/reference/overview.md",
-            "Overview: NoiseTypes" => "./generated/reference/noisetypes.md",
-            "Overview: OnsetTypes" => "./generated/reference/onsettypes.md",
-            "Overview: Components (EEG, fMRI, Pupil)" => "./generated/reference/basistypes.md",
+            "Overview of functionality" => "./generated/reference/overview.md",
+            "Overview: Experimental design types" => "./generated/reference/designtypes.md",
+            "Overview: Basis function (component) types" => "./generated/reference/basistypes.md",
+            "Overview: Onset types" => "./generated/reference/onsettypes.md",
+            "Overview: Noise types" => "./generated/reference/noisetypes.md",
         ],
         "HowTo" => [
-            "Define a new, (imbalanced) design" => "./generated/HowTo/newDesign.md",
-            "Repeating a design" => "./generated/HowTo/repeatTrials.md",
-            "Define a new duration & jitter component" => "./generated/HowTo/newComponent.md",
+            "Define a new (imbalanced) design" => "./generated/HowTo/newDesign.md",
+            "Define design-dependent component basis functions" => "./generated/HowTo/componentfunction.md",
+            "Get multiple trials with identical subject/item combinations" => "./generated/HowTo/repeatTrials.md",
+            "Define a new component (with variable duration and shift)" => "./generated/HowTo/newComponent.md",
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
-            "Use predefined design / onsets data" => "./generated/HowTo/predefinedData.md",
+            "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
+            "Simulate ground truth marginal effects" => "./generated/HowTo/getGroundTruth.md",
+            "Sequence of events (e.g. SCR)" => "./generated/HowTo/sequence.md",
         ],
-        "DocStrings" => "api.md",
+        "Developer documentation" => "developer_docs.md",
+        "API / Docstrings" => "api.md",
     ],
 )
 
-deploydocs(; repo = "github.com/unfoldtoolbox/UnfoldSim.jl", devbranch = "main")
+deploydocs(;
+    repo = "github.com/unfoldtoolbox/UnfoldSim.jl",
+    devbranch = "main",
+    push_preview = true,
+)
