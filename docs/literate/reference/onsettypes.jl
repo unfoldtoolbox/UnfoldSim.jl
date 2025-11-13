@@ -134,10 +134,16 @@ end
 # ```
 
 # ## LogNormalOnset
-# The `LogNormalOnset` is based on a log-normal distribution and has four parameters: `μ`, `σ`, `offset` and `truncate_upper`. 
+# The `LogNormalOnset` is based on a log-normal distribution and has five parameters: \ `μ`, `σ`, `offset`, `truncate_upper` and `truncate_lower`. 
 
 # Example:
-onset_lognormal = LogNormalOnset(; μ = 3, σ = 0.25, offset = 0, truncate_upper = nothing, truncate_lower = nothing);
+onset_lognormal = LogNormalOnset(;
+    μ = 3,
+    σ = 0.25,
+    offset = 0,
+    truncate_upper = nothing,
+    truncate_lower = nothing,
+);
 
 # The parameters `μ` and `σ` are the location and scale parameter of the log-normal distribution. However, they are not identical to its mean and standard deviation.
 # If a variable $X$ is log-normally distributed then $Y = ln(X)$ is normally distributed with mean `μ` and standard deviation `σ`[^1].
@@ -145,7 +151,7 @@ onset_lognormal = LogNormalOnset(; μ = 3, σ = 0.25, offset = 0, truncate_upper
 # The `offset` parameter determines the minimal distance between two events and its value is added to the value sampled from the log-normal distribution i.e. it shifts the distribution.
 # Its default value is `0`, i.e. no offset.
 
-# The `truncate_upper` and 'truncate_lower' parameters allows to truncate the distribution at a certain sample values. Its default value for both is `nothing`, i.e. no truncation.
+# The `truncate_upper` and `truncate_lower` parameters allow to truncate the distribution at certain sample values. The default value for both is `nothing`, i.e. no truncation.
 
 # In the figure below, it is illustrated how the onset distribution changes when changing one of its parameters.
 let # hide
@@ -153,10 +159,11 @@ let # hide
 
     ## Define parameter combinations # hide
     parameters = [ # hide
-        (((3, 0.25, 0, nothing), (2.5, 0.25, 0, nothing)), "μ"), # hide
-        (((3, 0.25, 0, nothing), (3, 0.35, 0, nothing)), "σ"), # hide
-        (((3, 0.25, 0, nothing), (3, 0.25, 30, nothing)), "offset"), # hide
-        (((3, 0.25, 0, nothing), (3, 0.25, 0, 25)), "truncate_upper"), # hide
+        (((3, 0.25, 0, nothing, nothing), (2.5, 0.25, 0, nothing, nothing)), "μ"), # hide
+        (((3, 0.25, 0, nothing, nothing), (3, 0.35, 0, nothing, nothing)), "σ"), # hide
+        (((3, 0.25, 0, nothing, nothing), (3, 0.25, 30, nothing, nothing)), "offset"), # hide
+        (((3, 0.25, 0, nothing, nothing), (3, 0.25, 0, 25, nothing)), "truncate_upper"), # hide
+        (((3, 0.25, 0, nothing, nothing), (3, 0.25, 0, nothing, 25)), "truncate_lower"), # hide
     ] # hide
 
     axes_list = Array{Any}(undef, length(parameters)) # hide
@@ -167,7 +174,7 @@ let # hide
         axes_list[index] = ax # hide
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets # hide
-        for (μ, σ, offset, truncate_upper) in combinations # hide
+        for (μ, σ, offset, truncate_upper, truncate_lower) in combinations # hide
             onsets = UnfoldSim.simulate_interonset_distances( # hide
                 MersenneTwister(42), # hide
                 LogNormalOnset(; # hide
@@ -175,6 +182,7 @@ let # hide
                     σ = σ, # hide
                     offset = offset, # hide
                     truncate_upper = truncate_upper, # hide
+                    truncate_lower = truncate_lower, # hide
                 ), # hide
                 design, # hide
             ) # hide
@@ -183,13 +191,15 @@ let # hide
                 ax, # hide
                 onsets, # hide
                 bins = range(0, 100, step = 1), # hide
-                label = "($μ,$σ,$offset,$truncate_upper)", # hide
+                label = "($μ,$σ,$offset,$truncate_upper,$truncate_lower)", # hide
             ) # hide
 
             if label == "offset" && offset !== 0 # hide
                 vlines!(offset, color = "black") # hide
             elseif label == "truncate_upper" && truncate_upper !== nothing # hide
                 vlines!(truncate_upper, color = "black") # hide
+            elseif label == "truncate_lower" && truncate_lower !== nothing # hide
+                vlines!(truncate_lower, color = "black") # hide
             end # hide
         end # hide
         hideydecorations!(ax) # hide
@@ -218,10 +228,11 @@ let
 
     ## Define parameter combinations
     parameters = [
-        (((3, 0.25, 0, nothing), (2.5, 0.25, 0, nothing)), "μ"),
-        (((3, 0.25, 0, nothing), (3, 0.35, 0, nothing)), "σ"),
-        (((3, 0.25, 0, nothing), (3, 0.25, 30, nothing)), "offset"),
-        (((3, 0.25, 0, nothing), (3, 0.25, 0, 25)), "truncate_upper"),
+        (((3, 0.25, 0, nothing, nothing), (2.5, 0.25, 0, nothing, nothing)), "μ"),
+        (((3, 0.25, 0, nothing, nothing), (3, 0.35, 0, nothing, nothing)), "σ"),
+        (((3, 0.25, 0, nothing, nothing), (3, 0.25, 30, nothing, nothing)), "offset"),
+        (((3, 0.25, 0, nothing, nothing), (3, 0.25, 0, 25, nothing)), "truncate_upper"),
+        (((3, 0.25, 0, nothing, nothing), (3, 0.25, 0, nothing, 25)), "truncate_lower"),
     ]
 
     axes_list = Array{Any}(undef, length(parameters))
@@ -232,7 +243,7 @@ let
         axes_list[index] = ax
 
         ## Go through all parameter combinations and plot a histogram of the sampled onsets
-        for (μ, σ, offset, truncate_upper) in combinations
+        for (μ, σ, offset, truncate_upper, truncate_lower) in combinations
             onsets = UnfoldSim.simulate_interonset_distances(
                 MersenneTwister(42),
                 LogNormalOnset(;
@@ -240,6 +251,7 @@ let
                     σ = σ,
                     offset = offset,
                     truncate_upper = truncate_upper,
+                    truncate_lower = truncate_lower,
                 ),
                 design,
             )
@@ -248,13 +260,15 @@ let
                 ax,
                 onsets,
                 bins = range(0, 100, step = 1),
-                label = "($μ,$σ,$offset,$truncate_upper)",
+                label = "($μ,$σ,$offset,$truncate_upper,$truncate_lower)",
             )
 
             if label == "offset" && offset !== 0
                 vlines!(offset, color = "black")
             elseif label == "truncate_upper" && truncate_upper !== nothing
                 vlines!(truncate_upper, color = "black")
+            elseif label == "truncate_lower" && truncate_lower !== nothing
+                vlines!(truncate_lower, color = "black")
             end
         end
         hideydecorations!(ax)
@@ -298,8 +312,8 @@ onsets = UnfoldSim.simulate_interonset_distances(MersenneTwister(42), o, design)
 
 f = Figure()
 ax = f[1, 1] = Axis(f)
-hist!(ax, onsets[events.cond .== "A"], bins = range(0, 100, step = 1), label = "cond: A")
-hist!(ax, onsets[events.cond .== "B"], bins = range(0, 100, step = 1), label = "cond: B")
+hist!(ax, onsets[events.cond.=="A"], bins = range(0, 100, step = 1), label = "cond: A")
+hist!(ax, onsets[events.cond.=="B"], bins = range(0, 100, step = 1), label = "cond: B")
 axislegend(ax)
 f
 
