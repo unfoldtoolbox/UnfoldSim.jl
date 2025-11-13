@@ -362,6 +362,7 @@ offset: The minimal distance between events - aka a shift of the LogNormal distr
 - `offset_β::Vector = [0] ` (optional): Choose a `Vector` of betas. The number of betas needs to fit the formula chosen.
 - `offset_contrasts::Dict = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
 - `truncate_upper::nothing` (optional): Upper limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
+- `truncate_lower::nothing` (optional): Lower limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
 
 # Combined with [ShiftOnsetByOne](@ref)
 
@@ -391,6 +392,7 @@ See also [`LogNormalOnset`](@ref UnfoldSim.LogNormalOnset) for a simplified vers
     offset_β::Vector = [0]
     offset_contrasts::Dict = Dict()
     truncate_upper = nothing # truncate at some sample?
+    truncate_lower = nothing
 end
 
 function simulate_interonset_distances(
@@ -412,6 +414,9 @@ function simulate_interonset_distances(
     if !isnothing(o.truncate_upper)
         funs = truncated.(funs; upper = o.truncate_upper)
     end
-    #@debug reduce(hcat, rand.(deepcopy(rng), funs, 1))
+    if !isnothing(o.truncate_lower)
+        funs = truncated.(funs; lower = o.truncate_lower)
+    end
+
     return Int.(round.(offsets .+ reduce(vcat, rand.(deepcopy(rng), funs, 1))))
 end

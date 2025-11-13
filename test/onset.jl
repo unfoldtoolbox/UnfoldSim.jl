@@ -46,6 +46,15 @@
         @test maximum(rand_vec) <= 100
         @test minimum(rand_vec) >= 10
     end
+
+    @testset "truncated_upper_lower_bound" begin
+        fun = LogNormal(3, 0.5)
+        # Test that truncating a distribution twice in a row with one bound is equal to truncating it with two bounds in one call
+        v1 = rand(StableRNG(1), truncated(truncated(fun; upper = 20); lower = 10), 100)
+        v2 = rand(StableRNG(1), truncated(fun; upper = 20, lower = 10), 100)
+        @test v1 == v2
+    end
+
     @testset "sim_onsets" begin
         uniform_onset = UniformOnset(; offset = 0, width = 50)
 
@@ -93,12 +102,13 @@
             μ_formula = @formula(0 ~ 1 + cond),
             μ_β = [1, 1],
             σ_β = [1],
+            truncate_lower = 5,
         )
         events = generate_events(design)
         onsets = UnfoldSim.simulate_interonset_distances(StableRNG(1), o, design)
-        @test minimum(onsets[1:2:end]) == 0
+        @test minimum(onsets[1:2:end]) >= 5
         @test maximum(onsets[1:2:end]) < 150
-        @test minimum(onsets[2:2:end]) == 0
+        @test minimum(onsets[2:2:end]) >= 5
         @test maximum(onsets[2:2:end]) > 300
 
 
