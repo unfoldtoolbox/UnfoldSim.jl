@@ -312,8 +312,8 @@ onsets = UnfoldSim.simulate_interonset_distances(MersenneTwister(42), o, design)
 
 f = Figure()
 ax = f[1, 1] = Axis(f)
-hist!(ax, onsets[events.cond.=="A"], bins = range(0, 100, step = 1), label = "cond: A")
-hist!(ax, onsets[events.cond.=="B"], bins = range(0, 100, step = 1), label = "cond: B")
+hist!(ax, onsets[events.cond .== "A"], bins = range(0, 100, step = 1), label = "cond: A")
+hist!(ax, onsets[events.cond .== "B"], bins = range(0, 100, step = 1), label = "cond: B")
 axislegend(ax)
 f
 
