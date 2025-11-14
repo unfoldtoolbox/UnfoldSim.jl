@@ -75,7 +75,7 @@
         "ideas",
         "tutorial"
       ]
-    }
+    },
     {
       "login": "vladdez",
       "name": "Vladimir Mikheev",
@@ -93,6 +93,6 @@
       "contributions": [
         "infra"
       ]
-    },
+    }
   ]
 }
