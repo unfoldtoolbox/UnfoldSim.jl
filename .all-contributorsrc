@@ -58,7 +58,9 @@
         "doc",
         "tutorial",
         "code",
-        "test"
+        "test",
+        "maintenance",
+        "review"
       ]
     },
     {
