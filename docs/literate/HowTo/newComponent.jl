@@ -2,7 +2,7 @@
 
 # We want a new component that changes its duration and shift depending on a column in the event design. This is somewhat already implemented in the HRF + Pupil bases.
 # !!! hint
-#     if you are just interested to use duration-dependency in your simulation, check out the component-function tutorial
+#     If you are just interested to use duration-dependency in your simulation, check out the [component function tutorial](@ref componentfunction).
 
 
 

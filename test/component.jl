@@ -110,6 +110,8 @@
             formula = @formula(0 ~ 1),
             β = [1],
         )
+        # test that SingleSubjectDesign (and thus get_basis) does not depend on the rng. 
+        # test that SingleSubjectDesign (and thus get_basis) does not depend on the rng. 
         @test UnfoldSim.get_basis(deepcopy(rng), signal, design) ==
               UnfoldSim.get_basis(signal, design)
 
@@ -141,12 +143,13 @@
             offset = 5,
         )
         @test UnfoldSim.get_offset(smin10) == -10
+        @test UnfoldSim.get_offset([smin10, splus5]) == [-10, 5]
         @test UnfoldSim.maxoffset([smin10, splus5]) == 5
         @test UnfoldSim.minoffset([smin10, splus5]) == -10
         @test UnfoldSim.minoffset(Dict('A' => [smin10, splus5])) == -10
         @test UnfoldSim.maxoffset(Dict('A' => [smin10, smin10], 'B' => [splus5, splus5])) ==
               5
-        # test that you can have a super large negative offset and dont run into errors (e.g. an event cannot even run in the issue to start before simulation time = 0)
+        # test that you can have a super large negative offset and don't run into errors (e.g. an event cannot even run in the issue to start before simulation time = 0)
 
         smin10000 = LinearModelComponent(;
             basis = [1, 2, 3],
@@ -158,8 +161,129 @@
         d, e = simulate(design, smin10000, UniformOnset(50, 0))
         @test length(d) > 10_000
         @test e.latency[1] > 10_000
+        @test d[e.latency[1]-10_000] == 1
+
+        smax10000 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = +10_000,
+        )
+        d, e = simulate(design, smax10000, UniformOnset(50, 0))
+        @test length(d) > 10_000
+        @test e.latency[1] < 100
+        @test d[e.latency[1]+10_000] == 1
+
+
+        # if we go back -10_000 and front +10_000, we should get a signal measuring 20_000
+        d, e = simulate(design, [smax10000, smin10000], UniformOnset(50, 0))
+        @test length(d) > 20_000
+        @test length(d) < 25_000 # earlier tests had the signal at 30_000, a bit too long
+        @test d[e.latency[1]+10_000] == 1
+        @test d[e.latency[1]-10_000] == 1
 
 
 
+        smax1000 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = +1000,
+        )
+        smax2000 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = +2000,
+        )
+
+        d, e = simulate(design, [smax1000, smax2000], UniformOnset(50, 0))
+        @test d[e.latency[1]+1000] == 1
+        @test d[e.latency[1]+2000] == 1
+
+        smin1000 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = -1000,
+        )
+        smin2000 = LinearModelComponent(;
+            basis = [1, 2, 3],
+            formula = @formula(0 ~ 1),
+            β = [1],
+            offset = -2000,
+        )
+
+        d, e = simulate(design, [smin1000, smin2000], UniformOnset(50, 0))
+        @test d[e.latency[1]-1000] == 1
+        @test d[e.latency[1]-2000] == 1
+
+        # Sequences with component offsets
+        design =
+            SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"])) |>
+            d -> RepeatDesign(SequenceDesign(d, "SR_"), 4)
+
+        components = Dict('S' => [smin10, splus5], 'R' => [smin10000])
+
+        @test UnfoldSim.get_offset(components) == Dict('R' => [-10_000], 'S' => [-10, 5])
+
+        o_width = 20
+        o_offset = 0
+        minoffset_shift = -1 * min(UnfoldSim.minoffset(components), 0) # latencies should be shifted to the right if minoffset is negative
+
+        for seed in range(1, 10)
+            d, e = simulate(
+                StableRNG(seed),
+                design,
+                components,
+                UniformOnset(offset = o_offset, width = o_width),
+                NoNoise(),
+            )
+            sequence_length =
+                length(UnfoldSim.evaluate_sequencestring(StableRNG(seed), design)) - 1 # without _
+
+            # Test onset shifts with component offsets and sequences (in particular inter-event-block distances) combined
+            @test minoffset_shift + 1 <= e.latency[1] <= minoffset_shift + 1 + o_width
+            @test minoffset_shift + 1 + (sequence_length + 1) * o_offset <=
+                  e.latency[sequence_length+1] <=
+                  minoffset_shift +
+                  1 +
+                  (sequence_length + 1) * o_width +
+                  2 * UnfoldSim.maxlength(components) # TODO: This part will fail once we implement a different way to specify the inter-event-block distances. Should be adapted then.
+        end
     end
+end
+
+
+@testset "limit_base" begin
+    # 1) scalar vector -> truncates to maxlength
+
+    v = collect(1:6)
+    @test UnfoldSim.limit_basis(v, 4) == [1, 2, 3, 4]
+
+    # 2) matrix -> truncates rows (keeps columns)
+    m = reshape(1:12, 6, 2)  # 6×2
+    @test UnfoldSim.limit_basis(m, 4) == m[1:4, :]
+
+    # 3) vector of vectors -> pads shorter vectors with zeros and returns maxlength × ncols matrix
+    b = [[1.0, 2.0, 3.0], [4.0, 5.0]]
+    res = UnfoldSim.limit_basis(b, 4)
+    @test size(res) == (4, 2)
+    @test res[:, 1] == [1.0, 2.0, 3.0, 0.0]
+    @test res[:, 2] == [4.0, 5.0, 0.0, 0.0]
+
+    # 4) truncation for per-element vectors longer than maxlength and padding for short ones
+    b2 = [[10, 20, 30, 40, 50], [1, 2]]
+    res2 = UnfoldSim.limit_basis(b2, 3)
+    @test size(res2) == (3, 2)
+    @test res2[:, 1] == [10, 20, 30]
+    @test res2[:, 2] == [1, 2, 0]
+
+    # 5) handle empty inner vectors (produce zero-filled column)
+    b3 = [Int[], [7]]
+    res3 = UnfoldSim.limit_basis(b3, 2)
+    @test size(res3) == (2, 2)
+    @test res3 == [0 7; 0 0]  # columns: first empty-> [0,0], second [7,0]
+
+
 end

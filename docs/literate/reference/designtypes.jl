@@ -42,7 +42,6 @@ design_single_shuffled = SingleSubjectDesign(;
     ),
 
     event_order_function = shuffle,
-
 );
 # ```@raw html
 # <details>

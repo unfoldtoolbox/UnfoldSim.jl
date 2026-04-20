@@ -9,16 +9,6 @@
   "contributorsPerLine": 7,
   "contributors": [
     {
-      "login": "maanikmarathe",
-      "name": "Maanik Marathe",
-      "avatar_url": "https://avatars.githubusercontent.com/u/66105649?v=4",
-      "profile": "https://github.com/maanikmarathe",
-      "contributions": [
-        "doc",
-        "code"
-      ]
-    },
-    {
       "login": "behinger",
       "name": "Benedikt Ehinger",
       "avatar_url": "https://avatars.githubusercontent.com/u/10183650?v=4",
@@ -36,6 +26,22 @@
       ]
     },
     {
+      "login": "jschepers",
+      "name": "Judith Schepers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22366977?v=4",
+      "profile": "https://github.com/jschepers",
+      "contributions": [
+        "ideas",
+        "bug",
+        "doc",
+        "tutorial",
+        "code",
+        "test",
+        "maintenance",
+        "review"
+      ]
+    },
+    {
       "login": "llips",
       "name": "Luis",
       "avatar_url": "https://avatars.githubusercontent.com/u/38983684?v=4",
@@ -48,17 +54,26 @@
       ]
     },
     {
-      "login": "jschepers",
-      "name": "Judith Schepers",
-      "avatar_url": "https://avatars.githubusercontent.com/u/22366977?v=4",
-      "profile": "https://github.com/jschepers",
+      "login": "maanikmarathe",
+      "name": "Maanik Marathe",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66105649?v=4",
+      "profile": "https://github.com/maanikmarathe",
       "contributions": [
-        "ideas",
-        "bug",
         "doc",
-        "tutorial",
+        "code"
+      ]
+    },
+    {
+      "login": "ReneSkukies",
+      "name": "René Skukies",
+      "avatar_url": "https://avatars.githubusercontent.com/u/57703446?v=4",
+      "profile": "https://reneskukies.de/",
+      "contributions": [
+        "doc",
         "code",
-        "test"
+        "test",
+        "ideas",
+        "tutorial"
       ]
     },
     {
@@ -77,19 +92,6 @@
       "profile": "https://reboreexplore.github.io/",
       "contributions": [
         "infra"
-      ]
-    },
-    {
-      "login": "ReneSkukies",
-      "name": "René Skukies",
-      "avatar_url": "https://avatars.githubusercontent.com/u/57703446?v=4",
-      "profile": "https://reneskukies.de/",
-      "contributions": [
-        "doc",
-        "code",
-        "test",
-        "ideas",
-        "tutorial"
       ]
     }
   ]

@@ -19,10 +19,10 @@ onset = UniformOnset(; width = 20, offset = 4);
 
 @testset "multichannel" begin
     mc = UnfoldSim.MultichannelComponent(signal, [-2, -1, 0, 1, 2, 3, 4])
-    s = simulate(StableRNG(1), mc, design)
-    @test size(s) == (7, 5, 10) # 7 chanels, 5 timepoints, 10 trials
-    @ŧest all(s[3, :, :] .== 0) # 3 is 0 in the projection
-    @test s[4, :, 3] == [0, 1, 2, 3, 0] .* 2 # basis * β[1]
+    d, e = simulate(StableRNG(1), design, mc, NoOnset(), NoNoise(), return_epoched = true)
+    @test size(d) == (7, 5, 10) # 7 chanels, 5 timepoints, 10 trials
+    @test all(d[3, :, :] .== 0) # 3 is 0 in the projection
+    @test d[4, :, 3] == [0, 1, 2, 3, 0] .* 2 # basis * β[1]
 
     # test different projection size, should error
     mcA = UnfoldSim.MultichannelComponent(signal, [-2, -1, 0, 1, 2, 3, 4])

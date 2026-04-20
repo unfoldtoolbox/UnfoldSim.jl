@@ -1,10 +1,3 @@
-# helper to move input ::Component to ::Vector{Component}
-Simulation(
-    design::AbstractDesign,
-    component::AbstractComponent,
-    onset::AbstractOnset,
-    noisetype::AbstractNoise,
-) = Simulation(design, [component], onset, noisetype)
 
 
 function simulate(
@@ -146,13 +139,13 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
         # TODO: This assumes a balanced design, but create_continuous_signal also assumes this, so we should be fine ;)
         size_responses = size(responses)
         signal =
-            reshape(responses, size_responses[1:end-1]..., size(deepcopy(rng), design)...)
+            reshape(responses, size_responses[1:(end-1)]..., size(deepcopy(rng), design)...)
     else # if there is an onset distribution given the next step is to create a continuous signal
         signal, latencies = create_continuous_signal(deepcopy(rng), responses, simulation)
         events.latency = latencies
     end
 
-    add_noise!(deepcopy(rng), noisetype, signal)
+    add_noise!(deepcopy(rng), noisetype, signal, simulation)
 
     # In case the data should be epoched & onset distribution is given i.e. the signals might be overlapping
     if return_epoched && !isa(onset, NoOnset)
@@ -238,7 +231,11 @@ julia> signal
  61
 ```
 """
-function create_continuous_signal(rng, responses, simulation)
+function create_continuous_signal(
+    rng,
+    responses,
+    simulation::Simulation{SimDataType},
+) where {SimDataType}
 
     (; design, components, onset, noisetype) = simulation
 
@@ -254,15 +251,26 @@ function create_continuous_signal(rng, responses, simulation)
     # flatten onsets (since subjects are concatenated in the events df)
     latencies = onsets[:,]
 
-    # combine responses with onsets
+    # calculate the required length of the continuous signal
+
+    # Reasoning:
+    # (1) We want the last event onset time to be within the signal -> lowerbound of max_length_continuous is `maximum(onsets)`
+    # (2) We want to extend the signal for those cases, where the response is longer than the last event onset time, without offset, the upper bound is: maximum(onsets)+max_length_component
+    # (3) In cases where we have a positive offset, the largest offset needs to be added  => maximum(onsets) + max_length_component + max(maxoffset(components), 0)
+    # (4) In cases where we have a negative offset, `max_length_component` might be reduced, by maximally the largest minoffset => maximum(onsets) + max_length_component + max(maxoffset(components), 0) + maximum(min.(get_offset.(components),0))
+
+    last_onset = maximum(onsets)
     max_length_component = maxlength(components)
-    offset_range = maxoffset(simulation.components) - minoffset(simulation.components)
-    max_length_continuoustime =
-        Int(ceil(maximum(onsets))) .+ max_length_component .+ offset_range
 
+    calculated_onset = maximum(onsets) + max_length_component  # add the signal (ideally, we'd add the longest signal of the last event - but it's not so easy). (2)
+    calculated_onset += max(maxoffset(components), 0) # if the largest offset is positive, add it (3)
+    calculated_onset += maximum(min.(vcat(values(get_offset(components))...), 0)) # add maximum of offsets that is smaller than 0 (4)
 
-    signal = zeros(n_chan, max_length_continuoustime, n_subjects)
-    @debug size(signal), offset_range
+    max_length_continuoustime = max(last_onset, calculated_onset) # ensure that maximum(onsets) is lowerbound (1)
+
+    signal = zeros(SimDataType, n_chan, max_length_continuoustime, n_subjects)
+
+    # combine responses with onsets
     for e = 1:n_chan
         for s = 1:n_subjects
             for i = 1:n_trials
@@ -272,9 +280,9 @@ function create_continuous_signal(rng, responses, simulation)
                     responses,
                     e,
                     s,
-                    one_onset+minoffset(simulation.components):one_onset+max_length_component-1+maxoffset(
+                    (one_onset+minoffset(simulation.components)):(one_onset+max_length_component-1+maxoffset(
                         simulation.components,
-                    ),
+                    )),
                     (s - 1) * n_trials + i,
                 )
             end

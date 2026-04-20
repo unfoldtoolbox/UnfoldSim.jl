@@ -202,8 +202,8 @@
         effects_dict_2 = Dict(:condition => ["car", "face"], :continuous => [2, 3, 4])
 
         # Generate effects design
-        ef_design_1 = UnfoldSim.EffectsDesign(design, effects_dict_1)
-        ef_design_2 = UnfoldSim.EffectsDesign(design, effects_dict_2)
+        ef_design_1 = EffectsDesign(design, effects_dict_1)
+        ef_design_2 = EffectsDesign(design, effects_dict_2)
 
         # Generate events
         ef_events_1 = generate_events(ef_design_1)
@@ -220,7 +220,7 @@
             n_items = 8,
             items_between = Dict(:condition => ["car", "face"], :continuous => [1, 2]),
         )
-        @test_throws ErrorException UnfoldSim.EffectsDesign(design, effects_dict_1)
+        @test_throws ErrorException EffectsDesign(design, effects_dict_1)
 
     end
 end

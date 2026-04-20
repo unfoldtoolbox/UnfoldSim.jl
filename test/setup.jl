@@ -6,6 +6,7 @@ using Statistics
 using LinearAlgebra
 using MixedModelsSim
 using DataFrames
+using Distributions # For LogNormal function
 
 function gen_debug_design(; n_subjects = 20, n_item = 100)
     # define design parameters

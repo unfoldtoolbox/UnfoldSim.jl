@@ -36,15 +36,25 @@
         @test minimum(rand_vec) > 100
 
         # test Truncated
-        lognormal_onset = LogNormalOnset(; μ = 4, σ = 1, truncate_upper = 100)
+        lognormal_onset =
+            LogNormalOnset(; μ = 4, σ = 1, truncate_lower = 10, truncate_upper = 100)
         rand_vec = UnfoldSim.simulate_interonset_distances(
             StableRNG(1),
             lognormal_onset,
             dummydesign,
         )
         @test maximum(rand_vec) <= 100
-        @test minimum(rand_vec) >= 0
+        @test minimum(rand_vec) >= 10
     end
+
+    @testset "truncated_upper_lower_bound" begin
+        fun = LogNormal(3, 0.5)
+        # Test that truncating a distribution twice in a row with one bound is equal to truncating it with two bounds in one call
+        v1 = rand(StableRNG(1), truncated(truncated(fun; upper = 20); lower = 10), 100)
+        v2 = rand(StableRNG(1), truncated(fun; upper = 20, lower = 10), 100)
+        @test v1 == v2
+    end
+
     @testset "sim_onsets" begin
         uniform_onset = UniformOnset(; offset = 0, width = 50)
 
@@ -92,12 +102,13 @@
             μ_formula = @formula(0 ~ 1 + cond),
             μ_β = [1, 1],
             σ_β = [1],
+            truncate_lower = 5,
         )
         events = generate_events(design)
         onsets = UnfoldSim.simulate_interonset_distances(StableRNG(1), o, design)
-        @test minimum(onsets[1:2:end]) == 0
+        @test minimum(onsets[1:2:end]) >= 5
         @test maximum(onsets[1:2:end]) < 150
-        @test minimum(onsets[2:2:end]) == 0
+        @test minimum(onsets[2:2:end]) >= 5
         @test maximum(onsets[2:2:end]) > 300
 
 
@@ -170,4 +181,47 @@
         result_onsets[3] == 1046
     end
 
+    @testset "ShiftOnset" begin
+        design =
+            SingleSubjectDesign(conditions = Dict(:cond => ["A", "B"])) |>
+            x -> RepeatDesign(x, 100)
+
+        o = UniformOnset(width = 50, offset = 10)
+
+        without = UnfoldSim.simulate_interonset_distances(StableRNG(1), o, design)
+        with = UnfoldSim.simulate_interonset_distances(
+            StableRNG(1),
+            ShiftOnsetByOne(o),
+            design,
+        )
+        # ShiftOnsetByOne adds a 0 to the front, thereby the first "non-0" "real" simulated inter onset distance is used for the second event
+        @test with[1] == 0
+
+        @test without[1:(end-1)] == with[2:end]
+
+
+    end
+end
+
+@testset "contains design" begin
+    @test UnfoldSim.contains_design(
+        RepeatDesign(SequenceDesign(SingleSubjectDesign(), "ABC"), 1),
+        SequenceDesign,
+    )
+    @test UnfoldSim.contains_design(
+        RepeatDesign(SequenceDesign(SingleSubjectDesign(), "ABC"), 1),
+        SingleSubjectDesign,
+    )
+    @test UnfoldSim.contains_design(
+        RepeatDesign(SequenceDesign(SingleSubjectDesign(), "ABC"), 1),
+        RepeatDesign,
+    )
+    @test UnfoldSim.contains_design(
+        SequenceDesign(SingleSubjectDesign(), "ABC"),
+        SequenceDesign,
+    )
+    @test !UnfoldSim.contains_design(
+        SequenceDesign(SingleSubjectDesign(), "ABC"),
+        RepeatDesign,
+    )
 end

@@ -354,22 +354,19 @@ end
 
 """
     SequenceDesign{T} <: AbstractDesign
-Enforce a sequence of events for each entry of a provided `AbstractDesign`.
+
+Create a sequence of events for each entry of a provided `AbstractDesign`.
+
 The sequence string can contain any number of `char`, but the `_` character is used to indicate a break between events without any overlap and has to be at the end of the sequence string. There can only be one `_` character in a sequence string.
-
-
-Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the `ImbalancedDesign` tutorial
-
-
+Important: The exact same variable sequence is used for current rows of a design. Only, if you later nest in a `RepeatDesign` then each `RepeatDesign` repetition will gain a new variable sequence. If you need imbalanced designs, please refer to the [`ImbalancedDesign`](https://unfoldtoolbox.github.io/UnfoldDocs/UnfoldSim.jl/stable/generated/HowTo/newDesign/) tutorial.
 
 # Fields
-- `design::AbstractDesign`: The design that is generated for every sequence-event
+- `design::AbstractDesign`: The design that is generated for every sequence event.
 - `sequence::String = ""` (optional): A string of characters depicting sequences.
             A variable sequence is defined using `[]`. For example, `S[ABC]` could result in any one sequence `SA`, `SB`, `SC`.
-            Experimental: It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`'s.
+            Experimental: It is also possible to define variable length sequences using `{}`. For example, `A{10,20}` would result in a sequence of 10 to 20 `A`s.
 
 # Examples
-
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 design = SequenceDesign(design, "SCR_")
@@ -388,49 +385,47 @@ Would result in a `generate_events(design)`
    6 │ two        R
 ```
 
-## Example for Sequence -> Repeat vs. Repeat -> Sequence
+## Combination of SequenceDesign and RepeatDesign
 
 ### Sequence -> Repeat 
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 design = SequenceDesign(design, "[AB]")
 design = RepeatDesign(design,2)
-generate_events(design)
 ```
 
-
-```repl
+```julia-repl
+julia> generate_events(design)
 4×2 DataFrame
  Row │ condition  event 
      │ String     Char  
 ─────┼──────────────────
-   1 │ one        A
-   2 │ two        A
-   3 │ one        B
-   4 │ two        B
+   1 │ one        B
+   2 │ two        B
+   3 │ one        A
+   4 │ two        A
 ```
-Sequence -> Repeat: a sequence design is repeated, then for each repetition a sequence is generated and applied. Events have different values
+Sequence -> Repeat: If a sequence design is repeated, then for each repetition a sequence is generated and applied. Events have different values.
 
 ### Repeat -> Sequence
 ```julia
 design = SingleSubjectDesign(conditions = Dict(:condition => ["one", "two"]))
 design = RepeatDesign(design,2)
 design = SequenceDesign(design, "[AB]")
-generate_events(design)
 ```
 
-```repl
+```julia-repl
+julia> generate_events(design)
 4×2 DataFrame
  Row │ condition  event 
      │ String     Char  
 ─────┼──────────────────
-   1 │ one        A
-   2 │ two        A
-   3 │ one        A
-   4 │ two        A
+   1 │ one        B
+   2 │ two        B
+   3 │ one        B
+   4 │ two        B
 ```
-Repeat -> Sequence: the design is first repeated, then for that design one sequence generated and applied. All events are the same
-
+Repeat -> Sequence: The design is first repeated, then for that design one sequence is generated and applied. All events are the same.
 
 See also [`SingleSubjectDesign`](@ref), [`MultiSubjectDesign`](@ref), [`RepeatDesign`](@ref)
 """
@@ -444,13 +439,17 @@ generate_events(rng, design::SequenceDesign{MultiSubjectDesign}) =
     error("not yet implemented")
 
 
+"""
+    generate_events(rng, design::SequenceDesign)
+
+First generates a sequence-string using `evaluate_sequencestring(rng,design.sequence)`. Then generates events from the nested `design.design` and repeats them according to the length of the sequence string.
+Finally, assigns the sequence-string-characters to the `:event` column in `events`.
+"""
 function generate_events(rng, design::SequenceDesign)
     df = generate_events(deepcopy(rng), design.design)
     nrows_df = size(df, 1)
 
-    #   @debug design.sequence
-    currentsequence = sequencestring(rng, design.sequence)
-    #    @debug currentsequence
+    currentsequence = evaluate_sequencestring(rng, design.sequence)
     currentsequence = replace(currentsequence, "_" => "")
     df = repeat(df, inner = length(currentsequence))
 
@@ -501,13 +500,26 @@ end
 
 """
     EffectsDesign <: AbstractDesign
-Design to obtain ground truth simulation.
 
-## Fields
-- `design::AbstractDesign`
-   The design of your (main) simulation.
-- `effects_dict::Dict`
-   Effects.jl style dictionary specifying variable effects. See also [Unfold.jl marginalized effects](https://unfoldtoolbox.github.io/Unfold.jl/stable/generated/HowTo/effects/)
+This design evaluates the nested design at the marginalized effects specified in the `effects_dict`. That is, it calculates all combination of the variables in the `effects_dict` while setting all other variables to a "typical" value (i.e. the mean for numerical variables).
+
+# Fields
+- `design::AbstractDesign`: The design of your (main) simulation.
+- `effects_dict::Dict`: Effects.jl style dictionary specifying variable effects. See also [Unfold.jl marginal effects](https://unfoldtoolbox.github.io/UnfoldDocs/Unfold.jl/stable/generated/HowTo/effects/)
+
+# Examples
+```julia-repl
+design =
+    SingleSubjectDesign(;
+        conditions = Dict(
+            :condition => ["bike", "face"],
+            :continuous => range(0, 5, length = 10),
+        ),
+    ) |> x -> RepeatDesign(x, 5);
+
+effects_dict = Dict(:condition => ["bike", "face"])
+effects_design = EffectsDesign(design, effects_dict)
+```
 """
 struct EffectsDesign <: AbstractDesign
     design::AbstractDesign
@@ -528,21 +540,29 @@ function expand_grid(design)
     return DataFrame(vec(rowtab))
 end
 
+"""
+    typical_value(v)
+    typical_value(v::Vector{<:Number})
+    
+Return the typical value, either the mean (if a vector) or all unique levels otherwise. Copied from Effects.jl
+"""
 typical_value(v::Vector{<:Number}) = [mean(v)]
 typical_value(v) = unique(v)
 
 """
-    UnfoldSim.generate_events(rng,design::EffectsDesign)
+    generate_events(rng::AbstractRNG, design::EffectsDesign)
 
-Generates events to simulate marginalized effects using an Effects.jl reference-grid dictionary. Every covariate that is in the `EffectsDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean)
+Generate events to simulate marginal effects using an Effects.jl reference-grid dictionary. Every covariate that is in the `EffectsDesign` but not in the `effects_dict` will be set to a `typical_value` (i.e. the mean).
 
-# Example
-```julia
-effects_dict = Dict(:conditionA=>[0,1])
-design = SingleSubjectDesign(; conditions = Dict(:conditionA => [0,1,2])) 
-eff_design = EffectsDesign(design,effects_dict) 
-generate_events(MersenneTwister(1),eff_design)
+# Examples
+```julia-repl
+julia> effects_dict = Dict(:conditionA => [0, 1]);
 
+julia> design = SingleSubjectDesign(; conditions = Dict(:conditionA => [0, 1, 2]));
+
+julia> eff_design = EffectsDesign(design,effects_dict);
+
+julia> generate_events(MersenneTwister(1),eff_design)
 2×1 DataFrame
  Row │ conditionA 
      │ Int64      
@@ -551,9 +571,8 @@ generate_events(MersenneTwister(1),eff_design)
    2 │          1
 ```
 """
-function UnfoldSim.generate_events(rng, t::EffectsDesign)
+function generate_events(rng::AbstractRNG, t::EffectsDesign)
     effects_dict = Dict{Any,Any}(t.effects_dict)
-    #effects_dict = t.effects_dict
     current_design = generate_events(deepcopy(rng), t.design)
     to_be_added = setdiff(names(current_design), string.(keys(effects_dict)))
     for tba in to_be_added

@@ -6,6 +6,7 @@ using Revise
 
 Revise.revise()
 
+
 GENERATED = joinpath(@__DIR__, "src", "generated")
 SOURCE = joinpath(@__DIR__, "literate")
 
@@ -51,12 +52,12 @@ makedocs(;
         ],
         "HowTo" => [
             "Define a new (imbalanced) design" => "./generated/HowTo/newDesign.md",
-            "Component basisfunction (duration-dependent)" => "./generated/HowTo/componentfunction.md",
+            "Define design-dependent component basis functions" => "./generated/HowTo/componentfunction.md",
             "Get multiple trials with identical subject/item combinations" => "./generated/HowTo/repeatTrials.md",
             "Define a new component (with variable duration and shift)" => "./generated/HowTo/newComponent.md",
             "Generate multi channel data" => "./generated/HowTo/multichannel.md",
             "Use existing experimental designs & onsets in the simulation" => "./generated/HowTo/predefinedData.md",
-            "Simulated marginal effects" => "./generated/HowTo/getGroundTruth.md",
+            "Simulate ground truth marginal effects" => "./generated/HowTo/getGroundTruth.md",
             "Sequence of events (e.g. SCR)" => "./generated/HowTo/sequence.md",
             #"Simulate LBA evidence accumulation models" => "./generated/HowTo/driftComponent.md",
         ],

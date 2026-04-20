@@ -7,7 +7,7 @@
 # For example, the N170 describes a negative deflection which occurrs roughly 170 ms after the onset of (certain) visual stimuli.
 # Often, researchers are interested how a component (e.g. its amplitude or timing) changes depending on certain experimental factors. 
 # For example, N170 has been shown to be related to face processing and its amplitude is modulated by whether the stimulus is a face or an object e.g. a car.
-# ([Source](https://neuraldatascience.io/7-eeg/components.html))
+# ([Source](https://neuraldatascience.io/eeg/components/))
 
 # Here we will learn how to simulate a typical ERP complex with P100, N170, P300.
 
