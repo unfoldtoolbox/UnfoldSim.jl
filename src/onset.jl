@@ -555,7 +555,7 @@ function UnfoldSim.simulate_onsets(rng, onset::SequenceOnset, simulation::Simula
     onset_counter = Dict()
     for k in keys(onset.onset)
         sub_design = UnfoldSim.SubselectDesign(simulation.design, k)
-        onsets_for_k = simulate_interonset_distances(deepcopy(rng), onset.onset[k], sub_design, simulation.components[k][1])
+  onsets_for_k = simulate_interonset_distances(rng, onset.onset[k], sub_design, simulation.components[k][1])
         onset_map[k] = onsets_for_k
         onset_counter[k] = 1
     end
