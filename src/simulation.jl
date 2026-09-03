@@ -151,7 +151,7 @@ function simulate(rng::AbstractRNG, simulation::Simulation; return_epoched::Bool
     if return_epoched && !isa(onset, NoOnset)
 
         # use epoch function to epoch the continuous (possibly overlapping) signal
-        if length(size(design)) == 1 # if there is only one subject
+        if length(size(deepcopy(rng), design)) == 1 # if there is only one subject
             signal = epoch(signal, events, (0, maxlength(components) - 1), 1)
         else # multi-subject case
             events_epoch = groupby(events, :subject) |> collect
