@@ -62,7 +62,8 @@ f
 
 
 # ## Exponential Noise
-# The parameter \tau of exponential noise is approximately on half of the exponential decay in AR spectrum
+# The parameter τ of exponential noise is approximately on half of the exponential decay in AR spectrum.
+# From empirical estimates, we recommend a τ of 0.03-0.0.04 * fs (https://github.com/unfoldtoolbox/UnfoldSim.jl/issues/182)
 using UnfoldSim, CairoMakie
 import StatsBase.autocor
 f = Figure()
@@ -74,7 +75,11 @@ for (ix,τ) = enumerate([0.1 1 3 10 30 100 300 1000])
     scatter!(ax, lags, autocor_vec)
 	vlines!(τ)
 end
+f[1, 2] = Legend(f, ax, "τ parameter")
+
 xlims!(1,10_000)
-ax.xlabel = "Exponential noise, τ parameter"
+ax.title = "Exponential noise, τ parameter"
+ax.xlabel = "Autocorrelation lag (log10-scale)"
+ax.ylabel = "Autocorrelation"
 f
 
