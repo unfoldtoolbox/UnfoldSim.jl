@@ -72,7 +72,7 @@ for (ix,τ) = enumerate([0.1 1 3 10 30 100 300 1000])
 	dat = simulate_noise(UnfoldSim.MersenneTwister(1), ExponentialNoise(;τ=τ,noiselevel=1),100_000)
 	lags = 0:1:10_000
     autocor_vec = autocor(dat, lags)
-    scatter!(ax, lags, autocor_vec)
+    scatter!(ax, lags, autocor_vec, label=string(τ))
 	vlines!(τ)
 end
 f[1, 2] = Legend(f, ax, "τ parameter")
