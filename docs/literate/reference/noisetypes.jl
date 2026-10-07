@@ -59,3 +59,27 @@ f
 
 # !!! hint
 #     From a theoretical point, `ExponentialNoise` seems to be the best fit for the AR spectrum of EEG signals. PinkNoise seems to be the most common choice in research papers.
+
+
+# ## Exponential Noise
+# The parameter τ of exponential noise is approximately on half of the exponential decay in AR spectrum.
+# From empirical estimates, we recommend a τ of 0.03-0.0.04 * fs (https://github.com/unfoldtoolbox/UnfoldSim.jl/issues/182)
+using UnfoldSim, CairoMakie
+import StatsBase.autocor
+f = Figure()
+ax = Axis(f[1,1],xscale=log10)
+for (ix,τ) = enumerate([0.1 1 3 10 30 100 300 1000])
+	dat = simulate_noise(UnfoldSim.MersenneTwister(1), ExponentialNoise(;τ=τ,noiselevel=1),100_000)
+	lags = 0:1:10_000
+    autocor_vec = autocor(dat, lags)
+    scatter!(ax, lags, autocor_vec, label=string(τ))
+	vlines!(τ)
+end
+f[1, 2] = Legend(f, ax, "τ parameter")
+
+xlims!(1,10_000)
+ax.title = "Exponential noise, τ parameter"
+ax.xlabel = "Autocorrelation lag (log10-scale)"
+ax.ylabel = "Autocorrelation"
+f
+
