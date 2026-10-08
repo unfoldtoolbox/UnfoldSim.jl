@@ -176,7 +176,7 @@ end
 
 Helper function to segment continuous `data` into epochs based on the given `events` and the time window `τ`.
 
-Adapted from Unfold.jl: https://github.com/unfoldtoolbox/Unfold.jl/blob/b3  a21c2bb7e93d2f45ec64b0197f4663a6d7939a/src/utilities.jl#L40
+Adapted from Unfold.jl: https://github.com/unfoldtoolbox/Unfold.jl/blob/b3a21c2bb7e93d2f45ec64b0197f4663a6d7939a/src/utilities.jl#L40
 
 # Arguments
 - `data::AbstractArray{T,2}`: Continuous data with the dimensions `channels x continuous_time`.

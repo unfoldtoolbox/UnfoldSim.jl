@@ -7,7 +7,7 @@ All fields can be named. Works best with [`MultiSubjectDesign`](@ref).
 
 # Fields
 - `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is also possible to provide a function that evaluates to an `Vector` of `Vectors`, with the `design` as input to the function, the outer vector has to have `nrows(design)`, one for each event. The inner vector represents the basis functions which can be of different size (a ragged array). Alternatively, one can also return a Matrix with the second dimension representing `nrows(design)`. In the case of providing a function, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples. If your design depends on `rng`, e.g. because of `event_order_function=shuffle` or some special `SequenceDesign`, then you can provide a two-arguments function `(rng,design)->...`.
-- `formula::Any`: Formula-object in the style of MixedModels.jl e.g. `@formula 0 ~ 1 + cond + (1|subject)`. The left-hand side is ignored.
+- `formula::Any`: Formula-object in the style of MixedModels.jl e.g. `@formula(0 ~ 1 + cond + (1|subject))`. The left-hand side is ignored.
 - `β::Vector` Vector of betas (fixed effects), must fit the formula.
 - `σs::Dict` Dict of random effect variances, e.g. `Dict(:subject => [0.5, 0.4])` or to specify correlation matrix `Dict(:subject=>[0.5,0.4,I(2,2)],...)`. Technically, this will be passed to the MixedModels.jl `create_re` function, which creates the θ matrices.
 - `contrasts::Dict` (optional): Dict in the style of MixedModels.jl. Determines which coding scheme to use for which categorical variables. Default is empty which corresponds to dummy coding. For more information see <https://juliastats.org/StatsModels.jl/stable/contrasts>.
@@ -50,7 +50,7 @@ All fields can be named. Works best with [`SingleSubjectDesign`](@ref).
 
 # Fields
 - `basis::Any`: an object, if accessed, provides a 'basis function', e.g. `hanning(40)::Vector`, this defines the response at a single event. It will be weighted by the model prediction. It is also possible to provide a function that evaluates to an `Vector` of `Vectors`, with the `design` as input to the function, the outer vector has to have `nrows(design)`, one for each event. The inner vector represents the basis functions which can be of different size (a ragged array). Alternatively, one can also return a Matrix with the second dimension representing `nrows(design)`. In the case of providing a function, one has to specify the `maxlength` as well in a tuple. E.g. `basis=(myfun,40)`, which would automatically cut the output of `myfun` to 40 samples. If your design depends on `rng`, e.g. because of `event_order_function=shuffle` or some special `SequenceDesign`, then you can provide a two-arguments function `(rng,design)->...`.
-- `formula::Any`: StatsModels `formula` object, e.g.  `@formula 0 ~ 1 + cond` (left-hand side must be 0).
+- `formula::Any`: StatsModels `formula` object, e.g.  `@formula(0 ~ 1 + cond)` (left-hand side must be 0).
 - `β::Vector` Vector of betas/coefficients, must fit the formula.
 - `contrasts::Dict` (optional): Determines which coding scheme to use for which categorical variables. Default is empty which corresponds to dummy coding. For more information see <https://juliastats.org/StatsModels.jl/stable/contrasts>.
 - `offset::Int = 0`: Can be used to shift the basis function in time (in samples).
@@ -128,10 +128,9 @@ By default a `MultichannelComponent` can be constructed using one of the followi
 
 # Examples
 ```julia-repl
-# Variant 1: Specify the projection vector manually
 julia> c1 = LinearModelComponent(; basis = p100(), formula = @formula(0 ~ 1), β = [1]);
 
-julia> mc1 = UnfoldSim.MultichannelComponent(c, [1, 2, -1, 3, 5, 2.3, 1])
+julia> mc1 = UnfoldSim.MultichannelComponent(c1, [1, 2, -1, 3, 5, 2.3, 1])
 MultichannelComponent
   component: LinearModelComponent
   projection: Array{Float64}((7,)) [1.0, 2.0, -1.0, 3.0, 5.0, 2.3, 1.0]
@@ -140,13 +139,13 @@ MultichannelComponent
 # Variant 2: Use a headmodel and specify a source
 julia> c2 = LinearModelComponent(; basis = p300(), formula = @formula(0 ~ 1), β = [1]);
 
-julia> hart = headmodel(type = "hartmut");
+julia> hart = Hartmut();
 Please cite: HArtMuT: Harmening Nils, Klug Marius, Gramann Klaus and Miklody Daniel - 10.1088/1741-2552/aca8ce
 
 julia> mc2 = UnfoldSim.MultichannelComponent(c2, hart => "Right Occipital Pole")
 MultichannelComponent
   component: LinearModelComponent
-  projection: Array{Float64}((227,)) [-0.03461859471337842, -0.04321094803502425, 0.0037088347968313525, -0.014722528968861278, -0.0234889834534478, 0.02731807504242923, 0.038863688452528036, 0.1190531258070562, -0.09956890221613562, -0.0867729334438599  …  0.37435404409695094, -0.020863789022627935, 0.25627478723535513, -0.05777985212119245, 0.37104376432271147, -0.19446620423767172, 0.2590764703721097, -0.12923837607416555, 0.1732886690359311, 0.4703016561960567]
+  projection: Array{Float64}((227,)) [-0.03461859471337842, -0.043210948035024246, 0.0037088347968313525, -0.014722528968861278, -0.0234889834534478, 0.02731807504242923, 0.038863688452528036, 0.1190531258070562, -0.09956890221613562, -0.0867729334438599  …  0.37435404409695094, -0.020863789022627942, 0.2562747872353551, -0.05777985212119245, 0.37104376432271147, -0.19446620423767172, 0.2590764703721096, -0.12923837607416555, 0.17328866903593113, 0.4703016561960567]
   noise: NoNoise NoNoise()
 ```
 
@@ -294,7 +293,7 @@ simulate_component(rng, c::AbstractComponent, simulation::Simulation) =
 Generate a linear model design matrix, weight it by the coefficients `c.β` and multiply the result with the given basis vector.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(get_basis(c.basis)) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(get_basis(c)) x length(design)`.
 
 # Examples
 ```julia-repl
@@ -350,7 +349,7 @@ Generate a MixedModel and simulate data according to the given parameters `c.β`
 - `return_parameters::Bool = false`: Can be used to return the per-event parameters used to weight the basis function. Sometimes useful to inspect what is simulated.
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(get_basis(basis)) x length(design)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(get_basis(c)) x length(design)`.
 
 # Notes
 1) MixedModels/Sim does not allow simulation of data without white noise of the residuals. Because we want our own noise, we use the following trick to remove the MixedModels-Noise:
@@ -584,7 +583,7 @@ julia> simulation = Simulation(design, [c1, c2], UniformOnset(; width = 0, offse
 julia> using StableRNGs
 
 julia> simulate_responses(StableRNG(1), [c1, c2], simulation)
-45×2 Matrix{Float64}:
+44×2 Matrix{Float64}:
  0.0        0.0
  0.0        0.0
  0.0        0.0

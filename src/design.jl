@@ -13,7 +13,7 @@ If conditions are omitted (or set to `nothing`), a single trial is simulated wit
 # Fields
 - `conditions::Dict{Symbol,Vector}`: Experimental conditions, e.g. `Dict(:A => ["a_small","a_big"], :B => ["b_tiny","b_large"])`.
 - `event_order_function = (rng, x) -> x`: Can be used to sort by specifying `sort`, or shuffling by providing `shuffle`, or custom functions following the interface `(rng, x) -> my_shuffle(rng,x)`.
-    The default is the identify function, i.e. not changing the order of the events.
+    The default is the identity function, i.e. not changing the order of the events.
 
 # Examples
 ```julia-repl
@@ -58,7 +58,7 @@ end
 A type for specifying the experimental design for multiple subjects (based on the given random-effects structure).
 
 Tip: Check the resulting dataframe using the [`generate_events`](@ref) function. \\
-Please note that the number of items `n_items` has to be a multiple of the number of between-item levels. The sample applies for `n_subjects` and the number of between-subject levels.
+Please note that the number of items `n_items` has to be a multiple of the number of between-item levels. The same applies for `n_subjects` and the number of between-subject levels.
 
 # Fields
 - `n_subjects::Int`: Number of subjects.
@@ -67,7 +67,7 @@ Please note that the number of items `n_items` has to be a multiple of the numbe
 - `items_between::Dict{Symbol,Vector}`: Effects between items, e.g. natural vs artificial images, (but shown to all subjects if not specified also in `subjects_between`).
 - `both_within::Dict{Symbol,Vector}`: Effects completely crossed i.e. conditions/covariates that are both within-subject and within-item.
 - `event_order_function = (rng, x) -> x`: Can be used to sort, or shuffle the events e.g. `(rng, x) -> shuffle(rng, x)` (or shorter just `event_order_function = shuffle`).
-    The default is the identify function, i.e. not changing the order of the events.
+    The default is the identity function, i.e. not changing the order of the events.
 
 # Examples
 ```julia-repl
@@ -585,7 +585,7 @@ end
 """
     Base.size([rng],design::AbstractDesign)
 
-Return the dimensions of the experiment design. For some designs (SequenceDesign), rng is required, as the size is only determined by the design, which in turn can be probabilistic.
+Return the dimensions of the experiment design. For some designs (SequenceDesign), rng is required, as the size is not only determined by the design, which in turn can be probabilistic.
 """
 Base.size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
 Base.size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)

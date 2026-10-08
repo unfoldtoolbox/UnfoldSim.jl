@@ -93,7 +93,7 @@ Tip: To manually create noise samples use the [`simulate_noise`](@ref) function.
 
 # Fields
 - `noiselevel = 1` (optional): Factor that is used to scale the noise.
-- `imfilter = nothing` (optional): Use `imfilter > 0` to smooth the noise using `Image.imfilter` with a Gaussian kernel with `σ = imfilter`.
+- `imfilter = nothing` (optional): Use `imfilter > 0` to smooth the noise using `ImageFiltering.imfilter` with a Gaussian kernel with `σ = imfilter`.
 
 # Examples
 ```julia-repl
@@ -218,7 +218,7 @@ Use `subtypes(AbstractNoise)` for a list of the implemented noise types.
 julia> noise = WhiteNoise()
 WhiteNoise
   noiselevel: Int64 1
-  imfilter: Int64 0
+  imfilter: Nothing nothing
 
 julia> using StableRNGs
 

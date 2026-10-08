@@ -79,17 +79,17 @@ Generate a Hanning window mimicking an N170 EEG component with a negative (!) pe
 # Examples
 ```julia-repl
 julia> n170(; sfreq = 120)
-28-element Vector{Float64}:
+29-element Vector{Float64}:
  -0.0
  -0.0
  -0.0
  -0.0
  -0.0
   ⋮
- -0.45386582026834904
- -0.2771308221117309
+ -0.453865820268349
+ -0.2771308221117308
  -0.1304955413896705
- -0.03376388529782215
+ -0.033763885297822094
  -0.0
 ```
 See also [`p100`](@ref), [`p300`](@ref), [`n400`](@ref), [`hanning`](@ref).
@@ -128,7 +128,7 @@ See also [`p100`](@ref), [`p300`](@ref), [`n170`](@ref), [`hanning`](@ref).
 n400(; sfreq = 100) = -hanning(0.4, 0.4, sfreq)
 
 """
-    hanning(duration, offset, sfreq)
+    hanning(width, offset, sfreq)
 
 Generate a (potentially shifted) hanning window with a certain duration. 
 
@@ -136,7 +136,7 @@ Note: This function extends the `DSP.hanning` function using multiple dispatch.
 
 # Arguments
 - `width`: in s.
-- `offset`: in s, defines the location of the hanning peak i.e. shift of the hanning window. Must be > `round(width/2)` (otherwise the left part of the curve would be cut off).
+- `offset`: in s, defines the location of the hanning peak i.e. shift of the hanning window. Must be at least half the `width` (otherwise the left part of the curve would be cut off).
 - `sfreq`: Sampling rate in Hz.
 
 # Returns
@@ -145,7 +145,7 @@ Note: This function extends the `DSP.hanning` function using multiple dispatch.
 # Examples
 ```julia-repl
 julia> UnfoldSim.hanning(0.1, 0.3, 100)
-35-element Vector{Float64}:
+34-element Vector{Float64}:
  0.0
  0.0
  0.0
@@ -233,12 +233,12 @@ Generate a parameterized BOLD haemodynamic response function (HRF) kernel based 
 
 Implementation and default parameters were taken from the SPM-toolbox.
 
-Note: TR = 1/sfreq
+Note: The returned kernel has one sample per `TR`.
 
 # Keyword arguments
-- `TR = 1`: repetition time, 1/sfreq.
+- `TR = 1`: repetition time, i.e. the sampling interval of the returned kernel.
 - `length = 32.0`: total length of the kernel in seconds.
-- `amplitude = 6`: maximal amplitude.
+- `amplitude = 6`: ratio of the peak to the post-undershoot amplitude (the post-undershoot gamma function is divided by this value).
 - `peak = 6.0`: peak timing.
 - `peak_width = 1.0`: width of the peak.
 - `post_undershoot = 16`: post-undershoot timing.

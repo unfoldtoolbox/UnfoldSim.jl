@@ -12,10 +12,8 @@ using MixedModelsSim
 using SignalAnalysis
 using LinearAlgebra
 using ToeplitzMatrices # for AR Expo. Noise "Circulant"
-using StatsModels
 using HDF5, Artifacts, FileIO
 using Automa # for sequence
-using LinearAlgebra # headmodel
 
 import DSP.hanning
 import Base.length

@@ -28,13 +28,13 @@ The most used keyword argument is: `return_epoched = true` which returns already
 
 ## Component / Signal
 - `sfreq = 100`: Sampling frequency.
-- `p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict())`: P1 with amplitude 5; no effects.
-- `n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, 3], Dict())`: N1 with amplitude 5, dummy-coded condition effect (levels "car", "face") of 3.
-- `p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5, 1], Dict())`: P3 with amplitude 5, continuous effect range [-5,5] with slope 1.
+- `p1 = (p100(; sfreq = sfreq), @formula(0 ~ 1), [5], Dict(), 0)`: P1 with amplitude 5; no effects.
+- `n1 = (n170(; sfreq = sfreq), @formula(0 ~ 1 + condition), [5, 3], Dict(), 0)`: N1 with amplitude 5, dummy-coded condition effect (levels "car", "face") of 3.
+- `p3 = (p300(; sfreq = sfreq), @formula(0 ~ 1 + continuous), [5, 1], Dict(), 0)`: P3 with amplitude 5, continuous effect range [-5,5] with slope 1.
 
 ## Onset
-- `overlap = (0.5,0.2)`, # convenient parameterization for the default `onset::UniformOnset`. (`offset`, `width`) in seconds. If you do not want any overlap, either use `onset=NoOnset()`, or put the offset to a value larger than the maximum used component length, e.g. `overlap=(1,0.2)`. Put the `width` to `0` to have no jitter between events.
-- `onset = UniformOnset(; offset = sfreq * 0.5 * overlap[1], width = sfreq * 0.5 * overlap[2])`, 
+- `overlap = (0.5,0.2)`: convenient parameterization for the default `onset::UniformOnset`. (`offset`, `width`) in seconds. If you do not want any overlap, either use `onset=NoOnset()`, or put the offset to a value larger than the maximum used component length, e.g. `overlap=(1,0.2)`. Put the `width` to `0` to have no jitter between events.
+- `onset = UniformOnset(; offset = sfreq * overlap[1], width = sfreq * overlap[2])`, 
 
 ## Noise
 - `noiselevel = 0.2`.
@@ -73,16 +73,16 @@ julia> events
  2000 │  -2.77778   car         120154
 
 julia> data
-120199-element Vector{Float64}:
-  0.31631798033146774
-  0.40338935529989906
-  0.46409775558165056
-  0.5862082040156747
+120198-element Vector{Float64}:
+  0.31637558073245997
+  0.40344667743156387
+  0.46415480078831567
+  0.5862649736351733
   ⋮
- -0.1879589005111152
- -0.3163314509311509
+ -0.17915653240144574
+ -0.26467571833237047
+ -0.34230861125327683
  -0.22230944464885682
- -0.01320095208877194
 ```
 
 See also [`predef_2x2`](@ref).
