@@ -11,7 +11,7 @@ abstract type AbstractComponent end
 abstract type AbstractHeadmodel end
 
 """
-    Simulation{T<:Numeric}
+    Simulation{T}
 
 A type to store all "ingredients" for a simulation including their parameters.
 
@@ -55,14 +55,14 @@ julia> events
    2 │ artificial          70
 
 julia> data
-85-element Vector{Float64}:
+84-element Vector{Float64}:
   0.8596261232522926
   1.1657369535500595
   0.9595228616486761
   ⋮
-  0.9925202143746904
+  0.805867173139493
+  0.7585646574936683
   0.2390652543395527
- -0.11672523788068771
 ```
 """
 struct Simulation{T}
