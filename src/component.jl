@@ -265,7 +265,7 @@ function limit_basis(b::AbstractVector{<:AbstractVector}, maxlength)
     return basis_out
 end
 limit_basis(b::AbstractVector{<:Number}, maxlength) = b[1:min(length(b), maxlength)]
-limit_basis(b::AbstractMatrix, maxlength) = b[1:min(length(b), maxlength), :]
+limit_basis(b::AbstractMatrix, maxlength) = b[1:min(size(b, 1), maxlength), :]
 
 Base.length(c::AbstractComponent) =
     isa(get_basis(c), Tuple) ? get_basis(c)[2] : length(get_basis(c))
@@ -480,31 +480,39 @@ julia> mc = UnfoldSim.MultichannelComponent(c, [1, 2, -1, 3, 5, 2.3, 1], PinkNoi
 julia> using StableRNGs
 
 julia> simulate_component(StableRNG(1), mc, design)
-7×15×2 Array{Float64, 3}:
+7×14×2 Array{Float64, 3}:
 [:, :, 1] =
-  0.859626   1.16574   0.959523   0.757522   1.17639   1.65156   1.3742    1.76706   2.76971   2.0306    1.17429   1.00922   1.09519   0.754659   2.25662
-  1.71925    2.33147   1.91905    1.51504    2.35278   3.30312   2.7484    3.53412   5.53942   4.0612    2.34858   2.01845   2.19039   1.50932    4.51324
- -0.859626  -1.16574  -0.959523  -0.757522  -1.17639  -1.65156  -1.3742   -1.76706  -2.76971  -2.0306   -1.17429  -1.00922  -1.09519  -0.754659  -2.25662
-  2.57888    3.49721   2.87857    2.27257    3.52917   4.95469   4.1226    5.30118   8.30913   6.09179   3.52287   3.02767   3.28558   2.26398    6.76985
-  4.29813    5.82868   4.79761    3.78761    5.88194   8.25781   6.871     8.8353   13.8485   10.153     5.87145   5.04612   5.47597   3.7733    11.2831
-  1.97714    2.68119   2.2069     1.7423     2.70569   3.79859   3.16066   4.06424   6.37033   4.67037   2.70087   2.32121   2.51894   1.73572    5.19022
-  0.859626   1.16574   0.959523   0.757522   1.17639   1.65156   1.3742    1.76706   2.76971   2.0306    1.17429   1.00922   1.09519   0.754659   2.25662
+  0.859626   1.16574   0.959523   0.757522   1.17639   1.82703   1.8185    2.2723    3.09948   2.0306    0.844521   0.503987   0.650896   0.579193
+  1.71925    2.33147   1.91905    1.51504    2.35278   3.65406   3.63699   4.54459   6.19896   4.0612    1.68904    1.00797    1.30179    1.15839
+ -0.859626  -1.16574  -0.959523  -0.757522  -1.17639  -1.82703  -1.8185   -2.2723   -3.09948  -2.0306   -0.844521  -0.503987  -0.650896  -0.579193
+  2.57888    3.49721   2.87857    2.27257    3.52917   5.48109   5.45549   6.81689   9.29844   6.09179   2.53356    1.51196    1.95269    1.73758
+  4.29813    5.82868   4.79761    3.78761    5.88194   9.13514   9.09248  11.3615   15.4974   10.153     4.2226     2.51994    3.25448    2.89596
+  1.97714    2.68119   2.2069     1.7423     2.70569   4.20217   4.18254   5.22628   7.1288    4.67037   1.9424     1.15917    1.49706    1.33214
+  0.859626   1.16574   0.959523   0.757522   1.17639   1.82703   1.8185    2.2723    3.09948   2.0306    0.844521   0.503987   0.650896   0.579193
 
 [:, :, 2] =
-  0.859626   1.16574   0.959523   0.757522   1.17639   1.65156   1.31571   1.56047   2.39471   1.54567   0.689367   0.634223   0.888605   0.69617   2.25662
-  1.71925    2.33147   1.91905    1.51504    2.35278   3.30312   2.63142   3.12094   4.78942   3.09135   1.37873    1.26845    1.77721    1.39234   4.51324
- -0.859626  -1.16574  -0.959523  -0.757522  -1.17639  -1.65156  -1.31571  -1.56047  -2.39471  -1.54567  -0.689367  -0.634223  -0.888605  -0.69617  -2.25662
-  2.57888    3.49721   2.87857    2.27257    3.52917   4.95469   3.94713   4.68142   7.18413   4.63702   2.0681     1.90267    2.66582    2.08851   6.76985
-  4.29813    5.82868   4.79761    3.78761    5.88194   8.25781   6.57855   7.80236  11.9735    7.72837   3.44684    3.17112    4.44303    3.48085  11.2831
-  1.97714    2.68119   2.2069     1.7423     2.70569   3.79859   3.02613   3.58909   5.50783   3.55505   1.58554    1.45871    2.04379    1.60119   5.19022
-  0.859626   1.16574   0.959523   0.757522   1.17639   1.65156   1.31571   1.56047   2.39471   1.54567   0.689367   0.634223   0.888605   0.69617   2.25662
+ -0.772476  -1.3724   -0.604064   0.336333  -0.178552  -1.04784  -1.39647   0.573443  -0.0278636   0.110731   0.162222   0.244492   0.0724519  -1.87052
+ -1.54495   -2.7448   -1.20813    0.672666  -0.357104  -2.09569  -2.79295   1.14689   -0.0557271   0.221462   0.324444   0.488983   0.144904   -3.74105
+  0.772476   1.3724    0.604064  -0.336333   0.178552   1.04784   1.39647  -0.573443   0.0278636  -0.110731  -0.162222  -0.244492  -0.0724519   1.87052
+ -2.31743   -4.1172   -1.81219    1.009     -0.535656  -3.14353  -4.18942   1.72033   -0.0835907   0.332192   0.486666   0.733475   0.217356   -5.61157
+ -3.86238   -6.86201  -3.02032    1.68167   -0.892759  -5.23922  -6.98237   2.86721   -0.139318    0.553654   0.811109   1.22246    0.36226    -9.35261
+ -1.77669   -3.15652  -1.38935    0.773566  -0.410669  -2.41004  -3.21189   1.31892   -0.0640862   0.254681   0.37311    0.562331   0.166639   -4.3022
+ -0.772476  -1.3724   -0.604064   0.336333  -0.178552  -1.04784  -1.39647   0.573443  -0.0278636   0.110731   0.162222   0.244492   0.0724519  -1.87052
 ```
 """
 function simulate_component(rng, c::MultichannelComponent, design::AbstractDesign)
     y = simulate_component(rng, c.component, design)
 
+    # Generate the noise per trial from a single deep copy of the rng that is advanced
+    # across trials, so that each trial gets independent noise (previously the noise was
+    # re-drawn per trial from the same rng state, i.e. every trial received the identical
+    # noise realization). Generating the noise per trial (rather than one batched,
+    # reshaped realization for all trials) does not assume that the noise process can be
+    # interrupted at arbitrary lengths, which is not guaranteed for all noise processes
+    # (e.g. stateful noise that changes over the course of the experiment).
+    _rng = deepcopy(rng)
     for trial = 1:size(y, 2)
-        y[:, trial] .= y[:, trial] .+ simulate_noise(deepcopy(rng), c.noise, size(y, 1))
+        @views y[:, trial] .+= simulate_noise(_rng, c.noise, size(y, 1))
     end
 
     y_proj = kron(y, c.projection)
@@ -628,7 +636,12 @@ function init_epoch_data(SimDataType, rng, components, design)
     max_offset = maxoffset(components)
     min_offset = minoffset(components)
     range_offset = (max_offset - min_offset)
-    if n_channels(components) > 1
+    # A MultichannelComponent always returns 3-D output, even with a single channel,
+    # so check for its presence rather than counting channels.
+    if any(
+        c -> c isa MultichannelComponent,
+        components isa Dict ? values(components) : components,
+    )
         epoch_data = zeros(
             SimDataType,
             n_channels(components),
@@ -672,7 +685,7 @@ function simulate_responses(
     evts = generate_events(deepcopy(rng), s.design)
     #@debug rng.state
     @debug size(epoch_data), size(evts)
-    multichannel = n_channels(event_component_dict) > 1
+    multichannel = any(c -> c isa MultichannelComponent, values(event_component_dict))
     for key in keys(event_component_dict)
         # we don't remember why we explicitly check for key == '_', maybe can be removed in future iterations
         if key == '_'
