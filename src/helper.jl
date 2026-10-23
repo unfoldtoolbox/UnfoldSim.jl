@@ -258,7 +258,7 @@ function epoch(
             d_end = size(data, 2)
         end
         #println("d: $(size(data)),e: $(size(epochs)) | $d_start,$d_end,$e_start,$e_end | $(events[si,eventtime])")
-        epochs[:, e_start:e_end, si] = data[:, d_start:d_end]
+        @views epochs[:, e_start:e_end, si] .= data[:, d_start:d_end]
     end
     return epochs
 end

@@ -188,7 +188,7 @@ See also [`PinkNoise`](@ref), [`RedNoise`](@ref), [`NoNoise`](@ref), [`WhiteNois
 """
 @with_kw struct ExponentialNoise <: AbstractNoise
     noiselevel = 1
-    τ::Any
+    τ::Float64
 end
 
 #-----------------------------
@@ -264,12 +264,13 @@ function simulate_noise(rng, t::ExponentialNoise, n::Int)
 
     @assert τ > 0
     f = exp(-1 / τ)
+    c = sqrt(1 - f^2) # loop-invariant, hoisted out of the loop
     #s = 0:n-1
     g = randn(rng, n)
     r = similar(g)
     r[1] = g[1]
-    for n = 1:(length(g)-1)
-        r[n+1] = f * r[n] + sqrt(1 - f^2) * g[n+1]
+    @inbounds for i = 1:(length(g)-1)
+        r[i+1] = f * r[i] + c * g[i+1]
     end
 
     return t.noiselevel .* r
