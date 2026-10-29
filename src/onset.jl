@@ -294,7 +294,7 @@ This is helpful if your overlap/event-distribution should be dependent on some c
 - `width_β::Vector`: Choose a `Vector` of betas, number needs to fit the formula chosen. 
 - `width_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
 
-# Combined with [ShiftOnsetByOne](@ref)
+# Combined with [`ShiftOnsetByOne`](@ref)
 Sometimes one wants to bias not the inter-onset distance prior to the current event, but after the current event.
 This is possible by using `ShiftOnsetByOne(UniformOnset(...))`, effectively shifting the inter-onset-distance vector by one. See `?ShiftOnsetByOne` for a visualization.
 
@@ -367,7 +367,7 @@ offset: The minimal distance between events - aka a shift of the LogNormal distr
 - `truncate_upper = nothing` (optional): Upper limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
 - `truncate_lower = nothing` (optional): Lower limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
 
-# Combined with [ShiftOnsetByOne](@ref)
+# Combined with [`ShiftOnsetByOne`](@ref)
 
 Sometimes one wants to bias not the inter-onset distance prior to the current event, but after the current event.
 This is possible by using `ShiftOnsetByOne(LogNormalOnsetFormula(...))`, effectively shifting the inter-onset-distance vector by one. See `?ShiftOnsetByOne` for a visualization.
