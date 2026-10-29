@@ -232,10 +232,8 @@ function magnitude(lf::AbstractArray{T,3}, orientation::AbstractArray{T,2}) wher
         leadfield: $(si[2:3]), orientation: $(size(orientation))."
 
     magnitude = fill(NaN, si[1:2])
-    for e = 1:si[1]
-        for s = 1:si[2]
-            magnitude[e, s] = lf[e, s, :]' * orientation[s, :]
-        end
+    @views for e = 1:si[1], s = 1:si[2]
+        magnitude[e, s] = dot(lf[e, s, :], orientation[s, :])
     end
     return magnitude
 end
