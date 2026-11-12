@@ -232,6 +232,8 @@ Float64, Vector{Float64}:
 ```
 """
 function SSM_Simulate(rng, model::SequentialSamplingModels.SSM2D, sfreq, max_length)
+    # accept e.g. tEnd/Δt which is a Float; indexing/fill below require an Int
+    max_length = Int(max_length)
     if isa(model, LBA) && !(model.τ ≈ 0.0)
         @warn(
             "LBA Model with non-0 non-decision. Given we do not know if non-decision time is encoding or response generation, we put everyhing to response generation. We recommend to use τ=0"
@@ -282,6 +284,8 @@ Float64, Vector{Float64}:
 ```
 """
 function SSM_Simulate(rng, model::KellyModel, sfreq, max_length)
+    # accept e.g. tEnd/Δt which is a Float; indexing/fill below require an Int
+    max_length = Int(max_length)
     Δt = 1 / sfreq
     time_vec = 0:Δt:max_length*Δt
     rt, evidence = KellyModel_simulate_cpp(rng, model, time_vec, Δt)
