@@ -154,10 +154,10 @@
 
         result_onsets = simulate_onsets(rng, sequence_onset, simulation)
 
-        size(result_onsets) == (60,)
-        result_onsets[1] == 121
-        result_onsets[2] == 201
-        result_onsets[3] == 906
+        @test size(result_onsets) == (60,)
+        @test result_onsets[1] == 121
+        @test result_onsets[2] == 201
+        @test result_onsets[3] == 910
 
         # Test DriftOnset combined with UniformOnset
         sequence_onset = SequenceOnset(
@@ -175,10 +175,10 @@
         )
 
         result_onsets = simulate_onsets(rng, sequence_onset, simulation)
-        size(result_onsets) == (60,)
-        result_onsets[1] == 121
-        result_onsets[2] == 201
-        result_onsets[3] == 1046
+        @test size(result_onsets) == (60,)
+        @test result_onsets[1] == 121
+        @test result_onsets[2] == 201
+        @test result_onsets[3] == 1050
     end
 
     @testset "ShiftOnset" begin
