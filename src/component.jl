@@ -748,9 +748,8 @@ Works best with [`SequenceDesign`](@ref).
 
 # Fields
 - `max_length::Int`: maximum length of the simulated trace.
-- `sfreq::Real`: sample frequency used to simulate the trace, used to evaluate the parameters in the model_type.
-- `model_type`: Model struct which defines the model to use to generate the trace, e.g. `KellyModel`
-- `model_parameters`: Dict. Containing the parameters for the sequential sampling simulation model specified in `model_type`.
+- `sfreq::Real`: sample frequency used to simulate the trace, used to evaluate the parameters in the model.
+- `model`: Preconfigured sequential sampling model instance which defines the model to use to generate the trace, e.g. `KellyModel(drift_rate = "drift_rate")`. Fields specified as strings are resolved against the design columns per event.
 
 # Examples
 ```julia-repl
@@ -758,20 +757,17 @@ Works best with [`SequenceDesign`](@ref).
 sfreq=500
 tEnd = 1.0
 max_length = tEnd*sfreq;
-model_parameter = Dict()
 DriftComponent(
     max_length,
     sfreq,
-    KellyModel,
-    model_parameter)
+    KellyModel())
 ```
 
 """
 struct DriftComponent <: AbstractComponent
     max_length::Int
     sfreq::Real
-    model_type::Any
-    model_parameters::Dict
+    model::Any
 end
 """
     simulate_component(rng, c::DriftComponent, design::AbstractDesign)
@@ -784,9 +780,7 @@ Generate evidence accumulation traces based on the model specified in `c::DriftC
 # Examples
 ```julia-repl
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
-julia> model_parameter = Dict();
-
-julia> c = DriftComponent(500, 500, KellyModel, model_parameter);
+julia> c = DriftComponent(500, 500, KellyModel());
 
 julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
 
@@ -820,9 +814,7 @@ Important: specify the same rng as in `simulate_component(rng, component::DriftC
 
 ```julia-repl
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
-julia> model_parameter = Dict();
-
-julia> c = DriftComponent(500, 500, KellyModel, model_parameter);
+julia> c = DriftComponent(500, 500, KellyModel());
 
 julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
 

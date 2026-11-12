@@ -95,13 +95,13 @@ f_data
 
 v = "drift_rate" ## take the drift rate directly from the design
 
-# The KellyModel has _many_ default parameters, let's grab them and immediately change a few
+# The KellyModel has _many_ default parameters, let's change a few and pass the model directly
 
-kelly_model =
-    UnfoldSim.KellyModel(drift_rate = v, motor_delay = 0.4, sensor_encoding_delay = 0.2)
-
-kelly_model_parameter = UnfoldSim.create_kelly_parameters_dict(kelly_model)
-drift = DriftComponent(max_length, fs, UnfoldSim.KellyModel, kelly_model_parameter)
+drift = DriftComponent(
+    max_length,
+    fs,
+    UnfoldSim.KellyModel(drift_rate = v, motor_delay = 0.4, sensor_encoding_delay = 0.2),
+)
 components = Dict('S' => [c_stimulus], 'C' => [drift], 'R' => [c_response])
 
 # We are ready to simulate!

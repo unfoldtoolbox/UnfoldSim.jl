@@ -67,33 +67,6 @@ Base.@kwdef mutable struct KellyModel <: SequentialSamplingModels.SSM2D
 end
 
 """
-    create_kelly_parameters_dict(model::KellyModel)
-
-Convert a `KellyModel` instance into a dictionary containing its parameters.
-
-# Arguments
-- `model::KellyModel`: The Kelly model instance whose parameters will be extracted.
-
-# Returns
-- `Dict{Symbol, Any}`: A dictionary where the keys are the parameter names as symbols, and the values are the corresponding parameter values.
-
-# Examples
-```julia-repl
-julia> model = KellyModel(drift_rate=5.5, boundary=1.2)
-KellyModel(5.5, 0.2, 0.4, 0.5, 1.2, 0.1, 0.4, 0.1, 0.2, 0.1)
-
-julia> create_kelly_parameters_dict(model)
-Dict{Symbol, Any}(:drift_rate => 5.5, :event_onset => 0.2, :sensor_encoding_delay => 0.4, 
-                  :accumulative_level_noise => 0.5, :boundary => 1.2, :motor_onset => 0.1, 
-                  :motor_delay => 0.4, :post_accumulation_duration => 0.1, 
-                  :post_accumulation_duration_variability => 0.2, :ramp_down_duration => 0.1)
-"""
-function create_kelly_parameters_dict(model::KellyModel)
-    return Dict(name => getfield(model, name) for name in fieldnames(typeof(model)))
-end
-
-
-"""
     KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
 
 Generate a single response time, and evidence trace of an evidence accumulation process using the Kelly model.
@@ -182,9 +155,7 @@ Generate response times and evidence Vectors of an given [`AbstractDesign`](@ref
 
 # Examples
 ```julia-repl
-julia> model_parameter = Dict(:motor_onset => 0.4, :event_onset => 0.2);
-
-julia> c = DriftComponent(500, 500, KellyModel, model_parameter);
+julia> c = DriftComponent(500, 500, KellyModel(motor_delay = 0.4, sensor_encoding_delay = 0.2));
 
 julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
 
@@ -199,10 +170,17 @@ function simulate_drift_component(rng, component::DriftComponent, design::Abstra
     events = generate_events(deepcopy(rng), design)
     traces = Matrix{Float64}(undef, component.max_length, size(events, 1))
     rts = Vector{Float64}(undef, size(events, 1))
+    has_strings =
+        any(getfield(component.model, name) isa String for name in fieldnames(typeof(component.model)))
     for (i, evt) in enumerate(eachrow(events))
-        parameters = get_model_parameter(rng, evt, component.model_parameters)
+        # resolve String fields (e.g. drift_rate = "drift_rate") against the design columns per
+        # event; models without String fields are used as stored
         model =
-            component.model_type(; (key => parameters[key] for key in keys(parameters))...)
+            has_strings ?
+            typeof(component.model)(;
+                (name => get_model_parameter(rng, evt, getfield(component.model, name)) for
+                 name in fieldnames(typeof(component.model)))...,
+            ) : component.model
         rt, evidence = SSM_Simulate(rng, model, component.sfreq, component.max_length)
 
         rts[i] = rt

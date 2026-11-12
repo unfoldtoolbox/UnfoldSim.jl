@@ -36,13 +36,7 @@
 
     @testset "simulate_drift_component" begin
         boundary = 1.0
-        model_parameter = Dict(:boundary => boundary);
-        c = UnfoldSim.DriftComponent(
-            max_length,
-            fs,
-            KellyModel,
-            model_parameter,
-        )
+        c = UnfoldSim.DriftComponent(max_length, fs, KellyModel(boundary = boundary))
         design_single = UnfoldSim.SingleSubjectDesign(
             conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]),
         )
