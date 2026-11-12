@@ -24,7 +24,7 @@
         )
         @test size(result_rt) == ()
         @test size(result_trace) == (501,)
-        @test isapprox(result_rt, 393.3925219909412, atol = 1e-8)
+        @test isapprox(result_rt, 291.53516402920155, atol = 1e-8)
         @test any(result_trace .== 0)
         @test any(result_trace .>= boundary)
 
@@ -59,7 +59,7 @@
         result_rt, result_trace = UnfoldSim.SSM_Simulate(deepcopy(StableRNG(1)), KellyModel(), fs, max_length)
         @test size(result_rt) == ()
         @test size(result_trace) == (500,)
-        @test isapprox(result_rt, 393.3925219909412, atol = 1e-8)
+        @test isapprox(result_rt, 291.53516402920155, atol = 1e-8)
         @test any(result_trace .== 0)
         @test any(result_trace .>= boundary)
 

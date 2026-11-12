@@ -126,7 +126,10 @@ function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
         sqrt(Δt),
     )
 
-    cum_evidence = cumsum(evidence .* model.drift_rate .* Δt .+ noise) # This is the cumulative differential evidence, just as in a 1d DDM. 
+    # start the accumulation at a per-trial sampled start point: an evidence offset, so a higher
+    # start point reaches the boundary earlier (RT) and the trace begins at the start point
+    start_point_sample = rand(rng, model.start_point_distribution)
+    cum_evidence = start_point_sample .+ cumsum(evidence .* model.drift_rate .* Δt .+ noise) # cumulative differential evidence, just as in a 1d DDM.
 
 
     # terminate the decision process on boundary crossing, record threshold-crossing samplepoint:
@@ -244,8 +247,10 @@ function SSM_Simulate(rng, model::SequentialSamplingModels.SSM2D, sfreq, max_len
 
     time_steps, evidence = SequentialSamplingModels.simulate(rng, model; Δt)
     if !(evidence isa Vector{Float64})
-        evidence = hcat(evidence...)
-        evidence = collect(vec(evidence))
+        # multi-accumulator: keep only the winning accumulator's trace (highest evidence at the
+        # recorded end time), not the column-major concatenation of all accumulators
+        evidence = evidence isa AbstractMatrix ? evidence : hcat(evidence...)
+        evidence = collect(evidence[:, argmax(evidence[end, :])])
     end
     # Store results for this trial
     rt = (time_steps[end] + model.τ) / Δt

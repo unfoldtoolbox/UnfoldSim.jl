@@ -813,7 +813,7 @@ Important: specify the same rng as in `simulate_component(rng, component::DriftC
 # Arguments
 - `rng::AbstractRNG`: Random seed to ensure the same traces are created as in the use of the [`simulate_component`](@ref) function.
 - `component::DriftComponent`: Component to specify the model and its parameters to simulate the evidence accumulation.
-- `design::UnfoldSim.SubselectDesign`: Subselection of the Sequence Design to ensure we only generate rt for the drift component events.
+- `design::AbstractDesign`: Design for which the response times are simulated. To only generate rts for the drift component events, pass the corresponding `UnfoldSim.SubselectDesign`.
 
 # Returns
 - `Vector{Float64}`: Simulated response times for each event in the events data frame. The output dimension is `size(events, 1)`.
@@ -834,7 +834,7 @@ julia> calculate_response_times_for_ssm(StableRNG(1),c,design_seq)
  360.1329203034039
 ```
 """
-function calculate_response_times_for_ssm(rng, component::DriftComponent, design::UnfoldSim.SubselectDesign)
+function calculate_response_times_for_ssm(rng, component::DriftComponent, design::AbstractDesign)
     rts, _ = simulate_drift_component(deepcopy(rng), component, design)
     return rts
 end

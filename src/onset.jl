@@ -442,23 +442,17 @@ struct SequenceOnset <: AbstractOnset
 end
 SequenceOnset(args::Pair...) = SequenceOnset(Dict(args...))
 """
-    DriftOnset<: AbstractOnset
-A type that defines the onsets for a [`DriftComponent`](@ref).
+    DriftOnset <: AbstractOnset
+A type that defines the onsets for a [`DriftComponent`](@ref): the inter-onset distances are the simulated response times of the drift model.
 
-Works best with [`DriftComponent`](@ref).
-
-# Fields
-- `onset::Dict`: onset for the DriftComponent.
+Combine with an [`UniformOnset`](@ref) as a tuple `(DriftOnset(), UniformOnset(width = 0, offset = 140))` to add jitter on top of the response times.
 
 # Examples
 ```julia-repl
 drift_onset = DriftOnset()
 ```
 """
-struct DriftOnset{T} <: AbstractOnset
-    onset::T
-end
-DriftOnset() = DriftOnset(UniformOnset(width = 0, offset = 0))
+struct DriftOnset <: AbstractOnset end
 
 """
     UnfoldSim.simulate_interonset_distances(rng, onset::AbstractOnset, design::AbstractDesign, components::AbstractComponent)
@@ -511,28 +505,6 @@ Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceD
 """
 function UnfoldSim.simulate_interonset_distances(rng, onset::Tuple, design::AbstractDesign, components::AbstractComponent)
     return Int.(round.(reduce(.+, simulate_interonset_distances.(deepcopy(rng), onset, Ref(design), Ref(components)))))
-end
-
-"""
-    UnfoldSim.simulate_interonset_distances(rng, onset::Char, design::AbstractDesign, components::AbstractComponent)
-
-Generates list of onsets for the end of a sequence in an [`SequenceDesign`](@ref).
-
-# Arguments
-- `rng::StableRNG`: Random seed to ensure reproducibility.
-- `onset::Char`: Defines to simulates onsets at the end of a sequence.
-- `design::AbstractDesign`: Design for which the onsets are simulated.
-- `components::AbstractComponent`: The Component for which the onset is simulated.
-
-# Returns
-- `Vector{Float64}`: the generated onsets for the end of a sequence in the SequenceDesign.
-"""
-function UnfoldSim.simulate_interonset_distances(rng, onset::Char, design::AbstractDesign, components::AbstractComponent)
-    @assert onset == '_'
-    df = generate_events(rng, design)
-    nrows_df = Int(size(df, 1))
-    onsets = repeat([UnfoldSim.maxlength([components])], nrows_df)
-    return onsets
 end
 
 """
