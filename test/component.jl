@@ -97,6 +97,10 @@
             parameters = UnfoldSim.get_model_parameter(rng, evt, c.model_parameters)
             @test parameters[:drift_rate] == drift_rates[i]
         end
+
+        # Regression: SSM_Simulate must accept a Float max_length (e.g. tEnd/Δt = 500.0)
+        @test size(UnfoldSim.SSM_Simulate(StableRNG(1), KellyModel(), 500, 500.0)[2]) == (500,)
+        @test size(UnfoldSim.SSM_Simulate(StableRNG(1), DDM(), 500, 500.0)[2]) == (500,)
     end
     @testset "get_basis" begin
 
