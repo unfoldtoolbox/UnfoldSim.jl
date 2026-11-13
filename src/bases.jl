@@ -233,7 +233,7 @@ Generate a parameterized BOLD haemodynamic response function (HRF) kernel based 
 
 Implementation and default parameters were taken from the SPM-toolbox.
 
-Note: The returned kernel has one sample per `TR`.
+Note: The returned kernel has one sample per `TR`. Effectively TR = 1/sfreq
 
 # Keyword arguments
 - `TR = 1`: repetition time, i.e. the sampling interval of the returned kernel.
