@@ -48,11 +48,9 @@ v = [0.8] ## Drift Rate, needs to be in [ ] for compatibility with `SequentialSa
 A = 0.2 ## The starting point is sampled uniformly between `[0, A]`
 k = 0.4 ## Difference of A with the bound/threshold ($A + k = b$), where b is the decision threshold.
 
-lba_parameter = Dict(:ν => v, :A => A, :k => k, :τ => 0.0) # we didnt specify σ thus it is 1 by default,
-
 # !!! important
 # The non-decision time has to be specified here as "τ=>0." because it is not defined whether non-decision time applies to stimulus encoding or response execution. If you have a non-0 value here, the events following the DriftComponent will be shifted by τ.
-drift = DriftComponent(max_length, fs, LBA, lba_parameter)
+drift = DriftComponent(max_length, fs, LBA(ν = v, A = A, k = k, τ = 0.0)) # we didnt specify σ thus it is 1 by default
 
 # Let's have a quick look at the simulation
 series(
