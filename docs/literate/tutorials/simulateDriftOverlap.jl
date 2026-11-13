@@ -18,7 +18,6 @@ using SequentialSamplingModels
 fs = 500
 Δt = 1 / fs; # time step
 tEnd = 1.0 # trial Duration
-time_vec = 0:Δt:tEnd; # time base - let's make it a typical stimulus duration
 max_length = tEnd / Δt
 
 c_stimulus = LinearModelComponent(;
@@ -45,7 +44,7 @@ design_rep = RepeatDesign(design_seq, 100) # 100 SCR-repeats
 # # Simplified S-C-R drift-model with LBA
 # ## LBA
 # The following parameters are described in the [SequentialSamplingModels.LBA model documentation](https://itsdfish.github.io/SequentialSamplingModels.jl/dev/lba/)
-v = [0.8] ## Drift Rate, needs to be in [ ] for compatability with `SequentialSamplingModels.jl``
+v = [0.8] ## Drift Rate, needs to be in [ ] for compatibility with `SequentialSamplingModels.jl`
 A = 0.2 ## The starting point is sampled uniformly between `[0, A]`
 k = 0.4 ## Difference of A with the bound/threshold ($A + k = b$), where b is the decision threshold.
 
@@ -91,7 +90,7 @@ f_data
 
 # # Complex  S-C-R drift-model ala `Kelly et al.`
 
-# In addition to changing the model to a more realistic version, we will also make use of the `drift_rate` specification in our `design``
+# In addition to changing the model to a more realistic version, we will also make use of the `drift_rate` specification in our `design`
 
 v = "drift_rate" ## take the drift rate directly from the design
 
@@ -129,7 +128,7 @@ data_epochs, times_epoch =
 f = @formula(0 ~ 1 + drift_rate)
 m = fit(UnfoldModel, ["S" => (f, times_epoch), "R" => (f, times_epoch)], evts, data_epochs);
 plot_erp(
-    effects(Dict(:drift_rate => [2, 3]), m);
+    effects(Dict(:drift_rate => [1, 2]), m);
     mapping = (;
         color = :drift_rate => nonnumeric,
         col = :eventname => UnfoldMakie.sorter(["S", "R"]),
@@ -142,11 +141,11 @@ fir_resp = firbasis(τ = (-1, 0.3), sfreq = fs)
 
 m = fit(UnfoldModel, ["S" => (f, fir_stim), "R" => (f, fir_resp)], evts, data);
 plot_erp(
-    effects(Dict(:drift_rate => [2, 3]), m);
+    effects(Dict(:drift_rate => [1, 2]), m);
     mapping = (;
         color = :drift_rate => nonnumeric,
         col = :eventname => UnfoldMakie.sorter(["S", "R"]),
     ),
 )
-# Deconvolution sucessfully removed the stimulus and response overlaps from our estimates, but it kept the drift-diffusion aspect nearly untouched. It is important to stress the "nearly", because depending on the `delay` parameters, this can potentially lead to problematic situation where it is unclear whether the drift activity should be assigned to S or R. In most realistic situations we found to be safe.
-# Further note that the drift-diffusion amplitude can be reduced because it is split up between `S` and `R` events.`
+# Deconvolution successfully removed the stimulus and response overlaps from our estimates, but it kept the drift-diffusion aspect nearly untouched. It is important to stress the "nearly", because depending on the `delay` parameters, this can potentially lead to problematic situation where it is unclear whether the drift activity should be assigned to S or R. In most realistic situations we found to be safe.
+# Further note that the drift-diffusion amplitude can be reduced because it is split up between `S` and `R` events.
