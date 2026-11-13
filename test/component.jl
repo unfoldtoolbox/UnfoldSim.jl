@@ -44,7 +44,114 @@
         @test UnfoldSim.weight_σs(Dict(:subj => [1, 2, [1 0.5; 0.5 1]]), 1.0, 2.0).subj ==
               create_re(1, 2; corrmat = [1 0.5; 0.5 1]) ./ 2
     end
+
+    @testset "DriftComponent" begin
+        # Test UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
+        boundary = 1.0
+        c = DriftComponent(500, 500, KellyModel(boundary = boundary))
+        design_single = UnfoldSim.SingleSubjectDesign(conditions = Dict(:condition => [1]))
+        design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
+        result_traces = UnfoldSim.simulate_component(StableRNG(1), c, design_seq)
+
+        @test size(result_traces) == (500, 3)
+        @test any(result_traces .== 0)
+        @test any(result_traces .>= boundary)
+
+        # Test UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
+        boundary = 1.0
+        c = DriftComponent(500, 500, KellyModel(boundary = boundary))
+        design_single = UnfoldSim.SingleSubjectDesign(
+            conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]),
+        )
+        design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
+        result_traces = UnfoldSim.simulate_component(StableRNG(1), c, design_seq)
+
+        @test size(result_traces) == (500, 6)
+        @test any(result_traces .== 0)
+        @test any(result_traces .>= boundary)
+
+        # Test calculate_response_times_for_ssm(rng, component::DriftComponent, design::AbstractDesign)
+        c = DriftComponent(500, 500, KellyModel())
+        design_single = UnfoldSim.SingleSubjectDesign(
+            conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]),
+        )
+        design_seq = UnfoldSim.SequenceDesign(design_single, "SCR_")
+        sub_design = UnfoldSim.SubselectDesign(design_seq, 'C')
+        result_rts = UnfoldSim.calculate_response_times_for_ssm(StableRNG(1), c, sub_design)
+        @test size(result_rts) == (2,)
+        @test isapprox(result_rts, [291.53516402920155, 403.2249117520565], atol = 1e-8)
+
+        # Test get_model_parameter: String model fields resolve from the conditions in the events data frame
+        rng = StableRNG(1)
+        c = DriftComponent(500, 500, KellyModel(drift_rate = "drift_rate"))
+        drift_rates = [0.5, 0.8]
+        design_single = UnfoldSim.SingleSubjectDesign(
+            conditions = Dict(:drift_rate => drift_rates, :condition => [1]),
+        )
+        events = UnfoldSim.generate_events(rng, design_single)
+        for (i, evt) in enumerate(eachrow(events))
+            @test UnfoldSim.get_model_parameter(rng, evt, c.model.drift_rate) == drift_rates[i]
+        end
+
+        # Regression: SSM_Simulate must accept a Float max_length (e.g. tEnd/Δt = 500.0)
+        @test size(UnfoldSim.SSM_Simulate(StableRNG(1), KellyModel(), 500, 500.0)[2]) == (500,)
+        @test size(UnfoldSim.SSM_Simulate(StableRNG(1), DDM(), 500, 500.0)[2]) == (500,)
+
+        # Regression: calculate_response_times_for_ssm accepts any AbstractDesign, e.g. a plain
+        # design without a sequence/subselect wrapper
+        c_plain = DriftComponent(500, 500, KellyModel())
+        plain_design = UnfoldSim.SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8]))
+        @test size(UnfoldSim.calculate_response_times_for_ssm(StableRNG(1), c_plain, plain_design)) == (2,)
+
+        # Regression: multi-accumulator SSM (LBA) places the winning accumulator's trace, not a
+        # column-major concatenation of all accumulators
+        lba = LBA()
+        ts, ev_matrix = UnfoldSim.SequentialSamplingModels.simulate(StableRNG(7), lba; Δt = 1 / 500)
+        winner = argmax(ev_matrix[end, :])
+        _, ev = UnfoldSim.SSM_Simulate(StableRNG(7), lba, 500, 500)
+        @test ev[1:length(ts)] == ev_matrix[:, winner]
+
+        # Regression: start_point is an evidence offset coupled to the RT — the trace begins at the
+        # start point and a higher start point crosses the boundary earlier
+        rt0, ev0 = UnfoldSim.SSM_Simulate(
+            StableRNG(1),
+            KellyModel(start_point_distribution = Uniform(0.0, 1e-3)),
+            500,
+            500,
+        )
+        rt5, ev5 = UnfoldSim.SSM_Simulate(
+            StableRNG(1),
+            KellyModel(start_point_distribution = Uniform(0.5, 0.5 + 1e-3)),
+            500,
+            500,
+        )
+        @test ev0[1] < 1e-3                 # trace starts at the start point (≈ 0)
+        @test 0.5 <= ev5[1] <= 0.5 + 1e-3   # trace starts at the start point (≈ 0.5)
+        @test rt5 < rt0                     # higher start point → earlier boundary crossing
+
+        # Regression: rt is capped at the window end when no boundary crossing occurs within
+        # the simulated trace (consistency with the SSM2D method)
+        rt_cap, ev_cap = UnfoldSim.SSM_Simulate(StableRNG(1), KellyModel(boundary = 100), 500, 500)
+        @test rt_cap == 500
+        @test length(ev_cap) == 500
+
+        # Regression: a sampled sensor-encoding onset beyond the trace window is clamped with
+        # a warning instead of erroring
+        rt_b5, ev_b5 = @test_logs (:warn,) UnfoldSim.SSM_Simulate(
+            StableRNG(1),
+            KellyModel(sensor_encoding_delay = 2.0),
+            500,
+            500,
+        )
+        @test rt_b5 == 500
+        @test length(ev_b5) == 500
+
+        # Regression: KellyModel is a 1-accumulator SSM (SSM1D), not a 2D choice-rt model
+        @test KellyModel() isa UnfoldSim.SequentialSamplingModels.SSM1D
+        @test length(KellyModel()) == 1
+    end
     @testset "get_basis" begin
+
 
         rng = StableRNG(1)
         design = UnfoldSim.SingleSubjectDesign(; conditions = Dict(:duration => 10:-1:5))

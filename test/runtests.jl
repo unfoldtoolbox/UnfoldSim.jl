@@ -11,5 +11,6 @@ include("setup.jl")
     include("noise.jl")
     include("onset.jl")
     include("sequence.jl")
+    include("sequentialSamplingModelSimulation.jl")
     include("simulation.jl")
 end

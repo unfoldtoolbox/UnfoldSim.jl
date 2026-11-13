@@ -737,3 +737,141 @@ function simulate_and_add!(
     @views epoch_data[:, (1+off):(length(component)+off), :] .+=
         simulate_component(rng, component, simulation)
 end
+
+
+
+"""
+    DriftComponent <: AbstractComponent
+A component that adds an evidence accumulation trace, following a specified sequential sampling model.
+
+Works best with [`SequenceDesign`](@ref).
+
+# Fields
+- `max_length::Int`: maximum length of the simulated trace.
+- `sfreq::Real`: sample frequency used to simulate the trace, used to evaluate the parameters in the model.
+- `model`: Preconfigured sequential sampling model instance which defines the model to use to generate the trace, e.g. `KellyModel(drift_rate = "drift_rate")`. Fields specified as strings are resolved against the design columns per event.
+
+# Examples
+```julia-repl
+# use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
+sfreq=500
+tEnd = 1.0
+max_length = tEnd*sfreq;
+DriftComponent(
+    max_length,
+    sfreq,
+    KellyModel())
+```
+
+"""
+struct DriftComponent <: AbstractComponent
+    max_length::Int
+    sfreq::Real
+    model::Any
+end
+"""
+    simulate_component(rng, c::DriftComponent, design::AbstractDesign)
+
+Generate evidence accumulation traces based on the model specified in `c::DriftComponent` and (optionally) parameters from `design::AbtractDesign`
+
+# Returns
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `c.max_length x size(events, 1)`.
+
+# Examples
+```julia-repl
+# use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
+julia> c = DriftComponent(500, 500, KellyModel());
+
+julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
+
+julia> design_seq = SequenceDesign(design_single,"SCR_");
+
+julia> simulate_component(StableRNG(1),c,design_seq)
+500×6 Matrix{Float64}:
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ ⋮                                  ⋮
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+```
+"""
+function UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
+    _, traces = simulate_drift_component(deepcopy(rng), c, design)
+    return traces
+end
+"""
+    calculate_response_times_for_ssm(rng, component::DriftComponent, design::AbstractDesign)
+
+Generate response times of the evidence accumulation by using the model and its parameters specified in the component.
+
+Important: specify the same rng as in `simulate_component(rng, component::DriftComponent, design::AbstractDesign)` to ensure that the response times match the generated traces. 
+
+# Arguments
+- `rng::AbstractRNG`: Random seed to ensure the same traces are created as in the use of the [`simulate_component`](@ref) function.
+- `component::DriftComponent`: Component to specify the model and its parameters to simulate the evidence accumulation.
+- `design::AbstractDesign`: Design for which the response times are simulated. To only generate rts for the drift component events, pass the corresponding `UnfoldSim.SubselectDesign`.
+
+# Returns
+- `Vector{Float64}`: Simulated response times for each event in the events data frame. The output dimension is `size(events, 1)`.
+
+```julia-repl
+# use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
+julia> c = DriftComponent(500, 500, KellyModel());
+
+julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5, 0.8], :condition => [1]));
+
+julia> design_seq = SequenceDesign(design_single,"SCR_");
+
+julia> sub_design = SubselectDesign(design_seq, 'C');
+
+julia> UnfoldSim.calculate_response_times_for_ssm(StableRNG(1),c,sub_design)
+2-element Vector{Float64}:
+ 291.53516402920155
+ 403.2249117520565
+```
+"""
+function calculate_response_times_for_ssm(rng, component::DriftComponent, design::AbstractDesign)
+    rts, _ = simulate_drift_component(deepcopy(rng), component, design)
+    return rts
+end
+Base.length(c::DriftComponent) = c.max_length
+"""
+    get_model_parameter(rng, evt, d::Dict)
+
+Construct a parameter dictionary of parameter names and values, resolving each value recursively.
+"""
+function get_model_parameter(rng, evt, d::Dict)
+    result_parameter = Dict()
+    for key in keys(d)
+        result_parameter[key] = get_model_parameter(rng, evt, d[key])
+    end
+    return result_parameter
+end
+"""
+    get_model_parameter(rng, evt, val)
+
+Default method: returns the value unchanged.
+"""
+get_model_parameter(rng, evt, val) = val
+"""
+    get_model_parameter(rng, evt, val::String)
+
+Returns the value of the events data frame column named by the string, i.e. resolves a model
+parameter specified as a string from the conditions in the events data frame.
+"""
+get_model_parameter(rng, evt, val::String) = evt[val]

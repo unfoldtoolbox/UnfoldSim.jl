@@ -17,6 +17,8 @@ using HDF5, Artifacts, FileIO
 using Automa # for sequence
 using LinearAlgebra # headmodel
 
+using SequentialSamplingModels # for SequentialSamplingModels
+
 import DSP.hanning
 import Base.length
 import Base.size
@@ -32,6 +34,7 @@ include("headmodel.jl")
 include("helper.jl")
 include("sequence.jl")
 include("bases.jl")
+include("sequentialSamplingModels.jl")
 
 export size, length
 export AbstractComponent, AbstractNoise, AbstractOnset, AbstractDesign
@@ -57,6 +60,7 @@ export simulate,
     simulate_responses,
     simulate_interonset_distances,
     simulate_component,
+    simulate_drift_component,
     simulate_onsets,
     simulate_noise,
     generate_events
@@ -79,4 +83,7 @@ export AbstractHeadmodel, Hartmut, headmodel, leadfield, orientation, magnitude
 
 # multichannel
 export MultichannelComponent
+
+# evidence accumulation
+export DriftComponent, DriftOnset, SequenceOnset, KellyModel, LBA, DDM
 end
