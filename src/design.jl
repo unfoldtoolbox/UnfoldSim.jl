@@ -585,7 +585,7 @@ end
 """
     Base.size([rng],design::AbstractDesign)
 
-Return the dimensions of the experiment design. For some designs (SequenceDesign), rng is required, as the size is not only determined by the design, which in turn can be probabilistic.
+Return the dimensions of the experiment design. For some designs (e.g. SequenceDesign), rng is required, as the size of the design can only be inferred once the probabilistic Sequence has been evaluated.
 """
 Base.size(design::MultiSubjectDesign) = (design.n_items, design.n_subjects)
 Base.size(design::SingleSubjectDesign) = (*(length.(values(design.conditions))...),)
