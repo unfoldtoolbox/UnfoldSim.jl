@@ -40,22 +40,24 @@ Tip: To manually generate inter-event distance samples use the [`simulate_intero
 - `σ`: The standard deviation of the log-transformed variable.
 - `offset = 0` (optional): The minimal distance between events.
 - `truncate_upper = nothing` (optional): Upper limit (in samples) at which the distribution is truncated.
+- `truncate_lower = nothing` (optional): Lower limit (in samples) at which the distribution is truncated.
 
 # Examples
 ```julia-repl
-julia> onset_distribution = LogNormalOnset(3, 0.25, 10, 25)
+julia> onset_distribution = LogNormalOnset(μ = 3, σ = 0.25, offset = 10, truncate_upper = 25)
 LogNormalOnset
   μ: Int64 3
   σ: Float64 0.25
   offset: Int64 10
   truncate_upper: Int64 25
+  truncate_lower: Nothing nothing
 ```
 
 See also [`UniformOnset`](@ref UnfoldSim.UniformOnset), [`NoOnset`](@ref).
 """
 @with_kw struct LogNormalOnset <: AbstractOnset
     μ::Any  # mean
-    σ::Any  # variance
+    σ::Any  # standard deviation
     offset = 0 # additional offset
     truncate_upper = nothing # truncate at some sample?
     truncate_lower = nothing # truncate at some lower sample?
@@ -137,7 +139,7 @@ julia> design_single = SingleSubjectDesign(;
        );
 
 # Create an inter-onset distance distribution
-julia> onset_distribution = LogNormalOnset(3, 0.5, 5, nothing);
+julia> onset_distribution = LogNormalOnset(μ = 3, σ = 0.5, offset = 5);
 
 julia> using StableRNGs
 
@@ -194,7 +196,7 @@ contains_design(d::Union{RepeatDesign,SequenceDesign,SubselectDesign}, target::T
 
 Call `simulate_interonset_distances` to generate distances between events and then add them up to generate the actual latencies in samples.
 
-Please note that this function is mainly for internal use in the context of `simulate` function calls. \n
+Please note that this function is mainly for internal use in the context of `simulate` function calls.
 Also note that the accumulation of onsets starts at 1 to avoid indexing problems in the case that the first sampled onset is 0.
 
 In case of a SequenceDesign with a '_' no-overlap indicator, we use twice the `maxlength(components)` as the distance following that sequence character.
@@ -205,6 +207,7 @@ In case of a SequenceDesign with a '_' no-overlap indicator, we use twice the `m
 - `simulation::Simulation`: Simulation object which contains design, component(s), inter-onset distance distribution and noise.
 
 # Returns
+- `Vector{Int}`: Latencies (in samples) of all events, i.e. the cumulative sum of the sampled inter-onset distances.
 
 # Examples
 ```julia-repl
@@ -284,10 +287,10 @@ This is helpful if your overlap/event-distribution should be dependent on some c
 
 # Fields
 
-- `offset_formula = @formula(0~1)`: Choose a formula depending on your `design`.
-- `offset_β::Vector = [0] `(optional): Choose a `Vector` of betas. The number of betas needs to fit the formula chosen.
+- `offset_formula = @formula(0 ~ 1)`: Choose a formula depending on your `design`.
+- `offset_β::Vector = [0]` (optional): Choose a `Vector` of betas. The number of betas needs to fit the formula chosen.
 - `offset_contrasts::Dict = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
-- `width_formula = `@formula(0~1)`: Choose a formula depending on your `Design`.
+- `width_formula = @formula(0 ~ 1)`: Choose a formula depending on your `Design`.
 - `width_β::Vector`: Choose a `Vector` of betas, number needs to fit the formula chosen. 
 - `width_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
 
@@ -352,22 +355,22 @@ offset: The minimal distance between events - aka a shift of the LogNormal distr
 
 # Fields
 
-- `μ_formula = @formula(0~1)` (optional): Choose a formula depending on your `design`
+- `μ_formula = @formula(0 ~ 1)` (optional): Choose a formula depending on your `design`
 - `μ_β::Vector`: Choose a `Vector` of betas, number needs to fit the formula chosen.
 - `μ_contrasts::Dict = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
-- `σ_formula = @formula(0~1)` (optional): Choose a formula depending on your `Design`.
+- `σ_formula = @formula(0 ~ 1)` (optional): Choose a formula depending on your `design`.
 - `σ_β::Vector`: Choose a `Vector` of betas, number needs to fit the formula chosen.
 - `σ_contrasts::Dict = Dict()` (optional) : Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
-- `offset_formula = @formula(0~1)` (optional): Choose a formula depending on your `design` for the offset.
+- `offset_formula = @formula(0 ~ 1)` (optional): Choose a formula depending on your `design` for the offset.
 - `offset_β::Vector = [0] ` (optional): Choose a `Vector` of betas. The number of betas needs to fit the formula chosen.
 - `offset_contrasts::Dict = Dict()` (optional): Choose a contrasts-`Dict`ionary according to the StatsModels specifications.
-- `truncate_upper::nothing` (optional): Upper limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
-- `truncate_lower::nothing` (optional): Lower limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
+- `truncate_upper = nothing` (optional): Upper limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
+- `truncate_lower = nothing` (optional): Lower limit (in samples) at which the distribution is truncated (formula for truncation currently not implemented)
 
 # Combined with [ShiftOnsetByOne](@ref)
 
 Sometimes one wants to bias not the inter-onset distance prior to the current event, but after the current event.
-This is possible by using `ShiftOnsetByOne(LogNormalOnset(...))`, effectively shifting the inter-onset-distance vector by one. See `?ShiftOnsetByOne` for a visualization.
+This is possible by using `ShiftOnsetByOne(LogNormalOnsetFormula(...))`, effectively shifting the inter-onset-distance vector by one. See `?ShiftOnsetByOne` for a visualization.
 
 
 # Examples

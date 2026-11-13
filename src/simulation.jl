@@ -7,7 +7,7 @@ function simulate(
     args...;
     kwargs...,
 )
-    @warn "No random generator defined, used the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!"
+    @warn "No random generator defined, using the default (`Random.MersenneTwister(1)`) with a fixed seed. This will always return the same results and the user is strongly encouraged to provide their own random generator!"
     simulate(MersenneTwister(1), design, components, onset, args...; kwargs...)
 end
 
@@ -216,7 +216,7 @@ julia> responses = simulate_responses(StableRNG(1), [c1, c2], simulation)
 julia> signal, latencies = UnfoldSim.create_continuous_signal(StableRNG(1), responses, simulation);
 
 julia> signal
-106-element Vector{Float64}:
+105-element Vector{Float64}:
  0.0
  0.0
  0.0

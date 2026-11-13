@@ -6,7 +6,7 @@ Type for accessing the HArtMuT model (Harmening et al., 2022), a head model whic
 Note: Use `Hartmut()` to create an instance of this head model.
 
 # Fields
-- `artefacual::Any`: Dict with artefactual sources (e.g. muscular and ocular) containing label, leadfield, orientation and position.
+- `artefactual::Any`: Dict with artefactual sources (e.g. muscular and ocular) containing label, leadfield, orientation and position.
 - `cortical::Any`:  Dict with cortical sources containing label, leadfield, orientation and position.
 - `electrodes::Any`: Dict with electrode labels and their positions in 3D space.
 
@@ -91,7 +91,7 @@ hartmut_citation() =
 """
     leadfield(hart::Hartmut; type = "cortical")
 
-Return the leadfield for the (cortical or artefacual) sources of the HArtMuT model.
+Return the leadfield for the (cortical or artefactual) sources of the HArtMuT model.
 
 # Keyword arguments
 - `type = "cortical"`: Defines whether the "cortical" or "artefactual" leadfield should be returned.
@@ -134,7 +134,7 @@ leadfield(hart::Hartmut; type = "cortical") =
 """
     orientation(hart::Hartmut; type = "cortical")
 
-Return the orientations of the (cortical or artefacual) sources of the HArtMuT model. 
+Return the orientations of the (cortical or artefactual) sources of the HArtMuT model. 
 
 The norm of the orientation vectors is 1 and the values are between -1 and 1.
 
