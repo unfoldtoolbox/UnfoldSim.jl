@@ -519,7 +519,7 @@ Generates list of onsets for all events of an [`SequenceDesign`](@ref), how to s
 - `simulation::Simulation`: Simulation which contains the design and other elements for the experiment.
 
 # Returns
-- `Vector`: the generated onsets (cumulative latencies) for all events in the SequenceDesign.
+- `Vector{Int}`: the generated onsets (cumulative latencies) for all events in the SequenceDesign.
 """
 function UnfoldSim.simulate_onsets(rng, onset::SequenceOnset, simulation::Simulation)
     @assert isa(simulation.design.design, SequenceDesign) "`SequenceOnset`is currently only compatible with a `SequenceDesign`"
@@ -532,7 +532,7 @@ function UnfoldSim.simulate_onsets(rng, onset::SequenceOnset, simulation::Simula
         onset_map[k] = onsets_for_k
         onset_counter[k] = 1
     end
-    final_onsets = []
+    final_onsets = Int[]
     for (i, evt_k) in enumerate(events.event)
         push!(final_onsets, onset_map[evt_k][onset_counter[evt_k]])
         onset_counter[evt_k] += 1

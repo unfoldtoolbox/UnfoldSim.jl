@@ -60,6 +60,7 @@ export simulate,
     simulate_responses,
     simulate_interonset_distances,
     simulate_component,
+    simulate_drift_component,
     simulate_onsets,
     simulate_noise,
     generate_events

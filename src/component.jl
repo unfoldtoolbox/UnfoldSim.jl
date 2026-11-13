@@ -839,7 +839,7 @@ julia> design_seq = SequenceDesign(design_single,"SCR_");
 
 julia> sub_design = SubselectDesign(design_seq, 'C');
 
-julia> calculate_response_times_for_ssm(StableRNG(1),c,sub_design)
+julia> UnfoldSim.calculate_response_times_for_ssm(StableRNG(1),c,sub_design)
 2-element Vector{Float64}:
  291.53516402920155
  403.2249117520565

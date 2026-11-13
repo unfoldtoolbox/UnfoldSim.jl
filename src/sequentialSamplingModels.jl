@@ -43,7 +43,7 @@ julia> km.boundary
 
 See also [`DriftComponent`](@ref).
 """
-Base.@kwdef mutable struct KellyModel <: SequentialSamplingModels.SSM2D
+Base.@kwdef mutable struct KellyModel <: SequentialSamplingModels.SSM1D
     drift_rate::Union{Real,String} = 6.0                    # drift rate
     sensor_encoding_delay::Union{Real,String} = 0.2                   # mean onset (sensory evidence)
     sensor_encoding_delay_variability::Union{Real,String} = 0.1         # sensory encoding delay
@@ -90,13 +90,18 @@ Generate a single response time, and evidence trace of an evidence accumulation 
 # Examples
 ```julia-repl
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
-julia> KellyModel_simulate_cpp(StableRNG(1), KellyModel(), 0:1/500:1.0, 1/500)
+julia> UnfoldSim.KellyModel_simulate_cpp(StableRNG(1), KellyModel(), 0:1/500:1.0, 1/500)
 (291.53516402920155, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 ```
 """
 function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
     evidence = zeros(length(time_vec))
-    evidence[time_vec.>=rand(rng, model.event_onset_distribution)] .= 1
+    onset_sample = rand(rng, model.event_onset_distribution)
+    if onset_sample > maximum(time_vec)
+        @warn "sampled `sensor_encoding_delay` onset ($onset_sample s) exceeds the trace window ($(maximum(time_vec)) s); clamping to the window end"
+        onset_sample = maximum(time_vec)
+    end
+    evidence[time_vec.>=onset_sample] .= 1
     startAccT = time_vec[findfirst(evidence .== 1)]
 
     noise = vcat(
@@ -213,7 +218,7 @@ Generate response time and evidence Vector of component.max_length by using a Se
 ```julia-repl
 julia> model = DDM();
 
-julia> SSM_Simulate(StableRNG(1), model, 500, 500)
+julia> UnfoldSim.SSM_Simulate(StableRNG(1), model, 500, 500)
 (223.00000000000003, [0.4, 0.3781849782644109, 0.384588489932016, 0.4202585987882927, 0.38453445925576213, 0.2964732725702471, 0.2864071080389341, 0.3345726755749544, 0.3667849099934518, 0.37245925390297063  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 ```
 """
@@ -266,7 +271,7 @@ Generate response time and evidence Vector of max_length by using the Kelly Mode
 ```julia-repl
 julia> model = KellyModel();
 
-julia> SSM_Simulate(StableRNG(1), model, 500, 500)
+julia> UnfoldSim.SSM_Simulate(StableRNG(1), model, 500, 500)
 (291.53516402920155, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 ```
 """
@@ -280,6 +285,9 @@ function SSM_Simulate(rng, model::KellyModel, sfreq, max_length)
         final_value = 0
         append!(evidence, fill(final_value, max_length - length(evidence)))
     end
+    # cap the response at the window end: without a boundary crossing within the simulated
+    # trace, the RT must not exceed the trace actually placed (consistency with the SSM2D method)
+    rt = min(rt, max_length)
     evidence = evidence[1:max_length]
     return rt, evidence
 end

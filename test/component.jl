@@ -128,6 +128,27 @@
         @test ev0[1] < 1e-3                 # trace starts at the start point (≈ 0)
         @test 0.5 <= ev5[1] <= 0.5 + 1e-3   # trace starts at the start point (≈ 0.5)
         @test rt5 < rt0                     # higher start point → earlier boundary crossing
+
+        # Regression: rt is capped at the window end when no boundary crossing occurs within
+        # the simulated trace (consistency with the SSM2D method)
+        rt_cap, ev_cap = UnfoldSim.SSM_Simulate(StableRNG(1), KellyModel(boundary = 100), 500, 500)
+        @test rt_cap == 500
+        @test length(ev_cap) == 500
+
+        # Regression: a sampled sensor-encoding onset beyond the trace window is clamped with
+        # a warning instead of erroring
+        rt_b5, ev_b5 = @test_logs (:warn,) UnfoldSim.SSM_Simulate(
+            StableRNG(1),
+            KellyModel(sensor_encoding_delay = 2.0),
+            500,
+            500,
+        )
+        @test rt_b5 == 500
+        @test length(ev_b5) == 500
+
+        # Regression: KellyModel is a 1-accumulator SSM (SSM1D), not a 2D choice-rt model
+        @test KellyModel() isa UnfoldSim.SequentialSamplingModels.SSM1D
+        @test length(KellyModel()) == 1
     end
     @testset "get_basis" begin
 

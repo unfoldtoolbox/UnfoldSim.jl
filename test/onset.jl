@@ -156,7 +156,7 @@
         @test size(result_onsets) == (60,)
         @test result_onsets[1] == 121
         @test result_onsets[2] == 201
-        @test result_onsets[3] == 773
+        @test result_onsets[3] == 701
 
         # Test DriftOnset combined with UniformOnset
         sequence_onset = SequenceOnset(
@@ -177,7 +177,7 @@
         @test size(result_onsets) == (60,)
         @test result_onsets[1] == 121
         @test result_onsets[2] == 201
-        @test result_onsets[3] == 913
+        @test result_onsets[3] == 841
     end
 
     @testset "ShiftOnset" begin
