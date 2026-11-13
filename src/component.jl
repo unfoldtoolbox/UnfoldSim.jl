@@ -775,7 +775,7 @@ end
 Generate evidence accumulation traces based on the model specified in `c::DriftComponent` and (optionally) parameters from `design::AbtractDesign`
 
 # Returns
-- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `length(c.time_vec) x size(events, 1)`.
+- `Matrix{Float64}`: Simulated component for each event in the events data frame. The output dimensions are `c.max_length x size(events, 1)`.
 
 # Examples
 ```julia-repl
@@ -787,10 +787,27 @@ julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5
 julia> design_seq = SequenceDesign(design_single,"SCR_");
 
 julia> simulate_component(StableRNG(1),c,design_seq)
-501x6 Matrix{Float64}:
-0.0  0.0  0.0  0.0  0.0  0.0
-0.0  0.0  0.0  0.0  0.0  0.0
-⋮                        ⋮
+500×6 Matrix{Float64}:
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ 0.0  0.0  0.0  0.20425   0.0242167  0.0
+ ⋮                                  ⋮
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
+ 0.0  0.0  0.0  0.0       0.0        0.0
 ```
 """
 function UnfoldSim.simulate_component(rng, c::DriftComponent, design::AbstractDesign)
@@ -820,10 +837,12 @@ julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5
 
 julia> design_seq = SequenceDesign(design_single,"SCR_");
 
-julia> calculate_response_times_for_ssm(StableRNG(1),c,design_seq)
+julia> sub_design = SubselectDesign(design_seq, 'C');
+
+julia> calculate_response_times_for_ssm(StableRNG(1),c,sub_design)
 2-element Vector{Float64}:
- 260.70134768436486
- 360.1329203034039
+ 291.53516402920155
+ 403.2249117520565
 ```
 """
 function calculate_response_times_for_ssm(rng, component::DriftComponent, design::AbstractDesign)
@@ -834,7 +853,7 @@ Base.length(c::DriftComponent) = c.max_length
 """
     get_model_parameter(rng, evt, d::Dict)
 
-Construct a parameter dictionary of parameter names and values.
+Construct a parameter dictionary of parameter names and values, resolving each value recursively.
 """
 function get_model_parameter(rng, evt, d::Dict)
     result_parameter = Dict()
@@ -846,11 +865,13 @@ end
 """
     get_model_parameter(rng, evt, val)
 
-Recursive default call return the model parameter as it is.
+Default method: returns the value unchanged.
 """
 get_model_parameter(rng, evt, val) = val
 """
     get_model_parameter(rng, evt, val::String)
-Recursive call if the model parameter specified as string from the conditions in the events data frame.
+
+Returns the value of the events data frame column named by the string, i.e. resolves a model
+parameter specified as a string from the conditions in the events data frame.
 """
 get_model_parameter(rng, evt, val::String) = evt[val]

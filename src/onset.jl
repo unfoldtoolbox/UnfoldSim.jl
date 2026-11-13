@@ -424,13 +424,14 @@ end
     SequenceOnset <: AbstractOnset
 Allows to specify inter-onset-distance functions per event.
 
-All fields are mandatory. Works best with [`SequenceDesign`](@ref).
+All fields are mandatory. Requires a [`SequenceDesign`](@ref).
 
 # Fields
 - `onset::Dict`: for each Sequence event a Onset is defined.
 
 # Examples
 ```julia-repl
+fs = 500
 sequence_onset = SequenceOnset(
     Dict('S'=>UniformOnset(width=0,offset=85*fs/100),
          'C'=>(DriftOnset(), UniformOnset(width=0, offset=150)),
@@ -466,7 +467,7 @@ Base function to simulate Abstract Onset between components in an [`SequenceDesi
 - `components::AbstractComponent`: The Component for which the onset is simulated.
 
 # Returns
-- `simulate_interonset_distances`: function call.
+- `Vector{Int}`: the simulated inter-onset distances for the drift components in the SequenceDesign.
 """
 UnfoldSim.simulate_interonset_distances(rng, onset::AbstractOnset, design::AbstractDesign, components::AbstractComponent) = UnfoldSim.simulate_interonset_distances(rng,onset,design)
 
@@ -482,7 +483,7 @@ Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceD
 - `components::AbstractComponent`: The Component for which the onset is simulated.
 
 # Returns
-- `Vector{Int}`: the generated onsets for the drift components in the SequenceDesign.
+- `Vector{Int}`: the generated onsets for the drift components in the SequenceDesign (the simulated response times of the drift model, in samples).
 """
 function UnfoldSim.simulate_interonset_distances(rng, onset::DriftOnset, design::AbstractDesign, components::AbstractComponent)
     rts = calculate_response_times_for_ssm(deepcopy(rng), components, design)
@@ -501,7 +502,7 @@ Generates list of onsets for multiple [`DriftComponent`](@ref) in an [`SequenceD
 - `components::AbstractComponent`: The Component for which the onset is simulated.
 
 # Returns
-- `Vector{Float64}`: the generated onsets for the drift components in the SequenceDesign.
+- `Vector{Int}`: the generated onsets for the drift components in the SequenceDesign, in samples.
 """
 function UnfoldSim.simulate_interonset_distances(rng, onset::Tuple, design::AbstractDesign, components::AbstractComponent)
     return Int.(round.(reduce(.+, simulate_interonset_distances.(deepcopy(rng), onset, Ref(design), Ref(components)))))
@@ -518,7 +519,7 @@ Generates list of onsets for all events of an [`SequenceDesign`](@ref), how to s
 - `simulation::Simulation`: Simulation which contains the design and other elements for the experiment.
 
 # Returns
-- `Vector{Float64}`: the generated onsets for all events in the SequenceDesign.
+- `Vector`: the generated onsets (cumulative latencies) for all events in the SequenceDesign.
 """
 function UnfoldSim.simulate_onsets(rng, onset::SequenceOnset, simulation::Simulation)
     @assert isa(simulation.design.design, SequenceDesign) "`SequenceOnset`is currently only compatible with a `SequenceDesign`"

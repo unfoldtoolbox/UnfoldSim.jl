@@ -1,41 +1,47 @@
 """
     KellyModel
 
-A advanced drift diffusion Model which can be used to simulate evidence accumulation.
+An advanced drift diffusion Model which can be used to simulate evidence accumulation.
 
 All fields can be named. Is used with [`DriftComponent`](@ref).
 The fields can be specified as a string, as this allows a reference to be made for selecting values from the design as parameters for the model used in the simulation.
-For example, different drift_rate values can be used depending on the design specification, which enables a kind of subject difference in the hole process.
-# Fields T::Union{Real,String} 
+For example, different drift_rate values can be used depending on the design specification, which enables a kind of subject difference in the whole process.
+# Fields
+Fields marked `T` accept either a `Real` or a `String`. A string is resolved against the corresponding column of the events data frame per event.
 - `drift_rate::T`: defines the amount of evidence accumulated per time step. (roughly the steepness of the trace)
-- `sensor_encoding_delay::T`: constant event onset delay in seconds. (mimics sensory evidence)
-- `sensor_encoding_delay_variability::T`: variability (σ) in the delay of the event onset in seconds, added ontop of `event_onset`. (mimics sensory encoding delay)
+- `sensor_encoding_delay::T`: mean delay in seconds before the evidence accumulation starts. (mimics sensory evidence)
+- `sensor_encoding_delay_variability::T`: variability (σ) of the onset delay in seconds, added on top of `sensor_encoding_delay`. (mimics sensory encoding delay)
 - `event_onset_distribution::Distribution{Univariate, Continuous}`: By default: Normal distribution using `sensor_encoding_delay` and `sensor_encoding_delay_variability` as μ and σ for sensor encoding delay. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
 - `accumulative_level_noise::T`: sigma of the normal-distributed noise added to the accumulation process.
 - `boundary::T`: the threshold of evidence needed to make a decision. See also `urgency` for collapsing bounds
-- `start_point::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
-- `start_point_variability::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
-- `start_point_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `start_point` and `start_point_variability` as μ and σ to add noise to the start-point. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here. The default Normal distribution is truncated at the `boundary`
+- `start_point::T`: initial evidence level of the accumulator. A higher start point reaches the boundary earlier (shorter response times).
+- `start_point_variability::T`: variability (σ) of the start point between trials.
+- `start_point_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `start_point` and `start_point_variability` as μ and σ, truncated at the `boundary` (upper). One value is sampled per trial as the initial evidence of the accumulator. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
 - `motor_delay::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
 - `motor_delay_variability::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
 - `motor_onset_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `motor_delay` and `motor_delay_variability` as μ and σ to add a motor delay. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
-- `urgency::T`: fixed delay between boundary reached and response time in seconds. (mimics motor time)
-- `urgency_variability::T`: variability in delay between boundary reached and response time in seconds. (mimics different reaction times of participants)
-- `urgency_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `urgency` and `urgency_variability` as μ and σ for an urgency signal, truncated to be positive at 0 (see `post_accumulation_distribution`). Effectively one value is sampled per trial and used as a slope value times the time-vector. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
+- `urgency::T`: mean slope of the urgency signal. The evidence boundary collapses over time as `boundary .- urgency * time`, implementing an urgency signal (see `urgency_distribution`).
+- `urgency_variability::T`: variability (σ) of the urgency slope between trials.
+- `urgency_distribution::Distribution{Univariate, Continuous}`:  By default: Normal distribution using `urgency` and `urgency_variability` as μ and σ for an urgency signal, truncated to be positive at 0. Effectively one value is sampled per trial and used as a slope value times the time-vector. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
 - `post_accumulation_duration::T`: fixed time the accumulation process resumes after boundary reached in seconds. (mimics evidence overshoot)
 - `post_accumulation_duration_variability::T`: variability in time the accumulation process resumes after boundary reached in seconds.
-- `post_accumulation_distribution::Distribution{Univariate, Continuous}`: By default: Normal distribution, trunacted to be positive at 0, using `post_accumulation_duration` and `post_accumulation_duration_variability` as μ (untruncated, effectively the mean is therefore higher and a function of both μ and σ, use e.g. `mean(truncated(Normal(100,10),lower=0))` to calculate the mean) and σ to sample a time per trial for how long the post-decision accumulation should take time. Effectively one value is sampled per trial and used as a slope value times the time-vector. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
+- `post_accumulation_distribution::Distribution{Univariate, Continuous}`: By default: Normal distribution, truncated to be positive at 0, using `post_accumulation_duration` and `post_accumulation_duration_variability` as μ (untruncated, effectively the mean is therefore higher and a function of both μ and σ, use e.g. `mean(truncated(Normal(100,10),lower=0))` to calculate the mean) and σ to sample a time per trial for how long the post-decision accumulation should take time. Effectively one value is sampled per trial and used as a slope value times the time-vector. Any `Univariate` distribution from e.g. `Distributions.jl` can be used here.
 - `ramp_down_duration::T`: duration (in s) of the post accumulation ramp down process.
 
 Notes: If a `..._distribution` is specified, then the other parameters for that distribution are no longer used.
 
 # Examples
 ```julia-repl
-julia> KellyModel();
-KellyModel{Float64}(6.0, 0.2, 0.4, 0.5, 1.0, 0.1, 0.4, 0.1, 0.2, 0.1)
+julia> km = KellyModel();
+
+julia> km.drift_rate
+6.0
+
+julia> km.boundary
+1.0
 ```
 
-See also [`LinearModelComponent`](@ref), [`MultichannelComponent`](@ref).
+See also [`DriftComponent`](@ref).
 """
 Base.@kwdef mutable struct KellyModel <: SequentialSamplingModels.SSM2D
     drift_rate::Union{Real,String} = 6.0                    # drift rate
@@ -78,14 +84,14 @@ Generate a single response time, and evidence trace of an evidence accumulation 
 - `Δt::Float64`: size of the time steps
 
 # Returns
-- `Float64`: Simulated response time for this trial.
+- `Float64`: Simulated response time for this trial, in samples (divide by `Δt` to get seconds).
 - `Vector{Float64}`: evidence values over time. The output dimension is `length(time_vec)`.
 
 # Examples
 ```julia-repl
 # use the KellyModel and its default parameters to simulate traces from 0:1/500:1.0
 julia> KellyModel_simulate_cpp(StableRNG(1), KellyModel(), 0:1/500:1.0, 1/500)
-(260.70134768436486, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+(291.53516402920155, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 ```
 """
 function KellyModel_simulate_cpp(rng, model::KellyModel, time_vec, Δt)
@@ -161,9 +167,8 @@ julia> design_single = SingleSubjectDesign(conditions = Dict(:drift_rate => [0.5
 
 julia> design_seq = SequenceDesign(design_single,"SCR_");
 
-julia> simulate_component(StableRNG(1),c,design_seq)
-Vector{Float64}, 501x6 Matrix{Float64}:
-([96.65745162948949, 273.7368235451535, 271.86040880709123, 128.41057786118193, 342.35208862144276, 237.14773586760617], [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0])
+julia> simulate_drift_component(StableRNG(1),c,design_seq)
+([291.53516402920155, 403.2249117520565, 422.02405474840674, 384.81735098290204, 415.37981946233543, 382.8882881087783], [0.0 0.0 … 0.024216739966584952 0.0; 0.0 0.0 … 0.024216739966584952 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0])
 ```
 """
 function simulate_drift_component(rng, component::DriftComponent, design::AbstractDesign)
@@ -201,15 +206,15 @@ Generate response time and evidence Vector of component.max_length by using a Se
 - `max_length::Int`: maximum length of the simulated signal.
 
 # Returns
-- `Float64`: Simulated response time for the trial.
-- `Vector{Float64}`: evidence values over time. The output dimension is `component.max_length`.
+- `Float64`: Simulated response time for the trial, in samples (divide by `Δt` to get seconds).
+- `Vector{Float64}`: evidence values over time. The output dimension is `max_length`. For multi-accumulator models, only the winning accumulator's trace is returned.
 
 # Examples
 ```julia-repl
-julia> model = DDM()
+julia> model = DDM();
+
 julia> SSM_Simulate(StableRNG(1), model, 500, 500)
-Float64, Vector{Float64}:
-(96.65745162948949, [0.0 0.0 … 0.0 0.0])
+(223.00000000000003, [0.4, 0.3781849782644109, 0.384588489932016, 0.4202585987882927, 0.38453445925576213, 0.2964732725702471, 0.2864071080389341, 0.3345726755749544, 0.3667849099934518, 0.37245925390297063  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 ```
 """
 function SSM_Simulate(rng, model::SequentialSamplingModels.SSM2D, sfreq, max_length)
@@ -254,16 +259,15 @@ Generate response time and evidence Vector of max_length by using the Kelly Mode
 - `max_length::Int`: maximum length of the simulated trace.
 
 # Returns
-- `Float64`: Simulated response time for the trial.
-- `Vector{Float64}`: evidence values over time. The output dimension is `c.max_length`.
+- `Float64`: Simulated response time for the trial, in samples (divide by `Δt` to get seconds).
+- `Vector{Float64}`: evidence values over time. The output dimension is `max_length`.
 
 # Examples
 ```julia-repl
-julia> model = KellyModel()
+julia> model = KellyModel();
 
 julia> SSM_Simulate(StableRNG(1), model, 500, 500)
-Float64, Vector{Float64}:
-(96.65745162948949, [0.0 0.0 … 0.0 0.0])
+(291.53516402920155, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 ```
 """
 function SSM_Simulate(rng, model::KellyModel, sfreq, max_length)
